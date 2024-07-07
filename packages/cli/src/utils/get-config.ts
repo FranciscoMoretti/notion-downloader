@@ -13,8 +13,8 @@ export const DEFAULT_TAILWIND_BASE_COLOR = "slate"
 
 // TODO: Figure out if we want to support all cosmiconfig formats.
 // A simple components.json file would be nice.
-const explorer = cosmiconfig("components", {
-  searchPlaces: ["components.json"],
+const explorer = cosmiconfig("downloader", {
+  searchPlaces: ["downloader.json"],
 })
 
 export const rawConfigSchema = z

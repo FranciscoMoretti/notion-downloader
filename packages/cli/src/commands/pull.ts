@@ -19,14 +19,17 @@ import ora from "ora"
 import prompts from "prompts"
 import { z } from "zod"
 
+import { setLogLevel } from "../log"
+import { notionPull } from "../pull"
+
 const pullOptionsSchema = z.object({
   notionToken: z.string(),
   rootPage: z.string(),
   markdownOutputPath: z.string(),
   statusTag: z.string(),
   logLevel: z.string().default("info"),
-  imgPrefixInMarkdown: z.optional(z.boolean()),
-  imgOutputPath: z.optional(z.string()),
+  imgPrefixInMarkdown: z.string().default(""),
+  imgOutputPath: z.string().default(""),
   overwrite: z.boolean(),
   cwd: z.string(),
 })
@@ -92,6 +95,8 @@ export const pull = new Command()
         ...opts,
       })
 
+      setLogLevel(opts.logLevel)
+
       const cwd = path.resolve(options.cwd)
 
       if (!existsSync(cwd)) {
@@ -111,55 +116,14 @@ export const pull = new Command()
 
       const registryIndex = await getRegistryIndex()
 
-      let selectedComponents = options.all
-        ? registryIndex.map((entry) => entry.name)
-        : options.notion - token
-      if (!options.notion - token?.length && !options.all) {
-        const { components } = await prompts({
-          type: "multiselect",
-          name: "components",
-          message: "Which components would you like to add?",
-          hint: "Space to select. A to toggle all. Enter to submit.",
-          instructions: false,
-          choices: registryIndex.map((entry) => ({
-            title: entry.name,
-            value: entry.name,
-            selected: options.all
-              ? true
-              : options.notion - token?.includes(entry.name),
-          })),
-        })
-        selectedComponents = components
-      }
+      // pull and convert
+      const spinner = ora(`Pulling pages...`).start()
 
-      if (!selectedComponents?.length) {
-        logger.warn("No components selected. Exiting.")
-        process.exit(0)
-      }
+      await notionPull({ ...options, locales: [] }).then(() =>
+        console.log("docu-notion Finished.")
+      )
 
-      const tree = await resolveTree(registryIndex, selectedComponents)
-      const payload = await fetchTree(config.style, tree)
-      const baseColor = await getRegistryBaseColor(config.tailwind.baseColor)
-
-      if (!payload.length) {
-        logger.warn("Selected components not found. Exiting.")
-        process.exit(0)
-      }
-
-      if (!options.yes) {
-        const { proceed } = await prompts({
-          type: "confirm",
-          name: "proceed",
-          message: `Ready to install components and dependencies. Proceed?`,
-          initial: true,
-        })
-
-        if (!proceed) {
-          process.exit(0)
-        }
-      }
-
-      const spinner = ora(`Installing components...`).start()
+      /*
       for (const item of payload) {
         spinner.text = `Installing ${item.name}...`
         const targetDir = await getItemTargetPath(
@@ -255,6 +219,7 @@ export const pull = new Command()
           )
         }
       }
+      */
       spinner.succeed(`Done.`)
     } catch (error) {
       handleError(error)
