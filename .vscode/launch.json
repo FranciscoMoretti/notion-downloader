@@ -5,13 +5,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug cli",
+      "name": "Debug CLI",
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/packages/cli/src/index.ts",
-      "outFiles": ["${workspaceFolder}/packages/cli/dist/**/*.js"],
-      "runtimeArgs": ["--experimental-specifier-resolution=node"]
+      "args": [
+        "pull",
+        "-n",
+        "secret_US5rR3rRRcWC2V23QAHu1QveMvcOQCDVzEUH4jOXu9J",
+        "-r",
+        "1a3e1cedb64341ab95defc6ae0294de5",
+        "--log-level",
+        "debug"
+      ],
+      "outFiles": ["${workspaceFolder}/packages/cli/dist/**/*.js"]
     }
   ]
 }
