@@ -1,6 +1,6 @@
 import path from "path"
 import { resolveImport } from "@/src/utils/resolve-import"
-import { cosmiconfig } from "cosmiconfig"
+import { cosmiconfig, cosmiconfigSync } from "cosmiconfig"
 import { loadConfig } from "tsconfig-paths"
 import { z } from "zod"
 
