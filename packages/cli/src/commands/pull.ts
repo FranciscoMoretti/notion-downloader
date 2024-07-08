@@ -14,6 +14,9 @@ import {
 import { transform } from "@/src/utils/transformers"
 import chalk from "chalk"
 import { Command, Option } from "commander"
+import dotenv from "dotenv"
+
+import "dotenv/config"
 import { execa } from "execa"
 import ora from "ora"
 import prompts from "prompts"
@@ -22,6 +25,7 @@ import { z } from "zod"
 import { setLogLevel } from "../log"
 import { notionPull } from "../pull"
 
+dotenv.config()
 const pullOptionsSchema = z.object({
   notionToken: z.string(),
   rootPage: z.string(),
@@ -37,11 +41,11 @@ const pullOptionsSchema = z.object({
 export const pull = new Command()
   .name("pull")
   .description("pull pages from notion")
-  .requiredOption(
+  .option(
     "-n, --notion-token <string>",
     "notion api token, which looks like secret_3bc1b50XFYb15123RHF243x43450XFY33250XFYa343"
   )
-  .requiredOption(
+  .option(
     "-r, --root-page <string>",
     "The 31 character ID of the page which is the root of your docs page in notion. The code will look like 9120ec9960244ead80fa2ef4bc1bba25. This page must have a child page named 'Outline'"
   )
@@ -91,8 +95,17 @@ export const pull = new Command()
   )
   .action(async (opts) => {
     try {
-      const options = pullOptionsSchema.parse({
+      // Get secrets from .env if they exist
+
+      // Prefer options to en vars
+      const optionsWithDotEnv = {
         ...opts,
+        notionToken: opts.notionToken || process.env.NOTION_TOKEN,
+        rootPage: opts.rootPage || process.env.NOTION_ROOT_PAGE,
+      }
+
+      const options = pullOptionsSchema.parse({
+        ...optionsWithDotEnv,
       })
 
       setLogLevel(opts.logLevel)
