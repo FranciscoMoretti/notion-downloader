@@ -13,12 +13,13 @@
       "args": [
         "pull",
         "-n",
-        "secret_US5rR3rRRcWC2V23QAHu1QveMvcOQCDVzEUH4jOXu9J",
+        "${env:NOTION_DATABASE_ID}",
         "-r",
-        "1a3e1cedb64341ab95defc6ae0294de5",
+        "${env:NOTION_DATABASE_ID}",
         "--log-level",
         "debug"
       ],
+      //   "cwd": "${workspaceFolder}/packages/cli/",
       "outFiles": ["${workspaceFolder}/packages/cli/dist/**/*.js"]
     }
   ]
