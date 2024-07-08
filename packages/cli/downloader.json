@@ -1,3 +1,5 @@
 {
-    "hello": "world"
+  "hello": "world",
+  "notion_token": "$NOTION_TOKEN",
+  "notion_root_page": "$NOTION_DATABASE_ID"
 }

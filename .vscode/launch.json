@@ -10,16 +10,9 @@
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/packages/cli/src/index.ts",
-      "args": [
-        "pull",
-        "-n",
-        "${env:NOTION_DATABASE_ID}",
-        "-r",
-        "${env:NOTION_DATABASE_ID}",
-        "--log-level",
-        "debug"
-      ],
-      //   "cwd": "${workspaceFolder}/packages/cli/",
+      "args": ["pull", "--log-level", "debug"],
+      "preLaunchTask": "build notion-download-md",
+      "cwd": "${workspaceFolder}/packages/cli/",
       "outFiles": ["${workspaceFolder}/packages/cli/dist/**/*.js"]
     }
   ]

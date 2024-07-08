@@ -14,7 +14,7 @@ export const DEFAULT_TAILWIND_BASE_COLOR = "slate"
 // TODO: Figure out if we want to support all cosmiconfig formats.
 // A simple components.json file would be nice.
 const explorer = cosmiconfig("downloader", {
-  searchPlaces: ["downloader.json"],
+  searchPlaces: ["downloader.json", "downloader.config.js"],
 })
 
 export const rawConfigSchema = z
@@ -98,6 +98,8 @@ export async function getRawConfig(cwd: string): Promise<RawConfig | null> {
 
     return rawConfigSchema.parse(configResult.config)
   } catch (error) {
-    throw new Error(`Invalid configuration found in ${cwd}/components.json.`)
+    throw new Error(
+      `Invalid configuration found in ${cwd} configuration file. Error: ${error}`
+    )
   }
 }
