@@ -106,7 +106,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   group(
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
-  // await getPagesRecursively(options, "", options.rootPage, 0, true);
+  // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
+  // await getPagesRecursively(options, "", options.rootPage, 0, true)
 
   // Database to pages array
   const pagesPromises = databaseResponse.results.map(
@@ -252,8 +253,9 @@ async function getPagesRecursively(
   }
   // a normal outline page that exists just to create the level, pointing at database pages that belong in this level
   else if (
-    pageInfo.childPageIdsAndOrder.length ||
-    pageInfo.linksPageIdsAndOrder.length
+    // TODO: This is disabled because instead page links are handled in the db
+    // pageInfo.linksPageIdsAndOrder.length ||
+    pageInfo.childPageIdsAndOrder.length
   ) {
     let layoutContext = incomingContext
     // don't make a level for "Outline" page at the root
@@ -275,16 +277,17 @@ async function getPagesRecursively(
       )
     }
 
-    for (const linkPageInfo of pageInfo.linksPageIdsAndOrder) {
-      pages.push(
-        await fromPageId(
-          layoutContext,
-          linkPageInfo.id,
-          linkPageInfo.order,
-          false
-        )
-      )
-    }
+    // TODO: This is disabled because instead page links are handled in the db
+    // for (const linkPageInfo of pageInfo.linksPageIdsAndOrder) {
+    //   pages.push(
+    //     await fromPageId(
+    //       layoutContext,
+    //       linkPageInfo.id,
+    //       linkPageInfo.order,
+    //       false
+    //     )
+    //   )
+    // }
   } else {
     console.info(
       warning(
