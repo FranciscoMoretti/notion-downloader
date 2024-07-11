@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { add } from "@/src/commands/add"
 import { diff } from "@/src/commands/diff"
 import { init } from "@/src/commands/init"
 import { pull } from "@/src/commands/pull"
@@ -22,7 +21,7 @@ async function main() {
       "display the version number"
     )
 
-  program.addCommand(init).addCommand(add).addCommand(diff).addCommand(pull)
+  program.addCommand(init).addCommand(diff).addCommand(pull)
 
   program.parse()
 }
