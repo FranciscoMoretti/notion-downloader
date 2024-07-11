@@ -1,15 +1,17 @@
-import { NotionPage } from "../NotionPage";
-import { error } from "../log";
-import { makeSamplePageObject, oneBlockToMarkdown } from "./pluginTestRun";
-import { IDocuNotionContext, IPlugin } from "./pluginTypes";
+import { expect, test } from "vitest"
+
+import { NotionPage } from "../NotionPage"
+import { error } from "../log"
+import { makeSamplePageObject, oneBlockToMarkdown } from "./pluginTestRun"
+import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 
 test("raw url inside a mermaid codeblock gets converted to path using slug of that page", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "slug-of-target",
     name: "My Target Page",
     id: targetPageId,
-  });
+  })
 
   const input = {
     type: "code",
@@ -36,7 +38,7 @@ test("raw url inside a mermaid codeblock gets converted to path using slug of th
       ],
       language: "mermaid", // notion assumed javascript in my test in which I didn't specify a language
     },
-  };
+  }
 
   const mermaidLinks: IPlugin = {
     name: "mermaidLinks",
@@ -48,20 +50,20 @@ test("raw url inside a mermaid codeblock gets converted to path using slug of th
           context: IDocuNotionContext,
           match: RegExpExecArray
         ) => {
-          const url = match[1];
+          const url = match[1]
           const docusaurusUrl =
-            context.convertNotionLinkToLocalDocusaurusLink(url);
+            context.convertNotionLinkToLocalDocusaurusLink(url)
           if (docusaurusUrl) {
             // eslint-disable-next-line @typescript-eslint/await-thenable
-            return await match[0].replace(url, docusaurusUrl);
+            return await match[0].replace(url, docusaurusUrl)
           } else {
-            error(`Could not convert link ${url} to a local docusaurus link`);
-            return match[0];
+            error(`Could not convert link ${url} to a local docusaurus link`)
+            return match[0]
           }
         },
       },
     ],
-  };
+  }
 
   const config = {
     plugins: [
@@ -69,7 +71,7 @@ test("raw url inside a mermaid codeblock gets converted to path using slug of th
       // standardExternalLinkConversion,
       mermaidLinks,
     ],
-  };
-  const results = await oneBlockToMarkdown(config, input, targetPage);
-  expect(results.trim()).toContain(`click A "/slug-of-target"`);
-});
+  }
+  const results = await oneBlockToMarkdown(config, input, targetPage)
+  expect(results.trim()).toContain(`click A "/slug-of-target"`)
+})

@@ -1,11 +1,13 @@
-import { NotionBlock } from "../types";
-import { blocksToMarkdown } from "./pluginTestRun";
-import { standardHeadingTransformer } from "./HeadingTransformer";
+import { describe, expect, test } from "vitest"
+
+import { NotionBlock } from "../types"
+import { standardHeadingTransformer } from "./HeadingTransformer"
+import { blocksToMarkdown } from "./pluginTestRun"
 
 test("Adds anchor to headings", async () => {
   //setLogLevel("verbose");
-  const headingBlockId = "86f746f4-1c79-4ba1-a2f6-a1d59c2f9d23";
-  const config = { plugins: [standardHeadingTransformer] };
+  const headingBlockId = "86f746f4-1c79-4ba1-a2f6-a1d59c2f9d23"
+  const config = { plugins: [standardHeadingTransformer] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -32,8 +34,8 @@ test("Adds anchor to headings", async () => {
         color: "default",
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
   expect(result.trim()).toBe(
     `# Heading One {#${headingBlockId.replaceAll("-", "")}}`
-  );
-});
+  )
+})

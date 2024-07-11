@@ -1,39 +1,36 @@
-import { NotionToMarkdown } from "notion-to-md";
-import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy";
-import { NotionPage } from "./NotionPage";
+import { NotionToMarkdown } from "notion-to-md"
+import { describe, expect, test } from "vitest"
 
-import { getMarkdownFromNotionBlocks } from "./transform";
-
-import { IDocuNotionContext } from "./plugins/pluginTypes";
-import { convertInternalUrl } from "./plugins/internalLinks";
-
-import { initNotionClient } from "./pull";
-import { NotionBlock } from "./types";
-
-import { IDocuNotionConfig } from "./config/configuration";
-
-import defaultConfig from "./config/default.docunotion.config";
+import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
+import { NotionPage } from "./NotionPage"
+import { IDocuNotionConfig } from "./config/configuration"
+import defaultConfig from "./config/default.docunotion.config"
+import { convertInternalUrl } from "./plugins/internalLinks"
+import { IDocuNotionContext } from "./plugins/pluginTypes"
+import { initNotionClient } from "./pull"
+import { getMarkdownFromNotionBlocks } from "./transform"
+import { NotionBlock } from "./types"
 
 test("Latex Rendering", async () => {
-  const pages = new Array<NotionPage>();
+  const pages = new Array<NotionPage>()
   const counts = {
     output_normally: 0,
     skipped_because_empty: 0,
     skipped_because_status: 0,
     skipped_because_level_cannot_have_content: 0,
-  };
+  }
 
-  const notionClient = initNotionClient("");
+  const notionClient = initNotionClient("")
 
-  const layoutStrategy = new HierarchicalNamedLayoutStrategy();
+  const layoutStrategy = new HierarchicalNamedLayoutStrategy()
 
-  const config: IDocuNotionConfig = defaultConfig;
+  const config: IDocuNotionConfig = defaultConfig
 
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => {
-      return new Promise<NotionBlock[]>(resolve =>
+      return new Promise<NotionBlock[]>((resolve) =>
         resolve(new Array<NotionBlock>())
-      );
+      )
     },
     // this changes with each page
     pageInfo: {
@@ -58,7 +55,7 @@ test("Latex Rendering", async () => {
     imports: [],
     convertNotionLinkToLocalDocusaurusLink: (url: string) =>
       convertInternalUrl(context, url),
-  };
+  }
 
   const blocks: Array<NotionBlock> = [
     {
@@ -101,9 +98,9 @@ test("Latex Rendering", async () => {
         color: "default",
       },
     },
-  ];
+  ]
 
   expect(await getMarkdownFromNotionBlocks(context, config, blocks)).toContain(
     "$x$"
-  );
-});
+  )
+})

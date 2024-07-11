@@ -1,10 +1,11 @@
-import { setLogLevel } from "../log";
-import { NotionPage } from "../NotionPage";
-import { makeSamplePageObject, oneBlockToMarkdown } from "./pluginTestRun";
-import { standardCalloutTransformer } from "./CalloutTransformer";
-import { standardExternalLinkConversion } from "./externalLinks";
+import { describe, expect, test } from "vitest"
 
-import { standardInternalLinkConversion } from "./internalLinks";
+import { NotionPage } from "../NotionPage"
+import { setLogLevel } from "../log"
+import { standardCalloutTransformer } from "./CalloutTransformer"
+import { standardExternalLinkConversion } from "./externalLinks"
+import { standardInternalLinkConversion } from "./internalLinks"
+import { makeSamplePageObject, oneBlockToMarkdown } from "./pluginTestRun"
 
 test("urls that show up as raw text get left that way", async () => {
   const results = await getMarkdown({
@@ -27,18 +28,18 @@ test("urls that show up as raw text get left that way", async () => {
         },
       ],
     },
-  });
-  expect(results.trim()).toBe("https://github.com");
-});
+  })
+  expect(results.trim()).toBe("https://github.com")
+})
 
 // See https://github.com/sillsdev/docu-notion/issues/97
 test("mention-style link to an existing page", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: undefined,
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -69,17 +70,17 @@ test("mention-style link to an existing page", async () => {
       },
     },
     targetPage
-  );
-  expect(results.trim()).toBe(`[foo](/${targetPageId})`);
-});
+  )
+  expect(results.trim()).toBe(`[foo](/${targetPageId})`)
+})
 
 test("link to an existing page on this site that has no slug", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: undefined,
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -136,12 +137,12 @@ test("link to an existing page on this site that has no slug", async () => {
       },
     },
     targetPage
-  );
-  expect(results.trim()).toBe(`Inline [great page](/${targetPageId}) the end.`);
-});
+  )
+  expect(results.trim()).toBe(`Inline [great page](/${targetPageId}) the end.`)
+})
 
 test("link to a heading block on a page", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const blocks = {
     type: "paragraph",
     paragraph: {
@@ -194,40 +195,40 @@ test("link to a heading block on a page", async () => {
       ],
       color: "default",
     },
-  };
-  setLogLevel("verbose");
+  }
+  setLogLevel("verbose")
   const noSlugTargetPage: NotionPage = makeSamplePageObject({
     slug: undefined,
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
-  const noSlugResults = await getMarkdown(blocks, noSlugTargetPage);
+  const noSlugResults = await getMarkdown(blocks, noSlugTargetPage)
 
   // the ending parentheses messed up a regex at one point.
   expect(noSlugResults.trim()).toBe(
     `(Inline [heading on some page](/${targetPageId}#456) the end.)`
-  );
+  )
 
   const slugTargetPage: NotionPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
-  });
-  const slugResults = await getMarkdown(blocks, slugTargetPage);
+  })
+  const slugResults = await getMarkdown(blocks, slugTargetPage)
   expect(slugResults.trim()).toBe(
     `(Inline [heading on some page](/hello-world#456) the end.)`
-  );
-});
+  )
+})
 
 // Text that has been selected and turned into a link to one of our pages
 test("inline link to an existing page on this site uses slug", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -270,18 +271,18 @@ test("inline link to an existing page on this site uses slug", async () => {
       },
     },
     targetPage
-  );
-  expect(results.trim()).toBe("Inline [It’s good](/hello-world)");
-});
+  )
+  expect(results.trim()).toBe("Inline [It’s good](/hello-world)")
+})
 
 // this is the kind of link you get if you just insert a "link to page" to Notion
 test("raw link to an existing page on this site that has a slug", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "point-to-me",
     name: "Point to Me",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -302,17 +303,17 @@ test("raw link to an existing page on this site that has a slug", async () => {
       },
     },
     targetPage
-  );
-  expect(results.trim()).toBe("[Point to Me](/point-to-me)");
-});
+  )
+  expect(results.trim()).toBe("[Point to Me](/point-to-me)")
+})
 
 test("link in a bulleted list", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "the-page",
     name: "Something",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -341,18 +342,18 @@ test("link in a bulleted list", async () => {
       },
     },
     targetPage
-  );
-  expect(results.trim()).toBe("- [item](/the-page)");
-});
+  )
+  expect(results.trim()).toBe("- [item](/the-page)")
+})
 
 test("link to an a heading on a page on this site uses slug", async () => {
-  const targetPageId = "123";
-  const headingBlockId = "456";
+  const targetPageId = "123"
+  const headingBlockId = "456"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -381,11 +382,11 @@ test("link to an a heading on a page on this site uses slug", async () => {
       },
     },
     targetPage
-  );
+  )
   expect(results.trim()).toBe(
     `[see this heading](/hello-world#${headingBlockId})`
-  );
-});
+  )
+})
 
 test("does not interfere with mailto links", async () => {
   const results = await getMarkdown({
@@ -412,9 +413,9 @@ test("does not interfere with mailto links", async () => {
       ],
       color: "default",
     },
-  });
-  expect(results.trim()).toBe(`[mailme](mailto:foo@example.com)`);
-});
+  })
+  expect(results.trim()).toBe(`[mailme](mailto:foo@example.com)`)
+})
 
 test("does not interfere with https links", async () => {
   const results = await getMarkdown({
@@ -441,9 +442,9 @@ test("does not interfere with https links", async () => {
       ],
       color: "default",
     },
-  });
-  expect(results.trim()).toBe(`[google](https://www.google.com)`);
-});
+  })
+  expect(results.trim()).toBe(`[google](https://www.google.com)`)
+})
 
 test("links to other notion pages that are not in this site give PROBLEM LINK", async () => {
   const results = await getMarkdown({
@@ -484,17 +485,17 @@ test("links to other notion pages that are not in this site give PROBLEM LINK", 
       ],
       color: "default",
     },
-  });
-  expect(results.trim()).toBe("Inline **[Problem Internal Link]**");
-});
+  })
+  expect(results.trim()).toBe("Inline **[Problem Internal Link]**")
+})
 
 test("internal link inside callout", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -552,23 +553,23 @@ test("internal link inside callout", async () => {
       },
     },
     targetPage
-  );
+  )
   expect(results.trim()).toBe(
     `:::caution
 
 Callouts inline [great page](/hello-world).
 
 :::`
-  );
-});
+  )
+})
 
 test("internal link inside codeblock ignored", async () => {
-  const targetPageId = "123";
+  const targetPageId = "123"
   const targetPage: NotionPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -600,25 +601,25 @@ test("internal link inside codeblock ignored", async () => {
       },
     },
     targetPage
-  );
+  )
   expect(results.trim()).toContain(
     "this should not change [link](https://www.notion.so/native/metapages/mypage)"
-  );
-});
+  )
+})
 
 test("multiple internal links in a paragraph", async () => {
-  const targetPageAId = "123";
+  const targetPageAId = "123"
   const targetPageA: NotionPage = makeSamplePageObject({
     slug: undefined,
     name: "Hello World A",
     id: targetPageAId,
-  });
-  const targetPageBId = "456";
+  })
+  const targetPageBId = "456"
   const targetPageB: NotionPage = makeSamplePageObject({
     slug: undefined,
     name: "Hello World B",
     id: targetPageBId,
-  });
+  })
 
   const results = await getMarkdown(
     {
@@ -679,9 +680,9 @@ test("multiple internal links in a paragraph", async () => {
     },
     targetPageA,
     targetPageB
-  );
-  expect(results.trim()).toBe(`[A](/${targetPageAId}) [B](/${targetPageBId})`);
-});
+  )
+  expect(results.trim()).toBe(`[A](/${targetPageAId}) [B](/${targetPageBId})`)
+})
 
 async function getMarkdown(
   block: Record<string, unknown>,
@@ -694,6 +695,6 @@ async function getMarkdown(
       standardInternalLinkConversion,
       standardExternalLinkConversion,
     ],
-  };
-  return await oneBlockToMarkdown(config, block, targetPage, targetPage2);
+  }
+  return await oneBlockToMarkdown(config, block, targetPage, targetPage2)
 }

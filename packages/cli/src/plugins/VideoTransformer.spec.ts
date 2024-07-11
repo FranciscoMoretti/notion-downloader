@@ -1,10 +1,12 @@
-import { setLogLevel } from "../log";
-import { NotionBlock } from "../types";
-import { standardVideoTransformer } from "./VideoTransformer";
-import { blocksToMarkdown } from "./pluginTestRun";
+import { describe, expect, test } from "vitest"
+
+import { setLogLevel } from "../log"
+import { NotionBlock } from "../types"
+import { standardVideoTransformer } from "./VideoTransformer"
+import { blocksToMarkdown } from "./pluginTestRun"
 
 test("youtube embedded", async () => {
-  const config = { plugins: [standardVideoTransformer] };
+  const config = { plugins: [standardVideoTransformer] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -25,16 +27,16 @@ test("youtube embedded", async () => {
         external: { url: "https://www.youtube.com/watch?v=FXIrojSK3Jo" },
       },
     } as unknown as NotionBlock,
-  ]);
-  expect(result).toContain(`import ReactPlayer from "react-player";`);
+  ])
+  expect(result).toContain(`import ReactPlayer from "react-player";`)
   expect(result).toContain(
     `<ReactPlayer controls url="https://www.youtube.com/watch?v=FXIrojSK3Jo" />`
-  );
-});
+  )
+})
 
 test("vimeo embedded", async () => {
-  setLogLevel("verbose");
-  const config = { plugins: [standardVideoTransformer] };
+  setLogLevel("verbose")
+  const config = { plugins: [standardVideoTransformer] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -45,16 +47,16 @@ test("vimeo embedded", async () => {
         external: { url: "https://vimeo.com/4613611xx" },
       },
     } as unknown as NotionBlock,
-  ]);
-  expect(result).toContain(`import ReactPlayer from "react-player";`);
+  ])
+  expect(result).toContain(`import ReactPlayer from "react-player";`)
   expect(result).toContain(
     `<ReactPlayer controls url="https://vimeo.com/4613611xx" />`
-  );
-});
+  )
+})
 
 test("video link, not embedded", async () => {
-  setLogLevel("verbose");
-  const config = { plugins: [standardVideoTransformer] };
+  setLogLevel("verbose")
+  const config = { plugins: [standardVideoTransformer] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -79,16 +81,16 @@ test("video link, not embedded", async () => {
         color: "default",
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
   expect(result).toContain(
     "[https://vimeo.com/4613611xx](https://vimeo.com/4613611xx)"
-  );
-  expect(result).not.toContain(`import`);
-});
+  )
+  expect(result).not.toContain(`import`)
+})
 
 test("direct upload to to Notion (embedded)", async () => {
-  setLogLevel("verbose");
-  const config = { plugins: [standardVideoTransformer] };
+  setLogLevel("verbose")
+  const config = { plugins: [standardVideoTransformer] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -107,9 +109,9 @@ test("direct upload to to Notion (embedded)", async () => {
         },
       },
     } as unknown as NotionBlock,
-  ]);
-  expect(result).toContain(`import ReactPlayer from "react-player";`);
+  ])
+  expect(result).toContain(`import ReactPlayer from "react-player";`)
   expect(result).toContain(
     `<ReactPlayer controls url="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f6bc4746-011e-2124-86ca-ed4337d70891/people_fre_motionAsset_p3.mp4?X-Blah-blah" />`
-  );
-});
+  )
+})

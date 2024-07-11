@@ -1,7 +1,9 @@
-import { initImageHandling, parseImageBlock } from "./images";
+import { describe, expect, test } from "vitest"
+
+import { initImageHandling, parseImageBlock } from "./images"
 
 const kPrimaryImageUrl =
-  "https://s3.us-west-2.amazonaws.com/primaryImage.png?Blah=foo";
+  "https://s3.us-west-2.amazonaws.com/primaryImage.png?Blah=foo"
 
 /* didn't work?
 beforeAll(async () => {
@@ -12,31 +14,31 @@ beforeAll(async () => {
 */
 /* eslint-disable @typescript-eslint/require-await */
 test("finds primary image url", async () => {
-  await initImageHandling("", "", []);
-  const img = parseImageBlock(kImageBlockWithTwoLocalizedImages.image);
-  expect(img.primaryUrl).toBe(kPrimaryImageUrl);
-});
+  await initImageHandling("", "", [])
+  const img = parseImageBlock(kImageBlockWithTwoLocalizedImages.image)
+  expect(img.primaryUrl).toBe(kPrimaryImageUrl)
+})
 
 test("primary caption content after image links are removed", async () => {
-  await initImageHandling("", "", []);
+  await initImageHandling("", "", [])
   const img = parseImageBlock(
     kImageBlockWithTwoLocalizedImagesWrappedWithActualCaptionText.image
-  );
+  )
   // carriage returns seem to mess up the markdown, so should be removed
-  expect(img.caption).toBe("Caption before images. Caption after images.");
-});
+  expect(img.caption).toBe("Caption before images. Caption after images.")
+})
 
 test("gets localized image links", async () => {
-  await initImageHandling("", "", []);
+  await initImageHandling("", "", [])
   const img = parseImageBlock(
     kImageBlockWithTwoLocalizedImagesWrappedWithActualCaptionText.image
-  );
-  expect(img.localizedUrls.length).toBe(2);
-  expect(img.localizedUrls[0].iso632Code).toBe("fr");
-  expect(img.localizedUrls[1].iso632Code).toBe("es");
-  expect(img.localizedUrls[0].url).toBe("https://i.imgur.com/pYmE7OJ.png");
-  expect(img.localizedUrls[1].url).toBe("https://i.imgur.com/8paSZ0i.png");
-});
+  )
+  expect(img.localizedUrls.length).toBe(2)
+  expect(img.localizedUrls[0].iso632Code).toBe("fr")
+  expect(img.localizedUrls[1].iso632Code).toBe("es")
+  expect(img.localizedUrls[0].url).toBe("https://i.imgur.com/pYmE7OJ.png")
+  expect(img.localizedUrls[1].url).toBe("https://i.imgur.com/8paSZ0i.png")
+})
 
 const kImageBlockWithTwoLocalizedImagesWrappedWithActualCaptionText = {
   object: "block",
@@ -137,7 +139,7 @@ const kImageBlockWithTwoLocalizedImagesWrappedWithActualCaptionText = {
       expiry_time: "2022-07-26T16:35:44.029Z",
     },
   },
-};
+}
 
 const kImageBlockWithTwoLocalizedImages = {
   object: "block",
@@ -230,4 +232,4 @@ const kImageBlockWithTwoLocalizedImages = {
       expiry_time: "2022-07-26T00:19:09.096Z",
     },
   },
-};
+}

@@ -1,11 +1,13 @@
-import { NotionBlock } from "../types";
-import { NotionPage } from "../NotionPage";
-import { blocksToMarkdown, makeSamplePageObject } from "./pluginTestRun";
-import { standardCalloutTransformer } from "./CalloutTransformer";
-import { standardExternalLinkConversion } from "./externalLinks";
-import { standardInternalLinkConversion } from "./internalLinks";
+import { beforeEach, expect, test } from "vitest"
 
-let block: any;
+import { NotionPage } from "../NotionPage"
+import { NotionBlock } from "../types"
+import { standardCalloutTransformer } from "./CalloutTransformer"
+import { standardExternalLinkConversion } from "./externalLinks"
+import { standardInternalLinkConversion } from "./internalLinks"
+import { blocksToMarkdown, makeSamplePageObject } from "./pluginTestRun"
+
+let block: any
 beforeEach(() => {
   block = {
     has_children: false,
@@ -31,20 +33,20 @@ beforeEach(() => {
       icon: { type: "emoji", emoji: "ℹ️" },
       color: "gray_background",
     },
-  };
-});
+  }
+})
 
 test("smoketest callout", async () => {
-  const config = { plugins: [standardCalloutTransformer] };
-  block.callout.icon.emoji = "ℹ️";
+  const config = { plugins: [standardCalloutTransformer] }
+  block.callout.icon.emoji = "ℹ️"
   let results = await blocksToMarkdown(config, [
     block as unknown as NotionBlock,
-  ]);
-  expect(results).toContain("\n:::note\n\nThis is the callout\n\n:::\n");
-  block.callout.icon.emoji = "❗";
-  results = await blocksToMarkdown(config, [block as unknown as NotionBlock]);
-  expect(results).toContain(":::info");
-});
+  ])
+  expect(results).toContain("\n:::note\n\nThis is the callout\n\n:::\n")
+  block.callout.icon.emoji = "❗"
+  results = await blocksToMarkdown(config, [block as unknown as NotionBlock])
+  expect(results).toContain(":::info")
+})
 
 test("external link inside callout, bold preserved", async () => {
   const config = {
@@ -53,7 +55,7 @@ test("external link inside callout, bold preserved", async () => {
       standardInternalLinkConversion,
       standardExternalLinkConversion,
     ],
-  };
+  }
   const results = await blocksToMarkdown(config, [
     {
       type: "callout",
@@ -109,15 +111,15 @@ test("external link inside callout, bold preserved", async () => {
         color: "gray_background",
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
   expect(results.trim()).toBe(
     `:::caution
 
 Callouts inline [**great page**](https://github.com).
 
 :::`
-  );
-});
+  )
+})
 
 test("internal link inside callout, bold preserved", async () => {
   const config = {
@@ -126,12 +128,12 @@ test("internal link inside callout, bold preserved", async () => {
       standardInternalLinkConversion,
       standardExternalLinkConversion,
     ],
-  };
+  }
   const slugTargetPage: NotionPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: "123",
-  });
+  })
   const results = await blocksToMarkdown(
     config,
     [
@@ -191,12 +193,12 @@ test("internal link inside callout, bold preserved", async () => {
       } as unknown as NotionBlock,
     ],
     [slugTargetPage]
-  );
+  )
   expect(results.trim()).toBe(
     `:::caution
 
 Callouts inline [**great page**](/hello-world#456) the end.
 
 :::`
-  );
-});
+  )
+})

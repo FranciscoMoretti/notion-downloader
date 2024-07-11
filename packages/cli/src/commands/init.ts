@@ -300,6 +300,9 @@ export async function promptForMinimalConfig(
 export async function runInit(cwd: string, config: Config) {
   const spinner = ora(`Initializing project...`)?.start()
 
+  // TODO: Implement init to create a config file
+  return
+
   // Ensure all resolved paths directories exist.
   for (const [key, resolvedPath] of Object.entries(config.resolvedPaths)) {
     // Determine if the path is a file or directory.

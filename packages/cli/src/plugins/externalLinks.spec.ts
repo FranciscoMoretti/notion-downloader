@@ -1,21 +1,23 @@
-import { setLogLevel } from "../log";
-import { oneBlockToMarkdown } from "./pluginTestRun";
-import { standardExternalLinkConversion } from "./externalLinks";
+import { describe, expect, test } from "vitest"
+
+import { setLogLevel } from "../log"
+import { standardExternalLinkConversion } from "./externalLinks"
+import { oneBlockToMarkdown } from "./pluginTestRun"
 
 // If you paste a link in notion and then choose "Create bookmark", the markdown
 // would normally be [bookmark](https://example.com)]. Instead of seeing "bookmark",
 // we change to the url.
 test("links turned into bookmarks", async () => {
-  setLogLevel("debug");
+  setLogLevel("debug")
   const results = await getMarkdown({
     type: "bookmark",
     bookmark: { caption: [], url: "https://github.com" },
-  });
-  expect(results.trim()).toBe("[https://github.com](https://github.com)");
-});
+  })
+  expect(results.trim()).toBe("[https://github.com](https://github.com)")
+})
 
 test("video links turned into bookmarks", async () => {
-  setLogLevel("debug");
+  setLogLevel("debug")
   const results = await getMarkdown({
     object: "block",
     type: "bookmark",
@@ -23,12 +25,12 @@ test("video links turned into bookmarks", async () => {
       caption: [],
       url: "https://vimeo.com/4613611xx",
     },
-  });
+  })
   expect(results).toContain(
     "[https://vimeo.com/4613611xx](https://vimeo.com/4613611xx)"
-  );
-  expect(results).not.toContain(`import`);
-});
+  )
+  expect(results).not.toContain(`import`)
+})
 
 test("external link inside callout", async () => {
   const results = await getMarkdown({
@@ -84,11 +86,11 @@ test("external link inside callout", async () => {
       icon: { type: "emoji", emoji: "⚠️" },
       color: "gray_background",
     },
-  });
+  })
   expect(results.trim()).toBe(
     "> ⚠️ Callouts inline [great page](https://github.com)."
-  );
-});
+  )
+})
 
 test("inline links to external site", async () => {
   const results = await getMarkdown({
@@ -129,13 +131,13 @@ test("inline links to external site", async () => {
       ],
       color: "default",
     },
-  });
-  expect(results.trim()).toBe("Inline [github](https://github.com)");
-});
+  })
+  expect(results.trim()).toBe("Inline [github](https://github.com)")
+})
 
 async function getMarkdown(block: Record<string, unknown>) {
   const config = {
     plugins: [standardExternalLinkConversion],
-  };
-  return await oneBlockToMarkdown(config, block);
+  }
+  return await oneBlockToMarkdown(config, block)
 }

@@ -1,12 +1,14 @@
-import { NotionBlock } from "../types";
-import { IPlugin } from "./pluginTypes";
-import { setLogLevel } from "../log";
-import { blocksToMarkdown } from "./pluginTestRun";
-import { gifEmbed, imgurGifEmbed } from "./embedTweaks";
+import { describe, expect, test } from "vitest"
+
+import { setLogLevel } from "../log"
+import { NotionBlock } from "../types"
+import { gifEmbed, imgurGifEmbed } from "./embedTweaks"
+import { blocksToMarkdown } from "./pluginTestRun"
+import { IPlugin } from "./pluginTypes"
 
 test("imgur", async () => {
-  setLogLevel("verbose");
-  const config = { plugins: [imgurGifEmbed] };
+  setLogLevel("verbose")
+  const config = { plugins: [imgurGifEmbed] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -14,13 +16,13 @@ test("imgur", async () => {
       type: "bookmark",
       bookmark: { caption: [], url: "https://imgur.com/gallery/U8TTNuI" },
     } as unknown as NotionBlock,
-  ]);
-  expect(result.trim()).toBe(`![](https://imgur.com/gallery/U8TTNuI.gif)`);
-});
+  ])
+  expect(result.trim()).toBe(`![](https://imgur.com/gallery/U8TTNuI.gif)`)
+})
 
 test("gif", async () => {
-  setLogLevel("verbose");
-  const config = { plugins: [gifEmbed] };
+  setLogLevel("verbose")
+  const config = { plugins: [gifEmbed] }
   const result = await blocksToMarkdown(config, [
     {
       object: "block",
@@ -31,14 +33,14 @@ test("gif", async () => {
         url: "https://en.wikipedia.org/wiki/GIF#/media/File:Rotating_earth_(large).gif",
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
   expect(result.trim()).toBe(
     `![](https://en.wikipedia.org/wiki/GIF#/media/File:Rotating_earth_(large).gif)`
-  );
-});
+  )
+})
 
 test("tweaks are not applied inside code blocks", async () => {
-  setLogLevel("verbose");
+  setLogLevel("verbose")
   const p: IPlugin = {
     name: "test",
     regexMarkdownModifications: [
@@ -47,8 +49,8 @@ test("tweaks are not applied inside code blocks", async () => {
         replacementPattern: `found`,
       },
     ],
-  };
-  const config = { plugins: [p] };
+  }
+  const config = { plugins: [p] }
   const result = await blocksToMarkdown(config, [
     {
       type: "code",
@@ -97,15 +99,15 @@ test("tweaks are not applied inside code blocks", async () => {
         ],
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
   // we should not change the code one
-  expect(result.trim()).toContain("don't find me");
+  expect(result.trim()).toContain("don't find me")
   // but we should change the non-code block one
-  expect(result.trim()).toContain("found this");
-});
+  expect(result.trim()).toContain("found this")
+})
 
 test("simplest possible", async () => {
-  setLogLevel("verbose");
+  setLogLevel("verbose")
   const p: IPlugin = {
     name: "test",
     regexMarkdownModifications: [
@@ -114,8 +116,8 @@ test("simplest possible", async () => {
         replacementPattern: `found`,
       },
     ],
-  };
-  const config = { plugins: [p] };
+  }
+  const config = { plugins: [p] }
   const result = await blocksToMarkdown(config, [
     {
       type: "paragraph",
@@ -138,13 +140,13 @@ test("simplest possible", async () => {
         ],
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
 
-  expect(result.trim()).toContain("found this");
-});
+  expect(result.trim()).toContain("found this")
+})
 
 test("use match in output", async () => {
-  setLogLevel("verbose");
+  setLogLevel("verbose")
   const p: IPlugin = {
     name: "test",
     regexMarkdownModifications: [
@@ -153,8 +155,8 @@ test("use match in output", async () => {
         replacementPattern: `found $1`,
       },
     ],
-  };
-  const config = { plugins: [p] };
+  }
+  const config = { plugins: [p] }
   const result = await blocksToMarkdown(config, [
     {
       type: "paragraph",
@@ -177,7 +179,7 @@ test("use match in output", async () => {
         ],
       },
     } as unknown as NotionBlock,
-  ]);
+  ])
 
-  expect(result.trim()).toContain("found find");
-});
+  expect(result.trim()).toContain("found find")
+})

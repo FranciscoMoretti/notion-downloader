@@ -1,8 +1,10 @@
-import { NotionBlock } from "../types";
-import { blocksToMarkdown } from "./pluginTestRun";
-import { standardEscapeHtmlBlockModifier } from "./EscapeHtmlBlockModifier";
+import { beforeEach, expect, test } from "vitest"
 
-let blocks: NotionBlock[];
+import { NotionBlock } from "../types"
+import { standardEscapeHtmlBlockModifier } from "./EscapeHtmlBlockModifier"
+import { blocksToMarkdown } from "./pluginTestRun"
+
+let blocks: NotionBlock[]
 beforeEach(() => {
   blocks = [
     {
@@ -107,16 +109,16 @@ beforeEach(() => {
       type: "paragraph",
       paragraph: { rich_text: [], color: "default" },
     },
-  ];
-});
+  ]
+})
 
 test("smoketest ", async () => {
-  const config = { plugins: [standardEscapeHtmlBlockModifier] };
-  let results = await blocksToMarkdown(config, blocks);
+  const config = { plugins: [standardEscapeHtmlBlockModifier] }
+  let results = await blocksToMarkdown(config, blocks)
   // shouldn't escape inside a code block
-  expect(results).toContain("This is code: if(1 < 3)");
+  expect(results).toContain("This is code: if(1 < 3)")
   // should escape outside a code block
-  expect(results).toContain("2 &lt; 3 &gt; 1");
+  expect(results).toContain("2 &lt; 3 &gt; 1")
   // that line is also bold and italic
-  expect(results).toContain("_**2 &lt; 3 &gt; 1**_");
-});
+  expect(results).toContain("_**2 &lt; 3 &gt; 1**_")
+})
