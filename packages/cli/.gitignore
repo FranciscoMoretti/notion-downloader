@@ -1,3 +1,5 @@
 components
 dist
 .turbo
+# Pages output
+docs

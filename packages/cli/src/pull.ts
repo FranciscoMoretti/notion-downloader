@@ -107,8 +107,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
   // await getPagesRecursively(options, "", options.rootPage, 0, true);
-  console.log(databaseResponse.results)
 
+  // Database to pages array
   const pagesPromises = databaseResponse.results.map(
     (page: GetPageResponse) => {
       const notionPage = fromPageId("", page.id, 0, true)

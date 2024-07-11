@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
-import { parseLinkId } from "./plugins/internalLinks";
-import { ListBlockChildrenResponseResults } from "notion-to-md/build/types";
-import chalk from "chalk";
-import { error } from "./log";
+import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
+import chalk from "chalk"
+import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
+
+import { error } from "./log"
+import { parseLinkId } from "./plugins/internalLinks"
 
 // Notion has 2 kinds of pages: a normal one which is just content, and what I'm calling a "database page", which has whatever properties you put on it.
 // docu-notion supports the later via links from outline pages. That is, you put the database pages in a database, then separately, in the outline, you
@@ -16,24 +17,24 @@ export enum PageType {
 }
 
 export class NotionPage {
-  public metadata: GetPageResponse;
-  public pageId: string;
-  public order: number;
-  public layoutContext: string; // where we found it in the hierarchy of the outline
-  public foundDirectlyInOutline: boolean; // the page was found as a descendent of /outline instead of being linked to
+  public metadata: GetPageResponse
+  public pageId: string
+  public order: number
+  public layoutContext: string // where we found it in the hierarchy of the outline
+  public foundDirectlyInOutline: boolean // the page was found as a descendent of /outline instead of being linked to
 
   public constructor(args: {
-    layoutContext: string;
-    pageId: string;
-    order: number;
-    metadata: GetPageResponse;
-    foundDirectlyInOutline: boolean;
+    layoutContext: string
+    pageId: string
+    order: number
+    metadata: GetPageResponse
+    foundDirectlyInOutline: boolean
   }) {
-    this.layoutContext = args.layoutContext;
-    this.pageId = args.pageId;
-    this.order = args.order;
-    this.metadata = args.metadata;
-    this.foundDirectlyInOutline = args.foundDirectlyInOutline;
+    this.layoutContext = args.layoutContext
+    this.pageId = args.pageId
+    this.order = args.order
+    this.metadata = args.metadata
+    this.foundDirectlyInOutline = args.foundDirectlyInOutline
 
     // review: this is expensive to learn as it takes another api call... I
     // think? We can tell if it's a database because it has a "Name" instead of a
@@ -42,17 +43,17 @@ export class NotionPage {
   }
 
   public matchesLinkId(id: string): boolean {
-    const { baseLinkId } = parseLinkId(id);
+    const { baseLinkId } = parseLinkId(id)
 
     const match =
       baseLinkId === this.pageId || // from a link_to_page.pageId, which still has the dashes
-      baseLinkId === this.pageId.replaceAll("-", ""); // from inline links, which are lacking the dashes
+      baseLinkId === this.pageId.replaceAll("-", "") // from inline links, which are lacking the dashes
 
     // logDebug(
     //   `matchedLinkId`,
     //   `comparing pageId:${this.pageId} to id ${id} --> ${match.toString()}`
     // );
-    return match;
+    return match
   }
 
   public get type(): PageType {
@@ -68,12 +69,12 @@ export class NotionPage {
     */
     return (this.metadata as any).parent.type === "database_id"
       ? PageType.DatabasePage
-      : PageType.Simple;
+      : PageType.Simple
   }
 
   // In Notion, pages from the Database have names and simple pages have titles.
   public get nameOrTitle(): string {
-    return this.type === PageType.DatabasePage ? this.name : this.title;
+    return this.type === PageType.DatabasePage ? this.name : this.title
   }
 
   public nameForFile(): string {
@@ -82,24 +83,24 @@ export class NotionPage {
       ? this.title
       : // if it's a Database page, then we'll use the slug unless there is none, then we'd rather have the
         // page name than an ugly id for the file name
-        this.explicitSlug()?.replace(/^\//, "") || this.name;
+        this.explicitSlug()?.replace(/^\//, "") || this.name
   }
 
   // TODO: let's go farther in hiding this separate title vs name stuff. This seems like an implementation detail on the Notion side.
 
   // In Notion, pages from the Outline have "title"'s.
   private get title(): string {
-    return this.getPlainTextProperty("title", "title missing");
+    return this.getPlainTextProperty("title", "title missing")
   }
   // In Notion, pages from the Database have "Name"s.
   private get name(): string {
-    return this.getPlainTextProperty("Name", "name missing");
+    return this.getPlainTextProperty("Name", "name missing")
   }
 
   private explicitSlug(): string | undefined {
-    const explicitSlug = this.getPlainTextProperty("Slug", "");
+    const explicitSlug = this.getPlainTextProperty("Slug", "")
     if (explicitSlug) {
-      if (explicitSlug === "/") return explicitSlug;
+      if (explicitSlug === "/") return explicitSlug
       // the root page
       else
         return (
@@ -121,40 +122,41 @@ export class NotionPage {
               // remove consecutive dashes
               .replaceAll("--", "-")
           )
-        );
-      return undefined; // this page has no slug property
+        )
+      return undefined // this page has no slug property
     }
   }
 
   public get slug(): string {
-    return this.explicitSlug() ?? "/" + this.pageId;
+    return this.explicitSlug() ?? "/" + this.pageId
   }
   public get hasExplicitSlug(): boolean {
-    return this.explicitSlug() !== undefined;
+    return this.explicitSlug() !== undefined
   }
   public get keywords(): string | undefined {
-    return this.getPlainTextProperty("Keywords", "");
+    return this.getPlainTextProperty("Keywords", "")
   }
   public get status(): string | undefined {
-    return this.getStatusProperty("Status");
+    return this.getStatusProperty("Status")
   }
 
   public getGenericProperty(property: string): string | undefined {
-    const type = (this.metadata as any).properties?.[property].type;
-    if (!type) return undefined;
+    const type = (this.metadata as any).properties?.[property].type
+    if (!type) return undefined
     switch (type) {
       case "text":
       case "rich_text":
       case "title":
-        return this.getPlainTextProperty(property, "");
+        return this.getPlainTextProperty(property, "")
       case "select":
-        return this.getSelectProperty(property);
+      case "status":
+        return this.getSelectProperty(property)
       case "multi_select":
-        return this.getMultiSelectProperty(property);
+        return this.getMultiSelectProperty(property)
       case "date":
-        return this.getDateProperty(property, "");
+        return this.getDateProperty(property, "")
       case "created_time":
-        return this.getCreatedTimeProperty(property);
+        return this.getCreatedTimeProperty(property)
 
       default:
         error(
@@ -163,8 +165,8 @@ export class NotionPage {
             null,
             2
           )}. Handling for this property type was not implemented. Please open an issue.`
-        );
-        return undefined;
+        )
+        return undefined
     }
   }
 
@@ -199,17 +201,17 @@ export class NotionPage {
       */
 
     //console.log("metadata:\n" + JSON.stringify(this.metadata, null, 2));
-    const p = (this.metadata as any).properties?.[property];
+    const p = (this.metadata as any).properties?.[property]
 
     //console.log(`prop ${property} = ${JSON.stringify(p)}`);
-    if (!p) return defaultIfEmpty;
-    const textArray = p[p.type];
+    if (!p) return defaultIfEmpty
+    const textArray = p[p.type]
     //console.log("textarray:" + JSON.stringify(textArray, null, 2));
     return textArray && textArray.length
       ? (textArray
           .map((item: { plain_text: any }) => item.plain_text)
           .join("") as string)
-      : defaultIfEmpty;
+      : defaultIfEmpty
   }
 
   public getStatusProperty(property: string): string | undefined {
@@ -227,16 +229,16 @@ export class NotionPage {
         },
         */
 
-    const p = (this.metadata as any).properties?.[property];
+    const p = (this.metadata as any).properties?.[property]
     if (!p) {
       throw new Error(
         `missing ${property} in ${JSON.stringify(this.metadata, null, 2)}`
-      );
-      return undefined;
+      )
+      return undefined
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return p.status?.name || "";
+    return p.status?.name || ""
   }
 
   public getCreatedTimeProperty(property: string) {
@@ -247,15 +249,15 @@ export class NotionPage {
     created_time: '2024-07-05T11:04:00.000Z'
   },
   */
-    const p = (this.metadata as any).properties?.[property];
+    const p = (this.metadata as any).properties?.[property]
     if (!p) {
       throw new Error(
         `missing ${property} in ${JSON.stringify(this.metadata, null, 2)}`
-      );
-      return undefined;
+      )
+      return undefined
     }
 
-    return (this.metadata as any).properties?.[property].created_time;
+    return (this.metadata as any).properties?.[property].created_time
   }
 
   public getMultiSelectProperty(property: string): string | undefined {
@@ -272,16 +274,16 @@ export class NotionPage {
         },
         */
 
-    const p = (this.metadata as any).properties?.[property];
+    const p = (this.metadata as any).properties?.[property]
     if (!p) {
       throw new Error(
         `missing ${property} in ${JSON.stringify(this.metadata, null, 2)}`
-      );
-      return undefined;
+      )
+      return undefined
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return p.multi_select?.map(({ name }) => name).join(", ") || "";
+    return p.multi_select?.map(({ name }) => name).join(", ") || ""
   }
 
   public getSelectProperty(property: string): string | undefined {
@@ -298,16 +300,16 @@ export class NotionPage {
         },
         */
 
-    const p = (this.metadata as any).properties?.[property];
+    const p = (this.metadata as any).properties?.[property]
     if (!p) {
       throw new Error(
         `missing ${property} in ${JSON.stringify(this.metadata, null, 2)}`
-      );
-      return undefined;
+      )
+      return undefined
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return p.select?.name || "";
+    return p.select?.name || ""
   }
 
   public getDateProperty(
@@ -331,26 +333,26 @@ export class NotionPage {
     */
 
     // console.log("metadata:\n" + JSON.stringify(this.metadata, null, 2));
-    const p = (this.metadata as any).properties?.[property];
+    const p = (this.metadata as any).properties?.[property]
 
     // console.log(`prop ${property} = ${JSON.stringify(p)}`);
-    if (!p) return defaultIfEmpty;
+    if (!p) return defaultIfEmpty
     if (start) {
-      return p?.date?.start ? (p.date.start as string) : defaultIfEmpty;
+      return p?.date?.start ? (p.date.start as string) : defaultIfEmpty
     } else {
-      return p?.date?.end ? (p.date.end as string) : defaultIfEmpty;
+      return p?.date?.end ? (p.date.end as string) : defaultIfEmpty
     }
   }
 
   public async getContentInfo(
     children: ListBlockChildrenResponseResults
   ): Promise<{
-    childPageIdsAndOrder: { id: string; order: number }[];
-    linksPageIdsAndOrder: { id: string; order: number }[];
-    hasParagraphs: boolean;
+    childPageIdsAndOrder: { id: string; order: number }[]
+    linksPageIdsAndOrder: { id: string; order: number }[]
+    hasParagraphs: boolean
   }> {
     for (let i = 0; i < children.length; i++) {
-      (children[i] as any).order = i;
+      ;(children[i] as any).order = i
     }
     return {
       childPageIdsAndOrder: children
@@ -360,10 +362,10 @@ export class NotionPage {
         .filter((b: any) => b.type === "link_to_page")
         .map((b: any) => ({ id: b.link_to_page.page_id, order: b.order })),
       hasParagraphs: children.some(
-        b =>
+        (b) =>
           (b as any).type === "paragraph" &&
           (b as any).paragraph.rich_text.length > 0
       ),
-    };
+    }
   }
 }
