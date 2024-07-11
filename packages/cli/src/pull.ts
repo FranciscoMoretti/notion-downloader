@@ -6,7 +6,7 @@ import {
   GetPageResponse,
   ListBlockChildrenResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import * as fs from "fs-extra"
+import fs from "fs-extra"
 import { RateLimiter } from "limiter-es6-compat"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
@@ -54,6 +54,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   optionsForLogging.notionToken =
     optionsForLogging.notionToken.substring(0, 10) + "..."
 
+  // TODO: This should be moved up to the pull command that already loads configs
   const config = await loadConfigAsync()
 
   verbose(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)

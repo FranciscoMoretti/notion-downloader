@@ -1,17 +1,17 @@
-import * as fs from "fs-extra";
-import { Option, program } from "commander";
-import { setLogLevel } from "./log";
+import path from "path"
+import { Option, program } from "commander"
+import fs from "fs-extra"
 
-import { notionPull } from "./pull";
-import path from "path";
+import { setLogLevel } from "./log"
+import { notionPull } from "./pull"
 
 export async function run(): Promise<void> {
-  const pkg = require("../package.json");
+  const pkg = require("../package.json")
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  console.log(`docu-notion version ${pkg.version}`);
+  console.log(`docu-notion version ${pkg.version}`)
 
-  program.name("docu-notion").description("");
-  program.usage("-n <token> -r <root> [options]");
+  program.name("docu-notion").description("")
+  program.usage("-n <token> -r <root> [options]")
   program
     .requiredOption(
       "-n, --notion-token <string>",
@@ -69,35 +69,35 @@ export async function run(): Promise<void> {
       )
         .choices(["default", "content-hash", "legacy"])
         .default("default")
-    );
+    )
 
-  program.showHelpAfterError();
-  program.parse();
-  setLogLevel(program.opts().logLevel);
-  console.log(JSON.stringify(program.opts()));
+  program.showHelpAfterError()
+  program.parse()
+  setLogLevel(program.opts().logLevel)
+  console.log(JSON.stringify(program.opts()))
 
   // copy in the this version of the css needed to make columns (and maybe other things?) work
-  let pathToCss = "";
+  let pathToCss = ""
   try {
     pathToCss = require.resolve(
       "@sillsdev/docu-notion/dist/docu-notion-styles.css"
-    );
+    )
   } catch (e) {
     // when testing from the docu-notion project itself:
-    pathToCss = "./src/css/docu-notion-styles.css";
+    pathToCss = "./src/css/docu-notion-styles.css"
   }
   // make any missing parts of the path exist
-  fs.ensureDirSync(program.opts().cssOutputDirectory);
+  fs.ensureDirSync(program.opts().cssOutputDirectory)
   fs.copyFileSync(
     pathToCss,
     path.join(program.opts().cssOutputDirectory, "docu-notion-styles.css")
-  );
+  )
 
   // pull and convert
   await notionPull(program.opts()).then(() =>
     console.log("docu-notion Finished.")
-  );
+  )
 }
 function parseLocales(value: string): string[] {
-  return value.split(",").map(l => l.trim().toLowerCase());
+  return value.split(",").map((l) => l.trim().toLowerCase())
 }

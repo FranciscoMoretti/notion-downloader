@@ -1,7 +1,8 @@
-import * as fs from "fs-extra";
-import sanitize from "sanitize-filename";
-import { LayoutStrategy } from "./LayoutStrategy";
-import { NotionPage } from "./NotionPage";
+import fs from "fs-extra"
+import sanitize from "sanitize-filename"
+
+import { LayoutStrategy } from "./LayoutStrategy"
+import { NotionPage } from "./NotionPage"
 
 // This strategy gives us a file tree that mirrors that of notion.
 // Each level in the outline becomes a directory, and each file bears the name of the Notion document.
@@ -14,13 +15,13 @@ export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
     context: string,
     levelLabel: string
   ): string {
-    const path = context + "/" + sanitize(levelLabel).replaceAll(" ", "-");
+    const path = context + "/" + sanitize(levelLabel).replaceAll(" ", "-")
 
     //console.log("Creating level " + path);
-    const newPath = dirRoot + "/" + path;
-    fs.mkdirSync(newPath, { recursive: true });
-    this.addCategoryMetadata(newPath, order, levelLabel);
-    return path;
+    const newPath = dirRoot + "/" + path
+    fs.mkdirSync(newPath, { recursive: true })
+    this.addCategoryMetadata(newPath, order, levelLabel)
+    return path
   }
 
   public getPathForPage(page: NotionPage, extensionWithDot: string): string {
@@ -34,13 +35,12 @@ export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
       .replaceAll("“", "")
       .replaceAll("”", "")
       .replaceAll("'", "")
-      .replaceAll("?", "-");
+      .replaceAll("?", "-")
 
-    const context = ("/" + page.layoutContext + "/").replaceAll("//", "/");
-    const path =
-      this.rootDirectory + context + sanitizedName + extensionWithDot;
+    const context = ("/" + page.layoutContext + "/").replaceAll("//", "/")
+    const path = this.rootDirectory + context + sanitizedName + extensionWithDot
 
-    return path;
+    return path
   }
 
   //{
@@ -58,7 +58,7 @@ export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
   //   }
   // }
   private addCategoryMetadata(dir: string, order: number, label: string) {
-    const data = `{"position":${order}, "label":"${label}"}`;
-    fs.writeFileSync(dir + "/_category_.json", data);
+    const data = `{"position":${order}, "label":"${label}"}`
+    fs.writeFileSync(dir + "/_category_.json", data)
   }
 }

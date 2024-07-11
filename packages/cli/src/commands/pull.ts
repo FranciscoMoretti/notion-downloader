@@ -8,7 +8,6 @@ import {
   fetchTree,
   getItemTargetPath,
   getRegistryBaseColor,
-  getRegistryIndex,
   resolveTree,
 } from "@/src/utils/registry"
 import { transform } from "@/src/utils/transformers"
@@ -126,8 +125,6 @@ export const pull = new Command()
         )
         process.exit(1)
       }
-
-      const registryIndex = await getRegistryIndex()
 
       // pull and convert
       const spinner = ora(`Pulling pages...`).start()

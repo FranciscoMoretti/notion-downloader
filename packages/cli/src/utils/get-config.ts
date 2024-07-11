@@ -17,38 +17,44 @@ const explorer = cosmiconfig("downloader", {
   searchPlaces: ["downloader.json", "downloader.config.js"],
 })
 
-export const rawConfigSchema = z
-  .object({
-    $schema: z.string().optional(),
-    style: z.string(),
-    rsc: z.coerce.boolean().default(false),
-    tsx: z.coerce.boolean().default(true),
-    tailwind: z.object({
-      config: z.string(),
-      css: z.string(),
-      baseColor: z.string(),
-      cssVariables: z.boolean().default(true),
-      prefix: z.string().default("").optional(),
-    }),
-    aliases: z.object({
-      components: z.string(),
-      utils: z.string(),
-      ui: z.string().optional(),
-    }),
-  })
-  .strict()
+export const rawConfigSchema = z.object({
+  hello: z.string(),
+})
+
+// export const rawConfigSchema = z
+//   .object({
+//     $schema: z.string().optional(),
+//     style: z.string(),
+//     rsc: z.coerce.boolean().default(false),
+//     tsx: z.coerce.boolean().default(true),
+//     tailwind: z.object({
+//       config: z.string(),
+//       css: z.string(),
+//       baseColor: z.string(),
+//       cssVariables: z.boolean().default(true),
+//       prefix: z.string().default("").optional(),
+//     }),
+//     aliases: z.object({
+//       components: z.string(),
+//       utils: z.string(),
+//       ui: z.string().optional(),
+//     }),
+//   })
+//   .strict()
 
 export type RawConfig = z.infer<typeof rawConfigSchema>
 
-export const configSchema = rawConfigSchema.extend({
-  resolvedPaths: z.object({
-    tailwindConfig: z.string(),
-    tailwindCss: z.string(),
-    utils: z.string(),
-    components: z.string(),
-    ui: z.string(),
-  }),
-})
+// export const configSchema = rawConfigSchema.extend({
+//   resolvedPaths: z.object({
+//     tailwindConfig: z.string(),
+//     tailwindCss: z.string(),
+//     utils: z.string(),
+//     components: z.string(),
+//     ui: z.string(),
+//   }),
+// })
+
+export const configSchema = rawConfigSchema
 
 export type Config = z.infer<typeof configSchema>
 
@@ -59,7 +65,7 @@ export async function getConfig(cwd: string) {
     return null
   }
 
-  return await resolveConfigPaths(cwd, config)
+  return await config //resolveConfigPaths(cwd, config)
 }
 
 export async function resolveConfigPaths(cwd: string, config: RawConfig) {
