@@ -14,11 +14,6 @@ import { getPackageManager } from "@/src/utils/get-package-manager"
 import { getProjectConfig, preFlight } from "@/src/utils/get-project-info"
 import { handleError } from "@/src/utils/handle-error"
 import { logger } from "@/src/utils/logger"
-import {
-  getRegistryBaseColor,
-  getRegistryBaseColors,
-  getRegistryStyles,
-} from "@/src/utils/registry"
 import * as templates from "@/src/utils/templates"
 import chalk from "chalk"
 import { Command } from "commander"
@@ -27,8 +22,6 @@ import template from "lodash.template"
 import ora from "ora"
 import prompts from "prompts"
 import { z } from "zod"
-
-import { applyPrefixesCss } from "../utils/transformers/transform-tw-prefix"
 
 const PROJECT_DEPENDENCIES = [
   "tailwindcss-animate",
@@ -100,8 +93,8 @@ export async function promptForConfig(
 ) {
   const highlight = (text: string) => chalk.cyan(text)
 
-  const styles = await getRegistryStyles()
-  const baseColors = await getRegistryBaseColors()
+  const styles = [] // await getRegistryStyles()
+  const baseColors = [] // await getRegistryBaseColors()
 
   const options = await prompts([
     {
@@ -240,8 +233,8 @@ export async function promptForMinimalConfig(
   let cssVariables = defaultConfig.tailwind.cssVariables
 
   if (!defaults) {
-    const styles = await getRegistryStyles()
-    const baseColors = await getRegistryBaseColors()
+    const styles = [] // await getRegistryStyles()
+    const baseColors = [] // await getRegistryBaseColors()
 
     const options = await prompts([
       {
@@ -361,9 +354,7 @@ export async function runInit(cwd: string, config: Config) {
     await fs.writeFile(
       config.resolvedPaths.tailwindCss,
       config.tailwind.cssVariables
-        ? config.tailwind.prefix
-          ? applyPrefixesCss(baseColor.cssVarsTemplate, config.tailwind.prefix)
-          : baseColor.cssVarsTemplate
+        ? baseColor.cssVarsTemplate
         : baseColor.inlineColorsTemplate,
       "utf8"
     )
