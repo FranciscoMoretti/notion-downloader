@@ -7,7 +7,6 @@ import {
   ListBlockChildrenResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
-import { RateLimiter } from "limiter-es6-compat"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
@@ -15,6 +14,7 @@ import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrate
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage, PageType } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
+import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, logDebug, verbose, warning } from "./log"
 import { convertInternalUrl } from "./plugins/internalLinks"
@@ -305,11 +305,6 @@ function writePage(page: NotionPage, finalMarkdown: string) {
   ++counts.output_normally
 }
 
-const notionLimiter = new RateLimiter({
-  tokensPerInterval: 3,
-  interval: "second",
-})
-
 let notionClient: Client
 
 async function getPageMetadata(id: string): Promise<GetPageResponse> {
@@ -318,55 +313,6 @@ async function getPageMetadata(id: string): Promise<GetPageResponse> {
       page_id: id,
     })
   })
-}
-
-// While everything works fine locally, on Github Actions we are getting a lot of timeouts, so
-// we're trying this extra retry-able wrapper.
-export async function executeWithRateLimitAndRetries<T>(
-  label: string,
-  asyncFunction: () => Promise<T>
-): Promise<T> {
-  await rateLimit()
-  const kRetries = 10
-  let lastException = undefined
-  for (let i = 0; i < kRetries; i++) {
-    try {
-      return await asyncFunction()
-    } catch (e: any) {
-      lastException = e
-      if (
-        e?.code === "notionhq_client_request_timeout" ||
-        e.message.includes("timeout") ||
-        e.message.includes("Timeout") ||
-        e.message.includes("limit") ||
-        e.message.includes("Limit") ||
-        e?.code === "notionhq_client_response_error" ||
-        e?.code === "service_unavailable"
-      ) {
-        const secondsToWait = i + 1
-        warning(
-          `While doing "${label}", got error "${
-            e.message as string
-          }". Will retry after ${secondsToWait}s...`
-        )
-        await new Promise((resolve) =>
-          setTimeout(resolve, 1000 * secondsToWait)
-        )
-      } else {
-        throw e
-      }
-    }
-  }
-
-  error(`Error: could not complete "${label}" after ${kRetries} retries.`)
-  throw lastException
-}
-
-async function rateLimit() {
-  if (notionLimiter.getTokensRemaining() < 1) {
-    logDebug("rateLimit", "*** delaying for rate limit")
-  }
-  await notionLimiter.removeTokens(1)
 }
 
 async function getBlockChildren(id: string): Promise<NotionBlock[]> {

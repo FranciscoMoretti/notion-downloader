@@ -29,6 +29,7 @@ export abstract class LayoutStrategy {
     context: string,
     levelLabel: string
   ): string
+
   public abstract getPathForPage(
     page: NotionPage,
     extensionWithDot: string
