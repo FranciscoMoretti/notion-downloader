@@ -124,6 +124,12 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   })
 
   logDebug("getPagesRecursively", JSON.stringify(pages, null, 2))
+  // Save pages to a json file
+  await savePagesToJson(
+    pages,
+    options.markdownOutputPath.replace(/\/+$/, "") + "/" + "pages.json"
+  )
+
   info(`Found ${pages.length} pages`)
   endGroup()
   group(
@@ -135,6 +141,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   await layoutStrategy.cleanupOldFiles()
   await cleanupOldImages()
   endGroup()
+}
+
+async function savePagesToJson(pages: NotionPage[], filename: string) {
+  const json = JSON.stringify(pages, null, 2)
+  await fs.writeFile(filename, json)
 }
 
 async function outputPages(
