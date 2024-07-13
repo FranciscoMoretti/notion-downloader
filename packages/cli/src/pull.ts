@@ -73,6 +73,10 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   layoutStrategy = new HierarchicalNamedLayoutStrategy()
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
+  await fs.mkdir(options.markdownOutputPath.replace(/\/+$/, "") + "/.cache", {
+    recursive: true,
+  })
+
   layoutStrategy.setRootDirectoryForMarkdown(
     options.markdownOutputPath.replace(/\/+$/, "") // trim any trailing slash
   )
@@ -81,6 +85,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
   let databaseResponse = { results: [] }
+  // TODO: Get root page, which can be DB or can be single page
   try {
     databaseResponse = (await executeWithRateLimitAndRetries(
       "retrieving root page",
@@ -127,13 +132,13 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // Save pages to a json file
   await savePagesToJson(
     pages,
-    options.markdownOutputPath.replace(/\/+$/, "") + "/" + "pages.json"
+    options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/" + "pages.json"
   )
 
   info(`Found ${pages.length} pages`)
   endGroup()
   group(
-    `Stage 2: convert ${pages.length} Notion pages to markdown and save locally...`
+    `Stage 2: convert ${pages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
   )
   await outputPages(options, config, pages)
   endGroup()
