@@ -5,6 +5,7 @@ import {
   BlockObjectResponse,
   GetPageResponse,
   ListBlockChildrenResponse,
+  PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 import { NotionToMarkdown } from "notion-to-md"
@@ -38,6 +39,15 @@ export type DocuNotionOptions = {
 let layoutStrategy: LayoutStrategy
 let notionToMarkdown: NotionToMarkdown
 const pages = new Array<NotionPage>()
+
+type TreeNodeType = "database" | "page" | "database_page" | "unknown"
+
+type TreeNodePage = {
+  pageId: string
+  type: TreeNodeType
+  children: Array<TreeNodePage>
+}
+
 const counts = {
   output_normally: 0,
   skipped_because_empty: 0,
@@ -84,17 +94,17 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   info("Connecting to Notion...")
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
-  let databaseResponse = { results: [] }
+  let databaseResponse = null
   // TODO: Get root page, which can be DB or can be single page
   try {
-    databaseResponse = (await executeWithRateLimitAndRetries(
+    databaseResponse = await executeWithRateLimitAndRetries(
       "retrieving root page",
       async () => {
         return await notionClient.databases.query({
           database_id: options.rootPage,
         })
       }
-    )) as any
+    )
   } catch (e: any) {
     error(
       `docu-notion could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${
@@ -106,6 +116,20 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
       }`
     )
     exit(1)
+  }
+
+  // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
+  // TODO: Fill this with dynamic type based on the result of the first query
+  const pagesTree: TreeNodePage = {
+    pageId: options.rootPage,
+    type: "database",
+    children: databaseResponse.results.map((page) => {
+      return {
+        pageId: page.id,
+        type: "page",
+        children: [],
+      }
+    }),
   }
 
   group(
@@ -130,7 +154,13 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   logDebug("getPagesRecursively", JSON.stringify(pages, null, 2))
   // Save pages to a json file
-  await savePagesToJson(
+  await saveDataToJson(
+    pagesTree,
+    options.markdownOutputPath.replace(/\/+$/, "") +
+      "/.cache/" +
+      "pageTree.json"
+  )
+  await saveDataToJson(
     pages,
     options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/" + "pages.json"
   )
@@ -148,8 +178,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   endGroup()
 }
 
-async function savePagesToJson(pages: NotionPage[], filename: string) {
-  const json = JSON.stringify(pages, null, 2)
+async function saveDataToJson(data: any, filename: string) {
+  const json = JSON.stringify(data, null, 2)
   await fs.writeFile(filename, json)
 }
 
