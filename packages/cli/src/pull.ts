@@ -52,11 +52,18 @@ const pages = new Array<NotionPage>()
 
 type NotionObject = "database" | "page" | "block"
 
-type NotionObjectTreeNode = {
-  id: string
-  object: NotionObject
-  children: Array<NotionObjectTreeNode>
-}
+type NotionObjectTreeNode =
+  | {
+      id: string
+      object: "database" | "page"
+      children: Array<NotionObjectTreeNode>
+    }
+  | {
+      id: string
+      object: "block"
+      type: string
+      children: Array<NotionObjectTreeNode>
+    }
 
 type ObjectsCache = Record<
   string,
@@ -267,10 +274,13 @@ async function fetchTreeRecursively(
   // TODO: add second argument to store responses from blocks and pages
 ) {
   info(
-    `Looking for children of {pageId: "${objectNode.id}", type: "${objectNode.object}"}`
+    `Looking for children of {object_id: "${objectNode.id}", object: "${objectNode.object}"}`
   )
 
-  if (objectNode.object === "database") {
+  if (
+    objectNode.object === "database" ||
+    (objectNode.object === "block" && objectNode.type === "child_database")
+  ) {
     const databaseResponse = await queryDatabase(objectNode.id)
 
     for (const childObject of databaseResponse.results) {
@@ -289,27 +299,32 @@ async function fetchTreeRecursively(
       objectNode.children.push(newNode)
       await fetchTreeRecursively(newNode, objectsCache)
     }
-  } else if (objectNode.object === "page") {
+  } else if (
+    objectNode.object === "page" ||
+    (objectNode.object === "block" && objectNode.type === "child_page")
+  ) {
     // TODO: Fix the inconsistency. In the block case, the non-full object response is handled in getBlockChildren()
     const blocksResponse = await getBlockChildren(objectNode.id)
     for (const childBlock of blocksResponse) {
       objectsCache[childBlock.id] = childBlock
+      const newNode: NotionObjectTreeNode = {
+        id: childBlock.id,
+        object: childBlock.object,
+        children: [],
+        type: childBlock.type,
+      }
+      objectNode.children.push(newNode)
       if (
         // TODO: Decide how to handle "mentions" (links to other objects)
         childBlock.type == "child_page" ||
         childBlock.type == "child_database"
       ) {
-        const newNode: NotionObjectTreeNode = {
-          id: childBlock.id,
-          object: childBlock.type == "child_database" ? "database" : "page",
-          children: [],
-        }
-        objectNode.children.push(newNode)
+        // Recurse if page or database (with children)
         await fetchTreeRecursively(newNode, objectsCache)
       }
     }
   } else if (objectNode.object === "block") {
-    // TODO: Handle links? Shouldn't be nested, but maybe they should be fetched.
+    // TODO: Decide how to process other nodes
   }
 }
 
