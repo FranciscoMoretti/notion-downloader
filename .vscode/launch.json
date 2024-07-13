@@ -10,7 +10,13 @@
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/packages/cli/src/index.ts",
-      "args": ["pull", "--log-level", "debug"],
+      "args": [
+        "pull",
+        // Disable root-is-db for non DBs roots
+        "--root-is-db",
+        "--log-level",
+        "debug"
+      ],
       "preLaunchTask": "build notion-download-md",
       "cwd": "${workspaceFolder}/packages/cli/",
       "outFiles": ["${workspaceFolder}/packages/cli/dist/**/*.js"]

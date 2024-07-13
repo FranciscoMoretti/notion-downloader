@@ -28,6 +28,7 @@ dotenv.config()
 const pullOptionsSchema = z.object({
   notionToken: z.string(),
   rootPage: z.string(),
+  rootIsDb: z.boolean().default(false),
   markdownOutputPath: z.string(),
   statusTag: z.string(),
   logLevel: z.string().default("info"),
@@ -47,6 +48,11 @@ export const pull = new Command()
   .option(
     "-r, --root-page <string>",
     "The 31 character ID of the page which is the root of your docs page in notion. The code will look like 9120ec9960244ead80fa2ef4bc1bba25. This page must have a child page named 'Outline'"
+  )
+  .option(
+    "-r, --root-is-db",
+    "Whether the root page is a database. If not, it must be a 'page'.",
+    false
   )
   .option(
     "-m, --markdown-output-path  <string>",

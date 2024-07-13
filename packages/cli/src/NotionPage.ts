@@ -343,29 +343,29 @@ export class NotionPage {
       return p?.date?.end ? (p.date.end as string) : defaultIfEmpty
     }
   }
+}
 
-  public async getContentInfo(
-    children: ListBlockChildrenResponseResults
-  ): Promise<{
-    childPageIdsAndOrder: { id: string; order: number }[]
-    linksPageIdsAndOrder: { id: string; order: number }[]
-    hasParagraphs: boolean
-  }> {
-    for (let i = 0; i < children.length; i++) {
-      ;(children[i] as any).order = i
-    }
-    return {
-      childPageIdsAndOrder: children
-        .filter((b: any) => b.type === "child_page")
-        .map((b: any) => ({ id: b.id, order: b.order })),
-      linksPageIdsAndOrder: children
-        .filter((b: any) => b.type === "link_to_page")
-        .map((b: any) => ({ id: b.link_to_page.page_id, order: b.order })),
-      hasParagraphs: children.some(
-        (b) =>
-          (b as any).type === "paragraph" &&
-          (b as any).paragraph.rich_text.length > 0
-      ),
-    }
+export async function getPageContentInfo(
+  children: ListBlockChildrenResponseResults
+): Promise<{
+  childPageIdsAndOrder: { id: string; order: number }[]
+  linksPageIdsAndOrder: { id: string; order: number }[]
+  hasParagraphs: boolean
+}> {
+  for (let i = 0; i < children.length; i++) {
+    ;(children[i] as any).order = i
+  }
+  return {
+    childPageIdsAndOrder: children
+      .filter((b: any) => b.type === "child_page")
+      .map((b: any) => ({ id: b.id, order: b.order })),
+    linksPageIdsAndOrder: children
+      .filter((b: any) => b.type === "link_to_page")
+      .map((b: any) => ({ id: b.link_to_page.page_id, order: b.order })),
+    hasParagraphs: children.some(
+      (b) =>
+        (b as any).type === "paragraph" &&
+        (b as any).paragraph.rich_text.length > 0
+    ),
   }
 }

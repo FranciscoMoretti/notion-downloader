@@ -48,7 +48,7 @@
     "@babel/core": "^7.22.1",
     "@babel/parser": "^7.22.6",
     "@babel/plugin-transform-typescript": "^7.22.5",
-    "@notionhq/client": "2.2.3",
+    "@notionhq/client": "^2.2.15",
     "axios": "^1.6.8",
     "chalk": "5.2.0",
     "commander": "^10.0.0",
