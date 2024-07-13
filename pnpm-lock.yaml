@@ -112,7 +112,7 @@ importers:
         specifier: ^7.22.5
         version: 7.24.6(@babel/core@7.24.6)
       '@notionhq/client':
-        specifier: ^2.2.3
+        specifier: ^2.2.15
         version: 2.2.15
       axios:
         specifier: ^1.6.8

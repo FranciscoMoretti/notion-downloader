@@ -1,11 +1,19 @@
 import * as Path from "path"
 import { exit } from "process"
-import { Client, isFullBlock } from "@notionhq/client"
+import {
+  Client,
+  isFullBlock,
+  isFullDatabase,
+  isFullPage,
+} from "@notionhq/client"
 import {
   BlockObjectResponse,
+  DatabaseObjectResponse,
+  GetDatabaseResponse,
   GetPageResponse,
   ListBlockChildrenResponse,
   PageObjectResponse,
+  QueryDatabaseParameters,
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
@@ -42,13 +50,18 @@ let layoutStrategy: LayoutStrategy
 let notionToMarkdown: NotionToMarkdown
 const pages = new Array<NotionPage>()
 
-type TreeNodeType = "database" | "page" | "database_page" | "unknown"
+type NotionObject = "database" | "page" | "block"
 
-type TreeNodePage = {
-  pageId: string
-  type: TreeNodeType
-  children: Array<TreeNodePage>
+type NotionObjectTreeNode = {
+  id: string
+  object: NotionObject
+  children: Array<NotionObjectTreeNode>
 }
+
+type ObjectsCache = Record<
+  string,
+  PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
+>
 
 const counts = {
   output_normally: 0,
@@ -96,18 +109,14 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   info("Connecting to Notion...")
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
-  let firstResponse = null
   // TODO: Get root page, which can be DB or can be single page
   try {
     if (options.rootIsDb) {
-      firstResponse = await getDatabase(options.rootPage)
+      await retrieveDatabase(options.rootPage)
     } else {
-      firstResponse = await executeWithRateLimitAndRetries(
-        "retrieving root page",
-        async () => {
-          await notionClient.pages.retrieve({ page_id: options.rootPage })
-        }
-      )
+      await executeWithRateLimitAndRetries("retrieving root page", async () => {
+        await notionClient.pages.retrieve({ page_id: options.rootPage })
+      })
     }
   } catch (e: any) {
     error(
@@ -124,11 +133,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     exit(1)
   }
 
+  const objectCache = {}
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  // TODO: Fill this with the correct type after type-probing on the first query, unless user specify isDB or not
-  const pagesTree: TreeNodePage = {
-    pageId: options.rootPage,
-    type: options.rootIsDb ? "database" : "page",
+  const objectsTree: NotionObjectTreeNode = {
+    id: options.rootPage,
+    object: options.rootIsDb ? "database" : "page",
     children: [],
   }
 
@@ -137,7 +146,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
   // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
   // await getPagesRecursively(options, "", options.rootPage, 0, true)
-  await fetchTreeRecursively(pagesTree)
+  await fetchTreeRecursively(objectsTree, objectCache)
 
   // Database to pages array
   // TODO: Save page metadata and content while fetching
@@ -155,10 +164,16 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   logDebug("getPagesRecursively", JSON.stringify(pages, null, 2))
   // Save pages to a json file
   await saveDataToJson(
-    pagesTree,
+    objectCache,
     options.markdownOutputPath.replace(/\/+$/, "") +
       "/.cache/" +
-      "pageTree.json"
+      "objects_cache.json"
+  )
+  await saveDataToJson(
+    objectsTree,
+    options.markdownOutputPath.replace(/\/+$/, "") +
+      "/.cache/" +
+      "object_tree.json"
   )
   await saveDataToJson(
     pages,
@@ -247,39 +262,55 @@ async function outputPages(
 }
 
 async function fetchTreeRecursively(
-  treeNode: TreeNodePage
+  objectNode: NotionObjectTreeNode,
+  objectsCache: ObjectsCache
   // TODO: add second argument to store responses from blocks and pages
 ) {
   info(
-    `Looking for children of {pageId: "${treeNode.pageId}", type: "${treeNode.type}"}`
+    `Looking for children of {pageId: "${objectNode.id}", type: "${objectNode.object}"}`
   )
 
-  if (treeNode.type === "database") {
-    const databaseResponse = await getDatabase(treeNode.pageId)
-    for (const child of databaseResponse.results) {
-      const newNode: TreeNodePage = {
-        pageId: child.id,
-        type: "page",
+  if (objectNode.object === "database") {
+    const databaseResponse = await queryDatabase(objectNode.id)
+
+    for (const childObject of databaseResponse.results) {
+      const newNode: NotionObjectTreeNode = {
+        id: childObject.id,
+        object: childObject.object,
         children: [],
       }
-      treeNode.children.push(newNode)
-      await fetchTreeRecursively(newNode)
-    }
-  } else if (treeNode.type === "page") {
-    // TODO: Handle inline DB Case
-    const blocksResponse = await getBlockChildren(treeNode.pageId)
-    const pageInfo = await getPageContentInfo(blocksResponse)
-    for (const child of pageInfo.childPageIdsAndOrder) {
-      const newNode: TreeNodePage = {
-        pageId: child.id,
-        type: "page",
-        children: [],
+      // Save object to cache
+      if (childObject.object == "database" && isFullDatabase(childObject)) {
+        objectsCache[childObject.id] = childObject
+      } else if (childObject.object == "page" && isFullPage(childObject)) {
+        objectsCache[childObject.id] = childObject
       }
-      treeNode.children.push(newNode)
-      await fetchTreeRecursively(newNode)
+
+      objectNode.children.push(newNode)
+      await fetchTreeRecursively(newNode, objectsCache)
     }
+  } else if (objectNode.object === "page") {
+    // TODO: Fix the inconsistency. In the block case, the non-full object response is handled in getBlockChildren()
+    const blocksResponse = await getBlockChildren(objectNode.id)
+    for (const childBlock of blocksResponse) {
+      objectsCache[childBlock.id] = childBlock
+      if (
+        // TODO: Decide how to handle "mentions" (links to other objects)
+        childBlock.type == "child_page" ||
+        childBlock.type == "child_database"
+      ) {
+        const newNode: NotionObjectTreeNode = {
+          id: childBlock.id,
+          object: childBlock.type == "child_database" ? "database" : "page",
+          children: [],
+        }
+        objectNode.children.push(newNode)
+        await fetchTreeRecursively(newNode, objectsCache)
+      }
+    }
+  } else if (objectNode.object === "block") {
+    // TODO: Handle links? Shouldn't be nested, but maybe they should be fetched.
   }
-  // TODO: Handle links? Shouldn't be nested, but maybe they should be fetched.
 }
 
 // This walks the "Outline" page and creates a list of all the nodes that will
@@ -397,11 +428,27 @@ async function getPageMetadata(id: string): Promise<GetPageResponse> {
   })
 }
 
-async function getDatabase(id: string): Promise<QueryDatabaseResponse> {
+async function queryDatabase(
+  id: string,
+  parameters?: QueryDatabaseParameters
+): Promise<QueryDatabaseResponse> {
+  // TODO: Query on a while loop until no more pages available
   return await executeWithRateLimitAndRetries(
     `database.retrieve(${id})`,
     () => {
       return notionClient.databases.query({
+        database_id: id,
+        ...parameters,
+      })
+    }
+  )
+}
+
+async function retrieveDatabase(id: string): Promise<GetDatabaseResponse> {
+  return await executeWithRateLimitAndRetries(
+    `database.retrieve(${id})`,
+    () => {
+      return notionClient.databases.retrieve({
         database_id: id,
       })
     }
@@ -443,6 +490,7 @@ async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   }
 
   const result = (overallResult?.results as BlockObjectResponse[]) ?? []
+  // TODO - rething if this numbering should be part of the downloading part of the app, or of the processing part
   numberChildrenIfNumberedList(result)
   return result
 }
