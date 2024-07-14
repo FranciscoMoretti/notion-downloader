@@ -32,32 +32,28 @@ import {
 
 export class LocalNotionClient extends Client {
   objectsCache: NotionObjectsCache
-  objectsTree: NotionObjectTreeNode
   databaseChildrenCache: DatabaseChildrenCache
   blocksChildrenCache: BlocksChildrenCache
   notionClient: Client
 
   constructor({
+    auth,
     objectsCache,
-    objectsTree,
     databaseChildrenCache,
     blocksChildrenCache,
-    auth,
   }: {
-    objectsCache: NotionObjectsCache
-    objectsTree: NotionObjectTreeNode
-    databaseChildrenCache: DatabaseChildrenCache
-    blocksChildrenCache: BlocksChildrenCache
     auth: string
+    objectsCache?: NotionObjectsCache
+    databaseChildrenCache?: DatabaseChildrenCache
+    blocksChildrenCache?: BlocksChildrenCache
   }) {
     super({
       auth: auth,
     })
-    this.objectsCache = objectsCache
-    this.objectsTree = objectsTree
-    this.databaseChildrenCache = databaseChildrenCache
-    this.blocksChildrenCache = blocksChildrenCache
     this.notionClient = new Client({ auth })
+    this.objectsCache = objectsCache || {}
+    this.databaseChildrenCache = databaseChildrenCache || {}
+    this.blocksChildrenCache = blocksChildrenCache || {}
   }
   // TODO: Split object caches into page/block/database objects caches
 
