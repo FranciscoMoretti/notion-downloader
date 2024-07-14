@@ -4,12 +4,6 @@ import { getConfig } from "@/src/utils/get-config"
 import { getPackageManager } from "@/src/utils/get-package-manager"
 import { handleError } from "@/src/utils/handle-error"
 import { logger } from "@/src/utils/logger"
-import {
-  fetchTree,
-  getItemTargetPath,
-  getRegistryBaseColor,
-  resolveTree,
-} from "@/src/utils/registry"
 import { transform } from "@/src/utils/transformers"
 import chalk from "chalk"
 import { Command, Option } from "commander"

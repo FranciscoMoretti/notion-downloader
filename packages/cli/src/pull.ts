@@ -8,11 +8,9 @@ import {
 } from "@notionhq/client"
 import {
   BlockObjectResponse,
-  DatabaseObjectResponse,
   GetDatabaseResponse,
   GetPageResponse,
   ListBlockChildrenResponse,
-  PageObjectResponse,
   QueryDatabaseParameters,
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
@@ -27,6 +25,10 @@ import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, logDebug, verbose, warning } from "./log"
+import {
+  NotionObjectTreeNode,
+  NotionObjectsCache,
+} from "./notion-structures-types"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
@@ -51,25 +53,6 @@ let notionToMarkdown: NotionToMarkdown
 const pages = new Array<NotionPage>()
 
 type NotionObject = "database" | "page" | "block"
-
-type NotionObjectTreeNode =
-  | {
-      id: string
-      object: "database" | "page"
-      children: Array<NotionObjectTreeNode>
-    }
-  | {
-      id: string
-      object: "block"
-      type: string
-      has_children: boolean
-      children: Array<NotionObjectTreeNode>
-    }
-
-type ObjectsCache = Record<
-  string,
-  PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
->
 
 const counts = {
   output_normally: 0,
@@ -271,7 +254,7 @@ async function outputPages(
 
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
-  objectsCache: ObjectsCache
+  objectsCache: NotionObjectsCache
   // TODO: add second argument to store responses from blocks and pages
 ) {
   info(
