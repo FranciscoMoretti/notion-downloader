@@ -510,6 +510,8 @@ async function listBlockChildren(id: string) {
 
     start_cursor = response?.next_cursor
   } while (start_cursor != null)
+  // TODO: verify if this has_more property should be false after getting all
+  overallResult.has_more = false
 
   if (overallResult?.results?.some((b) => !isFullBlock(b))) {
     error(
