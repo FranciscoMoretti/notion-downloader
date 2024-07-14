@@ -52,6 +52,7 @@ export class LocalNotionClient extends Client {
     this.blocksChildrenCache = blocksChildrenCache
     this.notionClient = new Client({ auth })
   }
+  // TODO: Split object caches into page/block/database objects caches
 
   // TODO: fix type annotations by only making get methods available or wrap the rest of the methods
   public readonly blocks = {
@@ -68,6 +69,7 @@ export class LocalNotionClient extends Client {
           this.objectsCache[args.block_id] as GetBlockResponse
         )
       }
+      console.log("Cache miss for block", args.block_id)
       return this.notionClient.blocks.retrieve(args)
       // TODO: Add saving to cache here
     },
@@ -105,6 +107,7 @@ export class LocalNotionClient extends Client {
           return Promise.resolve(response)
         }
         // Fallback to calling API
+        console.log("Cache miss for block children", args.block_id)
         return this.notionClient.blocks.children.list(args)
         // TODO: Add saving to cache here
       },
@@ -126,6 +129,7 @@ export class LocalNotionClient extends Client {
           this.objectsCache[args.page_id] as GetPageResponse
         )
       }
+      console.log("Cache miss for page", args.page_id)
       return this.notionClient.pages.retrieve(args)
       // TODO: Add saving to cache here
     },
@@ -170,6 +174,7 @@ export class LocalNotionClient extends Client {
         return Promise.resolve(response)
       }
       // Fallback to calling API
+      console.log("Cache for database query", args.database_id)
       return this.notionClient.databases.query(args)
       // TODO: Add saving to cache here
     },

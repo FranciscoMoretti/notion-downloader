@@ -142,7 +142,15 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
   // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
-  // await getPagesRecursively(options, "", options.rootPage, 0, true)
+  if (!options.rootIsDb) {
+    // Fetch first page and save in cache
+    const pageResponse = await getPageMetadata(rootPageUUID)
+    if (!isFullPage(pageResponse)) {
+      throw Error("Root page must be a full page")
+    }
+    objectsCache[rootPageUUID] = pageResponse
+  }
+
   await fetchTreeRecursively(
     objectsTree,
     objectsCache,
@@ -159,23 +167,39 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     auth: options.notionToken,
   })
 
-  // TODO: Save page metadata and content while fetching
-  const response = await cachedNotionClient.databases.query({
-    database_id: rootPageUUID,
-  })
-  const pagesPromises = response.results.map((page) => {
-    const notionPage = fromPageId("", page.id, 0, true)
-    return notionPage
-  })
-  await Promise.all(pagesPromises).then((results) => {
-    results.forEach((resultPage) => {
-      console.log(resultPage)
-      pages.push(resultPage)
-    })
-  })
+  updateNotionClient(cachedNotionClient)
 
-  logDebug("getPagesRecursively", JSON.stringify(pages, null, 2))
+  // // Demo of fetching with root database
+  // const response = await cachedNotionClient.databases.query({
+  //   database_id: rootPageUUID,
+  // })
+  // const pagesPromises = response.results.map((page) => {
+  //   const notionPage = fromPageId("", page.id, 0, true)
+  //   return notionPage
+  // })
+  // await Promise.all(pagesPromises).then((results) => {
+  //   results.forEach((resultPage) => {
+  //     console.log(resultPage)
+  //     pages.push(resultPage)
+  //   })
+  // })
+
+  // ---- Markdown conversion and writing to files ----
+  await getPagesRecursively(options, "", rootPageUUID, 0, true)
+
   // Save pages to a json file
+  await saveDataToJson(
+    blocksChildrenCache,
+    options.markdownOutputPath.replace(/\/+$/, "") +
+      "/.cache/" +
+      "block_children_cache.json"
+  )
+  await saveDataToJson(
+    databaseChildrenCache,
+    options.markdownOutputPath.replace(/\/+$/, "") +
+      "/.cache/" +
+      "database_children_cache.json"
+  )
   await saveDataToJson(
     objectsCache,
     options.markdownOutputPath.replace(/\/+$/, "") +
@@ -410,8 +434,7 @@ async function getPagesRecursively(
   }
   // a normal outline page that exists just to create the level, pointing at database pages that belong in this level
   else if (
-    // TODO: This is disabled because instead page links are handled in the db
-    // pageInfo.linksPageIdsAndOrder.length ||
+    pageInfo.linksPageIdsAndOrder.length ||
     pageInfo.childPageIdsAndOrder.length
   ) {
     let layoutContext = incomingContext
@@ -434,17 +457,16 @@ async function getPagesRecursively(
       )
     }
 
-    // TODO: This is disabled because instead page links are handled in the db
-    // for (const linkPageInfo of pageInfo.linksPageIdsAndOrder) {
-    //   pages.push(
-    //     await fromPageId(
-    //       layoutContext,
-    //       linkPageInfo.id,
-    //       linkPageInfo.order,
-    //       false
-    //     )
-    //   )
-    // }
+    for (const linkPageInfo of pageInfo.linksPageIdsAndOrder) {
+      pages.push(
+        await fromPageId(
+          layoutContext,
+          linkPageInfo.id,
+          linkPageInfo.order,
+          false
+        )
+      )
+    }
   } else {
     console.info(
       warning(
@@ -551,6 +573,10 @@ export function initNotionClient(notionToken: string): Client {
     auth: notionToken,
   })
   return notionClient
+}
+
+function updateNotionClient(client: Client) {
+  notionClient = client
 }
 async function fromPageId(
   context: string,
