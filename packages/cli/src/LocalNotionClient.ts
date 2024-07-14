@@ -9,6 +9,7 @@ import {
   ListBlockChildrenParameters,
   ListBlockChildrenResponse,
   QueryDatabaseParameters,
+  QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
 import {
@@ -74,7 +75,7 @@ export class LocalNotionClient extends Client {
       return this.notionClient.databases.retrieve(args)
     },
 
-    query: (args: QueryDatabaseParameters): Promise<GetDatabaseResponse> => {
+    query: (args: QueryDatabaseParameters): Promise<QueryDatabaseResponse> => {
       return this.notionClient.databases.query(args)
     },
   }
