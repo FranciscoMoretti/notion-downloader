@@ -30,6 +30,7 @@ import {
   NotionDatabaseObjectsCache,
   NotionPageObjectsCache,
 } from "./notion-structures-types"
+import { saveDataToJson } from "./utils"
 
 export class LocalNotionClient extends Client {
   databaseChildrenCache: DatabaseChildrenCache
@@ -38,6 +39,17 @@ export class LocalNotionClient extends Client {
   databaseObjectsCache: NotionDatabaseObjectsCache
   blockObjectsCache: NotionBlockObjectsCache
   notionClient: Client
+
+  private readonly blockChildrenCacheFilename = "block_children_cache.json"
+
+  private readonly databaseChildrenCacheFilename =
+    "database_children_cache.json"
+
+  private readonly pageObjectsCacheFilename = "page_objects_cache.json"
+
+  private readonly databaseObjectsCacheFilename = "database_objects_cache.json"
+
+  private readonly blocksObjectsCacheFilename = "block_objects_cache.json"
 
   constructor({
     auth,
@@ -258,5 +270,49 @@ export class LocalNotionClient extends Client {
         return response
       })
     },
+  }
+
+  saveCacheToDir = ({
+    cacheDir,
+  }: {
+    // TODO: Add options to save only part of cache
+    cacheDir: string
+  }) => {
+    const promises = []
+    promises.push(
+      saveDataToJson(
+        this.blocksChildrenCache,
+        cacheDir + this.blockChildrenCacheFilename
+      )
+    )
+
+    promises.push(
+      saveDataToJson(
+        this.databaseChildrenCache,
+        cacheDir + this.databaseChildrenCacheFilename
+      )
+    )
+
+    promises.push(
+      saveDataToJson(
+        this.pageObjectsCache,
+        cacheDir + this.pageObjectsCacheFilename
+      )
+    )
+
+    promises.push(
+      saveDataToJson(
+        this.databaseObjectsCache,
+        cacheDir + this.databaseObjectsCacheFilename
+      )
+    )
+
+    promises.push(
+      saveDataToJson(
+        this.blockObjectsCache,
+        cacheDir + this.blocksObjectsCacheFilename
+      )
+    )
+    return Promise.all(promises)
   }
 }

@@ -37,7 +37,7 @@ import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
 import { NotionBlock } from "./types"
-import { convertToUUID } from "./utils"
+import { convertToUUID, saveDataToJson } from "./utils"
 
 type ImageFileNameFormat = "default" | "content-hash" | "legacy"
 export type DocuNotionOptions = {
@@ -176,40 +176,9 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   await getPagesRecursively(options, "", rootPageUUID, 0, true)
 
   // Save pages to a json file
-  await saveDataToJson(
-    cachedNotionClient.blocksChildrenCache,
-    options.markdownOutputPath.replace(/\/+$/, "") +
-      "/.cache/" +
-      "block_children_cache.json"
-  )
-
-  await saveDataToJson(
-    cachedNotionClient.databaseChildrenCache,
-    options.markdownOutputPath.replace(/\/+$/, "") +
-      "/.cache/" +
-      "database_children_cache.json"
-  )
-
-  await saveDataToJson(
-    cachedNotionClient.pageObjectsCache,
-    options.markdownOutputPath.replace(/\/+$/, "") +
-      "/.cache/" +
-      "page_objects_cache.json"
-  )
-
-  await saveDataToJson(
-    cachedNotionClient.databaseObjectsCache,
-    options.markdownOutputPath.replace(/\/+$/, "") +
-      "/.cache/" +
-      "database_objects_cache.json"
-  )
-
-  await saveDataToJson(
-    cachedNotionClient.blockObjectsCache,
-    options.markdownOutputPath.replace(/\/+$/, "") +
-      "/.cache/" +
-      "block_objects_cache.json"
-  )
+  await notionClient.saveCacheToDir({
+    cacheDir: options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/",
+  })
 
   await saveDataToJson(
     objectsTree,
@@ -233,11 +202,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   await layoutStrategy.cleanupOldFiles()
   await cleanupOldImages()
   endGroup()
-}
-
-async function saveDataToJson(data: any, filename: string) {
-  const json = JSON.stringify(data, null, 2)
-  await fs.writeFile(filename, json)
 }
 
 async function outputPages(
@@ -463,7 +427,7 @@ function writePage(page: NotionPage, finalMarkdown: string) {
   ++counts.output_normally
 }
 
-let notionClient: Client
+let notionClient: LocalNotionClient
 
 async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   // we can only get so many responses per call, so we set this to
@@ -521,7 +485,7 @@ export function initNotionClient(notionToken: string): Client {
   return notionClient
 }
 
-function updateNotionClient(client: Client) {
+function updateNotionClient(client: LocalNotionClient) {
   notionClient = client
 }
 async function fromPageId(
