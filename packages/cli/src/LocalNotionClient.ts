@@ -21,6 +21,7 @@ import {
   QueryDatabaseParameters,
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import fs from "fs-extra"
 
 import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import {
@@ -270,6 +271,36 @@ export class LocalNotionClient extends Client {
         return response
       })
     },
+  }
+
+  private loadDataFromJson = (filePath: string) => {
+    if (fs.existsSync(filePath)) {
+      const jsonData = fs.readFileSync(filePath, "utf8")
+      return JSON.parse(jsonData)
+    }
+    return undefined
+  }
+
+  loadCacheFromDir = ({
+    cacheDir,
+  }: {
+    // TODO: Add options to load only part of cache
+    cacheDir: string
+  }) => {
+    this.blocksChildrenCache =
+      this.loadDataFromJson(cacheDir + this.blockChildrenCacheFilename) || {}
+
+    this.databaseChildrenCache =
+      this.loadDataFromJson(cacheDir + this.databaseChildrenCacheFilename) || {}
+
+    this.pageObjectsCache =
+      this.loadDataFromJson(cacheDir + this.pageObjectsCacheFilename) || {}
+
+    this.databaseObjectsCache =
+      this.loadDataFromJson(cacheDir + this.databaseObjectsCacheFilename) || {}
+
+    this.blockObjectsCache =
+      this.loadDataFromJson(cacheDir + this.blocksObjectsCacheFilename) || {}
   }
 
   saveCacheToDir = ({

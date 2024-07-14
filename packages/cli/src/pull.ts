@@ -88,6 +88,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   // TODO: HACK: until we can add the notion token to the config
   options.statusTag = "Published"
+  const CACHE_DIR = options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/"
 
   const regularNotionClient = initNotionClient(options.notionToken)
   notionToMarkdown = new NotionToMarkdown({ notionClient: regularNotionClient })
@@ -109,6 +110,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   const cachedNotionClient = new LocalNotionClient({
     auth: options.notionToken,
   })
+
+  cachedNotionClient.loadCacheFromDir({ cacheDir: CACHE_DIR })
 
   updateNotionClient(cachedNotionClient)
 
@@ -177,19 +180,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   // Save pages to a json file
   await notionClient.saveCacheToDir({
-    cacheDir: options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/",
+    cacheDir: CACHE_DIR,
   })
 
-  await saveDataToJson(
-    objectsTree,
-    options.markdownOutputPath.replace(/\/+$/, "") +
-      "/.cache/" +
-      "object_tree.json"
-  )
-  await saveDataToJson(
-    pages,
-    options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/" + "pages.json"
-  )
+  await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
+  await saveDataToJson(pages, CACHE_DIR + "pages.json")
 
   info(`Found ${pages.length} pages`)
   endGroup()
