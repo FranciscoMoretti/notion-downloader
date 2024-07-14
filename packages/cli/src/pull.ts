@@ -155,6 +155,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     objectsTree: objectsTree,
     objectsCache: objectsCache,
     databaseChildrenCache: databaseChildrenCache,
+    blocksChildrenCache: blocksChildrenCache,
     auth: options.notionToken,
   })
 
