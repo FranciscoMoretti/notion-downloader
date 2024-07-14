@@ -17,6 +17,7 @@ import {
 import fs from "fs-extra"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
+import { B } from "vitest/dist/reporters-yx5ZTtEV"
 
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
@@ -27,6 +28,7 @@ import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, logDebug, verbose, warning } from "./log"
 import {
+  BlocksChildrenCache,
   DatabaseChildrenCache,
   NotionObjectTreeNode,
   NotionObjectsCache,
@@ -128,6 +130,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   const objectsCache: NotionObjectsCache = {}
   const databaseChildrenCache: DatabaseChildrenCache = {}
+  const blocksChildrenCache: BlocksChildrenCache = {}
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
   const objectsTree: NotionObjectTreeNode = {
     id: rootPageUUID,
@@ -140,7 +143,12 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
   // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
   // await getPagesRecursively(options, "", options.rootPage, 0, true)
-  await fetchTreeRecursively(objectsTree, objectsCache, databaseChildrenCache)
+  await fetchTreeRecursively(
+    objectsTree,
+    objectsCache,
+    databaseChildrenCache,
+    blocksChildrenCache
+  )
 
   // Database to pages array
   const cachedNotionClient = new LocalNotionClient({
@@ -268,7 +276,8 @@ async function outputPages(
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
   objectsCache: NotionObjectsCache,
-  databaseChildrenCache: DatabaseChildrenCache
+  databaseChildrenCache: DatabaseChildrenCache,
+  blocksChildrenCache: BlocksChildrenCache
   // TODO: add second argument to store responses from blocks and pages
 ) {
   info(
@@ -300,7 +309,12 @@ async function fetchTreeRecursively(
       }
 
       objectNode.children.push(newNode)
-      await fetchTreeRecursively(newNode, objectsCache, databaseChildrenCache)
+      await fetchTreeRecursively(
+        newNode,
+        objectsCache,
+        databaseChildrenCache,
+        blocksChildrenCache
+      )
     }
   } else if (
     objectNode.object === "page" ||
@@ -308,6 +322,9 @@ async function fetchTreeRecursively(
     (objectNode.object === "block" && objectNode.has_children)
   ) {
     const blocksResponse = await listBlockChildren(objectNode.id)
+    blocksChildrenCache[objectNode.id] = {
+      children: blocksResponse.results.map((child) => child.id),
+    }
     for (const childBlock of blocksResponse.results) {
       if (!isFullBlock(childBlock)) {
         throw new Error(`Non full block: ${JSON.stringify(childBlock)}`)
@@ -328,7 +345,12 @@ async function fetchTreeRecursively(
         childBlock.has_children
       ) {
         // Recurse if page or database (with children)
-        await fetchTreeRecursively(newNode, objectsCache, databaseChildrenCache)
+        await fetchTreeRecursively(
+          newNode,
+          objectsCache,
+          databaseChildrenCache,
+          blocksChildrenCache
+        )
       }
     }
   }

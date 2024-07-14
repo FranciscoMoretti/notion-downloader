@@ -1,5 +1,7 @@
 import { Client } from "@notionhq/client"
 import {
+  BlockObjectRequest,
+  BlockObjectResponse,
   DatabaseObjectResponse,
   GetBlockParameters,
   GetBlockResponse,
@@ -15,6 +17,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 
 import {
+  BlocksChildrenCache,
   DatabaseChildrenCache,
   NotionObjectTreeNode,
   NotionObjectsCache,
@@ -24,17 +27,20 @@ export class LocalNotionClient extends Client {
   objectsCache: NotionObjectsCache
   objectsTree: NotionObjectTreeNode
   databaseChildrenCache: DatabaseChildrenCache
+  blocksChildrenCache: BlocksChildrenCache
   notionClient: Client
 
   constructor({
     objectsCache,
     objectsTree,
     databaseChildrenCache,
+    blocksChildrenCache,
     auth,
   }: {
     objectsCache: NotionObjectsCache
     objectsTree: NotionObjectTreeNode
     databaseChildrenCache: DatabaseChildrenCache
+    blocksChildrenCache: BlocksChildrenCache
     auth: string
   }) {
     super({
@@ -43,6 +49,7 @@ export class LocalNotionClient extends Client {
     this.objectsCache = objectsCache
     this.objectsTree = objectsTree
     this.databaseChildrenCache = databaseChildrenCache
+    this.blocksChildrenCache = blocksChildrenCache
     this.notionClient = new Client({ auth })
   }
 
@@ -52,7 +59,17 @@ export class LocalNotionClient extends Client {
      * Retrieve block
      */
     retrieve: (args: GetBlockParameters): Promise<GetBlockResponse> => {
+      // Check if we have it in cache
+      if (this.objectsCache[args.block_id]) {
+        // We have it in cache
+        // TODO: Do type narrowing and validation instead of casting
+        console.log("Retrieved block from cache")
+        return Promise.resolve(
+          this.objectsCache[args.block_id] as GetBlockResponse
+        )
+      }
       return this.notionClient.blocks.retrieve(args)
+      // TODO: Add saving to cache here
     },
 
     /**
@@ -62,7 +79,34 @@ export class LocalNotionClient extends Client {
       list: (
         args: ListBlockChildrenParameters
       ): Promise<ListBlockChildrenResponse> => {
+        // Check if we have it in cache
+        if (this.blocksChildrenCache[args.block_id]) {
+          // We have it in cache
+          const childrenIds = this.blocksChildrenCache[args.block_id].children
+          const results = childrenIds
+            .map((id) => this.objectsCache[id])
+            .filter(Boolean) as BlockObjectResponse[]
+          if (results.length !== childrenIds.length) {
+            console.log(`LocalNotionClient: Block children not found in cache.`)
+            throw Error(
+              "Inconsistent state: Block children not found in cache."
+            )
+          }
+
+          const response: ListBlockChildrenResponse = {
+            type: "block",
+            block: {},
+            object: "list",
+            next_cursor: null,
+            has_more: false,
+            results: results,
+          }
+          console.log("Retrieved block children query from cache")
+          return Promise.resolve(response)
+        }
+        // Fallback to calling API
         return this.notionClient.blocks.children.list(args)
+        // TODO: Add saving to cache here
       },
     },
   }
@@ -73,7 +117,17 @@ export class LocalNotionClient extends Client {
      * Retrieve page
      */
     retrieve: (args: GetPageParameters): Promise<GetPageResponse> => {
+      // Check if we have it in cache
+      if (this.objectsCache[args.page_id]) {
+        // We have it in cache
+        // TODO: Do type narrowing and validation instead of casting
+        console.log("Retrieved page from cache")
+        return Promise.resolve(
+          this.objectsCache[args.page_id] as GetPageResponse
+        )
+      }
       return this.notionClient.pages.retrieve(args)
+      // TODO: Add saving to cache here
     },
   }
 
@@ -112,12 +166,12 @@ export class LocalNotionClient extends Client {
           has_more: false,
           results: results,
         }
-
+        console.log("Retrieved database query from cache")
         return Promise.resolve(response)
       }
       // Fallback to calling API
       return this.notionClient.databases.query(args)
-      // TODO: Add saving to database here
+      // TODO: Add saving to cache here
     },
   }
 }

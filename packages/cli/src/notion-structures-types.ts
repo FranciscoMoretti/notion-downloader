@@ -18,6 +18,13 @@ export type NotionObjectTreeNode =
       children: Array<NotionObjectTreeNode>
     }
 
+export type BlocksChildrenCache = Record<
+  string,
+  {
+    children: string[]
+  }
+>
+
 export type DatabaseChildrenCache = Record<
   string,
   {
