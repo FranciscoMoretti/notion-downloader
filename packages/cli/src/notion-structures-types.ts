@@ -17,6 +17,14 @@ export type NotionObjectTreeNode =
       has_children: boolean
       children: Array<NotionObjectTreeNode>
     }
+
+export type DatabaseChildrenCache = Record<
+  string,
+  {
+    children: string[]
+  }
+>
+
 export type NotionObjectsCache = Record<
   string,
   PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse

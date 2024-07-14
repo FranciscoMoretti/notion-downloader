@@ -20,12 +20,14 @@ import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
+import { LocalNotionClient } from "./LocalNotionClient"
 import { NotionPage, PageType, getPageContentInfo } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, logDebug, verbose, warning } from "./log"
 import {
+  DatabaseChildrenCache,
   NotionObjectTreeNode,
   NotionObjectsCache,
 } from "./notion-structures-types"
@@ -33,6 +35,7 @@ import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
 import { NotionBlock } from "./types"
+import { convertToUUID } from "./utils"
 
 type ImageFileNameFormat = "default" | "content-hash" | "legacy"
 export type DocuNotionOptions = {
@@ -72,6 +75,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   // TODO: This should be moved up to the pull command that already loads configs
   const config = await loadConfigAsync()
+  const rootPageUUID = convertToUUID(options.rootPage)
 
   verbose(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
   await initImageHandling(
@@ -83,8 +87,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // TODO: HACK: until we can add the notion token to the config
   options.statusTag = "Published"
 
-  const notionClient = initNotionClient(options.notionToken)
-  notionToMarkdown = new NotionToMarkdown({ notionClient })
+  const regularNotionClient = initNotionClient(options.notionToken)
+  notionToMarkdown = new NotionToMarkdown({ notionClient: regularNotionClient })
 
   layoutStrategy = new HierarchicalNamedLayoutStrategy()
 
@@ -103,17 +107,15 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // TODO: Get root page, which can be DB or can be single page
   try {
     if (options.rootIsDb) {
-      await retrieveDatabase(options.rootPage)
+      await retrieveDatabase(rootPageUUID)
     } else {
       await executeWithRateLimitAndRetries("retrieving root page", async () => {
-        await notionClient.pages.retrieve({ page_id: options.rootPage })
+        await regularNotionClient.pages.retrieve({ page_id: rootPageUUID })
       })
     }
   } catch (e: any) {
     error(
-      `docu-notion could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${
-        options.rootPage
-      }".\r\nb) Check that your Notion API token (the "Integration Secret") is correct. It starts with "${
+      `docu-notion could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${rootPageUUID}".\r\nb) Check that your Notion API token (the "Integration Secret") is correct. It starts with "${
         optionsForLogging.notionToken
       }".\r\nc) Check that your root page includes your "integration" in its "connections".\r\nThis internal error message may help:\r\n    ${
         e.message as string
@@ -124,10 +126,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     exit(1)
   }
 
-  const objectCache = {}
+  const objectsCache: NotionObjectsCache = {}
+  const databaseChildrenCache: DatabaseChildrenCache = {}
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
   const objectsTree: NotionObjectTreeNode = {
-    id: options.rootPage,
+    id: rootPageUUID,
     object: options.rootIsDb ? "database" : "page",
     children: [],
   }
@@ -137,25 +140,35 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
   // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
   // await getPagesRecursively(options, "", options.rootPage, 0, true)
-  await fetchTreeRecursively(objectsTree, objectCache)
+  await fetchTreeRecursively(objectsTree, objectsCache, databaseChildrenCache)
 
   // Database to pages array
+  const cachedNotionClient = new LocalNotionClient({
+    objectsTree: objectsTree,
+    objectsCache: objectsCache,
+    databaseChildrenCache: databaseChildrenCache,
+    auth: options.notionToken,
+  })
+
   // TODO: Save page metadata and content while fetching
-  // const pagesPromises = firstResponse.results.map((page: GetPageResponse) => {
-  //   const notionPage = fromPageId("", page.id, 0, true)
-  //   return notionPage
-  // })
-  // await Promise.all(pagesPromises).then((results) => {
-  //   results.forEach((resultPage) => {
-  //     console.log(resultPage)
-  //     pages.push(resultPage)
-  //   })
-  // })
+  const response = await cachedNotionClient.databases.query({
+    database_id: rootPageUUID,
+  })
+  const pagesPromises = response.results.map((page) => {
+    const notionPage = fromPageId("", page.id, 0, true)
+    return notionPage
+  })
+  await Promise.all(pagesPromises).then((results) => {
+    results.forEach((resultPage) => {
+      console.log(resultPage)
+      pages.push(resultPage)
+    })
+  })
 
   logDebug("getPagesRecursively", JSON.stringify(pages, null, 2))
   // Save pages to a json file
   await saveDataToJson(
-    objectCache,
+    objectsCache,
     options.markdownOutputPath.replace(/\/+$/, "") +
       "/.cache/" +
       "objects_cache.json"
@@ -254,7 +267,8 @@ async function outputPages(
 
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
-  objectsCache: NotionObjectsCache
+  objectsCache: NotionObjectsCache,
+  databaseChildrenCache: DatabaseChildrenCache
   // TODO: add second argument to store responses from blocks and pages
 ) {
   info(
@@ -267,6 +281,10 @@ async function fetchTreeRecursively(
   ) {
     // TODO: Decide how to process a child_database block that also has children.
     const databaseResponse = await queryDatabase(objectNode.id)
+
+    databaseChildrenCache[objectNode.id] = {
+      children: databaseResponse.results.map((child) => child.id),
+    }
 
     for (const childObject of databaseResponse.results) {
       if (childObject.object == "database" && !isFullDatabase(childObject)) {
@@ -282,7 +300,7 @@ async function fetchTreeRecursively(
       }
 
       objectNode.children.push(newNode)
-      await fetchTreeRecursively(newNode, objectsCache)
+      await fetchTreeRecursively(newNode, objectsCache, databaseChildrenCache)
     }
   } else if (
     objectNode.object === "page" ||
@@ -310,7 +328,7 @@ async function fetchTreeRecursively(
         childBlock.has_children
       ) {
         // Recurse if page or database (with children)
-        await fetchTreeRecursively(newNode, objectsCache)
+        await fetchTreeRecursively(newNode, objectsCache, databaseChildrenCache)
       }
     }
   }

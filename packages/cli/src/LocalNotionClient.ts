@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client"
 import {
+  DatabaseObjectResponse,
   GetBlockParameters,
   GetBlockResponse,
   GetDatabaseParameters,
@@ -8,11 +9,13 @@ import {
   GetPageResponse,
   ListBlockChildrenParameters,
   ListBlockChildrenResponse,
+  PageObjectResponse,
   QueryDatabaseParameters,
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
 import {
+  DatabaseChildrenCache,
   NotionObjectTreeNode,
   NotionObjectsCache,
 } from "./notion-structures-types"
@@ -20,18 +23,26 @@ import {
 export class LocalNotionClient extends Client {
   objectsCache: NotionObjectsCache
   objectsTree: NotionObjectTreeNode
+  databaseChildrenCache: DatabaseChildrenCache
   notionClient: Client
 
-  constructor(
-    objectsCache: NotionObjectsCache,
-    objectsTree: NotionObjectTreeNode,
+  constructor({
+    objectsCache,
+    objectsTree,
+    databaseChildrenCache,
+    auth,
+  }: {
+    objectsCache: NotionObjectsCache
+    objectsTree: NotionObjectTreeNode
+    databaseChildrenCache: DatabaseChildrenCache
     auth: string
-  ) {
+  }) {
     super({
       auth: auth,
     })
     this.objectsCache = objectsCache
     this.objectsTree = objectsTree
+    this.databaseChildrenCache = databaseChildrenCache
     this.notionClient = new Client({ auth })
   }
 
@@ -76,7 +87,37 @@ export class LocalNotionClient extends Client {
     },
 
     query: (args: QueryDatabaseParameters): Promise<QueryDatabaseResponse> => {
+      // Check if we have it in cache
+      if (this.databaseChildrenCache[args.database_id]) {
+        // We have it in cache
+        const childrenIds =
+          this.databaseChildrenCache[args.database_id].children
+        const results = childrenIds
+          .map((id) => this.objectsCache[id])
+          .filter(Boolean) as PageObjectResponse[] | DatabaseObjectResponse[]
+        if (results.length !== childrenIds.length) {
+          console.log(
+            `LocalNotionClient: Database children not found in cache.`
+          )
+          throw Error(
+            "Inconsistent state: Database children not found in cache."
+          )
+        }
+
+        const response: QueryDatabaseResponse = {
+          type: "page_or_database",
+          page_or_database: {},
+          object: "list",
+          next_cursor: null,
+          has_more: false,
+          results: results,
+        }
+
+        return Promise.resolve(response)
+      }
+      // Fallback to calling API
       return this.notionClient.databases.query(args)
+      // TODO: Add saving to database here
     },
   }
 }
