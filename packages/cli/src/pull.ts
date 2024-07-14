@@ -498,6 +498,7 @@ async function queryDatabase(
   args: QueryDatabaseParameters
 ): Promise<QueryDatabaseResponse> {
   // TODO: Query on a while loop until no more pages available
+  // TODO: Handle case in which options are used
   return await executeWithRateLimitAndRetries(
     `database.query(${args?.database_id})`,
     () => {

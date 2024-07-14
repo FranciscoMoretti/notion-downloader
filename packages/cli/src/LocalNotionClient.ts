@@ -1,4 +1,10 @@
-import { Client } from "@notionhq/client"
+import {
+  Client,
+  isFullBlock,
+  isFullDatabase,
+  isFullPage,
+  isFullPageOrDatabase,
+} from "@notionhq/client"
 import {
   BlockObjectRequest,
   BlockObjectResponse,
@@ -16,6 +22,7 @@ import {
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
+import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import {
   BlocksChildrenCache,
   DatabaseChildrenCache,
@@ -70,8 +77,20 @@ export class LocalNotionClient extends Client {
         )
       }
       console.log("Cache miss for block", args.block_id)
-      return this.notionClient.blocks.retrieve(args)
-      // TODO: Add saving to cache here
+      return executeWithRateLimitAndRetries(
+        `blocks.retrieve(${args.block_id})`,
+        () => {
+          return this.notionClient.blocks.retrieve(args)
+        }
+      ).then((response) => {
+        // Saving to cache here
+        console.log("Saving to cache block", args.block_id)
+        if (!isFullBlock(response)) {
+          throw Error(`Non full page: ${JSON.stringify(response)}`)
+        }
+        this.objectsCache[args.block_id] = response
+        return response
+      })
     },
 
     /**
@@ -108,8 +127,28 @@ export class LocalNotionClient extends Client {
         }
         // Fallback to calling API
         console.log("Cache miss for block children", args.block_id)
-        return this.notionClient.blocks.children.list(args)
-        // TODO: Add saving to cache here
+        // TODO: Query on a while loop until no more pages available
+
+        // TODO: Handle case in which options are used
+        return executeWithRateLimitAndRetries(
+          `blocks.children.list(${args.block_id})`,
+          () => {
+            return this.notionClient.blocks.children.list(args)
+          }
+        ).then((response) => {
+          // Saving to cache here
+          console.log("Saving to cache block", args.block_id)
+          this.blocksChildrenCache[args.block_id] = {
+            children: response.results.map((child) => child.id),
+          }
+          response.results.forEach((child) => {
+            if (!isFullBlock(child)) {
+              throw Error(`Non full block: ${JSON.stringify(response)}`)
+            }
+            this.objectsCache[child.id] = child
+          })
+          return response
+        })
       },
     },
   }
@@ -130,8 +169,20 @@ export class LocalNotionClient extends Client {
         )
       }
       console.log("Cache miss for page", args.page_id)
-      return this.notionClient.pages.retrieve(args)
-      // TODO: Add saving to cache here
+      return executeWithRateLimitAndRetries(
+        `pages.retrieve(${args.page_id})`,
+        () => {
+          return this.notionClient.pages.retrieve(args)
+        }
+      ).then((response) => {
+        // Saving to cache here
+        console.log("Saving to cache page", args.page_id)
+        if (!isFullPage(response)) {
+          throw Error(`Non full page: ${JSON.stringify(response)}`)
+        }
+        this.objectsCache[args.page_id] = response
+        return response
+      })
     },
   }
 
@@ -174,9 +225,31 @@ export class LocalNotionClient extends Client {
         return Promise.resolve(response)
       }
       // Fallback to calling API
-      console.log("Cache for database query", args.database_id)
-      return this.notionClient.databases.query(args)
-      // TODO: Add saving to cache here
+      console.log("Cache miss for database query", args.database_id)
+      // TODO: Query on a while loop until no more pages available
+
+      // TODO: Handle case in which options are used
+      return executeWithRateLimitAndRetries(
+        `database.query(${args.database_id})`,
+        () => {
+          return this.notionClient.databases.query(args)
+        }
+      ).then((response) => {
+        // Saving to database children cache
+        this.databaseChildrenCache[args.database_id] = {
+          children: response.results.map((child) => child.id),
+        }
+        response.results.forEach((child) => {
+          if (!isFullPageOrDatabase(child)) {
+            throw new Error(
+              `Non full page or database: ${JSON.stringify(child)}`
+            )
+          }
+          // Saving to objects cache
+          this.objectsCache[child.id] = child
+        })
+        return response
+      })
     },
   }
 }
