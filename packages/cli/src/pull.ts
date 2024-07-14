@@ -286,16 +286,16 @@ async function fetchTreeRecursively(
     const databaseResponse = await queryDatabase(objectNode.id)
 
     for (const childObject of databaseResponse.results) {
+      if (childObject.object == "database" && !isFullDatabase(childObject)) {
+        throw new Error(`Non full database: ${JSON.stringify(childObject)}`)
+      } else if (childObject.object == "page" && !isFullPage(childObject)) {
+        throw new Error(`Non full page: ${JSON.stringify(childObject)}`)
+      }
+      objectsCache[childObject.id] = childObject
       const newNode: NotionObjectTreeNode = {
         id: childObject.id,
         object: childObject.object,
         children: [],
-      }
-      // Save object to cache
-      if (childObject.object == "database" && isFullDatabase(childObject)) {
-        objectsCache[childObject.id] = childObject
-      } else if (childObject.object == "page" && isFullPage(childObject)) {
-        objectsCache[childObject.id] = childObject
       }
 
       objectNode.children.push(newNode)
@@ -306,9 +306,11 @@ async function fetchTreeRecursively(
     (objectNode.object === "block" && objectNode.type === "child_page") ||
     (objectNode.object === "block" && objectNode.has_children)
   ) {
-    // TODO: Fix the inconsistency. In the block case, the non-full object response is handled in getBlockChildren()
-    const blocksResponse = await getBlockChildren(objectNode.id)
-    for (const childBlock of blocksResponse) {
+    const blocksResponse = await listBlockChildren(objectNode.id)
+    for (const childBlock of blocksResponse.results) {
+      if (!isFullBlock(childBlock)) {
+        throw new Error(`Non full block: ${JSON.stringify(childBlock)}`)
+      }
       objectsCache[childBlock.id] = childBlock
       const newNode: NotionObjectTreeNode = {
         id: childBlock.id,
@@ -477,6 +479,15 @@ async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   // we can only get so many responses per call, so we set this to
   // the first response we get, then keep adding to its array of blocks
   // with each subsequent response
+  let overallResult: ListBlockChildrenResponse | undefined =
+    await listBlockChildren(id)
+
+  const result = (overallResult?.results as BlockObjectResponse[]) ?? []
+  // TODO - rething if this numbering should be part of the downloading part of the app, or of the processing part
+  numberChildrenIfNumberedList(result)
+  return result
+}
+async function listBlockChildren(id: string) {
   let overallResult: ListBlockChildrenResponse | undefined = undefined
   let start_cursor: string | undefined | null = undefined
 
@@ -502,16 +513,13 @@ async function getBlockChildren(id: string): Promise<NotionBlock[]> {
 
   if (overallResult?.results?.some((b) => !isFullBlock(b))) {
     error(
-      `The Notion API returned some blocks that were not full blocks. docu-notion does not handle this yet. Please report it.`
+      `The Notion API returned some blocks that were not full blocks. Notion downloader does not handle this yet. Please report it.`
     )
     exit(1)
   }
-
-  const result = (overallResult?.results as BlockObjectResponse[]) ?? []
-  // TODO - rething if this numbering should be part of the downloading part of the app, or of the processing part
-  numberChildrenIfNumberedList(result)
-  return result
+  return overallResult
 }
+
 export function initNotionClient(notionToken: string): Client {
   notionClient = new Client({
     auth: notionToken,
