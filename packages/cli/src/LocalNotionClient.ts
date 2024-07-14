@@ -26,24 +26,31 @@ import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries
 import {
   BlocksChildrenCache,
   DatabaseChildrenCache,
-  NotionObjectTreeNode,
-  NotionObjectsCache,
+  NotionBlockObjectsCache,
+  NotionDatabaseObjectsCache,
+  NotionPageObjectsCache,
 } from "./notion-structures-types"
 
 export class LocalNotionClient extends Client {
-  objectsCache: NotionObjectsCache
   databaseChildrenCache: DatabaseChildrenCache
   blocksChildrenCache: BlocksChildrenCache
+  pageObjectsCache: NotionPageObjectsCache
+  databaseObjectsCache: NotionDatabaseObjectsCache
+  blockObjectsCache: NotionBlockObjectsCache
   notionClient: Client
 
   constructor({
     auth,
-    objectsCache,
+    pageObjectsCache,
+    databaseObjectsCache,
+    blockObjectsCache,
     databaseChildrenCache,
     blocksChildrenCache,
   }: {
     auth: string
-    objectsCache?: NotionObjectsCache
+    pageObjectsCache?: NotionPageObjectsCache
+    databaseObjectsCache?: NotionDatabaseObjectsCache
+    blockObjectsCache?: NotionBlockObjectsCache
     databaseChildrenCache?: DatabaseChildrenCache
     blocksChildrenCache?: BlocksChildrenCache
   }) {
@@ -51,9 +58,11 @@ export class LocalNotionClient extends Client {
       auth: auth,
     })
     this.notionClient = new Client({ auth })
-    this.objectsCache = objectsCache || {}
     this.databaseChildrenCache = databaseChildrenCache || {}
     this.blocksChildrenCache = blocksChildrenCache || {}
+    this.pageObjectsCache = pageObjectsCache || {}
+    this.databaseObjectsCache = databaseObjectsCache || {}
+    this.blockObjectsCache = blockObjectsCache || {}
   }
   // TODO: Split object caches into page/block/database objects caches
 
@@ -64,12 +73,12 @@ export class LocalNotionClient extends Client {
      */
     retrieve: (args: GetBlockParameters): Promise<GetBlockResponse> => {
       // Check if we have it in cache
-      if (this.objectsCache[args.block_id]) {
+      if (this.blockObjectsCache[args.block_id]) {
         // We have it in cache
         // TODO: Do type narrowing and validation instead of casting
         console.log("Retrieved block from cache")
         return Promise.resolve(
-          this.objectsCache[args.block_id] as GetBlockResponse
+          this.blockObjectsCache[args.block_id] as GetBlockResponse
         )
       }
       console.log("Cache miss for block", args.block_id)
@@ -84,7 +93,7 @@ export class LocalNotionClient extends Client {
         if (!isFullBlock(response)) {
           throw Error(`Non full page: ${JSON.stringify(response)}`)
         }
-        this.objectsCache[args.block_id] = response
+        this.blockObjectsCache[args.block_id] = response
         return response
       })
     },
@@ -101,7 +110,7 @@ export class LocalNotionClient extends Client {
           // We have it in cache
           const childrenIds = this.blocksChildrenCache[args.block_id].children
           const results = childrenIds
-            .map((id) => this.objectsCache[id])
+            .map((id) => this.blockObjectsCache[id])
             .filter(Boolean) as BlockObjectResponse[]
           if (results.length !== childrenIds.length) {
             console.log(`LocalNotionClient: Block children not found in cache.`)
@@ -141,7 +150,7 @@ export class LocalNotionClient extends Client {
             if (!isFullBlock(child)) {
               throw Error(`Non full block: ${JSON.stringify(response)}`)
             }
-            this.objectsCache[child.id] = child
+            this.blockObjectsCache[child.id] = child
           })
           return response
         })
@@ -156,13 +165,9 @@ export class LocalNotionClient extends Client {
      */
     retrieve: (args: GetPageParameters): Promise<GetPageResponse> => {
       // Check if we have it in cache
-      if (this.objectsCache[args.page_id]) {
-        // We have it in cache
-        // TODO: Do type narrowing and validation instead of casting
+      if (this.pageObjectsCache[args.page_id]) {
         console.log("Retrieved page from cache")
-        return Promise.resolve(
-          this.objectsCache[args.page_id] as GetPageResponse
-        )
+        return Promise.resolve(this.pageObjectsCache[args.page_id])
       }
       console.log("Cache miss for page", args.page_id)
       return executeWithRateLimitAndRetries(
@@ -176,7 +181,7 @@ export class LocalNotionClient extends Client {
         if (!isFullPage(response)) {
           throw Error(`Non full page: ${JSON.stringify(response)}`)
         }
-        this.objectsCache[args.page_id] = response
+        this.pageObjectsCache[args.page_id] = response
         return response
       })
     },
@@ -198,7 +203,9 @@ export class LocalNotionClient extends Client {
         const childrenIds =
           this.databaseChildrenCache[args.database_id].children
         const results = childrenIds
-          .map((id) => this.objectsCache[id])
+          .map(
+            (id) => this.pageObjectsCache[id] || this.databaseObjectsCache[id]
+          )
           .filter(Boolean) as PageObjectResponse[] | DatabaseObjectResponse[]
         if (results.length !== childrenIds.length) {
           console.log(
@@ -242,7 +249,11 @@ export class LocalNotionClient extends Client {
             )
           }
           // Saving to objects cache
-          this.objectsCache[child.id] = child
+          if (isFullPage(child)) {
+            this.pageObjectsCache[child.id] = child
+          } else {
+            this.databaseObjectsCache[child.id] = child
+          }
         })
         return response
       })

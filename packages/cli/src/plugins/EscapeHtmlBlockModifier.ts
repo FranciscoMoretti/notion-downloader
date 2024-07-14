@@ -1,5 +1,5 @@
-import { NotionBlock } from "../types";
-import { IPlugin } from "./pluginTypes";
+import { NotionBlock } from "../types"
+import { IPlugin } from "./pluginTypes"
 
 export const standardEscapeHtmlBlockModifier: IPlugin = {
   name: "standardEscapeHtmlBlockModifier",
@@ -7,18 +7,18 @@ export const standardEscapeHtmlBlockModifier: IPlugin = {
   notionBlockModifications: [
     {
       modify: (block: NotionBlock) => {
-        escapeHtml(block);
+        escapeHtml(block)
       },
     },
   ],
-};
+}
 
 function escapeHtml(block: NotionBlock): void {
   //console.log("escapeHtml called with\n", JSON.stringify(block, null, 2));
-  const blockContent = (block as any)[block.type]; // e.g. block["paragraph"] gives an array of the strings that make up the paragraph
+  const blockContent = (block as any)[block.type] // e.g. block["paragraph"] gives an array of the strings that make up the paragraph
   if (blockContent.rich_text?.length) {
     for (let i = 0; i < blockContent.rich_text.length; i++) {
-      const rt = blockContent.rich_text[i];
+      const rt = blockContent.rich_text[i]
 
       // See https://github.com/sillsdev/docu-notion/issues/21.
       // For now, we just do a simple replace of < an > with &lt; and &gt;
@@ -38,7 +38,7 @@ function escapeHtml(block: NotionBlock): void {
       ) {
         rt.plain_text = rt.plain_text
           .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;");
+          .replaceAll(">", "&gt;")
       }
     }
   }

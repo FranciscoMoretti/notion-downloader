@@ -32,7 +32,6 @@ export type DatabaseChildrenCache = Record<
   }
 >
 
-export type NotionObjectsCache = Record<
-  string,
-  PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
->
+export type NotionPageObjectsCache = Record<string, PageObjectResponse>
+export type NotionDatabaseObjectsCache = Record<string, DatabaseObjectResponse>
+export type NotionBlockObjectsCache = Record<string, BlockObjectResponse>

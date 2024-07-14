@@ -116,7 +116,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // TODO: Get root page, which can be DB or can be single page
   try {
     if (options.rootIsDb) {
-      await retrieveDatabase(rootPageUUID)
+      await notionClient.databases.retrieve({ database_id: rootPageUUID })
     } else {
       await executeWithRateLimitAndRetries("retrieving root page", async () => {
         await regularNotionClient.pages.retrieve({ page_id: rootPageUUID })
@@ -135,7 +135,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     exit(1)
   }
 
-  const objectsCache: NotionObjectsCache = {}
   const databaseChildrenCache: DatabaseChildrenCache = {}
   const blocksChildrenCache: BlocksChildrenCache = {}
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
@@ -151,11 +150,9 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
   if (!options.rootIsDb) {
     // Fetch first page and save in cache
-    const pageResponse = await getPageRetrieve(rootPageUUID)
-    if (!isFullPage(pageResponse)) {
-      throw Error("Root page must be a full page")
-    }
-    objectsCache[rootPageUUID] = pageResponse
+    await notionClient.pages.retrieve({
+      page_id: rootPageUUID,
+    })
   }
 
   await fetchTreeRecursively(objectsTree)
@@ -176,7 +173,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // })
 
   // ---- Markdown conversion and writing to files ----
-  // await getPagesRecursively(options, "", rootPageUUID, 0, true)
+  await getPagesRecursively(options, "", rootPageUUID, 0, true)
 
   // Save pages to a json file
   await saveDataToJson(
@@ -194,10 +191,24 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
 
   await saveDataToJson(
-    cachedNotionClient.objectsCache,
+    cachedNotionClient.pageObjectsCache,
     options.markdownOutputPath.replace(/\/+$/, "") +
       "/.cache/" +
-      "objects_cache.json"
+      "page_objects_cache.json"
+  )
+
+  await saveDataToJson(
+    cachedNotionClient.databaseObjectsCache,
+    options.markdownOutputPath.replace(/\/+$/, "") +
+      "/.cache/" +
+      "database_objects_cache.json"
+  )
+
+  await saveDataToJson(
+    cachedNotionClient.blockObjectsCache,
+    options.markdownOutputPath.replace(/\/+$/, "") +
+      "/.cache/" +
+      "block_objects_cache.json"
   )
 
   await saveDataToJson(
@@ -302,7 +313,9 @@ async function fetchTreeRecursively(objectNode: NotionObjectTreeNode) {
     (objectNode.object === "block" && objectNode.type === "child_database")
   ) {
     // TODO: Decide how to process a child_database block that also has children.
-    const databaseResponse = await queryDatabase({ database_id: objectNode.id })
+    const databaseResponse = await notionClient.databases.query({
+      database_id: objectNode.id,
+    })
 
     for (const childObject of databaseResponse.results) {
       const newNode: NotionObjectTreeNode = {
@@ -319,7 +332,9 @@ async function fetchTreeRecursively(objectNode: NotionObjectTreeNode) {
     (objectNode.object === "block" && objectNode.type === "child_page") ||
     (objectNode.object === "block" && objectNode.has_children)
   ) {
-    const blocksResponse = await listBlockChildren(objectNode.id)
+    const blocksResponse = await notionClient.blocks.children.list({
+      block_id: objectNode.id,
+    })
     for (const childBlock of blocksResponse.results) {
       if (!isFullBlock(childBlock)) {
         throw new Error(`Non full block: ${JSON.stringify(childBlock)}`)
@@ -450,44 +465,12 @@ function writePage(page: NotionPage, finalMarkdown: string) {
 
 let notionClient: Client
 
-async function getPageRetrieve(id: string): Promise<GetPageResponse> {
-  return await executeWithRateLimitAndRetries(`pages.retrieve(${id})`, () => {
-    return notionClient.pages.retrieve({
-      page_id: id,
-    })
-  })
-}
-
-async function queryDatabase(
-  args: QueryDatabaseParameters
-): Promise<QueryDatabaseResponse> {
-  // TODO: Query on a while loop until no more pages available
-  // TODO: Handle case in which options are used
-  return await executeWithRateLimitAndRetries(
-    `database.query(${args?.database_id})`,
-    () => {
-      return notionClient.databases.query(args)
-    }
-  )
-}
-
-async function retrieveDatabase(id: string): Promise<GetDatabaseResponse> {
-  return await executeWithRateLimitAndRetries(
-    `database.retrieve(${id})`,
-    () => {
-      return notionClient.databases.retrieve({
-        database_id: id,
-      })
-    }
-  )
-}
-
 async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   // we can only get so many responses per call, so we set this to
   // the first response we get, then keep adding to its array of blocks
   // with each subsequent response
   let overallResult: ListBlockChildrenResponse | undefined =
-    await listBlockChildren(id)
+    await notionClient.blocks.children.list({ block_id: id })
 
   const result = (overallResult?.results as BlockObjectResponse[]) ?? []
   // TODO - rething if this numbering should be part of the downloading part of the app, or of the processing part
@@ -501,13 +484,15 @@ async function listBlockChildren(id: string) {
   // Note: there is a now a collectPaginatedAPI() in the notion client, so
   // we could switch to using that (I don't know if it does rate limiting?)
   do {
-    const response: ListBlockChildrenResponse =
-      await executeWithRateLimitAndRetries(`getBlockChildren(${id})`, () => {
+    const response = await executeWithRateLimitAndRetries(
+      `getBlockChildren(${id})`,
+      () => {
         return notionClient.blocks.children.list({
           start_cursor: start_cursor as string | undefined,
           block_id: id,
         })
-      })
+      }
+    )
 
     if (!overallResult) {
       overallResult = response
@@ -545,7 +530,9 @@ async function fromPageId(
   order: number,
   foundDirectlyInOutline: boolean
 ): Promise<NotionPage> {
-  const metadata = await getPageRetrieve(pageId)
+  const metadata = await notionClient.pages.retrieve({
+    page_id: pageId,
+  })
 
   //logDebug("notion metadata", JSON.stringify(metadata));
   return new NotionPage({
