@@ -62,6 +62,7 @@ type NotionObjectTreeNode =
       id: string
       object: "block"
       type: string
+      has_children: boolean
       children: Array<NotionObjectTreeNode>
     }
 
@@ -281,6 +282,7 @@ async function fetchTreeRecursively(
     objectNode.object === "database" ||
     (objectNode.object === "block" && objectNode.type === "child_database")
   ) {
+    // TODO: Decide how to process a child_database block that also has children.
     const databaseResponse = await queryDatabase(objectNode.id)
 
     for (const childObject of databaseResponse.results) {
@@ -301,7 +303,8 @@ async function fetchTreeRecursively(
     }
   } else if (
     objectNode.object === "page" ||
-    (objectNode.object === "block" && objectNode.type === "child_page")
+    (objectNode.object === "block" && objectNode.type === "child_page") ||
+    (objectNode.object === "block" && objectNode.has_children)
   ) {
     // TODO: Fix the inconsistency. In the block case, the non-full object response is handled in getBlockChildren()
     const blocksResponse = await getBlockChildren(objectNode.id)
@@ -311,20 +314,20 @@ async function fetchTreeRecursively(
         id: childBlock.id,
         object: childBlock.object,
         children: [],
+        has_children: childBlock.has_children,
         type: childBlock.type,
       }
       objectNode.children.push(newNode)
       if (
         // TODO: Decide how to handle "mentions" (links to other objects)
         childBlock.type == "child_page" ||
-        childBlock.type == "child_database"
+        childBlock.type == "child_database" ||
+        childBlock.has_children
       ) {
         // Recurse if page or database (with children)
         await fetchTreeRecursively(newNode, objectsCache)
       }
     }
-  } else if (objectNode.object === "block") {
-    // TODO: Decide how to process other nodes
   }
 }
 
