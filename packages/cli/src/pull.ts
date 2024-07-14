@@ -144,7 +144,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
   if (!options.rootIsDb) {
     // Fetch first page and save in cache
-    const pageResponse = await getPageMetadata(rootPageUUID)
+    const pageResponse = await getPageRetrieve(rootPageUUID)
     if (!isFullPage(pageResponse)) {
       throw Error("Root page must be a full page")
     }
@@ -314,7 +314,7 @@ async function fetchTreeRecursively(
     (objectNode.object === "block" && objectNode.type === "child_database")
   ) {
     // TODO: Decide how to process a child_database block that also has children.
-    const databaseResponse = await queryDatabase(objectNode.id)
+    const databaseResponse = await queryDatabase({ database_id: objectNode.id })
 
     databaseChildrenCache[objectNode.id] = {
       children: databaseResponse.results.map((child) => child.id),
@@ -486,7 +486,7 @@ function writePage(page: NotionPage, finalMarkdown: string) {
 
 let notionClient: Client
 
-async function getPageMetadata(id: string): Promise<GetPageResponse> {
+async function getPageRetrieve(id: string): Promise<GetPageResponse> {
   return await executeWithRateLimitAndRetries(`pages.retrieve(${id})`, () => {
     return notionClient.pages.retrieve({
       page_id: id,
@@ -495,17 +495,13 @@ async function getPageMetadata(id: string): Promise<GetPageResponse> {
 }
 
 async function queryDatabase(
-  id: string,
-  parameters?: QueryDatabaseParameters
+  args: QueryDatabaseParameters
 ): Promise<QueryDatabaseResponse> {
   // TODO: Query on a while loop until no more pages available
   return await executeWithRateLimitAndRetries(
-    `database.retrieve(${id})`,
+    `database.query(${args?.database_id})`,
     () => {
-      return notionClient.databases.query({
-        database_id: id,
-        ...parameters,
-      })
+      return notionClient.databases.query(args)
     }
   )
 }
@@ -584,7 +580,7 @@ async function fromPageId(
   order: number,
   foundDirectlyInOutline: boolean
 ): Promise<NotionPage> {
-  const metadata = await getPageMetadata(pageId)
+  const metadata = await getPageRetrieve(pageId)
 
   //logDebug("notion metadata", JSON.stringify(metadata));
   return new NotionPage({
