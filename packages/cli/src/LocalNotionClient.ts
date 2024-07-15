@@ -1,3 +1,4 @@
+import { info } from "console"
 import {
   Client,
   isFullBlock,
@@ -40,6 +41,8 @@ export class LocalNotionClient extends Client {
   databaseObjectsCache: NotionDatabaseObjectsCache
   blockObjectsCache: NotionBlockObjectsCache
   notionClient: Client
+
+  // TODO: Implement better logging (like turbo repo)
 
   private readonly blockChildrenCacheFilename = "block_children_cache.json"
 
@@ -87,14 +90,19 @@ export class LocalNotionClient extends Client {
     retrieve: (args: GetBlockParameters): Promise<GetBlockResponse> => {
       // Check if we have it in cache
       if (this.blockObjectsCache[args.block_id]) {
-        // We have it in cache
-        // TODO: Do type narrowing and validation instead of casting
-        console.log("Retrieved block from cache")
-        return Promise.resolve(
-          this.blockObjectsCache[args.block_id] as GetBlockResponse
-        )
+        this.logCacheMessage({
+          operation: "HIT",
+          cache_type: "block",
+          id: args.block_id,
+        })
+        return Promise.resolve(this.blockObjectsCache[args.block_id])
       }
-      console.log("Cache miss for block", args.block_id)
+
+      this.logCacheMessage({
+        operation: "MISS",
+        cache_type: "block",
+        id: args.block_id,
+      })
       return executeWithRateLimitAndRetries(
         `blocks.retrieve(${args.block_id})`,
         () => {
@@ -102,7 +110,11 @@ export class LocalNotionClient extends Client {
         }
       ).then((response) => {
         // Saving to cache here
-        console.log("Saving to cache block", args.block_id)
+        this.logCacheMessage({
+          operation: "SAVE",
+          cache_type: "block",
+          id: args.block_id,
+        })
         if (!isFullBlock(response)) {
           throw Error(`Non full page: ${JSON.stringify(response)}`)
         }
@@ -121,15 +133,18 @@ export class LocalNotionClient extends Client {
         // Check if we have it in cache
         if (this.blocksChildrenCache[args.block_id]) {
           // We have it in cache
+          this.logCacheMessage({
+            operation: "HIT",
+            cache_type: "block_children",
+            id: args.block_id,
+          })
           const childrenIds = this.blocksChildrenCache[args.block_id].children
           const results = childrenIds
             .map((id) => this.blockObjectsCache[id])
             .filter(Boolean) as BlockObjectResponse[]
           if (results.length !== childrenIds.length) {
-            console.log(`LocalNotionClient: Block children not found in cache.`)
-            throw Error(
-              "Inconsistent state: Block children not found in cache."
-            )
+            console.log(`LocalNotionClient: Block children not HIT in cache.`)
+            throw Error("Inconsistent state: Block children not HIT in cache.")
           }
 
           const response: ListBlockChildrenResponse = {
@@ -140,11 +155,15 @@ export class LocalNotionClient extends Client {
             has_more: false,
             results: results,
           }
-          console.log("Retrieved block children query from cache")
+
           return Promise.resolve(response)
         }
         // Fallback to calling API
-        console.log("Cache miss for block children", args.block_id)
+        this.logCacheMessage({
+          operation: "MISS",
+          cache_type: "block_children",
+          id: args.block_id,
+        })
         // TODO: Query on a while loop until no more pages available
 
         // TODO: Handle case in which options are used
@@ -155,7 +174,11 @@ export class LocalNotionClient extends Client {
           }
         ).then((response) => {
           // Saving to cache here
-          console.log("Saving to cache block", args.block_id)
+          this.logCacheMessage({
+            operation: "SAVE",
+            cache_type: "block_children",
+            id: args.block_id,
+          })
           this.blocksChildrenCache[args.block_id] = {
             children: response.results.map((child) => child.id),
           }
@@ -179,10 +202,18 @@ export class LocalNotionClient extends Client {
     retrieve: (args: GetPageParameters): Promise<GetPageResponse> => {
       // Check if we have it in cache
       if (this.pageObjectsCache[args.page_id]) {
-        console.log("Retrieved page from cache")
+        this.logCacheMessage({
+          operation: "HIT",
+          cache_type: "page",
+          id: args.page_id,
+        })
         return Promise.resolve(this.pageObjectsCache[args.page_id])
       }
-      console.log("Cache miss for page", args.page_id)
+      this.logCacheMessage({
+        operation: "MISS",
+        cache_type: "page",
+        id: args.page_id,
+      })
       return executeWithRateLimitAndRetries(
         `pages.retrieve(${args.page_id})`,
         () => {
@@ -190,7 +221,11 @@ export class LocalNotionClient extends Client {
         }
       ).then((response) => {
         // Saving to cache here
-        console.log("Saving to cache page", args.page_id)
+        this.logCacheMessage({
+          operation: "SAVE",
+          cache_type: "page",
+          id: args.page_id,
+        })
         if (!isFullPage(response)) {
           throw Error(`Non full page: ${JSON.stringify(response)}`)
         }
@@ -213,6 +248,11 @@ export class LocalNotionClient extends Client {
       // Check if we have it in cache
       if (this.databaseChildrenCache[args.database_id]) {
         // We have it in cache
+        this.logCacheMessage({
+          operation: "HIT",
+          cache_type: "database_children",
+          id: args.database_id,
+        })
         const childrenIds =
           this.databaseChildrenCache[args.database_id].children
         const results = childrenIds
@@ -221,12 +261,8 @@ export class LocalNotionClient extends Client {
           )
           .filter(Boolean) as PageObjectResponse[] | DatabaseObjectResponse[]
         if (results.length !== childrenIds.length) {
-          console.log(
-            `LocalNotionClient: Database children not found in cache.`
-          )
-          throw Error(
-            "Inconsistent state: Database children not found in cache."
-          )
+          console.log(`LocalNotionClient: Database children not HIT in cache.`)
+          throw Error("Inconsistent state: Database children not HIT in cache.")
         }
 
         const response: QueryDatabaseResponse = {
@@ -237,11 +273,15 @@ export class LocalNotionClient extends Client {
           has_more: false,
           results: results,
         }
-        console.log("Retrieved database query from cache")
         return Promise.resolve(response)
       }
       // Fallback to calling API
-      console.log("Cache miss for database query", args.database_id)
+      this.logCacheMessage({
+        operation: "MISS",
+        cache_type: "database_children",
+        id: args.database_id,
+      })
+
       // TODO: Query on a while loop until no more pages available
 
       // TODO: Handle case in which options are used
@@ -263,10 +303,25 @@ export class LocalNotionClient extends Client {
           }
           // Saving to objects cache
           if (isFullPage(child)) {
+            this.logCacheMessage({
+              operation: "SAVE",
+              cache_type: "page",
+              id: child.id,
+            })
             this.pageObjectsCache[child.id] = child
           } else {
+            this.logCacheMessage({
+              operation: "SAVE",
+              cache_type: "database",
+              id: child.id,
+            })
             this.databaseObjectsCache[child.id] = child
           }
+        })
+        this.logCacheMessage({
+          operation: "SAVE",
+          cache_type: "database_children",
+          id: args.database_id,
         })
         return response
       })
@@ -306,7 +361,7 @@ export class LocalNotionClient extends Client {
   saveCacheToDir = ({
     cacheDir,
   }: {
-    // TODO: Add options to save only part of cache
+    // TODO: Add options to SAVE only part of cache
     cacheDir: string
   }) => {
     const promises = []
@@ -345,5 +400,22 @@ export class LocalNotionClient extends Client {
       )
     )
     return Promise.all(promises)
+  }
+
+  private logCacheMessage({
+    cache_type,
+    operation,
+    id,
+  }: {
+    id: string
+    operation: "HIT" | "SAVE" | "MISS"
+    cache_type:
+      | "block"
+      | "database"
+      | "page"
+      | "block_children"
+      | "database_children"
+  }) {
+    info(`CACHE: (${operation}) (${cache_type}) : ${id}`)
   }
 }
