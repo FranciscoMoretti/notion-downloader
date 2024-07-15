@@ -87,11 +87,17 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
 
   // TODO: HACK: until we can add the notion token to the config
-  options.statusTag = "Published"
+  // options.statusTag = "Published"
   const CACHE_DIR = options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/"
 
-  const regularNotionClient = initNotionClient(options.notionToken)
-  notionToMarkdown = new NotionToMarkdown({ notionClient: regularNotionClient })
+  const cachedNotionClient = new LocalNotionClient({
+    auth: options.notionToken,
+  })
+
+  updateNotionClient(cachedNotionClient)
+  notionToMarkdown = new NotionToMarkdown({
+    notionClient: cachedNotionClient as Client,
+  })
 
   layoutStrategy = new HierarchicalNamedLayoutStrategy()
 
@@ -106,12 +112,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   info("Connecting to Notion...")
 
-  // Database to pages array
-  const cachedNotionClient = new LocalNotionClient({
-    auth: options.notionToken,
-  })
-
-  cachedNotionClient.loadCache()
+  await cachedNotionClient.loadCache()
 
   updateNotionClient(cachedNotionClient)
 
@@ -122,7 +123,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
       await notionClient.databases.retrieve({ database_id: rootPageUUID })
     } else {
       await executeWithRateLimitAndRetries("retrieving root page", async () => {
-        await regularNotionClient.pages.retrieve({ page_id: rootPageUUID })
+        await cachedNotionClient.pages.retrieve({ page_id: rootPageUUID })
       })
     }
   } catch (e: any) {
