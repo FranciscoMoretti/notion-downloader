@@ -96,7 +96,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   updateNotionClient(cachedNotionClient)
   notionToMarkdown = new NotionToMarkdown({
-    notionClient: cachedNotionClient as Client,
+    notionClient: cachedNotionClient,
   })
 
   layoutStrategy = new HierarchicalNamedLayoutStrategy()

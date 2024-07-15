@@ -7,20 +7,38 @@ import {
   isFullPageOrDatabase,
 } from "@notionhq/client"
 import {
+  AppendBlockChildrenParameters,
+  AppendBlockChildrenResponse,
   BlockObjectRequest,
   BlockObjectResponse,
+  CreateDatabaseParameters,
+  CreateDatabaseResponse,
+  CreatePageParameters,
+  CreatePageResponse,
   DatabaseObjectResponse,
+  DeleteBlockParameters,
+  DeleteBlockResponse,
   GetBlockParameters,
   GetBlockResponse,
   GetDatabaseParameters,
   GetDatabaseResponse,
   GetPageParameters,
+  GetPagePropertyParameters,
+  GetPagePropertyResponse,
   GetPageResponse,
   ListBlockChildrenParameters,
   ListBlockChildrenResponse,
+  ListDatabasesParameters,
+  ListDatabasesResponse,
   PageObjectResponse,
   QueryDatabaseParameters,
   QueryDatabaseResponse,
+  UpdateBlockParameters,
+  UpdateBlockResponse,
+  UpdateDatabaseParameters,
+  UpdateDatabaseResponse,
+  UpdatePageParameters,
+  UpdatePageResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 
@@ -128,10 +146,24 @@ export class LocalNotionClient extends Client {
       })
     },
 
+    update: (args: UpdateBlockParameters): Promise<UpdateBlockResponse> => {
+      return this.blocks.update(args)
+    },
+
+    delete: (args: DeleteBlockParameters): Promise<DeleteBlockResponse> => {
+      return this.notionClient.blocks.delete(args)
+    },
+
     /**
      * Retrieve block children
      */
     children: {
+      append: (
+        args: AppendBlockChildrenParameters
+      ): Promise<AppendBlockChildrenResponse> => {
+        return this.notionClient.blocks.children.append(args)
+      },
+
       list: (
         args: ListBlockChildrenParameters
       ): Promise<ListBlockChildrenResponse> => {
@@ -200,48 +232,11 @@ export class LocalNotionClient extends Client {
   }
 
   // TODO: fix type annotations by only making get methods available or wrap the rest of the methods
-  public readonly pages = {
-    /**
-     * Retrieve page
-     */
-    retrieve: (args: GetPageParameters): Promise<GetPageResponse> => {
-      // Check if we have it in cache
-      if (this.pageObjectsCache[args.page_id]) {
-        this.logCacheMessage({
-          operation: "HIT",
-          cache_type: "page",
-          id: args.page_id,
-        })
-        return Promise.resolve(this.pageObjectsCache[args.page_id])
-      }
-      this.logCacheMessage({
-        operation: "MISS",
-        cache_type: "page",
-        id: args.page_id,
-      })
-      return executeWithRateLimitAndRetries(
-        `pages.retrieve(${args.page_id})`,
-        () => {
-          return this.notionClient.pages.retrieve(args)
-        }
-      ).then((response) => {
-        // Saving to cache here
-        this.logCacheMessage({
-          operation: "SAVE",
-          cache_type: "page",
-          id: args.page_id,
-        })
-        if (!isFullPage(response)) {
-          throw Error(`Non full page: ${JSON.stringify(response)}`)
-        }
-        this.pageObjectsCache[args.page_id] = response
-        return response
-      })
-    },
-  }
-
-  // TODO: fix type annotations by only making get methods available or wrap the rest of the methods
   public readonly databases = {
+    list: (args: ListDatabasesParameters): Promise<ListDatabasesResponse> => {
+      return this.notionClient.databases.list(args)
+    },
+
     /**
      * Retrieve database
      */
@@ -361,6 +356,74 @@ export class LocalNotionClient extends Client {
         })
         return response
       })
+    },
+
+    create: (
+      args: CreateDatabaseParameters
+    ): Promise<CreateDatabaseResponse> => {
+      return this.notionClient.databases.create(args)
+    },
+
+    update: (
+      args: UpdateDatabaseParameters
+    ): Promise<UpdateDatabaseResponse> => {
+      return this.notionClient.databases.update(args)
+    },
+  }
+
+  // TODO: fix type annotations by only making get methods available or wrap the rest of the methods
+  public readonly pages = {
+    create: (args: CreatePageParameters): Promise<CreatePageResponse> => {
+      return this.notionClient.pages.create(args)
+    },
+
+    /**
+     * Retrieve page
+     */
+    retrieve: (args: GetPageParameters): Promise<GetPageResponse> => {
+      // Check if we have it in cache
+      if (this.pageObjectsCache[args.page_id]) {
+        this.logCacheMessage({
+          operation: "HIT",
+          cache_type: "page",
+          id: args.page_id,
+        })
+        return Promise.resolve(this.pageObjectsCache[args.page_id])
+      }
+      this.logCacheMessage({
+        operation: "MISS",
+        cache_type: "page",
+        id: args.page_id,
+      })
+      return executeWithRateLimitAndRetries(
+        `pages.retrieve(${args.page_id})`,
+        () => {
+          return this.notionClient.pages.retrieve(args)
+        }
+      ).then((response) => {
+        // Saving to cache here
+        this.logCacheMessage({
+          operation: "SAVE",
+          cache_type: "page",
+          id: args.page_id,
+        })
+        if (!isFullPage(response)) {
+          throw Error(`Non full page: ${JSON.stringify(response)}`)
+        }
+        this.pageObjectsCache[args.page_id] = response
+        return response
+      })
+    },
+    update: (args: UpdatePageParameters): Promise<UpdatePageResponse> => {
+      return this.notionClient.pages.update(args)
+    },
+
+    properties: {
+      retrieve: (
+        args: GetPagePropertyParameters
+      ): Promise<GetPagePropertyResponse> => {
+        return this.notionClient.pages.properties.retrieve(args)
+      },
     },
   }
 
