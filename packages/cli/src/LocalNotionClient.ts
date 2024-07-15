@@ -41,6 +41,7 @@ export class LocalNotionClient extends Client {
   databaseObjectsCache: NotionDatabaseObjectsCache
   blockObjectsCache: NotionBlockObjectsCache
   notionClient: Client
+  cacheDirectory: string
 
   // TODO: Implement better logging (like turbo repo)
 
@@ -62,6 +63,7 @@ export class LocalNotionClient extends Client {
     blockObjectsCache,
     databaseChildrenCache,
     blocksChildrenCache,
+    cacheDirectory,
   }: {
     auth: string
     pageObjectsCache?: NotionPageObjectsCache
@@ -69,6 +71,7 @@ export class LocalNotionClient extends Client {
     blockObjectsCache?: NotionBlockObjectsCache
     databaseChildrenCache?: DatabaseChildrenCache
     blocksChildrenCache?: BlocksChildrenCache
+    cacheDirectory?: string
   }) {
     super({
       auth: auth,
@@ -79,8 +82,10 @@ export class LocalNotionClient extends Client {
     this.pageObjectsCache = pageObjectsCache || {}
     this.databaseObjectsCache = databaseObjectsCache || {}
     this.blockObjectsCache = blockObjectsCache || {}
+    this.cacheDirectory = cacheDirectory
+      ? cacheDirectory?.replace(/\/+$/, "") + "/"
+      : "./.cache/"
   }
-  // TODO: Split object caches into page/block/database objects caches
 
   // TODO: fix type annotations by only making get methods available or wrap the rest of the methods
   public readonly blocks = {
@@ -336,34 +341,38 @@ export class LocalNotionClient extends Client {
     return undefined
   }
 
-  loadCacheFromDir = ({
-    cacheDir,
-  }: {
-    // TODO: Add options to load only part of cache
-    cacheDir: string
-  }) => {
-    this.blocksChildrenCache =
-      this.loadDataFromJson(cacheDir + this.blockChildrenCacheFilename) || {}
-
-    this.databaseChildrenCache =
-      this.loadDataFromJson(cacheDir + this.databaseChildrenCacheFilename) || {}
-
-    this.pageObjectsCache =
-      this.loadDataFromJson(cacheDir + this.pageObjectsCacheFilename) || {}
-
-    this.databaseObjectsCache =
-      this.loadDataFromJson(cacheDir + this.databaseObjectsCacheFilename) || {}
-
-    this.blockObjectsCache =
-      this.loadDataFromJson(cacheDir + this.blocksObjectsCacheFilename) || {}
+  loadCache = async () => {
+    const cacheDir = this.cacheDirectory
+    if (await fs.pathExists(cacheDir + this.blockChildrenCacheFilename)) {
+      this.blocksChildrenCache =
+        this.loadDataFromJson(cacheDir + this.blockChildrenCacheFilename) || {}
+    }
+    if (await fs.pathExists(cacheDir + this.databaseChildrenCacheFilename)) {
+      this.databaseChildrenCache =
+        this.loadDataFromJson(cacheDir + this.databaseChildrenCacheFilename) ||
+        {}
+    }
+    if (await fs.pathExists(cacheDir + this.pageObjectsCacheFilename)) {
+      this.pageObjectsCache =
+        this.loadDataFromJson(cacheDir + this.pageObjectsCacheFilename) || {}
+    }
+    if (await fs.pathExists(cacheDir + this.databaseObjectsCacheFilename)) {
+      this.databaseObjectsCache =
+        this.loadDataFromJson(cacheDir + this.databaseObjectsCacheFilename) ||
+        {}
+    }
+    if (await fs.pathExists(cacheDir + this.blocksObjectsCacheFilename)) {
+      this.blockObjectsCache =
+        this.loadDataFromJson(cacheDir + this.blocksObjectsCacheFilename) || {}
+    }
   }
 
-  saveCacheToDir = ({
-    cacheDir,
-  }: {
-    // TODO: Add options to SAVE only part of cache
-    cacheDir: string
-  }) => {
+  saveCache = () => {
+    const cacheDir = this.cacheDirectory
+    if (!fs.existsSync(cacheDir)) {
+      // Make dir recursively
+      fs.mkdirSync(cacheDir, { recursive: true })
+    }
     const promises = []
     promises.push(
       saveDataToJson(

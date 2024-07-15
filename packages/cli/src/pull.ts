@@ -111,7 +111,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     auth: options.notionToken,
   })
 
-  cachedNotionClient.loadCacheFromDir({ cacheDir: CACHE_DIR })
+  cachedNotionClient.loadCache()
 
   updateNotionClient(cachedNotionClient)
 
@@ -179,9 +179,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   await getPagesRecursively(options, "", rootPageUUID, 0, true)
 
   // Save pages to a json file
-  await notionClient.saveCacheToDir({
-    cacheDir: CACHE_DIR,
-  })
+  await notionClient.saveCache()
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
   await saveDataToJson(pages, CACHE_DIR + "pages.json")
