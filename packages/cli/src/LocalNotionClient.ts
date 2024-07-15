@@ -246,7 +246,38 @@ export class LocalNotionClient extends Client {
      * Retrieve database
      */
     retrieve: (args: GetDatabaseParameters): Promise<GetDatabaseResponse> => {
-      return this.notionClient.databases.retrieve(args)
+      // Check if we have it in cache
+      if (this.pageObjectsCache[args.database_id]) {
+        this.logCacheMessage({
+          operation: "HIT",
+          cache_type: "database",
+          id: args.database_id,
+        })
+        return Promise.resolve(this.databaseObjectsCache[args.database_id])
+      }
+      this.logCacheMessage({
+        operation: "MISS",
+        cache_type: "database",
+        id: args.database_id,
+      })
+      return executeWithRateLimitAndRetries(
+        `databases.retrieve(${args.database_id})`,
+        () => {
+          return this.notionClient.databases.retrieve(args)
+        }
+      ).then((response) => {
+        // Saving to cache here
+        this.logCacheMessage({
+          operation: "SAVE",
+          cache_type: "database",
+          id: args.database_id,
+        })
+        if (!isFullDatabase(response)) {
+          throw Error(`Non full database: ${JSON.stringify(response)}`)
+        }
+        this.databaseObjectsCache[args.database_id] = response
+        return response
+      })
     },
 
     query: (args: QueryDatabaseParameters): Promise<QueryDatabaseResponse> => {
