@@ -180,7 +180,7 @@ export class NotionCacheClient extends Client {
             .map((id) => this.blockObjectsCache[id])
             .filter(Boolean) as BlockObjectResponse[]
           if (results.length !== childrenIds.length) {
-            console.log(`LocalNotionClient: Block children not HIT in cache.`)
+            console.log(`NotionCacheClient: Block children not HIT in cache.`)
             throw Error("Inconsistent state: Block children not HIT in cache.")
           }
 
@@ -292,7 +292,7 @@ export class NotionCacheClient extends Client {
           )
           .filter(Boolean) as PageObjectResponse[] | DatabaseObjectResponse[]
         if (results.length !== childrenIds.length) {
-          console.log(`LocalNotionClient: Database children not HIT in cache.`)
+          console.log(`NotionCacheClient: Database children not HIT in cache.`)
           throw Error("Inconsistent state: Database children not HIT in cache.")
         }
 
