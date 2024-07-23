@@ -5,7 +5,6 @@ import {
   MdBlock,
 } from "notion-to-md/build/types"
 
-import { executeWithRateLimitAndRetries } from "../executeWithRateLimitAndRetries"
 import { NotionBlock } from "../types"
 import { IGetBlockChildrenFn, IPlugin } from "./pluginTypes"
 
@@ -66,13 +65,8 @@ async function getColumnWidth(
 ): Promise<string> {
   const unofficialNotionClient = new NotionAPI()
   const blockId = block.id
-  const recordMap = await executeWithRateLimitAndRetries(
-    `unofficialNotionClient.getPage(${blockId}) in getColumnWidth()`,
-    () => {
-      // Yes, it is odd to call 'getPage' for a block, but that's how we access the format info.
-      return unofficialNotionClient.getPage(blockId)
-    }
-  )
+  // Yes, it is odd to call 'getPage' for a block, but that's how we access the format info.
+  const recordMap = await unofficialNotionClient.getPage(blockId)
   const blockResult = recordMap.block[blockId]
 
   // ENHANCE: could we use https://github.com/NotionX/react-notion-x/tree/master/packages/notion-types

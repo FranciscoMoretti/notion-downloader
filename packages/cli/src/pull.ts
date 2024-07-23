@@ -15,23 +15,17 @@ import {
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
+import { NotionCacheClient } from "notion-cache-client"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
-import { LocalNotionClient } from "./LocalNotionClient"
 import { NotionPage, PageType, getPageContentInfo } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
-import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, logDebug, verbose, warning } from "./log"
-import {
-  BlocksChildrenCache,
-  DatabaseChildrenCache,
-  NotionObjectTreeNode,
-  NotionObjectsCache,
-} from "./notion-structures-types"
+import { NotionObjectTreeNode } from "./notion-structures-types"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
@@ -89,7 +83,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // options.statusTag = "Published"
   const CACHE_DIR = options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/"
 
-  const cachedNotionClient = new LocalNotionClient({
+  const cachedNotionClient = new NotionCacheClient({
     auth: options.notionToken,
   })
 
@@ -121,9 +115,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     if (options.rootIsDb) {
       await notionClient.databases.retrieve({ database_id: rootPageUUID })
     } else {
-      await executeWithRateLimitAndRetries("retrieving root page", async () => {
-        await cachedNotionClient.pages.retrieve({ page_id: rootPageUUID })
-      })
+      await cachedNotionClient.pages.retrieve({ page_id: rootPageUUID })
     }
   } catch (e: any) {
     error(
@@ -138,8 +130,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     exit(1)
   }
 
-  const databaseChildrenCache: DatabaseChildrenCache = {}
-  const blocksChildrenCache: BlocksChildrenCache = {}
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
   const objectsTree: NotionObjectTreeNode = {
     id: rootPageUUID,
@@ -450,7 +440,7 @@ function writePage(page: NotionPage, finalMarkdown: string) {
   ++counts.output_normally
 }
 
-let notionClient: LocalNotionClient
+let notionClient: NotionCacheClient
 
 async function getBlockChildren(id: string): Promise<NotionBlock[]> {
   // we can only get so many responses per call, so we set this to
@@ -471,15 +461,10 @@ async function listBlockChildren(id: string) {
   // Note: there is a now a collectPaginatedAPI() in the notion client, so
   // we could switch to using that (I don't know if it does rate limiting?)
   do {
-    const response = await executeWithRateLimitAndRetries(
-      `getBlockChildren(${id})`,
-      () => {
-        return notionClient.blocks.children.list({
-          start_cursor: start_cursor as string | undefined,
-          block_id: id,
-        })
-      }
-    )
+    const response = await notionClient.blocks.children.list({
+      start_cursor: start_cursor as string | undefined,
+      block_id: id,
+    })
 
     if (!overallResult) {
       overallResult = response
@@ -508,7 +493,7 @@ export function initNotionClient(notionToken: string): Client {
   return notionClient
 }
 
-function updateNotionClient(client: LocalNotionClient) {
+function updateNotionClient(client: NotionCacheClient) {
   notionClient = client
 }
 async function fromPageId(

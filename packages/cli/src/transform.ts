@@ -2,7 +2,6 @@ import chalk from "chalk"
 
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig } from "./config/configuration"
-import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import {
   IDocuNotionContext,
@@ -160,20 +159,17 @@ async function doNotionToMarkdown(
   blocks: Array<NotionBlock>
 ) {
   let mdBlocks: any
-  await executeWithRateLimitAndRetries(
-    "notionToMarkdown.blocksToMarkdown",
-    async () => {
-      mdBlocks = await docunotionContext.notionToMarkdown.blocksToMarkdown(
-        // We need to provide a copy of blocks.
-        // Calling blocksToMarkdown can modify the values in the blocks. If it does, and then
-        // we have to retry, we end up retrying with the modified values, which
-        // causes various issues (like using the transformed image url instead of the original one).
-        // Note, currently, we don't do anything else with blocks after this.
-        // If that changes, we'll need to figure out a more sophisticated approach.
-        JSON.parse(JSON.stringify(blocks))
-      )
-    }
-  )
+  await (async () => {
+    mdBlocks = await docunotionContext.notionToMarkdown.blocksToMarkdown(
+      // We need to provide a copy of blocks.
+      // Calling blocksToMarkdown can modify the values in the blocks. If it does, and then
+      // we have to retry, we end up retrying with the modified values, which
+      // causes various issues (like using the transformed image url instead of the original one).
+      // Note, currently, we don't do anything else with blocks after this.
+      // If that changes, we'll need to figure out a more sophisticated approach.
+      JSON.parse(JSON.stringify(blocks))
+    )
+  })
 
   const markdown =
     docunotionContext.notionToMarkdown.toMarkdownString(mdBlocks).parent || ""
