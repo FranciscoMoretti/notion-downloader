@@ -159,7 +159,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     })
   }
 
-  await fetchTreeRecursively(objectsTree)
+  await fetchTreeRecursively(objectsTree, {
+    downloadAllPages: true,
+    downloadDatabases: true,
+    followLinks: true,
+  })
 
   // // Demo of fetching with root database
   // const response = await cachedNotionClient.databases.query({
@@ -175,6 +179,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   //     pages.push(resultPage)
   //   })
   // })
+
+  info(`Fetched tree recursively`)
 
   // ---- Markdown conversion and writing to files ----
   await getPagesRecursively(options, "", rootPageUUID, 0, true)
@@ -261,7 +267,14 @@ async function outputPages(
   info(JSON.stringify(counts))
 }
 
-async function fetchTreeRecursively(objectNode: NotionObjectTreeNode) {
+async function fetchTreeRecursively(
+  objectNode: NotionObjectTreeNode,
+  options?: {
+    downloadAllPages?: boolean
+    downloadDatabases?: boolean
+    followLinks?: boolean
+  }
+) {
   info(
     `Looking for children of {object_id: "${objectNode.id}", object: "${objectNode.object}"}`
   )
@@ -270,11 +283,17 @@ async function fetchTreeRecursively(objectNode: NotionObjectTreeNode) {
     objectNode.object === "database" ||
     (objectNode.object === "block" && objectNode.type === "child_database")
   ) {
+    if (options?.downloadDatabases) {
+      // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
+      const databaseResponse = await notionClient.databases.retrieve({
+        database_id: objectNode.id,
+      })
+    }
+
     // TODO: Decide how to process a child_database block that also has children.
     const databaseResponse = await notionClient.databases.query({
       database_id: objectNode.id,
     })
-
     for (const childObject of databaseResponse.results) {
       const newNode: NotionObjectTreeNode = {
         id: childObject.id,
@@ -283,13 +302,20 @@ async function fetchTreeRecursively(objectNode: NotionObjectTreeNode) {
       }
 
       objectNode.children.push(newNode)
-      await fetchTreeRecursively(newNode)
+      await fetchTreeRecursively(newNode, options)
     }
   } else if (
     objectNode.object === "page" ||
     (objectNode.object === "block" && objectNode.type === "child_page") ||
     (objectNode.object === "block" && objectNode.has_children)
   ) {
+    if (options?.downloadAllPages) {
+      // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
+      const pageResponse = await notionClient.pages.retrieve({
+        page_id: objectNode.id,
+      })
+    }
+
     const blocksResponse = await notionClient.blocks.children.list({
       block_id: objectNode.id,
     })
@@ -312,7 +338,7 @@ async function fetchTreeRecursively(objectNode: NotionObjectTreeNode) {
         childBlock.has_children
       ) {
         // Recurse if page or database (with children)
-        await fetchTreeRecursively(newNode)
+        await fetchTreeRecursively(newNode, options)
       }
     }
   }
