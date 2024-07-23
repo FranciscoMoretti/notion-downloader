@@ -17,7 +17,6 @@ import {
 import fs from "fs-extra"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
-import { B } from "vitest/dist/reporters-yx5ZTtEV"
 
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
@@ -309,7 +308,11 @@ async function fetchTreeRecursively(
     (objectNode.object === "block" && objectNode.type === "child_page") ||
     (objectNode.object === "block" && objectNode.has_children)
   ) {
-    if (options?.downloadAllPages) {
+    if (
+      options?.downloadAllPages &&
+      (objectNode.object === "page" ||
+        (objectNode.object === "block" && objectNode.type === "child_page"))
+    ) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
       const pageResponse = await notionClient.pages.retrieve({
         page_id: objectNode.id,
