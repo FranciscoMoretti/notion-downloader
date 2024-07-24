@@ -38,7 +38,6 @@ export type DocuNotionOptions = {
 }
 
 let layoutStrategy: LayoutStrategy
-let notionToMarkdown: NotionToMarkdown
 
 const counts = {
   output_normally: 0,
@@ -75,7 +74,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     auth: options.notionToken,
   })
 
-  notionToMarkdown = new NotionToMarkdown({
+  const notionToMarkdown = new NotionToMarkdown({
     notionClient: cachedNotionClient,
   })
 
@@ -168,7 +167,14 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   group(
     `Stage 2: convert ${pages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
   )
-  await outputPages(options, config, pages, cachedNotionClient)
+  await outputPages(
+    options,
+    config,
+    pages,
+    cachedNotionClient,
+    layoutStrategy,
+    notionToMarkdown
+  )
   endGroup()
   group("Stage 3: clean up old files & images...")
   await layoutStrategy.cleanupOldFiles()
@@ -180,7 +186,9 @@ async function outputPages(
   options: DocuNotionOptions,
   config: IDocuNotionConfig,
   pages: Array<NotionPage>,
-  client: Client
+  client: Client,
+  layoutStrategy: LayoutStrategy,
+  notionToMarkdown: NotionToMarkdown
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
