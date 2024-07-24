@@ -78,7 +78,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     auth: options.notionToken,
   })
 
-  updateNotionClient(cachedNotionClient)
   notionToMarkdown = new NotionToMarkdown({
     notionClient: cachedNotionClient,
   })
@@ -347,7 +346,8 @@ async function getPagesRecursively(
     incomingContext,
     pageIdOfThisParent,
     orderOfThisParent,
-    true
+    true,
+    client
   )
 
   info(
@@ -402,7 +402,8 @@ async function getPagesRecursively(
         layoutContext,
         childPageInfo.id,
         childPageInfo.order,
-        false
+        false,
+        client
       )
     }
 
@@ -412,7 +413,8 @@ async function getPagesRecursively(
           layoutContext,
           linkPageInfo.id,
           linkPageInfo.order,
-          false
+          false,
+          client
         )
       )
     }
@@ -433,8 +435,6 @@ function writePage(page: NotionPage, finalMarkdown: string) {
   ++counts.output_normally
 }
 
-let notionClient: NotionCacheClient
-
 async function getBlockChildren(
   id: string,
   client: Client
@@ -450,14 +450,14 @@ async function getBlockChildren(
   numberChildrenIfNumberedList(result)
   return result
 }
-async function listBlockChildren(id: string) {
+async function listBlockChildren(id: string, client: Client) {
   let overallResult: ListBlockChildrenResponse | undefined = undefined
   let start_cursor: string | undefined | null = undefined
 
   // Note: there is a now a collectPaginatedAPI() in the notion client, so
   // we could switch to using that (I don't know if it does rate limiting?)
   do {
-    const response = await notionClient.blocks.children.list({
+    const response = await client.blocks.children.list({
       start_cursor: start_cursor as string | undefined,
       block_id: id,
     })
@@ -482,16 +482,14 @@ async function listBlockChildren(id: string) {
   return overallResult
 }
 
-function updateNotionClient(client: NotionCacheClient) {
-  notionClient = client
-}
 async function fromPageId(
   context: string,
   pageId: string,
   order: number,
-  foundDirectlyInOutline: boolean
+  foundDirectlyInOutline: boolean,
+  client: Client
 ): Promise<NotionPage> {
-  const metadata = await notionClient.pages.retrieve({
+  const metadata = await client.pages.retrieve({
     page_id: pageId,
   })
 
