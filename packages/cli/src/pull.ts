@@ -1,18 +1,9 @@
 import * as Path from "path"
 import { exit } from "process"
-import {
-  Client,
-  isFullBlock,
-  isFullDatabase,
-  isFullPage,
-} from "@notionhq/client"
+import { Client, isFullBlock } from "@notionhq/client"
 import {
   BlockObjectResponse,
-  GetDatabaseResponse,
-  GetPageResponse,
   ListBlockChildrenResponse,
-  QueryDatabaseParameters,
-  QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
@@ -24,7 +15,7 @@ import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage, PageType, getPageContentInfo } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { cleanupOldImages, initImageHandling } from "./images"
-import { endGroup, error, group, info, logDebug, verbose, warning } from "./log"
+import { endGroup, error, group, info, verbose, warning } from "./log"
 import { NotionObjectTreeNode } from "./notion-structures-types"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
