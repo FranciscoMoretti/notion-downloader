@@ -104,7 +104,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // TODO: Get root page, which can be DB or can be single page
   try {
     if (options.rootIsDb) {
-      await notionClient.databases.retrieve({ database_id: rootPageUUID })
+      await cachedNotionClient.databases.retrieve({ database_id: rootPageUUID })
     } else {
       await cachedNotionClient.pages.retrieve({ page_id: rootPageUUID })
     }
@@ -131,19 +131,14 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   group(
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
-  // TODO: Merge recursively get pages with getting pages from DB. This fails if the rootpage is a DB
-  if (!options.rootIsDb) {
-    // Fetch first page and save in cache
-    await notionClient.pages.retrieve({
-      page_id: rootPageUUID,
-    })
-  }
-
   await fetchTreeRecursively(objectsTree, {
     downloadAllPages: true,
     downloadDatabases: true,
     followLinks: true,
   })
+
+  // Save pages to a json file
+  await notionClient.saveCache()
 
   // // Demo of fetching with root database
   // const response = await cachedNotionClient.databases.query({
@@ -160,13 +155,10 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   //   })
   // })
 
-  info(`Fetched tree recursively`)
+  info(`PULL: Fetched entire page tree`)
 
   // ---- Markdown conversion and writing to files ----
   await getPagesRecursively(options, "", rootPageUUID, 0, true)
-
-  // Save pages to a json file
-  await notionClient.saveCache()
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
   await saveDataToJson(pages, CACHE_DIR + "pages.json")
@@ -475,13 +467,6 @@ async function listBlockChildren(id: string) {
     exit(1)
   }
   return overallResult
-}
-
-export function initNotionClient(notionToken: string): Client {
-  notionClient = new Client({
-    auth: notionToken,
-  })
-  return notionClient
 }
 
 function updateNotionClient(client: NotionCacheClient) {

@@ -1,3 +1,4 @@
+import { Client } from "@notionhq/client"
 import { NotionToMarkdown } from "notion-to-md"
 import { describe, expect, test } from "vitest"
 
@@ -7,7 +8,6 @@ import { IDocuNotionConfig } from "./config/configuration"
 import defaultConfig from "./config/default.docunotion.config"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
-import { initNotionClient } from "./pull"
 import { getMarkdownFromNotionBlocks } from "./transform"
 import { NotionBlock } from "./types"
 
@@ -20,7 +20,9 @@ test("Latex Rendering", async () => {
     skipped_because_level_cannot_have_content: 0,
   }
 
-  const notionClient = initNotionClient("")
+  const notionClient = new Client({
+    auth: "",
+  })
 
   const layoutStrategy = new HierarchicalNamedLayoutStrategy()
 
