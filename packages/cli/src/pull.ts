@@ -131,14 +131,14 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   group(
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
-  await fetchTreeRecursively(objectsTree, {
+  await fetchTreeRecursively(objectsTree, cachedNotionClient, {
     downloadAllPages: true,
     downloadDatabases: true,
     followLinks: true,
   })
 
   // Save pages to a json file
-  await notionClient.saveCache()
+  await cachedNotionClient.saveCache()
 
   // // Demo of fetching with root database
   // const response = await cachedNotionClient.databases.query({
@@ -158,7 +158,14 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   info(`PULL: Fetched entire page tree`)
 
   // ---- Markdown conversion and writing to files ----
-  await getPagesRecursively(options, "", rootPageUUID, 0, true)
+  await getPagesRecursively(
+    options,
+    "",
+    rootPageUUID,
+    0,
+    true,
+    cachedNotionClient
+  )
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
   await saveDataToJson(pages, CACHE_DIR + "pages.json")
@@ -168,7 +175,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   group(
     `Stage 2: convert ${pages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
   )
-  await outputPages(options, config, pages)
+  await outputPages(options, config, pages, cachedNotionClient)
   endGroup()
   group("Stage 3: clean up old files & images...")
   await layoutStrategy.cleanupOldFiles()
@@ -179,10 +186,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 async function outputPages(
   options: DocuNotionOptions,
   config: IDocuNotionConfig,
-  pages: Array<NotionPage>
+  pages: Array<NotionPage>,
+  client: Client
 ) {
   const context: IDocuNotionContext = {
-    getBlockChildren: getBlockChildren,
+    getBlockChildren: (id: string) => getBlockChildren(id, client),
     // this changes with each page
     pageInfo: {
       directoryContainingMarkdown: "",
@@ -241,6 +249,7 @@ async function outputPages(
 
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
+  client: Client,
   options?: {
     downloadAllPages?: boolean
     downloadDatabases?: boolean
@@ -257,13 +266,13 @@ async function fetchTreeRecursively(
   ) {
     if (options?.downloadDatabases) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
-      const databaseResponse = await notionClient.databases.retrieve({
+      const databaseResponse = await client.databases.retrieve({
         database_id: objectNode.id,
       })
     }
 
     // TODO: Decide how to process a child_database block that also has children.
-    const databaseResponse = await notionClient.databases.query({
+    const databaseResponse = await client.databases.query({
       database_id: objectNode.id,
     })
     for (const childObject of databaseResponse.results) {
@@ -274,7 +283,7 @@ async function fetchTreeRecursively(
       }
 
       objectNode.children.push(newNode)
-      await fetchTreeRecursively(newNode, options)
+      await fetchTreeRecursively(newNode, client, options)
     }
   } else if (
     objectNode.object === "page" ||
@@ -287,12 +296,12 @@ async function fetchTreeRecursively(
         (objectNode.object === "block" && objectNode.type === "child_page"))
     ) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
-      const pageResponse = await notionClient.pages.retrieve({
+      const pageResponse = await client.pages.retrieve({
         page_id: objectNode.id,
       })
     }
 
-    const blocksResponse = await notionClient.blocks.children.list({
+    const blocksResponse = await client.blocks.children.list({
       block_id: objectNode.id,
     })
     for (const childBlock of blocksResponse.results) {
@@ -314,7 +323,7 @@ async function fetchTreeRecursively(
         childBlock.has_children
       ) {
         // Recurse if page or database (with children)
-        await fetchTreeRecursively(newNode, options)
+        await fetchTreeRecursively(newNode, client, options)
       }
     }
   }
@@ -331,7 +340,8 @@ async function getPagesRecursively(
   incomingContext: string,
   pageIdOfThisParent: string,
   orderOfThisParent: number,
-  rootLevel: boolean
+  rootLevel: boolean,
+  client: Client
 ) {
   const pageInTheOutline = await fromPageId(
     incomingContext,
@@ -344,7 +354,7 @@ async function getPagesRecursively(
     `Looking for children and links from ${incomingContext}/${pageInTheOutline.nameOrTitle}`
   )
 
-  const r = await getBlockChildren(pageInTheOutline.pageId)
+  const r = await getBlockChildren(pageInTheOutline.pageId, client)
   const pageInfo = await getPageContentInfo(r)
 
   if (
@@ -425,15 +435,18 @@ function writePage(page: NotionPage, finalMarkdown: string) {
 
 let notionClient: NotionCacheClient
 
-async function getBlockChildren(id: string): Promise<NotionBlock[]> {
+async function getBlockChildren(
+  id: string,
+  client: Client
+): Promise<NotionBlock[]> {
   // we can only get so many responses per call, so we set this to
   // the first response we get, then keep adding to its array of blocks
   // with each subsequent response
   let overallResult: ListBlockChildrenResponse | undefined =
-    await notionClient.blocks.children.list({ block_id: id })
+    await client.blocks.children.list({ block_id: id })
 
   const result = (overallResult?.results as BlockObjectResponse[]) ?? []
-  // TODO - rething if this numbering should be part of the downloading part of the app, or of the processing part
+  // TODO - rethink if this numbering should be part of the downloading part of the app, or of the processing part
   numberChildrenIfNumberedList(result)
   return result
 }
