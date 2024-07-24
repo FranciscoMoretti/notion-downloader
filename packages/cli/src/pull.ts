@@ -7,7 +7,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
-import { NotionObjectTreeNode, fetchNotionObjectTree } from "notion-downloader"
+import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
@@ -118,24 +118,19 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
 
-  await cachedNotionClient.loadCache()
-
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTree: NotionObjectTreeNode = await fetchNotionObjectTree({
+  const objectsTree: NotionObjectTreeNode = await downloadObjectTree({
     client: cachedNotionClient,
     startingNode: {
       rootPageUUID: rootPageUUID,
       rootIsDb: options.rootIsDb || false,
     },
-    options: {
+    dataOptions: {
       downloadAllPages: true,
       downloadDatabases: true,
       followLinks: true,
     },
   })
-
-  // Save pages to a json file
-  await cachedNotionClient.saveCache()
 
   // // Demo of fetching with root database
   // const response = await cachedNotionClient.databases.query({

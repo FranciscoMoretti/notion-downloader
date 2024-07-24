@@ -20,13 +20,40 @@ interface StartingNode {
 interface FetchingOptions {
   client: NotionCacheClient
   startingNode: StartingNode
-  options: DownloadObjectsOptions
+  dataOptions: DownloadObjectsOptions
+}
+
+interface StorageOptions {
+  savePath?: boolean
+  cleanCache?: boolean
+}
+
+type DownloadOptions = FetchingOptions & {
+  storageOptions: StorageOptions
+}
+
+export async function downloadObjectTree({
+  client,
+  startingNode,
+  dataOptions: options,
+}: DownloadOptions) {
+  // TODO Implement the StorageOptions with loadCache and saveCache functions and create a cleanup func
+  await client.loadCache()
+
+  // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
+  const objectsTree: NotionObjectTreeNode = await fetchNotionObjectTree({
+    client: client,
+    startingNode: startingNode,
+    dataOptions: options,
+  })
+
+  await client.saveCache()
 }
 
 export async function fetchNotionObjectTree({
   startingNode,
   client,
-  options,
+  dataOptions: options,
 }: FetchingOptions) {
   const objectsTree: NotionObjectTreeNode = {
     id: startingNode.rootPageUUID,
