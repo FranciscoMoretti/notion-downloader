@@ -6,32 +6,42 @@ import { NotionObjectTreeNode } from "./notion-object-tree"
 
 // TODO: Consider making this compatible with client by returning more data
 
-interface FetchTreeOptions {
+interface DownloadObjectsOptions {
   downloadAllPages?: boolean
   downloadDatabases?: boolean
   followLinks?: boolean
 }
 
-export async function fetchNotionObjectTree(
-  rootPageUUID: string,
-  rootIsDb: boolean,
-  cachedNotionClient: NotionCacheClient,
-  options: FetchTreeOptions
-) {
+interface StartingNode {
+  rootPageUUID: string
+  rootIsDb: boolean
+}
+
+interface FetchingOptions {
+  client: NotionCacheClient
+  startingNode: StartingNode
+  options: DownloadObjectsOptions
+}
+
+export async function fetchNotionObjectTree({
+  startingNode,
+  client,
+  options,
+}: FetchingOptions) {
   const objectsTree: NotionObjectTreeNode = {
-    id: rootPageUUID,
-    object: rootIsDb ? "database" : "page",
+    id: startingNode.rootPageUUID,
+    object: startingNode.rootIsDb ? "database" : "page",
     children: [],
   }
 
-  await fetchTreeRecursively(objectsTree, cachedNotionClient, options)
+  await fetchTreeRecursively(objectsTree, client, options)
   return objectsTree
 }
 
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
   client: Client,
-  options?: FetchTreeOptions
+  options?: DownloadObjectsOptions
 ) {
   info(
     `Looking for children of {object_id: "${objectNode.id}", object: "${objectNode.object}"}`

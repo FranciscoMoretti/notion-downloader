@@ -121,16 +121,18 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   await cachedNotionClient.loadCache()
 
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTree: NotionObjectTreeNode = await fetchNotionObjectTree(
-    rootPageUUID,
-    options.rootIsDb || false,
-    cachedNotionClient,
-    {
+  const objectsTree: NotionObjectTreeNode = await fetchNotionObjectTree({
+    client: cachedNotionClient,
+    startingNode: {
+      rootPageUUID: rootPageUUID,
+      rootIsDb: options.rootIsDb || false,
+    },
+    options: {
       downloadAllPages: true,
       downloadDatabases: true,
       followLinks: true,
-    }
-  )
+    },
+  })
 
   // Save pages to a json file
   await cachedNotionClient.saveCache()
