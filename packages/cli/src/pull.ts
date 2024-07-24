@@ -97,8 +97,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   await cachedNotionClient.loadCache()
 
-  updateNotionClient(cachedNotionClient)
-
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
   // TODO: Get root page, which can be DB or can be single page
   try {
