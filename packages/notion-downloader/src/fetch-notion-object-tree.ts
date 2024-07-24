@@ -48,6 +48,7 @@ export async function downloadObjectTree({
   })
 
   await client.saveCache()
+  return objectsTree
 }
 
 export async function fetchNotionObjectTree({

@@ -39,7 +39,6 @@ export type DocuNotionOptions = {
 
 let layoutStrategy: LayoutStrategy
 let notionToMarkdown: NotionToMarkdown
-const pages = new Array<NotionPage>()
 
 const counts = {
   output_normally: 0,
@@ -149,6 +148,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   info(`PULL: Fetched entire page tree`)
 
+  const pages = new Array<NotionPage>()
   // ---- Markdown conversion and writing to files ----
   await getPagesRecursively(
     options,
@@ -156,7 +156,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     rootPageUUID,
     0,
     true,
-    cachedNotionClient
+    cachedNotionClient,
+    pages
   )
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
@@ -251,7 +252,8 @@ async function getPagesRecursively(
   pageIdOfThisParent: string,
   orderOfThisParent: number,
   rootLevel: boolean,
-  client: Client
+  client: Client,
+  pages: Array<NotionPage>
 ) {
   const pageInTheOutline = await fromPageId(
     incomingContext,
@@ -314,7 +316,8 @@ async function getPagesRecursively(
         childPageInfo.id,
         childPageInfo.order,
         false,
-        client
+        client,
+        pages
       )
     }
 
