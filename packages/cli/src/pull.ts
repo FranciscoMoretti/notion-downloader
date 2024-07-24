@@ -95,8 +95,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   info("Connecting to Notion...")
 
-  await cachedNotionClient.loadCache()
-
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
   // TODO: Get root page, which can be DB or can be single page
   try {
@@ -118,21 +116,23 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     exit(1)
   }
 
-  // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTree: NotionObjectTreeNode = {
-    id: rootPageUUID,
-    object: options.rootIsDb ? "database" : "page",
-    children: [],
-  }
-
   group(
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
-  await fetchTreeRecursively(objectsTree, cachedNotionClient, {
-    downloadAllPages: true,
-    downloadDatabases: true,
-    followLinks: true,
-  })
+
+  await cachedNotionClient.loadCache()
+
+  // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
+  const objectsTree: NotionObjectTreeNode = await fetchNotionObjectTree(
+    rootPageUUID,
+    options.rootIsDb || false,
+    cachedNotionClient,
+    {
+      downloadAllPages: true,
+      downloadDatabases: true,
+      followLinks: true,
+    }
+  )
 
   // Save pages to a json file
   await cachedNotionClient.saveCache()
@@ -178,6 +178,22 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   await layoutStrategy.cleanupOldFiles()
   await cleanupOldImages()
   endGroup()
+}
+
+async function fetchNotionObjectTree(
+  rootPageUUID: string,
+  rootIsDb: boolean,
+  cachedNotionClient: NotionCacheClient,
+  options: FetchTreeOptions
+) {
+  const objectsTree: NotionObjectTreeNode = {
+    id: rootPageUUID,
+    object: rootIsDb ? "database" : "page",
+    children: [],
+  }
+
+  await fetchTreeRecursively(objectsTree, cachedNotionClient, options)
+  return objectsTree
 }
 
 async function outputPages(
@@ -244,14 +260,16 @@ async function outputPages(
   info(JSON.stringify(counts))
 }
 
+interface FetchTreeOptions {
+  downloadAllPages?: boolean
+  downloadDatabases?: boolean
+  followLinks?: boolean
+}
+
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
   client: Client,
-  options?: {
-    downloadAllPages?: boolean
-    downloadDatabases?: boolean
-    followLinks?: boolean
-  }
+  options?: FetchTreeOptions
 ) {
   info(
     `Looking for children of {object_id: "${objectNode.id}", object: "${objectNode.object}"}`
