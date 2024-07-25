@@ -461,6 +461,16 @@ export class NotionCacheClient extends Client {
     }
   }
 
+  clearCache = () => {
+    this.blocksChildrenCache = {}
+    this.databaseChildrenCache = {}
+    this.pageObjectsCache = {}
+    this.databaseObjectsCache = {}
+    this.blockObjectsCache = {}
+
+    this.saveCache()
+  }
+
   saveCache = () => {
     const cacheDir = this.cacheDirectory
     if (!fs.existsSync(cacheDir)) {

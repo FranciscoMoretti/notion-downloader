@@ -13,7 +13,8 @@
       "args": [
         "pull",
         // Disable root-is-db for non DBs roots
-        // "--root-is-db",
+        "--root-is-db",
+        "--clean-cache",
         "--log-level",
         "debug"
       ],

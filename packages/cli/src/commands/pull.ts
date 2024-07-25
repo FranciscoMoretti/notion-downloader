@@ -24,6 +24,7 @@ const pullOptionsSchema = z.object({
   rootPage: z.string(),
   rootIsDb: z.boolean().default(false),
   markdownOutputPath: z.string(),
+  cleanCache: z.boolean().default(false),
   statusTag: z.string(),
   logLevel: z.string().default("info"),
   imgPrefixInMarkdown: z.string().default(""),
@@ -44,7 +45,7 @@ export const pull = new Command()
     "The 31 character ID of the page which is the root of your docs page in notion. The code will look like 9120ec9960244ead80fa2ef4bc1bba25. This page must have a child page named 'Outline'"
   )
   .option(
-    "-r, --root-is-db",
+    "-d, --root-is-db",
     "Whether the root page is a database. If not, it must be a 'page'.",
     false
   )
@@ -57,6 +58,11 @@ export const pull = new Command()
     "-t, --status-tag  <string>",
     "Database pages without a Notion page property 'status' matching this will be ignored. Use '*' to ignore status altogether.",
     "Publish"
+  )
+  .option(
+    "-c, --clean-cache",
+    "Clear the cache before starting. WARNING: this will remove all files from the cache directory.",
+    false
   )
   .addOption(
     new Option("-l, --log-level <level>", "Log level").choices([

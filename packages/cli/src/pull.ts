@@ -29,6 +29,7 @@ export type DocuNotionOptions = {
   rootPage: string
   rootIsDb?: boolean
   locales: string[]
+  cleanCache: Boolean
   markdownOutputPath: string
   imgOutputPath: string
   imgPrefixInMarkdown: string
@@ -128,36 +129,41 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
       downloadDatabases: true,
       followLinks: true,
     },
+    storageOptions: {
+      cleanCache: options.cleanCache,
+    },
   })
-
-  // // Demo of fetching with root database
-  // const response = await cachedNotionClient.databases.query({
-  //   database_id: rootPageUUID,
-  // })
-  // const pagesPromises = response.results.map((page) => {
-  //   const notionPage = fromPageId("", page.id, 0, true)
-  //   return notionPage
-  // })
-  // await Promise.all(pagesPromises).then((results) => {
-  //   results.forEach((resultPage) => {
-  //     console.log(resultPage)
-  //     pages.push(resultPage)
-  //   })
-  // })
 
   info(`PULL: Fetched entire page tree`)
 
   const pages = new Array<NotionPage>()
   // ---- Markdown conversion and writing to files ----
-  await getPagesRecursively(
-    options.markdownOutputPath,
-    "",
-    rootPageUUID,
-    0,
-    true,
-    cachedNotionClient,
-    pages
-  )
+  // // Demo of fetching with root database
+  if (options.rootIsDb) {
+    const response = await cachedNotionClient.databases.query({
+      database_id: rootPageUUID,
+    })
+    const pagesPromises = response.results.map((page) => {
+      const notionPage = fromPageId("", page.id, 0, true, cachedNotionClient)
+      return notionPage
+    })
+    await Promise.all(pagesPromises).then((results) => {
+      results.forEach((resultPage) => {
+        console.log(resultPage)
+        pages.push(resultPage)
+      })
+    })
+  } else {
+    await getPagesRecursively(
+      options.markdownOutputPath,
+      "",
+      rootPageUUID,
+      0,
+      true,
+      cachedNotionClient,
+      pages
+    )
+  }
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
   await saveDataToJson(pages, CACHE_DIR + "pages.json")
