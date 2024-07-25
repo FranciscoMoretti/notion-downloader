@@ -351,6 +351,7 @@ export async function getPageContentInfo(
   children: ListBlockChildrenResponseResults
 ): Promise<{
   childPageIdsAndOrder: { id: string; order: number }[]
+  childDatabaseIdsAndOrder: { id: string; order: number }[]
   linksPageIdsAndOrder: { id: string; order: number }[]
   hasParagraphs: boolean
 }> {
@@ -360,6 +361,9 @@ export async function getPageContentInfo(
   return {
     childPageIdsAndOrder: children
       .filter((b: any) => b.type === "child_page")
+      .map((b: any) => ({ id: b.id, order: b.order })),
+    childDatabaseIdsAndOrder: children
+      .filter((b: any) => b.type === "child_database")
       .map((b: any) => ({ id: b.id, order: b.order })),
     linksPageIdsAndOrder: children
       .filter((b: any) => b.type === "link_to_page")

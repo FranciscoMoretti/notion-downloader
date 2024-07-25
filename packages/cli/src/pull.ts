@@ -16,6 +16,7 @@ import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage, PageType, fromPageId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { getOutlinePagesRecursively } from "./get-outline-pages-recursively"
+import { getTreePages } from "./get-tree-pages"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
 import { convertInternalUrl } from "./plugins/internalLinks"
@@ -163,11 +164,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
       })
     })
   } else {
-    await getOutlinePagesRecursively(
+    await getTreePages(
       options.markdownOutputPath,
       "",
       rootPageUUID,
-      0,
+      options.rootIsDb ? "database" : "page",
       true,
       cachedNotionClient,
       pages,
