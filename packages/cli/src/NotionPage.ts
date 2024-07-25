@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+
+import { Client } from "@notionhq/client"
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
 import chalk from "chalk"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
@@ -90,7 +92,7 @@ export class NotionPage {
 
   // In Notion, pages from the Outline have "title"'s.
   private get title(): string {
-    return this.getPlainTextProperty("title", "title missing")
+    return this.getPlainTextProperty("Title", "title missing")
   }
   // In Notion, pages from the Database have "Name"s.
   private get name(): string {
@@ -368,4 +370,24 @@ export async function getPageContentInfo(
         (b as any).paragraph.rich_text.length > 0
     ),
   }
+}
+export async function fromPageId(
+  context: string,
+  pageId: string,
+  order: number,
+  foundDirectlyInOutline: boolean,
+  client: Client
+): Promise<NotionPage> {
+  const metadata = await client.pages.retrieve({
+    page_id: pageId,
+  })
+
+  //logDebug("notion metadata", JSON.stringify(metadata));
+  return new NotionPage({
+    layoutContext: context,
+    pageId,
+    order,
+    metadata,
+    foundDirectlyInOutline,
+  })
 }
