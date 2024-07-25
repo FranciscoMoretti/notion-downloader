@@ -150,7 +150,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   const pages = new Array<NotionPage>()
   // ---- Markdown conversion and writing to files ----
   await getPagesRecursively(
-    options,
+    options.markdownOutputPath,
     "",
     rootPageUUID,
     0,
@@ -255,7 +255,7 @@ async function outputPages(
 // then step through this list creating the files we need, and, crucially, be
 // able to figure out what the url will be for any links between content pages.
 async function getPagesRecursively(
-  options: DocuNotionOptions,
+  outputRootPath: string,
   incomingContext: string,
   pageIdOfThisParent: string,
   orderOfThisParent: number,
@@ -311,7 +311,7 @@ async function getPagesRecursively(
     // don't make a level for "Outline" page at the root
     if (!rootLevel && pageInTheOutline.nameOrTitle !== "Outline") {
       layoutContext = layoutStrategy.newLevel(
-        options.markdownOutputPath,
+        outputRootPath,
         pageInTheOutline.order,
         incomingContext,
         pageInTheOutline.nameOrTitle
@@ -319,7 +319,7 @@ async function getPagesRecursively(
     }
     for (const childPageInfo of pageInfo.childPageIdsAndOrder) {
       await getPagesRecursively(
-        options,
+        outputRootPath,
         layoutContext,
         childPageInfo.id,
         childPageInfo.order,
