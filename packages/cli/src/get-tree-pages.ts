@@ -5,7 +5,7 @@ import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
 import { error, info, warning } from "./log"
 import { OutputCounts, getBlockChildren } from "./pull"
 
-// TODO: Add suppport for links
+// TODO: Add support for links
 export async function getTreePages(
   outputRootPath: string,
   incomingContext: string,
