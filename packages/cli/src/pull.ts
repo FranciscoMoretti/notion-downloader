@@ -31,7 +31,7 @@ export type DocuNotionOptions = {
   rootPage: string
   rootIsDb?: boolean
   locales: string[]
-  cleanCache: Boolean
+  cleanCache: boolean
   markdownOutputPath: string
   imgOutputPath: string
   imgPrefixInMarkdown: string
