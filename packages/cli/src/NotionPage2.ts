@@ -2,40 +2,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { Client } from "@notionhq/client"
-import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
+import {
+  GetPageResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
 import { error } from "./log"
 import { parseLinkId } from "./plugins/internalLinks"
 
-// Notion has 2 kinds of pages: a normal one which is just content, and what I'm calling a "database page", which has whatever properties you put on it.
-// docu-notion supports the later via links from outline pages. That is, you put the database pages in a database, then separately, in the outline, you
-// create pages for each node of the outline and then add links from those to the database pages. In this way, we get the benefits of database
-// pages (metadata, workflow, etc) and also normal pages (order, position in the outline).
-export enum PageType {
-  DatabasePage,
-  Simple,
-}
+export class NotionPage2 {
+  public metadata: PageObjectResponse
 
-export class NotionPage {
-  public metadata: GetPageResponse
-  public pageId: string
-  public order: number
-  public layoutContext: string // where we found it in the hierarchy of the outline
-  public foundDirectlyInOutline: boolean // the page was found as a descendent of /outline instead of being linked to
-
-  public constructor(args: {
-    layoutContext: string
-    pageId: string
-    order: number
-    metadata: GetPageResponse
-    foundDirectlyInOutline: boolean
-  }) {
-    this.layoutContext = args.layoutContext
-    this.pageId = args.pageId
-    this.order = args.order
-    this.metadata = args.metadata
-    this.foundDirectlyInOutline = args.foundDirectlyInOutline
+  public constructor(metadata: PageObjectResponse) {
+    this.metadata = metadata
 
     // review: this is expensive to learn as it takes another api call... I
     // think? We can tell if it's a database because it has a "Name" instead of a
@@ -47,8 +27,8 @@ export class NotionPage {
     const { baseLinkId } = parseLinkId(id)
 
     const match =
-      baseLinkId === this.pageId || // from a link_to_page.pageId, which still has the dashes
-      baseLinkId === this.pageId.replaceAll("-", "") // from inline links, which are lacking the dashes
+      baseLinkId === this.id || // from a link_to_page.pageId, which still has the dashes
+      baseLinkId === this.id.replaceAll("-", "") // from inline links, which are lacking the dashes
 
     // logDebug(
     //   `matchedLinkId`,
@@ -57,7 +37,11 @@ export class NotionPage {
     return match
   }
 
-  public get type(): PageType {
+  public get id(): string {
+    return this.metadata.id
+  }
+
+  public get isDatabasePage(): boolean {
     /*
     {
         "object": "page",
@@ -68,19 +52,17 @@ export class NotionPage {
             ...
         },
     */
-    return (this.metadata as any).parent.type === "database_id"
-      ? PageType.DatabasePage
-      : PageType.Simple
+    return this.metadata.parent.type === "database_id"
   }
 
   // In Notion, pages from the Database have names and simple pages have titles.
   public get nameOrTitle(): string {
-    return this.type === PageType.DatabasePage ? this.name : this.title
+    return this.isDatabasePage ? this.name : this.title
   }
 
   public nameForFile(): string {
     // In Notion, pages from the Database have names and simple pages have titles.
-    return this.type === PageType.Simple
+    return !this.isDatabasePage
       ? this.title
       : // if it's a Database page, then we'll use the slug unless there is none, then we'd rather have the
         // page name than an ugly id for the file name
@@ -91,7 +73,7 @@ export class NotionPage {
 
   // In Notion, pages from the Outline have "title"'s.
   private get title(): string {
-    return this.getPlainTextProperty("Title", "title missing")
+    return this.getPlainTextProperty("title", "title missing")
   }
   // In Notion, pages from the Database have "Name"s.
   private get name(): string {
@@ -129,7 +111,7 @@ export class NotionPage {
   }
 
   public get slug(): string {
-    return this.explicitSlug() ?? "/" + this.pageId
+    return this.explicitSlug() ?? "/" + this.id
   }
   public get hasExplicitSlug(): boolean {
     return this.explicitSlug() !== undefined
@@ -373,24 +355,4 @@ export async function getPageContentInfo(
         (b as any).paragraph.rich_text.length > 0
     ),
   }
-}
-export async function fromPageId(
-  context: string,
-  pageId: string,
-  order: number,
-  foundDirectlyInOutline: boolean,
-  client: Client
-): Promise<NotionPage> {
-  const metadata = await client.pages.retrieve({
-    page_id: pageId,
-  })
-
-  //logDebug("notion metadata", JSON.stringify(metadata));
-  return new NotionPage({
-    layoutContext: context,
-    pageId,
-    order,
-    metadata,
-    foundDirectlyInOutline,
-  })
 }

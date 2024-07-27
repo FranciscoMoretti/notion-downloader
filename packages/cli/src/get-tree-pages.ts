@@ -3,7 +3,7 @@ import { Client } from "@notionhq/client"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
 import { error, info, warning } from "./log"
-import { OutputCounts, getBlockChildren } from "./pull"
+import { FilesMap, OutputCounts, getBlockChildren } from "./pull"
 
 // TODO: Add support for links
 export async function getTreePages(
@@ -15,7 +15,8 @@ export async function getTreePages(
   client: Client,
   pages: Array<NotionPage>,
   layoutStrategy: LayoutStrategy,
-  counts: OutputCounts
+  counts: OutputCounts,
+  filesMap: FilesMap
 ) {
   info(
     `Looking for children and links from [${currentType}] ${incomingContext}/${currentID}...`
@@ -23,9 +24,6 @@ export async function getTreePages(
 
   if (currentType == "database") {
     const databaseResponse = await client.databases.retrieve({
-      database_id: currentID,
-    })
-    const databaseChildrenResponse = await client.databases.query({
       database_id: currentID,
     })
     let layoutContext = incomingContext
@@ -39,6 +37,12 @@ export async function getTreePages(
       )
     }
 
+    // Save the DB filepath no matter if its the root label or not
+    filesMap.database[currentID] = layoutContext
+
+    const databaseChildrenResponse = await client.databases.query({
+      database_id: currentID,
+    })
     for (const page of databaseChildrenResponse.results) {
       await getTreePages(
         outputRootPath,
@@ -49,7 +53,8 @@ export async function getTreePages(
         client,
         pages,
         layoutStrategy,
-        counts
+        counts,
+        filesMap
       )
     }
   } else if (currentType == "page") {
@@ -76,6 +81,7 @@ export async function getTreePages(
       return
     }
     if (!rootLevel && pageInfo.hasParagraphs) {
+      filesMap.page[currentID] = incomingContext
       pages.push(currentPage)
     }
 
@@ -103,7 +109,8 @@ export async function getTreePages(
           client,
           pages,
           layoutStrategy,
-          counts
+          counts,
+          filesMap
         )
       }
 

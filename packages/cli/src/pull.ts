@@ -1,6 +1,11 @@
 import * as Path from "path"
 import { exit } from "process"
-import { Client, isFullBlock } from "@notionhq/client"
+import {
+  Client,
+  isFullBlock,
+  isFullDatabase,
+  isFullPage,
+} from "@notionhq/client"
 import {
   BlockObjectResponse,
   ListBlockChildrenResponse,
@@ -13,7 +18,9 @@ import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
+import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage, PageType, fromPageId } from "./NotionPage"
+import { NotionPage2, getPageContentInfo } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { getOutlinePagesRecursively } from "./get-outline-pages-recursively"
 import { getTreePages } from "./get-tree-pages"
@@ -26,6 +33,10 @@ import { NotionBlock } from "./types"
 import { convertToUUID, saveDataToJson } from "./utils"
 
 type ImageFileNameFormat = "default" | "content-hash" | "legacy"
+export type FilesMap = Record<
+  "page" | "database" | "image",
+  Record<string, string>
+>
 export type DocuNotionOptions = {
   notionToken: string
   rootPage: string
@@ -56,6 +67,122 @@ export const counts: OutputCounts = {
   skipped_because_status: 0,
   skipped_because_level_cannot_have_content: 0,
   error_because_no_slug: 0,
+}
+
+async function getFileTreeMap(
+  outputRootPath: string,
+  incomingContext: string,
+  currentID: string,
+  currentType: "page" | "database",
+  rootLevel: boolean,
+  client: Client,
+  layoutStrategy: LayoutStrategy,
+  filesMap: FilesMap
+): Promise<void> {
+  if (currentType === "database") {
+    const database = await getNotionDatabase(client, currentID)
+    let layoutContext = incomingContext
+    if (!rootLevel) {
+      layoutContext = layoutStrategy.newLevel(
+        outputRootPath,
+        -1,
+        incomingContext,
+        database.title
+      )
+      filesMap.database[currentID] = layoutStrategy.getPathForDatabase(
+        database,
+        layoutContext
+      )
+    } else {
+      filesMap.database[currentID] = outputRootPath
+    }
+    // Recurse to children
+    const databaseChildrenResponse = await client.databases.query({
+      database_id: currentID,
+    })
+    for (const page of databaseChildrenResponse.results) {
+      // TODO: Consider using just id from objectTreeMap instead of the database query here
+      await getFileTreeMap(
+        outputRootPath,
+        layoutContext,
+        page.id,
+        "page",
+        false,
+        client,
+        layoutStrategy,
+        filesMap
+      )
+    }
+  } else if (currentType === "page") {
+    const page = await getNotionPage2(client, currentID)
+    if (!rootLevel) {
+      filesMap.page[currentID] = layoutStrategy.getPathForPage2(
+        page,
+        incomingContext
+      )
+    } else {
+      filesMap.page[currentID] = outputRootPath
+    }
+    // Recurse to children
+    const pageBlocksResponse = await client.blocks.children.list({
+      block_id: currentID,
+    })
+    const pageInfo = await getPageContentInfo(pageBlocksResponse.results)
+    // TODO: Also handle blocks that have block/page children (e.g. columns)
+    if (pageInfo.childDatabaseIdsAndOrder || pageInfo.childPageIdsAndOrder) {
+      const layoutContext = layoutStrategy.newLevel(
+        outputRootPath,
+        -1,
+        incomingContext,
+        page.nameOrTitle
+      )
+      for (const page of pageInfo.childPageIdsAndOrder) {
+        await getFileTreeMap(
+          outputRootPath,
+          layoutContext,
+          page.id,
+          "page",
+          false,
+          client,
+          layoutStrategy,
+          filesMap
+        )
+      }
+      for (const database of pageInfo.childDatabaseIdsAndOrder) {
+        await getFileTreeMap(
+          outputRootPath,
+          layoutContext,
+          database.id,
+          "database",
+          false,
+          client,
+          layoutStrategy,
+          filesMap
+        )
+      }
+    }
+  } else {
+    throw new Error(`Unknown type ${currentType}`)
+  }
+}
+
+async function getNotionPage2(client: Client, currentID: string) {
+  const pageResponse = await client.pages.retrieve({ page_id: currentID })
+  if (!isFullPage(pageResponse)) {
+    throw Error("Notion page response is not full for " + currentID)
+  }
+  const page = new NotionPage2(pageResponse)
+  return page
+}
+
+async function getNotionDatabase(client: Client, currentID: string) {
+  const databaseResponse = await client.databases.retrieve({
+    database_id: currentID,
+  })
+  if (!isFullDatabase(databaseResponse)) {
+    throw Error("Notion database response is not full for " + currentID)
+  }
+  return new NotionDatabase(databaseResponse)
 }
 
 export async function notionPull(options: DocuNotionOptions): Promise<void> {
@@ -147,6 +274,24 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   info(`PULL: Fetched entire page tree`)
 
   const pages = new Array<NotionPage>()
+
+  const filesMap: FilesMap = {
+    page: {},
+    database: {},
+    image: {},
+  }
+
+  await getFileTreeMap(
+    options.markdownOutputPath,
+    "", // Start context
+    rootPageUUID,
+    options.rootIsDb ? "database" : "page",
+    true,
+    cachedNotionClient,
+    layoutStrategy,
+    filesMap
+  )
+
   await getTreePages(
     options.markdownOutputPath,
     "",
@@ -156,7 +301,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     cachedNotionClient,
     pages,
     layoutStrategy,
-    counts
+    counts,
+    filesMap
   )
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")

@@ -1,6 +1,8 @@
 import fs from "fs-extra"
 
+import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
+import { NotionPage2 } from "./NotionPage2"
 import { verbose } from "./log"
 
 // Here a fuller name would be File Tree Layout Strategy. That is,
@@ -33,6 +35,16 @@ export abstract class LayoutStrategy {
   public abstract getPathForPage(
     page: NotionPage,
     extensionWithDot: string
+  ): string
+
+  public abstract getPathForPage2(
+    page: NotionPage2,
+    currentPath: string
+  ): string
+
+  public abstract getPathForDatabase(
+    page: NotionDatabase,
+    currentPath: string
   ): string
 
   public getLinkPathForPage(page: NotionPage): string {
