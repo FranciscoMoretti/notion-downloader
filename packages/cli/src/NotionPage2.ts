@@ -120,7 +120,7 @@ export class NotionPage2 {
     return this.getPlainTextProperty("Keywords", "")
   }
   public get status(): string | undefined {
-    return this.getStatusProperty("Status")
+    return this.getGenericProperty("Status")
   }
 
   public getGenericProperty(property: string): string | undefined {
