@@ -124,7 +124,8 @@ export async function getTreePages(
           client,
           pages,
           layoutStrategy,
-          counts
+          counts,
+          filesMap
         )
       }
     } else {
