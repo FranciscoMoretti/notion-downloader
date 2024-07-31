@@ -82,20 +82,17 @@ async function getFileTreeMap(
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
     let layoutContext = incomingContext
-    if (!rootLevel) {
-      layoutContext = layoutStrategy.newLevel(
-        outputRootPath,
-        -1,
-        incomingContext,
-        database.title
-      )
-      filesMap.database[currentID] = layoutStrategy.getPathForDatabase(
-        database,
-        layoutContext
-      )
-    } else {
-      filesMap.database[currentID] = outputRootPath
-    }
+    layoutContext = layoutStrategy.newLevel(
+      outputRootPath,
+      -1,
+      incomingContext,
+      database.title
+    )
+    filesMap.database[currentID] = layoutStrategy.getPathForDatabase(
+      database,
+      layoutContext
+    )
+
     // Recurse to children
     const databaseChildrenResponse = await client.databases.query({
       database_id: currentID,
@@ -115,14 +112,11 @@ async function getFileTreeMap(
     }
   } else if (currentType === "page") {
     const page = await getNotionPage2(client, currentID)
-    if (!rootLevel) {
-      filesMap.page[currentID] = layoutStrategy.getPathForPage2(
-        page,
-        incomingContext
-      )
-    } else {
-      filesMap.page[currentID] = outputRootPath
-    }
+    filesMap.page[currentID] = layoutStrategy.getPathForPage2(
+      page,
+      incomingContext
+    )
+
     // Recurse to children
     const pageBlocksResponse = await client.blocks.children.list({
       block_id: currentID,
@@ -273,8 +267,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 
   info(`PULL: Fetched entire page tree`)
 
-  const pages = new Array<NotionPage>()
-
   const filesMap: FilesMap = {
     page: {},
     database: {},
@@ -292,18 +284,26 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     filesMap
   )
 
-  await getTreePages(
-    options.markdownOutputPath,
-    "",
-    rootPageUUID,
-    options.rootIsDb ? "database" : "page",
-    true,
-    cachedNotionClient,
-    pages,
-    layoutStrategy,
-    counts,
-    filesMap
+  // await getTreePages(
+  //   options.markdownOutputPath,
+  //   "",
+  //   rootPageUUID,
+  //   options.rootIsDb ? "database" : "page",
+  //   true,
+  //   cachedNotionClient,
+  //   pages,
+  //   layoutStrategy,
+  //   counts,
+  //   filesMap
+  // )
+
+  const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
+    (id) =>
+      // TODO: All path related things should come from filesMap instead of belonging to a page
+      fromPageId("incomingContextDummy", id, -1, false, cachedNotionClient)
   )
+
+  const pages = await Promise.all(pagesPromises)
 
   await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
   await saveDataToJson(pages, CACHE_DIR + "pages.json")
@@ -313,17 +313,20 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   group(
     `Stage 2: convert ${pages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
   )
+
   await outputPages(
     options,
     config,
     pages,
     cachedNotionClient,
     layoutStrategy,
-    notionToMarkdown
+    notionToMarkdown,
+    filesMap
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  await layoutStrategy.cleanupOldFiles()
+  // TODO: Do the cleanup based on (new filestree -> new paths) vs old paths
+  // await layoutStrategy.cleanupOldFiles()
   await cleanupOldImages()
   endGroup()
 }
@@ -334,7 +337,8 @@ async function outputPages(
   pages: Array<NotionPage>,
   client: Client,
   layoutStrategy: LayoutStrategy,
-  notionToMarkdown: NotionToMarkdown
+  notionToMarkdown: NotionToMarkdown,
+  filesMap: FilesMap
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
@@ -354,8 +358,9 @@ async function outputPages(
       convertInternalUrl(context, url),
   }
   for (const page of pages) {
-    layoutStrategy.pageWasSeen(page)
-    const mdPath = layoutStrategy.getPathForPage(page, ".md")
+    // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
+    // layoutStrategy.pageWasSeen(page)
+    const mdPath = filesMap.page[page.pageId]
 
     // most plugins should not write to disk, but those handling image files need these paths
     context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPath)
@@ -384,7 +389,7 @@ async function outputPages(
       }
 
       const markdown = await getMarkdownForPage(config, context, page)
-      writePage(page, markdown)
+      writePage(markdown, mdPath)
     }
   }
 
@@ -394,9 +399,10 @@ async function outputPages(
   info(JSON.stringify(counts))
 }
 
-function writePage(page: NotionPage, finalMarkdown: string) {
-  const mdPath = layoutStrategy.getPathForPage(page, ".md")
+function writePage(finalMarkdown: string, mdPath: string) {
   verbose(`writing ${mdPath}`)
+  // TODO: Move directory creation to a previous step to avoid repetition in creating directories
+  fs.mkdirSync(Path.dirname(mdPath), { recursive: true })
   fs.writeFileSync(mdPath, finalMarkdown, {})
   ++counts.output_normally
 }
