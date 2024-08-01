@@ -1,3 +1,4 @@
+import https from "https"
 import * as Path from "path"
 import axios from "axios"
 import FileType, { FileTypeResult } from "file-type"
@@ -110,6 +111,8 @@ async function processImageBlock(
   context: IDocuNotionContext
 ): Promise<void> {
   const imageBlock = block.image
+
+  // TODOL: Fix ISSUE Getting a "socket hung up" error when getting the image.
   logDebug("processImageBlock", JSON.stringify(imageBlock))
 
   const imageSet = parseImageBlock(imageBlock)
@@ -149,10 +152,12 @@ async function processImageBlock(
 }
 
 async function readPrimaryImage(imageSet: ImageSet) {
-  // In Mar 2024, we started having a problem getting a particular gif from imgur using
-  // node-fetch. Switching to axios resolved it. I don't know why.
+  // Keep alive with a long timeout solved some image retrieval issues. Maybe we should consider retries with exponential
+  // back-offs if this becomes an issue again.
   const response = await axios.get(imageSet.primaryUrl, {
     responseType: "arraybuffer",
+    httpsAgent: new https.Agent({ keepAlive: true }),
+    timeout: 10000,
   })
   imageSet.primaryBuffer = Buffer.from(response.data, "utf-8")
   imageSet.fileType = await FileType.fromBuffer(imageSet.primaryBuffer)
