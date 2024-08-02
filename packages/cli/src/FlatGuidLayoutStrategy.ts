@@ -8,7 +8,7 @@ import { NotionPage } from "./NotionPage"
 //    * is less "future" proof, in the sense that if you someday take these files and move them
 //    * to a new system, maybe you will wish the files had names.
 
-// TODO: for this to be viable, we'd also have to emit info on how to build the sidebar, because
+// TODO: Fill this with the new interface of pagename databasename etc once its ready
 // the directory/file structure itself is no longer representative of the outline we want.
 export class FlatGuidLayoutStrategy extends LayoutStrategy {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

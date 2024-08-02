@@ -52,8 +52,6 @@ export type DocuNotionOptions = {
   imageFileNameFormat?: ImageFileNameFormat
 }
 
-let layoutStrategy: LayoutStrategy
-
 export interface OutputCounts {
   output_normally: number
   skipped_because_empty: number
@@ -210,7 +208,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     notionClient: cachedNotionClient,
   })
 
-  layoutStrategy = new HierarchicalNamedLayoutStrategy()
+  let layoutStrategy = new HierarchicalNamedLayoutStrategy()
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
