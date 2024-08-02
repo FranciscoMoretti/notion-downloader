@@ -72,8 +72,6 @@ export async function getOutlinePagesRecursively(
     // don't make a level for "Outline" page at the root
     if (!rootLevel && pageInTheOutline.nameOrTitle !== "Outline") {
       layoutContext = layoutStrategy.newLevel(
-        outputRootPath,
-        pageInTheOutline.order,
         incomingContext,
         pageInTheOutline.nameOrTitle
       )

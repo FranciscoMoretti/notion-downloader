@@ -30,8 +30,6 @@ export async function getTreePages(
     let layoutContext = incomingContext
     if (!rootLevel) {
       layoutContext = layoutStrategy.newLevel(
-        outputRootPath,
-        -1,
         incomingContext,
         // TODO: Improve how this property is handled
         databaseResponse.title[0].plain_text || "Untitled"
@@ -94,8 +92,6 @@ export async function getTreePages(
       let layoutContext = incomingContext
       if (!rootLevel) {
         layoutContext = layoutStrategy.newLevel(
-          outputRootPath,
-          currentPage.order,
           incomingContext,
           currentPage.nameOrTitle
         )

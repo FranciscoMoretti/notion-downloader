@@ -11,12 +11,7 @@ export abstract class LayoutStrategy {
     this.rootDirectory = markdownOutputPath
   }
 
-  public abstract newLevel(
-    rootDir: string,
-    order: number,
-    context: string,
-    levelLabel: string
-  ): string
+  public abstract newLevel(context: string, levelLabel: string): string
 
   public abstract getPathForPage(
     page: NotionPage,

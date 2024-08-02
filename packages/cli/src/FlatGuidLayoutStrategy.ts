@@ -12,15 +12,10 @@ import { NotionPage } from "./NotionPage"
 // the directory/file structure itself is no longer representative of the outline we want.
 export class FlatGuidLayoutStrategy extends LayoutStrategy {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public newLevel(
-    rootDir: string,
-    order: number,
-    context: string,
-    _levelLabel: string
-  ): string {
+  public newLevel(context: string, levelLabel: string): string {
     // In this strategy, we ignore context and don't create any directories to match the levels.
     // Just return the following for the benefit of logging.
-    return context + "/" + _levelLabel
+    return context + "/" + levelLabel
   }
 
   public getPathForPage(page: NotionPage, extensionWithDot: string): string {

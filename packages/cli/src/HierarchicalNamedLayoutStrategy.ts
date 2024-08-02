@@ -11,18 +11,8 @@ import { NotionPage2 } from "./NotionPage2"
 // As long as you use slugs, the urls is still just something like https://site/slug
 
 export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
-  public newLevel(
-    dirRoot: string,
-    order: number,
-    context: string,
-    levelLabel: string
-  ): string {
+  public newLevel(context: string, levelLabel: string): string {
     const path = context + "/" + sanitize(levelLabel).replaceAll(" ", "-")
-
-    //console.log("Creating level " + path);
-    const newPath = dirRoot + "/" + path
-    fs.mkdirSync(newPath, { recursive: true })
-    this.addCategoryMetadata(newPath, order, levelLabel)
     return path
   }
 
@@ -68,24 +58,5 @@ export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
         .replaceAll("'", "")
         .replaceAll("?", "-")
     )
-  }
-
-  //{
-  //   "position": 2.5,
-  //   "label": "Tutorial",
-  //   "collapsible": true,
-  //   "collapsed": false,
-  //   "className": "red",
-  //   "link": {
-  //     "type": "generated-index",
-  //     "title": "Tutorial overview"
-  //   },
-  //   "customProps": {
-  //     "description": "This description can be used in the swizzled DocCard"
-  //   }
-  // }
-  private addCategoryMetadata(dir: string, order: number, label: string) {
-    const data = `{"position":${order}, "label":"${label}"}`
-    fs.writeFileSync(dir + "/_category_.json", data)
   }
 }
