@@ -268,11 +268,7 @@ async function outputPages(
 
     // most plugins should not write to disk, but those handling image files need these paths
     context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPath)
-    // TODO: This needs clarifying: getLinkPathForPage() is about urls, but
-    // downstream images.ts is using it as a file system path
-    context.pageInfo.relativeFilePathToFolderContainingPage = Path.dirname(
-      layoutStrategy.getLinkPathForPage(page)
-    )
+    context.pageInfo.relativeFilePathToFolderContainingPage = page.slug
     context.pageInfo.slug = page.slug
 
     if (

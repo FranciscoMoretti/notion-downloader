@@ -1,6 +1,6 @@
-import { IDocuNotionContext, IPlugin } from "./pluginTypes";
-import { error, warning } from "../log";
-import { NotionPage } from "../NotionPage";
+import { NotionPage } from "../NotionPage"
+import { error, warning } from "../log"
+import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 
 // converts a url to a local link, if it is a link to a page in the Notion site
 // only here for plugins, notion won't normally be giving us raw urls (at least not that I've noticed)
@@ -10,29 +10,29 @@ export function convertInternalUrl(
   context: IDocuNotionContext,
   url: string
 ): string | undefined {
-  const kGetIDFromNotionURL = /https:\/\/www\.notion\.so\S+-([a-z,0-9]+)+.*/;
-  const match = kGetIDFromNotionURL.exec(url);
+  const kGetIDFromNotionURL = /https:\/\/www\.notion\.so\S+-([a-z,0-9]+)+.*/
+  const match = kGetIDFromNotionURL.exec(url)
   if (match === null) {
     warning(
       `[standardInternalLinkConversion] Could not parse link ${url} as a Notion URL`
-    );
-    return undefined;
+    )
+    return undefined
   }
-  const id = match[1];
-  const pages = context.pages;
+  const id = match[1]
+  const pages = context.pages
   // find the page where pageId matches hrefFromNotion
-  const targetPage = pages.find(p => {
-    return p.matchesLinkId(id);
-  });
+  const targetPage = pages.find((p) => {
+    return p.matchesLinkId(id)
+  })
 
   if (!targetPage) {
     // About this situation. See https://github.com/sillsdev/docu-notion/issues/9
     warning(
       `[standardInternalLinkConversion] Could not find the target of this link. Note that links to outline sections are not supported. ${url}. https://github.com/sillsdev/docu-notion/issues/9`
-    );
-    return undefined;
+    )
+    return undefined
   }
-  return convertLinkHref(context, targetPage, url);
+  return convertLinkHref(context, targetPage, url)
 }
 
 // handles the whole markdown link, including the label
@@ -42,39 +42,39 @@ function convertInternalLink(
 ): string {
   // match both [foo](/123) and [bar](https://www.notion.so/123) <-- the "mention" link style
   const linkRegExp =
-    /\[([^\]]+)?\]\((?:https?:\/\/www\.notion\.so\/|\/)?([^),^/]+)\)/g;
-  const match = linkRegExp.exec(markdownLink);
+    /\[([^\]]+)?\]\((?:https?:\/\/www\.notion\.so\/|\/)?([^),^/]+)\)/g
+  const match = linkRegExp.exec(markdownLink)
   if (match === null) {
     warning(
       `[standardInternalLinkConversion] Could not parse link ${markdownLink}`
-    );
-    return markdownLink;
+    )
+    return markdownLink
   }
 
-  const labelFromNotion = match[1] || "";
-  const hrefFromNotion = match[2];
+  const labelFromNotion = match[1] || ""
+  const hrefFromNotion = match[2]
 
   // verbose(
   //   `[standardInternalLinkConversion] Converting ${markdownLink} with has url ${hrefFromNotion}`
   // );
 
-  const pages = context.pages;
+  const pages = context.pages
   // find the page where pageId matches hrefFromNotion
-  const targetPage = pages.find(p => {
-    return p.matchesLinkId(hrefFromNotion);
-  });
+  const targetPage = pages.find((p) => {
+    return p.matchesLinkId(hrefFromNotion)
+  })
 
   if (!targetPage) {
     // About this situation. See https://github.com/sillsdev/docu-notion/issues/9
     warning(
       `[standardInternalLinkConversion] Could not find the target of this link. Note that links to outline sections are not supported. ${markdownLink}. https://github.com/sillsdev/docu-notion/issues/9`
-    );
-    return "**[Problem Internal Link]**";
+    )
+    return "**[Problem Internal Link]**"
   }
 
-  const label = convertLinkLabel(targetPage, labelFromNotion);
-  const url = convertLinkHref(context, targetPage, hrefFromNotion);
-  return `[${label}](${url})`;
+  const label = convertLinkLabel(targetPage, labelFromNotion)
+  const url = convertLinkHref(context, targetPage, hrefFromNotion)
+  return `[${label}](${url})`
 }
 
 function convertLinkLabel(targetPage: NotionPage, text: string): string {
@@ -82,15 +82,15 @@ function convertLinkLabel(targetPage: NotionPage, text: string): string {
   // you see the name of the page as the text of the link. But when Notion gives us that same
   // link, it uses "link_to_page" as the text. So we have to look up the name of the page in
   // order to fix that.;
-  if (text !== "link_to_page") return text;
-  else return targetPage.nameOrTitle;
+  if (text !== "link_to_page") return text
+  else return targetPage.nameOrTitle
 }
 function convertLinkHref(
   context: IDocuNotionContext,
   targetPage: NotionPage,
   url: string
 ): string {
-  let convertedLink = context.layoutStrategy.getLinkPathForPage(targetPage);
+  let convertedLink = targetPage.slug
 
   /*****************************
   NOTE: as of this writing, the official Notion API completely drops links
@@ -98,26 +98,26 @@ function convertLinkHref(
   *******************************/
 
   // Include the fragment (# and after) if it exists
-  const { fragmentId } = parseLinkId(url);
+  const { fragmentId } = parseLinkId(url)
   //verbose(`Parsed ${url} and got Fragment ID: ${fragmentId}`);
-  convertedLink += fragmentId;
+  convertedLink += fragmentId
 
   //verbose(`Converting Link ${url} --> ${convertedLink}`);
-  return convertedLink;
+  return convertedLink
 }
 // Parse the link ID to get the base (before the #) and the fragment (# and after).
 export function parseLinkId(fullLinkId: string): {
-  baseLinkId: string; // before the #
-  fragmentId: string; // # and after
+  baseLinkId: string // before the #
+  fragmentId: string // # and after
 } {
-  const iHash: number = fullLinkId.indexOf("#");
+  const iHash: number = fullLinkId.indexOf("#")
   if (iHash >= 0) {
     return {
       baseLinkId: fullLinkId.substring(0, iHash),
       fragmentId: fullLinkId.substring(iHash),
-    };
+    }
   }
-  return { baseLinkId: fullLinkId, fragmentId: "" };
+  return { baseLinkId: fullLinkId, fragmentId: "" }
 }
 
 export const standardInternalLinkConversion: IPlugin = {
@@ -133,4 +133,4 @@ export const standardInternalLinkConversion: IPlugin = {
       /\[([^\]]+)?\]\((?!mailto:)(https:\/\/www\.notion\.so\/[^),^/]+|\/?[^),^/]+)\)/,
     convert: convertInternalLink,
   },
-};
+}
