@@ -1,4 +1,4 @@
-import { Client, isFullBlock } from "@notionhq/client"
+import { Client, collectPaginatedAPI, isFullBlock } from "@notionhq/client"
 import { NotionCacheClient } from "notion-cache-client"
 
 import { info } from "./log"
@@ -92,10 +92,13 @@ async function fetchTreeRecursively(
     }
 
     // TODO: Decide how to process a child_database block that also has children.
-    const databaseResponse = await client.databases.query({
-      database_id: objectNode.id,
-    })
-    for (const childObject of databaseResponse.results) {
+    const databaseChildrenResults = await collectPaginatedAPI(
+      client.databases.query,
+      {
+        database_id: objectNode.id,
+      }
+    )
+    for (const childObject of databaseChildrenResults) {
       const newNode: NotionObjectTreeNode = {
         id: childObject.id,
         object: childObject.object,
@@ -121,10 +124,13 @@ async function fetchTreeRecursively(
       })
     }
 
-    const blocksResponse = await client.blocks.children.list({
-      block_id: objectNode.id,
-    })
-    for (const childBlock of blocksResponse.results) {
+    const blocksChildrenResults = await collectPaginatedAPI(
+      client.blocks.children.list,
+      {
+        block_id: objectNode.id,
+      }
+    )
+    for (const childBlock of blocksChildrenResults) {
       if (!isFullBlock(childBlock)) {
         throw new Error(`Non full block: ${JSON.stringify(childBlock)}`)
       }

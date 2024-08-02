@@ -420,37 +420,6 @@ export async function getBlockChildren(
   numberChildrenIfNumberedList(result)
   return result
 }
-async function listBlockChildren(id: string, client: Client) {
-  let overallResult: ListBlockChildrenResponse | undefined = undefined
-  let start_cursor: string | undefined | null = undefined
-
-  // Note: there is a now a collectPaginatedAPI() in the notion client, so
-  // we could switch to using that (I don't know if it does rate limiting?)
-  do {
-    const response = await client.blocks.children.list({
-      start_cursor: start_cursor as string | undefined,
-      block_id: id,
-    })
-
-    if (!overallResult) {
-      overallResult = response
-    } else {
-      overallResult.results.push(...response.results)
-    }
-
-    start_cursor = response?.next_cursor
-  } while (start_cursor != null)
-  // TODO: verify if this has_more property should be false after getting all
-  overallResult.has_more = false
-
-  if (overallResult?.results?.some((b) => !isFullBlock(b))) {
-    error(
-      `The Notion API returned some blocks that were not full blocks. Notion downloader does not handle this yet. Please report it.`
-    )
-    exit(1)
-  }
-  return overallResult
-}
 
 // This function is copied (and renamed from modifyNumberedListObject) from notion-to-md.
 // They always run it on the results of their getBlockChildren.
