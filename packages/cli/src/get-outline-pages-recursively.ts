@@ -2,8 +2,9 @@ import { Client } from "@notionhq/client"
 
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
+import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
-import { OutputCounts, getBlockChildren } from "./pull"
+import { OutputCounts } from "./pull"
 
 // This walks the "Outline" page and creates a list of all the nodes that will
 // be in the sidebar, including the directories, the pages that are linked to

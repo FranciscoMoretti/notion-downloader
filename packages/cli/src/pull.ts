@@ -6,32 +6,29 @@ import {
   isFullDatabase,
   isFullPage,
 } from "@notionhq/client"
-import {
-  BlockObjectResponse,
-  ListBlockChildrenResponse,
-} from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
-import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
 import { FileCleaner } from "./FileCleaner"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage, PageType, fromPageId } from "./NotionPage"
-import { NotionPage2, getPageContentInfo } from "./NotionPage2"
+import { NotionPage2 } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { getOutlinePagesRecursively } from "./get-outline-pages-recursively"
 import { getTreePages } from "./get-tree-pages"
+import { getBlockChildren } from "./getBlockChildren"
+import { getFileTreeMap } from "./getFileTreeMap"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
-import { NotionBlock } from "./types"
 import { convertToUUID, saveDataToJson } from "./utils"
+import { writePage } from "./writePage"
 
 type ImageFileNameFormat = "default" | "content-hash" | "legacy"
 export type FilesMap = Record<
@@ -68,98 +65,7 @@ export const counts: OutputCounts = {
   error_because_no_slug: 0,
 }
 
-async function getFileTreeMap(
-  outputRootPath: string,
-  incomingContext: string,
-  currentID: string,
-  currentType: "page" | "database",
-  rootLevel: boolean,
-  client: Client,
-  layoutStrategy: LayoutStrategy,
-  filesMap: FilesMap
-): Promise<void> {
-  if (currentType === "database") {
-    const database = await getNotionDatabase(client, currentID)
-    let layoutContext = incomingContext
-    layoutContext = layoutStrategy.newLevel(
-      outputRootPath,
-      -1,
-      incomingContext,
-      database.title
-    )
-    filesMap.database[currentID] = layoutStrategy.getPathForDatabase(
-      database,
-      layoutContext
-    )
-
-    // Recurse to children
-    const databaseChildrenResponse = await client.databases.query({
-      database_id: currentID,
-    })
-    for (const page of databaseChildrenResponse.results) {
-      // TODO: Consider using just id from objectTreeMap instead of the database query here
-      await getFileTreeMap(
-        outputRootPath,
-        layoutContext,
-        page.id,
-        "page",
-        false,
-        client,
-        layoutStrategy,
-        filesMap
-      )
-    }
-  } else if (currentType === "page") {
-    const page = await getNotionPage2(client, currentID)
-    filesMap.page[currentID] = layoutStrategy.getPathForPage2(
-      page,
-      incomingContext
-    )
-
-    // Recurse to children
-    const pageBlocksResponse = await client.blocks.children.list({
-      block_id: currentID,
-    })
-    const pageInfo = await getPageContentInfo(pageBlocksResponse.results)
-    // TODO: Also handle blocks that have block/page children (e.g. columns)
-    if (pageInfo.childDatabaseIdsAndOrder || pageInfo.childPageIdsAndOrder) {
-      const layoutContext = layoutStrategy.newLevel(
-        outputRootPath,
-        -1,
-        incomingContext,
-        page.nameOrTitle
-      )
-      for (const page of pageInfo.childPageIdsAndOrder) {
-        await getFileTreeMap(
-          outputRootPath,
-          layoutContext,
-          page.id,
-          "page",
-          false,
-          client,
-          layoutStrategy,
-          filesMap
-        )
-      }
-      for (const database of pageInfo.childDatabaseIdsAndOrder) {
-        await getFileTreeMap(
-          outputRootPath,
-          layoutContext,
-          database.id,
-          "database",
-          false,
-          client,
-          layoutStrategy,
-          filesMap
-        )
-      }
-    }
-  } else {
-    throw new Error(`Unknown type ${currentType}`)
-  }
-}
-
-async function getNotionPage2(client: Client, currentID: string) {
+export async function getNotionPage2(client: Client, currentID: string) {
   const pageResponse = await client.pages.retrieve({ page_id: currentID })
   if (!isFullPage(pageResponse)) {
     throw Error("Notion page response is not full for " + currentID)
@@ -168,7 +74,7 @@ async function getNotionPage2(client: Client, currentID: string) {
   return page
 }
 
-async function getNotionDatabase(client: Client, currentID: string) {
+export async function getNotionDatabase(client: Client, currentID: string) {
   const databaseResponse = await client.databases.retrieve({
     database_id: currentID,
   })
@@ -395,47 +301,4 @@ async function outputPages(
 
   info(`Finished processing ${pages.length} pages`)
   info(JSON.stringify(counts))
-}
-
-function writePage(finalMarkdown: string, mdPath: string) {
-  verbose(`writing ${mdPath}`)
-  // TODO: Move directory creation to a previous step to avoid repetition in creating directories
-  fs.mkdirSync(Path.dirname(mdPath), { recursive: true })
-  fs.writeFileSync(mdPath, finalMarkdown, {})
-  ++counts.output_normally
-}
-
-export async function getBlockChildren(
-  id: string,
-  client: Client
-): Promise<NotionBlock[]> {
-  // we can only get so many responses per call, so we set this to
-  // the first response we get, then keep adding to its array of blocks
-  // with each subsequent response
-  let overallResult: ListBlockChildrenResponse | undefined =
-    await client.blocks.children.list({ block_id: id })
-
-  const result = (overallResult?.results as BlockObjectResponse[]) ?? []
-  // TODO - rethink if this numbering should be part of the downloading part of the app, or of the processing part
-  numberChildrenIfNumberedList(result)
-  return result
-}
-
-// This function is copied (and renamed from modifyNumberedListObject) from notion-to-md.
-// They always run it on the results of their getBlockChildren.
-// When we use our own getBlockChildren, we need to run it too.
-export function numberChildrenIfNumberedList(
-  blocks: ListBlockChildrenResponseResults
-): void {
-  let numberedListIndex = 0
-
-  for (const block of blocks) {
-    if ("type" in block && block.type === "numbered_list_item") {
-      // add numbers
-      // @ts-ignore
-      block.numbered_list_item.number = ++numberedListIndex
-    } else {
-      numberedListIndex = 0
-    }
-  }
 }

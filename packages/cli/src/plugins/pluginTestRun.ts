@@ -1,14 +1,15 @@
-import { Client } from "@notionhq/client";
-import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints";
-import { NotionToMarkdown } from "notion-to-md";
-import { IDocuNotionContext } from "./pluginTypes";
-import { HierarchicalNamedLayoutStrategy } from "../HierarchicalNamedLayoutStrategy";
-import { NotionPage } from "../NotionPage";
-import { getMarkdownFromNotionBlocks } from "../transform";
-import { IDocuNotionConfig } from "../config/configuration";
-import { NotionBlock } from "../types";
-import { convertInternalUrl } from "./internalLinks";
-import { numberChildrenIfNumberedList } from "../pull";
+import { Client } from "@notionhq/client"
+import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
+import { NotionToMarkdown } from "notion-to-md"
+
+import { HierarchicalNamedLayoutStrategy } from "../HierarchicalNamedLayoutStrategy"
+import { NotionPage } from "../NotionPage"
+import { IDocuNotionConfig } from "../config/configuration"
+import { numberChildrenIfNumberedList } from "../getBlockChildren"
+import { getMarkdownFromNotionBlocks } from "../transform"
+import { NotionBlock } from "../types"
+import { convertInternalUrl } from "./internalLinks"
+import { IDocuNotionContext } from "./pluginTypes"
 
 export async function blocksToMarkdown(
   config: IDocuNotionConfig,
@@ -23,10 +24,10 @@ export async function blocksToMarkdown(
 ): Promise<string> {
   const notionClient = new Client({
     auth: validApiKey || "unused",
-  });
+  })
   const notionToMD = new NotionToMarkdown({
     notionClient,
-  });
+  })
 
   // if (pages && pages.length) {
   //   console.log(pages[0]);
@@ -36,14 +37,14 @@ export async function blocksToMarkdown(
     notionToMarkdown: notionToMD,
     getBlockChildren: (id: string) => {
       // We call numberChildrenIfNumberedList here because the real getBlockChildren does
-      if (children) numberChildrenIfNumberedList(children);
+      if (children) numberChildrenIfNumberedList(children)
 
       return new Promise<NotionBlock[]>((resolve, reject) => {
-        resolve(children ?? []);
-      });
+        resolve(children ?? [])
+      })
     },
     convertNotionLinkToLocalDocusaurusLink: (url: string) => {
-      return convertInternalUrl(docunotionContext, url);
+      return convertInternalUrl(docunotionContext, url)
     },
     imports: [],
 
@@ -90,28 +91,24 @@ export async function blocksToMarkdown(
     //     // logDebug("Testrun-TODO", s);
     //   },
     // },
-  };
+  }
 
   if (pages && pages.length) {
     // console.log(pages[0].matchesLinkId);
     // console.log(docunotionContext.pages[0].matchesLinkId);
   }
-  const r = await getMarkdownFromNotionBlocks(
-    docunotionContext,
-    config,
-    blocks
-  );
+  const r = await getMarkdownFromNotionBlocks(docunotionContext, config, blocks)
   //console.log("blocksToMarkdown", r);
-  return r;
+  return r
 }
 
 // This is used for things like testing links to other pages and frontmatter creation,
 // when just testing what happens to individual blocks is not enough.
 // after getting this, you can make changes to it, then pass it to blocksToMarkdown
 export function makeSamplePageObject(options: {
-  slug?: string;
-  name?: string;
-  id?: string;
+  slug?: string
+  name?: string
+  id?: string
 }): NotionPage {
   let slugObject: any = {
     Slug: {
@@ -119,7 +116,7 @@ export function makeSamplePageObject(options: {
       type: "rich_text",
       rich_text: [],
     },
-  };
+  }
 
   if (options.slug)
     slugObject = {
@@ -144,9 +141,9 @@ export function makeSamplePageObject(options: {
           href: null,
         },
       ],
-    };
+    }
 
-  const id = options.id || "4a6de8c0-b90b-444b-8a7b-d534d6ec71a4";
+  const id = options.id || "4a6de8c0-b90b-444b-8a7b-d534d6ec71a4"
   const m: GetPageResponse = {
     object: "page",
     id: id,
@@ -223,7 +220,7 @@ export function makeSamplePageObject(options: {
       },
     },
     url: `https://www.notion.so/Hello-World-${id}`,
-  };
+  }
 
   const p = new NotionPage({
     layoutContext: "/Second-Level/Third-Level",
@@ -231,11 +228,11 @@ export function makeSamplePageObject(options: {
     order: 0,
     metadata: m,
     foundDirectlyInOutline: false,
-  });
+  })
 
   // console.log(p.matchesLinkId);
 
-  return p;
+  return p
 }
 
 export async function oneBlockToMarkdown(
@@ -268,19 +265,19 @@ export async function oneBlockToMarkdown(
       archived: false,
     },
     ...block,
-  };
+  }
 
   const dummyPage1 = makeSamplePageObject({
     slug: "dummy1",
     name: "Dummy1",
-  });
+  })
   const dummyPage2 = makeSamplePageObject({
     slug: "dummy2",
     name: "Dummy2",
-  });
+  })
   return await blocksToMarkdown(
     config,
     [fullBlock as NotionBlock],
     targetPage ? [dummyPage1, targetPage, targetPage2 ?? dummyPage2] : undefined
-  );
+  )
 }

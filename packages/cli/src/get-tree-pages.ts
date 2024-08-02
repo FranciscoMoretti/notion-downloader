@@ -2,8 +2,9 @@ import { Client } from "@notionhq/client"
 
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
+import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
-import { FilesMap, OutputCounts, getBlockChildren } from "./pull"
+import { FilesMap, OutputCounts } from "./pull"
 
 // TODO: Add support for links
 export async function getTreePages(
