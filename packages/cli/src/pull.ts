@@ -16,6 +16,7 @@ import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
+import { FileCleaner } from "./FileCleaner"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
@@ -199,7 +200,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
 
   // TODO: HACK: until we can add the notion token to the config
-  // options.statusTag = "Published"
   const CACHE_DIR = options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/"
 
   const cachedNotionClient = new NotionCacheClient({
@@ -211,6 +211,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   })
 
   layoutStrategy = new HierarchicalNamedLayoutStrategy()
+  const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
   await fs.mkdir(options.markdownOutputPath.replace(/\/+$/, "") + "/.cache", {
@@ -325,8 +326,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  // TODO: Do the cleanup based on (new filestree -> new paths) vs old paths
-  // await layoutStrategy.cleanupOldFiles()
+  await fileCleaner.cleanupOldFiles(Object.values(filesMap.page))
   await cleanupOldImages()
   endGroup()
 }

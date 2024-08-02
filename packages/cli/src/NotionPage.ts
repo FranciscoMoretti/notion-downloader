@@ -149,8 +149,9 @@ export class NotionPage {
       case "rich_text":
       case "title":
         return this.getPlainTextProperty(property, "")
-      case "select":
       case "status":
+        return this.getStatusProperty(property)
+      case "select":
         return this.getSelectProperty(property)
       case "multi_select":
         return this.getMultiSelectProperty(property)
