@@ -134,9 +134,7 @@ export class NotionPage {
   public get hasExplicitSlug(): boolean {
     return this.explicitSlug() !== undefined
   }
-  public get keywords(): string | undefined {
-    return this.getPlainTextProperty("Keywords", "")
-  }
+
   public get status(): string | undefined {
     return this.getGenericProperty("Status")
   }
@@ -375,6 +373,7 @@ export async function getPageContentInfo(
     ),
   }
 }
+
 export async function fromPageId(
   context: string,
   pageId: string,

@@ -1,6 +1,6 @@
 import chalk from "chalk"
 
-import { NotionPage } from "./NotionPage"
+import { NotionPage2 } from "./NotionPage2"
 import { IDocuNotionConfig } from "./config/configuration"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import {
@@ -12,21 +12,15 @@ import { NotionBlock } from "./types"
 export async function getMarkdownForPage(
   config: IDocuNotionConfig,
   context: IDocuNotionContext,
-  page: NotionPage
+  page: NotionPage2
 ): Promise<string> {
   info(
-    `Reading & converting page ${page.layoutContext}/${
-      page.nameOrTitle
-    } (${chalk.blue(
-      page.hasExplicitSlug
-        ? page.slug
-        : page.foundDirectlyInOutline
-        ? "Descendant of Outline, not Database"
-        : "NO SLUG"
+    `Reading & converting page ${page.id}/${page.nameOrTitle} (${chalk.blue(
+      page.hasExplicitSlug ? page.slug : "NO SLUG"
     )})`
   )
 
-  const blocks = await context.getBlockChildren(page.pageId)
+  const blocks = await context.getBlockChildren(page.id)
 
   logDebugFn("markdown from page", () => JSON.stringify(blocks, null, 2))
 
@@ -258,19 +252,15 @@ function registerNotionToMarkdownCustomTransforms(
 }
 
 // enhance:make this built-in plugin so that it can be overridden
-function getFrontMatter(page: NotionPage): string {
+function getFrontMatter(page: NotionPage2): string {
   let frontmatter = "---\n"
   frontmatter += `title: ${page.nameOrTitle.replaceAll(":", "-")}\n` // I have not found a way to escape colons
-  frontmatter += `sidebar_position: ${page.order}\n`
   frontmatter += `slug: ${page.slug ?? ""}\n`
   // TODO: Consider clearing the props above which are non standard
   frontmatter += `id: ${page.metadata.id}\n`
-  frontmatter += `cover: ${
-    page.metadata.cover == null ? "" : page.metadata.cover
-  }\n`
+  frontmatter += `cover: ${page.metadata.cover || ""}\n`
   frontmatter += `created_time: ${page.metadata.created_time}\n`
   frontmatter += `last_edited_time: ${page.metadata.last_edited_time}\n`
-  if (page.keywords) frontmatter += `keywords: [${page.keywords}]\n`
 
   // Table Properties
   if (page.metadata.properties) {

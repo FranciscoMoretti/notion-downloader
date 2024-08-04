@@ -13,11 +13,6 @@ export abstract class LayoutStrategy {
 
   public abstract newLevel(context: string, levelLabel: string): string
 
-  public abstract getPathForPage(
-    page: NotionPage,
-    extensionWithDot: string
-  ): string
-
   public abstract getPathForPage2(
     page: NotionPage2,
     currentPath: string

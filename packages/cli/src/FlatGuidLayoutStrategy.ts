@@ -19,10 +19,6 @@ export class FlatGuidLayoutStrategy extends LayoutStrategy {
     return context + "/" + levelLabel
   }
 
-  public getPathForPage(page: NotionPage, extensionWithDot: string): string {
-    // In this strategy, we don't care about the location or the title
-    return this.rootDirectory + "/" + page.pageId + extensionWithDot
-  }
   public getPathForPage2(page: NotionPage2, extensionWithDot: string): string {
     // In this strategy, we don't care about the location or the title
     return this.rootDirectory + "/" + page.id + extensionWithDot

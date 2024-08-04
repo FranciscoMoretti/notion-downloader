@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { Client } from "@notionhq/client"
+import { Client, isFullPage } from "@notionhq/client"
 import {
   GetPageResponse,
   PageObjectResponse,
@@ -60,6 +60,7 @@ export class NotionPage2 {
     return this.isDatabasePage ? this.name : this.title
   }
 
+  // TODO: This responsibility of naming should go to an external class
   public nameForFile(): string {
     // In Notion, pages from the Database have names and simple pages have titles.
     return !this.isDatabasePage
@@ -116,9 +117,7 @@ export class NotionPage2 {
   public get hasExplicitSlug(): boolean {
     return this.explicitSlug() !== undefined
   }
-  public get keywords(): string | undefined {
-    return this.getPlainTextProperty("Keywords", "")
-  }
+
   public get status(): string | undefined {
     return this.getGenericProperty("Status")
   }
@@ -356,4 +355,20 @@ export async function getPageContentInfo(
         (b as any).paragraph.rich_text.length > 0
     ),
   }
+}
+
+export async function fromPageId(
+  pageId: string,
+  client: Client
+): Promise<NotionPage2> {
+  const metadata = await client.pages.retrieve({
+    page_id: pageId,
+  })
+
+  if (!isFullPage(metadata)) {
+    throw Error("Non full response for page: " + pageId)
+  }
+
+  //logDebug("notion metadata", JSON.stringify(metadata));
+  return new NotionPage2(metadata)
 }

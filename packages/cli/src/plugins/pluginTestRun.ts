@@ -4,6 +4,7 @@ import { NotionToMarkdown } from "notion-to-md"
 
 import { HierarchicalNamedLayoutStrategy } from "../HierarchicalNamedLayoutStrategy"
 import { NotionPage } from "../NotionPage"
+import { NotionPage2 } from "../NotionPage2"
 import { IDocuNotionConfig } from "../config/configuration"
 import { numberChildrenIfNumberedList } from "../getBlockChildren"
 import { getMarkdownFromNotionBlocks } from "../transform"
@@ -14,7 +15,7 @@ import { IDocuNotionContext } from "./pluginTypes"
 export async function blocksToMarkdown(
   config: IDocuNotionConfig,
   blocks: NotionBlock[],
-  pages?: NotionPage[],
+  pages?: NotionPage2[],
   // Notes on children:
   //   - These children will apply to each block in blocks. (could enhance but not needed yet)
   //   - If you are passing in children, it is probably because your parent block has has_children=true.

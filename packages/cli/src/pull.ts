@@ -15,10 +15,8 @@ import { FileCleaner } from "./FileCleaner"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage, PageType, fromPageId } from "./NotionPage"
-import { NotionPage2 } from "./NotionPage2"
+import { NotionPage2, fromPageId } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
-import { getOutlinePagesRecursively } from "./get-outline-pages-recursively"
 import { getTreePages } from "./get-tree-pages"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
@@ -202,10 +200,10 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   //   filesMap
   // )
 
-  const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
+  const pagesPromises: Promise<NotionPage2>[] = Object.keys(filesMap.page).map(
     (id) =>
       // TODO: All path related things should come from filesMap instead of belonging to a page
-      fromPageId("incomingContextDummy", id, -1, false, cachedNotionClient)
+      fromPageId(id, cachedNotionClient)
   )
 
   const pages = await Promise.all(pagesPromises)
@@ -238,7 +236,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 async function outputPages(
   options: DocuNotionOptions,
   config: IDocuNotionConfig,
-  pages: Array<NotionPage>,
+  pages: Array<NotionPage2>,
   client: Client,
   layoutStrategy: LayoutStrategy,
   notionToMarkdown: NotionToMarkdown,
@@ -264,7 +262,7 @@ async function outputPages(
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
     // layoutStrategy.pageWasSeen(page)
-    const mdPath = filesMap.page[page.pageId]
+    const mdPath = filesMap.page[page.id]
 
     // most plugins should not write to disk, but those handling image files need these paths
     context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPath)
@@ -272,7 +270,7 @@ async function outputPages(
     context.pageInfo.slug = page.slug
 
     if (
-      page.type === PageType.DatabasePage &&
+      page.isDatabasePage &&
       context.options.statusTag != "*" &&
       page.status !== context.options.statusTag
     ) {

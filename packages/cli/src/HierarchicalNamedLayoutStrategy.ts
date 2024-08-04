@@ -16,15 +16,6 @@ export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
     return path
   }
 
-  public getPathForPage(page: NotionPage, extensionWithDot: string): string {
-    const sanitizedName = this.toFileName(page.nameForFile())
-
-    const context = ("/" + page.layoutContext + "/").replaceAll("//", "/")
-    const path = this.rootDirectory + context + sanitizedName + extensionWithDot
-
-    return path
-  }
-
   public getPathForPage2(page: NotionPage2, currentPath: string): string {
     // TODO: Fix inconsistency, it seems we are sanitizing in two places
     const sanitizedName = this.toFileName(page.nameForFile())
