@@ -116,7 +116,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     notionClient: cachedNotionClient,
   })
 
-  let layoutStrategy = new FlatGuidLayoutStrategy()
+  let layoutStrategy = new HierarchicalNamedLayoutStrategy()
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
