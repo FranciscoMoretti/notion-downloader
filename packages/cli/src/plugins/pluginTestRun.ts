@@ -2,7 +2,6 @@ import { Client } from "@notionhq/client"
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { HierarchicalNamedLayoutStrategy } from "../HierarchicalNamedLayoutStrategy"
 import { NotionPage } from "../NotionPage"
 import { NotionPage2 } from "../NotionPage2"
 import { IDocuNotionConfig } from "../config/configuration"
@@ -55,7 +54,6 @@ export async function blocksToMarkdown(
       relativeFilePathToFolderContainingPage: "not yet",
       slug: "not yet",
     },
-    layoutStrategy: new HierarchicalNamedLayoutStrategy(),
     options: {
       notionToken: "",
       rootPage: "",

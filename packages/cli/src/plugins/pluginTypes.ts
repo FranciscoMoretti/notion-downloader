@@ -1,7 +1,6 @@
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
-import { LayoutStrategy } from "../LayoutStrategy"
 import { NotionPage2 } from "../NotionPage2"
 import { ICounts, NotionBlock } from "../index"
 import { DocuNotionOptions } from "../pull"
@@ -68,7 +67,6 @@ export type ICustomNotionToMarkdownConversion = (
 export type IGetBlockChildrenFn = (id: string) => Promise<NotionBlock[]>
 
 export type IDocuNotionContext = {
-  layoutStrategy: LayoutStrategy
   options: DocuNotionOptions
   getBlockChildren: IGetBlockChildrenFn
   notionToMarkdown: NotionToMarkdown

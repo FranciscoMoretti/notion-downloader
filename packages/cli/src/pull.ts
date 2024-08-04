@@ -13,11 +13,9 @@ import { NotionToMarkdown } from "notion-to-md"
 
 import { FileCleaner } from "./FileCleaner"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
-import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2, fromPageId } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
-import { getTreePages } from "./get-tree-pages"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { cleanupOldImages, initImageHandling } from "./images"
@@ -219,7 +217,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     config,
     pages,
     cachedNotionClient,
-    layoutStrategy,
     notionToMarkdown,
     filesMap
   )
@@ -235,7 +232,6 @@ async function outputPages(
   config: IDocuNotionConfig,
   pages: Array<NotionPage2>,
   client: Client,
-  layoutStrategy: LayoutStrategy,
   notionToMarkdown: NotionToMarkdown,
   filesMap: FilesMap
 ) {
@@ -247,7 +243,6 @@ async function outputPages(
       relativeFilePathToFolderContainingPage: "",
       slug: "",
     },
-    layoutStrategy: layoutStrategy,
     notionToMarkdown: notionToMarkdown,
     options: options,
     pages: pages,
@@ -258,7 +253,6 @@ async function outputPages(
   }
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
-    // layoutStrategy.pageWasSeen(page)
     const mdPath = filesMap.page[page.id]
 
     // most plugins should not write to disk, but those handling image files need these paths
