@@ -127,12 +127,22 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   info("Connecting to Notion...")
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
-  // TODO: Get root page, which can be DB or can be single page
   try {
-    if (options.rootIsDb) {
+    let pageResult = undefined
+    if (!options.rootIsDb) {
+      try {
+        pageResult = await cachedNotionClient.pages.retrieve({
+          page_id: rootPageUUID,
+        })
+      } catch (e: any) {
+        // Catch APIResponseError
+        if (e.code !== "object_not_found") {
+          throw e
+        }
+      }
+    }
+    if (options.rootIsDb || !pageResult) {
       await cachedNotionClient.databases.retrieve({ database_id: rootPageUUID })
-    } else {
-      await cachedNotionClient.pages.retrieve({ page_id: rootPageUUID })
     }
   } catch (e: any) {
     error(
