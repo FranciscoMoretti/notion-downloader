@@ -197,19 +197,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     filesMap
   )
 
-  // await getTreePages(
-  //   options.markdownOutputPath,
-  //   "",
-  //   rootPageUUID,
-  //   options.rootIsDb ? "database" : "page",
-  //   true,
-  //   cachedNotionClient,
-  //   pages,
-  //   layoutStrategy,
-  //   counts,
-  //   filesMap
-  // )
-
   const pagesPromises: Promise<NotionPage2>[] = Object.keys(filesMap.page).map(
     (id) =>
       // TODO: All path related things should come from filesMap instead of belonging to a page
