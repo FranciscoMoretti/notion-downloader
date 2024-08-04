@@ -12,6 +12,7 @@ import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FileCleaner } from "./FileCleaner"
+import { FlatGuidLayoutStrategy } from "./FlatGuidLayoutStrategy"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2, fromPageId } from "./NotionPage2"
@@ -80,6 +81,11 @@ export async function getNotionDatabase(client: Client, currentID: string) {
   return new NotionDatabase(databaseResponse)
 }
 
+function sanitizeMarkdownOutputPath(path: string) {
+  // Remove trailing slashes
+  return path.replace(/\/+$/, "")
+}
+
 export async function notionPull(options: DocuNotionOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -110,17 +116,13 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     notionClient: cachedNotionClient,
   })
 
-  let layoutStrategy = new HierarchicalNamedLayoutStrategy()
+  let layoutStrategy = new FlatGuidLayoutStrategy()
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
   await fs.mkdir(options.markdownOutputPath.replace(/\/+$/, "") + "/.cache", {
     recursive: true,
   })
-
-  layoutStrategy.setRootDirectoryForMarkdown(
-    options.markdownOutputPath.replace(/\/+$/, "") // trim any trailing slash
-  )
 
   info("Connecting to Notion...")
 
@@ -141,6 +143,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     }
     if (options.rootIsDb || !pageResult) {
       await cachedNotionClient.databases.retrieve({ database_id: rootPageUUID })
+      // TODO: SHould move page type detection of root to a utility function
+      options.rootIsDb = true
     }
   } catch (e: any) {
     error(
@@ -185,7 +189,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   }
 
   await getFileTreeMap(
-    options.markdownOutputPath,
     "", // Start context
     rootPageUUID,
     options.rootIsDb ? "database" : "page",
@@ -196,9 +199,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
 
   const pagesPromises: Promise<NotionPage2>[] = Object.keys(filesMap.page).map(
-    (id) =>
-      // TODO: All path related things should come from filesMap instead of belonging to a page
-      fromPageId(id, cachedNotionClient)
+    (id) => fromPageId(id, cachedNotionClient)
   )
 
   const pages = await Promise.all(pagesPromises)
@@ -222,7 +223,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  await fileCleaner.cleanupOldFiles(Object.values(filesMap.page))
+  await fileCleaner.cleanupOldFiles(
+    Object.values(filesMap.page).map(
+      (p) => sanitizeMarkdownOutputPath(options.markdownOutputPath) + p
+    )
+  )
   await cleanupOldImages()
   endGroup()
 }
@@ -254,10 +259,14 @@ async function outputPages(
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
     const mdPath = filesMap.page[page.id]
+    const mdPathWithRoot =
+      sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
 
     // most plugins should not write to disk, but those handling image files need these paths
-    context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPath)
-    context.pageInfo.relativeFilePathToFolderContainingPage = page.slug
+    context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
+    context.pageInfo.relativeFilePathToFolderContainingPage = Path.basename(
+      Path.dirname(mdPathWithRoot)
+    )
     context.pageInfo.slug = page.slug
 
     if (
@@ -278,7 +287,7 @@ async function outputPages(
       }
 
       const markdown = await getMarkdownForPage(config, context, page)
-      writePage(markdown, mdPath)
+      writePage(markdown, mdPathWithRoot)
     }
   }
 

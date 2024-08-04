@@ -1,4 +1,5 @@
 import { LayoutStrategy } from "./LayoutStrategy"
+import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2 } from "./NotionPage2"
 
 // This strategy creates a flat list of files that have notion-id for file names.
@@ -15,11 +16,18 @@ export class FlatGuidLayoutStrategy extends LayoutStrategy {
   public newLevel(context: string, levelLabel: string): string {
     // In this strategy, we ignore context and don't create any directories to match the levels.
     // Just return the following for the benefit of logging.
-    return context + "/" + levelLabel
+    return context
   }
 
-  public getPathForPage2(page: NotionPage2, extensionWithDot: string): string {
+  public getPathForPage2(page: NotionPage2, currentPath: string): string {
     // In this strategy, we don't care about the location or the title
-    return this.rootDirectory + "/" + page.id + extensionWithDot
+    return "/" + page.id + ".md"
+  }
+
+  public getPathForDatabase(
+    database: NotionDatabase,
+    currentPath: string
+  ): string {
+    return currentPath
   }
 }

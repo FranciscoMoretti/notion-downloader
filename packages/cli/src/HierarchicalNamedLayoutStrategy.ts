@@ -20,7 +20,7 @@ export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
     const sanitizedName = this.toFileName(page.nameForFile())
 
     const context = ("/" + currentPath + "/").replaceAll("//", "/")
-    const path = this.rootDirectory + context + sanitizedName + ".md"
+    const path = context + sanitizedName + ".md"
 
     return path
   }

@@ -5,7 +5,6 @@ import { getPageContentInfo } from "./NotionPage2"
 import { FilesMap, getNotionDatabase, getNotionPage2 } from "./pull"
 
 export async function getFileTreeMap(
-  outputRootPath: string,
   incomingContext: string,
   currentID: string,
   currentType: "page" | "database",
@@ -16,12 +15,11 @@ export async function getFileTreeMap(
 ): Promise<void> {
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
-    let layoutContext = incomingContext
-    layoutContext = layoutStrategy.newLevel(incomingContext, database.title)
-    filesMap.database[currentID] = layoutStrategy.getPathForDatabase(
-      database,
-      layoutContext
+    const layoutContext = layoutStrategy.newLevel(
+      incomingContext,
+      database.title
     )
+    filesMap.database[currentID] = layoutContext
 
     // Recurse to children
     const databaseChildrenResponse = await client.databases.query({
@@ -30,7 +28,6 @@ export async function getFileTreeMap(
     for (const page of databaseChildrenResponse.results) {
       // TODO: Consider using just id from objectTreeMap instead of the database query here
       await getFileTreeMap(
-        outputRootPath,
         layoutContext,
         page.id,
         "page",
@@ -60,7 +57,6 @@ export async function getFileTreeMap(
       )
       for (const page of pageInfo.childPageIdsAndOrder) {
         await getFileTreeMap(
-          outputRootPath,
           layoutContext,
           page.id,
           "page",
@@ -72,7 +68,6 @@ export async function getFileTreeMap(
       }
       for (const database of pageInfo.childDatabaseIdsAndOrder) {
         await getFileTreeMap(
-          outputRootPath,
           layoutContext,
           database.id,
           "database",
