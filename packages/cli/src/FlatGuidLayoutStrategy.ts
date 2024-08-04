@@ -1,5 +1,6 @@
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage } from "./NotionPage"
+import { NotionPage2 } from "./NotionPage2"
 
 // This strategy creates a flat list of files that have notion-id for file names.
 // Pros: the urls will never change so long as the notion pages are not delete and re-recreated.
@@ -21,5 +22,9 @@ export class FlatGuidLayoutStrategy extends LayoutStrategy {
   public getPathForPage(page: NotionPage, extensionWithDot: string): string {
     // In this strategy, we don't care about the location or the title
     return this.rootDirectory + "/" + page.pageId + extensionWithDot
+  }
+  public getPathForPage2(page: NotionPage2, extensionWithDot: string): string {
+    // In this strategy, we don't care about the location or the title
+    return this.rootDirectory + "/" + page.id + extensionWithDot
   }
 }
