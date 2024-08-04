@@ -1,5 +1,4 @@
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NotionPage } from "./NotionPage"
 import { NotionPage2 } from "./NotionPage2"
 
 // This strategy creates a flat list of files that have notion-id for file names.

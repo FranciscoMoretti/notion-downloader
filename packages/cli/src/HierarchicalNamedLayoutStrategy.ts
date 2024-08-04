@@ -3,7 +3,6 @@ import sanitize from "sanitize-filename"
 
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage } from "./NotionPage"
 import { NotionPage2 } from "./NotionPage2"
 
 // This strategy gives us a file tree that mirrors that of notion.

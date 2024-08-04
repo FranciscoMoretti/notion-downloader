@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client"
 
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
+import { NotionPage2, fromPageId, getPageContentInfo } from "./NotionPage2"
 import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
 import { FilesMap, OutputCounts } from "./pull"
@@ -14,7 +14,7 @@ export async function getTreePages(
   currentType: "page" | "database",
   rootLevel: boolean,
   client: Client,
-  pages: Array<NotionPage>,
+  pages: Array<NotionPage2>,
   layoutStrategy: LayoutStrategy,
   counts: OutputCounts,
   filesMap: FilesMap
@@ -57,14 +57,8 @@ export async function getTreePages(
       )
     }
   } else if (currentType == "page") {
-    const currentPage = await fromPageId(
-      incomingContext,
-      currentID,
-      -1,
-      false,
-      client
-    )
-    const blocks = await getBlockChildren(currentPage.pageId, client)
+    const currentPage = await fromPageId(currentID, client)
+    const blocks = await getBlockChildren(currentPage.id, client)
     const pageInfo = await getPageContentInfo(blocks)
 
     // TODO: Consider dropping this restriction of not having content and children. An MD File can be at the same level as a folder

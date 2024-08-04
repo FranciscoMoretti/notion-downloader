@@ -1,5 +1,4 @@
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage } from "./NotionPage"
 import { NotionPage2 } from "./NotionPage2"
 
 // Here a fuller name would be File Tree Layout Strategy. That is,

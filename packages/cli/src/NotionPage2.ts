@@ -2,10 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 import { Client, isFullPage } from "@notionhq/client"
-import {
-  GetPageResponse,
-  PageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints"
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
 import { error } from "./log"
