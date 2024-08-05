@@ -127,6 +127,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   info("Connecting to Notion...")
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
+  // TODO: SHould move page type detection of root to a utility function. Here it retries 10 times before exiting if we use the cache client
   try {
     let pageResult = undefined
     if (!options.rootIsDb) {
@@ -143,7 +144,6 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     }
     if (options.rootIsDb || !pageResult) {
       await cachedNotionClient.databases.retrieve({ database_id: rootPageUUID })
-      // TODO: SHould move page type detection of root to a utility function
       options.rootIsDb = true
     }
   } catch (e: any) {
