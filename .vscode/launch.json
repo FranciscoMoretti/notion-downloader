@@ -14,7 +14,7 @@
         "pull",
         // Disable root-is-db for non DBs roots
         // "--root-is-db",
-        // "--clean-cache",
+        "--clean-cache",
         "--img-output-path",
         "public",
         "--img-prefix-in-markdown",

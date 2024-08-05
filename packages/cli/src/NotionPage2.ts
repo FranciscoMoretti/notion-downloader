@@ -8,11 +8,27 @@ import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 import { error } from "./log"
 import { parseLinkId } from "./plugins/internalLinks"
 
+type CustomPropertiesConfig = {
+  titleProperty: string
+  slugProperty: string
+}
+
+export type NotionPageConfig = {
+  titleProperty?: string
+  slugProperty?: string
+}
+
 export class NotionPage2 {
   public metadata: PageObjectResponse
+  public config: CustomPropertiesConfig
 
-  public constructor(metadata: PageObjectResponse) {
+  public constructor(metadata: PageObjectResponse, config?: NotionPageConfig) {
     this.metadata = metadata
+    this.config = {
+      titleProperty: "Name",
+      slugProperty: "Slug",
+      ...config,
+    }
 
     // review: this is expensive to learn as it takes another api call... I
     // think? We can tell if it's a database because it has a "Name" instead of a
@@ -75,11 +91,11 @@ export class NotionPage2 {
   }
   // In Notion, pages from the Database have "Name"s.
   private get name(): string {
-    return this.getPlainTextProperty("Name", "name missing")
+    return this.getPlainTextProperty(this.config.titleProperty, "name missing")
   }
 
   private explicitSlug(): string | undefined {
-    const explicitSlug = this.getPlainTextProperty("Slug", "")
+    const explicitSlug = this.getPlainTextProperty(this.config.slugProperty, "")
     if (explicitSlug) {
       if (explicitSlug === "/") return explicitSlug
       // the root page
@@ -356,7 +372,8 @@ export async function getPageContentInfo(
 
 export async function fromPageId(
   pageId: string,
-  client: Client
+  client: Client,
+  config?: NotionPageConfig
 ): Promise<NotionPage2> {
   const metadata = await client.pages.retrieve({
     page_id: pageId,
@@ -367,5 +384,5 @@ export async function fromPageId(
   }
 
   //logDebug("notion metadata", JSON.stringify(metadata));
-  return new NotionPage2(metadata)
+  return new NotionPage2(metadata, config)
 }

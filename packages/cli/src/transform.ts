@@ -253,24 +253,36 @@ function registerNotionToMarkdownCustomTransforms(
 
 // enhance:make this built-in plugin so that it can be overridden
 function getFrontMatter(page: NotionPage2): string {
-  let frontmatter = "---\n"
-  frontmatter += `title: ${page.nameOrTitle.replaceAll(":", "-")}\n` // I have not found a way to escape colons
-  frontmatter += `slug: ${page.slug ?? ""}\n`
-  // TODO: Consider clearing the props above which are non standard
-  frontmatter += `id: ${page.metadata.id}\n`
-  // TODO: Cover images have to be handled, downloaded and stored. Decide if only store files, or also external.
-  frontmatter += `cover: ${
-    page.metadata.cover?.external?.url || page.metadata.cover?.file?.url || ""
-  }\n`
-  frontmatter += `created_time: ${page.metadata.created_time}\n`
-  frontmatter += `last_edited_time: ${page.metadata.last_edited_time}\n`
+  const customProperties = Object.fromEntries(
+    Object.entries(page.metadata.properties).map(([key, _]) => [
+      key,
+      page.getGenericProperty(key),
+    ])
+  )
 
-  // Table Properties
-  if (page.metadata.properties) {
-    Object.keys(page.metadata.properties).forEach((key) => {
-      frontmatter += `${key}: ${page.getGenericProperty(key)}\n`
-    })
+  const standardProperties = {
+    title: `${page.nameOrTitle.replaceAll(":", "-")}`,
+    slug: page.slug ?? "",
+    // TODO: Consider clearing the props above which are non standard
+    id: page.metadata.id,
+    // TODO: Cover images have to be handled, downloaded and stored. Decide if only store files, or also external.
+    cover:
+      page.metadata.cover?.external?.url ||
+      page.metadata.cover?.file?.url ||
+      "",
+    created_time: page.metadata.created_time,
+    last_edited_time: page.metadata.last_edited_time,
   }
+
+  const frontMatterProperties = {
+    ...customProperties,
+    ...standardProperties,
+  }
+
+  let frontmatter = "---\n"
+  Object.entries(frontMatterProperties).forEach(([key, value]) => {
+    frontmatter += `${key}: ${value}\n`
+  })
 
   frontmatter += "---\n"
   return frontmatter

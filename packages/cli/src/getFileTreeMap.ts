@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client"
 
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
-import { getPageContentInfo } from "./NotionPage2"
+import { NotionPageConfig, getPageContentInfo } from "./NotionPage2"
 import { getNotionDatabase, getNotionPage2 } from "./pull"
 
 export async function getFileTreeMap(
@@ -12,7 +12,8 @@ export async function getFileTreeMap(
   rootLevel: boolean,
   client: Client,
   layoutStrategy: LayoutStrategy,
-  filesMap: FilesMap
+  filesMap: FilesMap,
+  pageConfig: NotionPageConfig
 ): Promise<void> {
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
@@ -35,11 +36,12 @@ export async function getFileTreeMap(
         false,
         client,
         layoutStrategy,
-        filesMap
+        filesMap,
+        pageConfig
       )
     }
   } else if (currentType === "page") {
-    const page = await getNotionPage2(client, currentID)
+    const page = await getNotionPage2(client, currentID, pageConfig)
     filesMap.page[currentID] = layoutStrategy.getPathForPage2(
       page,
       incomingContext
@@ -64,7 +66,8 @@ export async function getFileTreeMap(
           false,
           client,
           layoutStrategy,
-          filesMap
+          filesMap,
+          pageConfig
         )
       }
       for (const database of pageInfo.childDatabaseIdsAndOrder) {
@@ -75,7 +78,8 @@ export async function getFileTreeMap(
           false,
           client,
           layoutStrategy,
-          filesMap
+          filesMap,
+          pageConfig
         )
       }
     }

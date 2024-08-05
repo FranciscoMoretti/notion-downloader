@@ -17,7 +17,7 @@ import { FilesMap } from "./FilesMap"
 import { FlatGuidLayoutStrategy } from "./FlatGuidLayoutStrategy"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage2, fromPageId } from "./NotionPage2"
+import { NotionPage2, NotionPageConfig, fromPageId } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
@@ -62,12 +62,16 @@ export const counts: OutputCounts = {
   error_because_no_slug: 0,
 }
 
-export async function getNotionPage2(client: Client, currentID: string) {
+export async function getNotionPage2(
+  client: Client,
+  currentID: string,
+  pageConfig: NotionPageConfig
+) {
   const pageResponse = await client.pages.retrieve({ page_id: currentID })
   if (!isFullPage(pageResponse)) {
     throw Error("Notion page response is not full for " + currentID)
   }
-  const page = new NotionPage2(pageResponse)
+  const page = new NotionPage2(pageResponse, pageConfig)
   return page
 }
 
@@ -188,6 +192,11 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     image: {},
   }
 
+  const pageConfig: NotionPageConfig = {
+    titleProperty: options.titleProperty,
+    slugProperty: options.slugProperty,
+  }
+
   await getFileTreeMap(
     "", // Start context
     rootPageUUID,
@@ -195,11 +204,12 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     true,
     cachedNotionClient,
     layoutStrategy,
-    filesMap
+    filesMap,
+    pageConfig
   )
 
   const pagesPromises: Promise<NotionPage2>[] = Object.keys(filesMap.page).map(
-    (id) => fromPageId(id, cachedNotionClient)
+    (id) => fromPageId(id, cachedNotionClient, pageConfig)
   )
 
   const pages = await Promise.all(pagesPromises)
