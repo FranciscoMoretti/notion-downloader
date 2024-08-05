@@ -18,7 +18,8 @@ const explorer = cosmiconfig("downloader", {
 })
 
 export const rawConfigSchema = z.object({
-  hello: z.string(),
+  titleProperty: z.string().optional(),
+  slugProperty: z.string().optional(),
 })
 
 // export const rawConfigSchema = z

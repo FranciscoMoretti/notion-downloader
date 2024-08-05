@@ -10,6 +10,7 @@ import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
+import { z } from "zod"
 
 import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
@@ -26,22 +27,24 @@ import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
 import { convertToUUID, saveDataToJson } from "./utils"
+import { configSchema } from "./utils/get-config"
 import { writePage } from "./writePage"
 
 type ImageFileNameFormat = "default" | "content-hash" | "legacy"
-export type DocuNotionOptions = {
-  notionToken: string
-  rootPage: string
-  rootIsDb?: boolean
-  locales: string[]
-  cleanCache: boolean
-  markdownOutputPath: string
-  imgOutputPath: string
-  imgPrefixInMarkdown: string
-  statusTag: string
-  requireSlugs?: boolean
-  imageFileNameFormat?: ImageFileNameFormat
-}
+export type DocuNotionOptions =
+  | {
+      notionToken: string
+      rootPage: string
+      rootIsDb?: boolean
+      locales: string[]
+      cleanCache: boolean
+      markdownOutputPath: string
+      imgOutputPath: string
+      imgPrefixInMarkdown: string
+      statusTag: string
+      requireSlugs?: boolean
+      imageFileNameFormat?: ImageFileNameFormat
+    } & z.infer<typeof configSchema>
 
 export interface OutputCounts {
   output_normally: number
