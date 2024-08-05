@@ -201,7 +201,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     "", // Start context
     rootPageUUID,
     options.rootIsDb ? "database" : "page",
-    true,
+    options.rootDbAsFolder,
     cachedNotionClient,
     layoutStrategy,
     filesMap,

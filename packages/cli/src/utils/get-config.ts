@@ -20,6 +20,7 @@ const explorer = cosmiconfig("downloader", {
 export const rawConfigSchema = z.object({
   titleProperty: z.string().optional(),
   slugProperty: z.string().optional(),
+  rootDbAsFolder: z.boolean().optional().default(false),
 })
 
 // export const rawConfigSchema = z

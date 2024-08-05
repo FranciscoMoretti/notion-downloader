@@ -9,7 +9,7 @@ export async function getFileTreeMap(
   incomingContext: string,
   currentID: string,
   currentType: "page" | "database",
-  rootLevel: boolean,
+  databaseIsRootLevel: boolean,
   client: Client,
   layoutStrategy: LayoutStrategy,
   filesMap: FilesMap,
@@ -17,10 +17,9 @@ export async function getFileTreeMap(
 ): Promise<void> {
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
-    const layoutContext = layoutStrategy.newLevel(
-      incomingContext,
-      database.title
-    )
+    const layoutContext = !databaseIsRootLevel
+      ? layoutStrategy.newLevel(incomingContext, database.title)
+      : incomingContext
     filesMap.database[currentID] = layoutContext
 
     // Recurse to children
