@@ -258,7 +258,10 @@ function getFrontMatter(page: NotionPage2): string {
   frontmatter += `slug: ${page.slug ?? ""}\n`
   // TODO: Consider clearing the props above which are non standard
   frontmatter += `id: ${page.metadata.id}\n`
-  frontmatter += `cover: ${page.metadata.cover || ""}\n`
+  // TODO: Cover images have to be handled, downloaded and stored. Decide if only store files, or also external.
+  frontmatter += `cover: ${
+    page.metadata.cover?.external?.url || page.metadata.cover?.file?.url || ""
+  }\n`
   frontmatter += `created_time: ${page.metadata.created_time}\n`
   frontmatter += `last_edited_time: ${page.metadata.last_edited_time}\n`
 
