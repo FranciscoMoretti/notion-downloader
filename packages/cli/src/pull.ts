@@ -12,6 +12,7 @@ import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FileCleaner } from "./FileCleaner"
+import { FilesMap } from "./FilesMap"
 import { FlatGuidLayoutStrategy } from "./FlatGuidLayoutStrategy"
 import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
@@ -28,10 +29,6 @@ import { convertToUUID, saveDataToJson } from "./utils"
 import { writePage } from "./writePage"
 
 type ImageFileNameFormat = "default" | "content-hash" | "legacy"
-export type FilesMap = Record<
-  "page" | "database" | "image",
-  Record<string, string>
->
 export type DocuNotionOptions = {
   notionToken: string
   rootPage: string
@@ -251,6 +248,7 @@ async function outputPages(
     notionToMarkdown: notionToMarkdown,
     options: options,
     pages: pages,
+    filesMap: filesMap,
     counts: counts, // review will this get copied or pointed to?
     imports: [],
     convertNotionLinkToLocalDocusaurusLink: (url: string) =>

@@ -1,8 +1,9 @@
 import { Client } from "@notionhq/client"
 
+import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { getPageContentInfo } from "./NotionPage2"
-import { FilesMap, getNotionDatabase, getNotionPage2 } from "./pull"
+import { getNotionDatabase, getNotionPage2 } from "./pull"
 
 export async function getFileTreeMap(
   incomingContext: string,

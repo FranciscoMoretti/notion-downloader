@@ -90,7 +90,7 @@ function convertLinkHref(
   targetPage: NotionPage2,
   url: string
 ): string {
-  let convertedLink = targetPage.slug
+  let convertedLink = context.filesMap.page[targetPage.id]
 
   /*****************************
   NOTE: as of this writing, the official Notion API completely drops links
