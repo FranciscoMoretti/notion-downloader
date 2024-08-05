@@ -60,6 +60,7 @@ export async function blocksToMarkdown(
       locales: [],
       markdownOutputPath: "",
       imgOutputPath: "",
+      cleanCache: false,
       imgPrefixInMarkdown: "",
       statusTag: "",
     },

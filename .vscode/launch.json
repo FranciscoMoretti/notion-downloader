@@ -15,6 +15,10 @@
         // Disable root-is-db for non DBs roots
         // "--root-is-db",
         // "--clean-cache",
+        "--img-output-path",
+        "public",
+        "--img-prefix-in-markdown",
+        "/public",
         "--log-level",
         "debug"
       ],
