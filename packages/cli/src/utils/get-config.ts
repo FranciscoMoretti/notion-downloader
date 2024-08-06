@@ -4,6 +4,8 @@ import { cosmiconfig, cosmiconfigSync } from "cosmiconfig"
 import { loadConfig } from "tsconfig-paths"
 import { z } from "zod"
 
+import { configFileOptionsSchema } from "../config/schema"
+
 export const DEFAULT_STYLE = "default"
 export const DEFAULT_COMPONENTS = "@/components"
 export const DEFAULT_UTILS = "@/lib/utils"
@@ -17,11 +19,7 @@ const explorer = cosmiconfig("downloader", {
   searchPlaces: ["downloader.json", "downloader.config.js"],
 })
 
-export const rawConfigSchema = z.object({
-  titleProperty: z.string().optional(),
-  slugProperty: z.string().optional(),
-  rootDbAsFolder: z.boolean().optional().default(false),
-})
+export const rawConfigSchema = configFileOptionsSchema
 
 // export const rawConfigSchema = z
 //   .object({

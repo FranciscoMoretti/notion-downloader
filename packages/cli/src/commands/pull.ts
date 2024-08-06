@@ -13,26 +13,12 @@ import "dotenv/config"
 import { execa } from "execa"
 import ora from "ora"
 import prompts from "prompts"
-import { z } from "zod"
 
+import { pullOptionsSchema } from "../config/schema"
 import { setLogLevel } from "../log"
 import { notionPull } from "../pull"
 
 dotenv.config()
-const pullOptionsSchema = z.object({
-  notionToken: z.string(),
-  rootPage: z.string(),
-  rootIsDb: z.boolean().default(false),
-  markdownOutputPath: z.string(),
-  cleanCache: z.boolean().default(false),
-  statusTag: z.string(),
-  logLevel: z.string().default("info"),
-  imgPrefixInMarkdown: z.string().default(""),
-  imgOutputPath: z.string().default(""),
-  overwrite: z.boolean(),
-  cwd: z.string(),
-})
-
 export const pull = new Command()
   .name("pull")
   .description("pull pages from notion")
