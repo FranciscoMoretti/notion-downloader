@@ -1,5 +1,5 @@
 {
-    "titleProperty": "Name",
+    "titleProperty": "title",
     "slugProperty": "slug",
     "rootDbAsFolder": true
 }
