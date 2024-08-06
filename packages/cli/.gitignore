@@ -4,3 +4,5 @@ dist
 # Pages output
 docs
 .cache
+content
+public
