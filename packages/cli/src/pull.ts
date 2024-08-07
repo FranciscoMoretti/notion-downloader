@@ -19,6 +19,7 @@ import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrate
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2, NotionPageConfig, fromPageId } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
+import { pullOptionsSchema } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { cleanupOldImages, initImageHandling } from "./images"
@@ -30,21 +31,7 @@ import { convertToUUID, saveDataToJson } from "./utils"
 import { configSchema } from "./utils/get-config"
 import { writePage } from "./writePage"
 
-type ImageFileNameFormat = "default" | "content-hash" | "legacy"
-export type DocuNotionOptions =
-  | {
-      notionToken: string
-      rootPage: string
-      rootIsDb?: boolean
-      locales: string[]
-      cleanCache: boolean
-      markdownOutputPath: string
-      imgOutputPath: string
-      imgPrefixInMarkdown: string
-      statusTag: string
-      requireSlugs?: boolean
-      imageFileNameFormat?: ImageFileNameFormat
-    } & z.infer<typeof configSchema>
+export type DocuNotionOptions = z.infer<typeof pullOptionsSchema>
 
 export interface OutputCounts {
   output_normally: number

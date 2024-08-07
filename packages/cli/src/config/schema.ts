@@ -20,6 +20,7 @@ export const pullOptionsSchema = z.object({
   titleProperty: z.string().optional(),
   slugProperty: z.string().optional(),
   rootDbAsFolder: z.boolean().default(false),
+  locales: z.array(z.string()).default([]),
 })
 
 // Same as pullOptionsSchema but all the properties are optional

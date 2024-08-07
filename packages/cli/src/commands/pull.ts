@@ -125,9 +125,7 @@ export const pull = new Command()
       // pull and convert
       const spinner = ora(`Pulling pages...`).start()
 
-      await notionPull({ ...config, ...options, locales: [] }).then(() =>
-        console.log("docu-notion Finished.")
-      )
+      await notionPull(options).then(() => console.log("docu-notion Finished."))
 
       /*
       for (const item of payload) {
