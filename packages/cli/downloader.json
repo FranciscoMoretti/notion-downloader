@@ -2,9 +2,9 @@
     "titleProperty": "title",
     "slugProperty": "slug",
     "rootDbAsFolder": true,
-    "cleanCache": true,
-    "imgOutputPath": "public",
-    "imgPrefixInMarkdown": "/public",
+    "cleanCache": false,
+    "imgOutputPath": "public/assets/",
+    "imgPrefixInMarkdown": "assets",
     "markdownOutputPath": "./content",
     "logLevel": "debug"
 }

@@ -21,6 +21,9 @@ export const pullOptionsSchema = z.object({
   slugProperty: z.string().optional(),
   rootDbAsFolder: z.boolean().default(false),
   locales: z.array(z.string()).default([]),
+  layoutStrategy: z
+    .enum(["HierarchicalNamedLayoutStrategy", "FlatGuidLayoutStrategy"])
+    .default("HierarchicalNamedLayoutStrategy"),
 })
 
 // Same as pullOptionsSchema but all the properties are optional
