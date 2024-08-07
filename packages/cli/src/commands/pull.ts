@@ -34,6 +34,7 @@ export const pull = new Command()
   .option(
     "-d, --root-is-db",
     "Whether the root page is a database. If not, it must be a 'page'." +
+      // TODO: These options default override the ones from the config file. Figure out how to integrate cosmiconfig and commander
       " Default: false"
   )
   .option(
