@@ -24,4 +24,6 @@ export const pullOptionsSchema = z.object({
 })
 
 // Same as pullOptionsSchema but all the properties are optional
-export const configFileOptionsSchema = pullOptionsSchema.partial()
+export const configFileOptionsSchema = pullOptionsSchema
+  .partial()
+  .omit({ cwd: true })

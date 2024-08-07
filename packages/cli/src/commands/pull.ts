@@ -33,23 +33,23 @@ export const pull = new Command()
   )
   .option(
     "-d, --root-is-db",
-    "Whether the root page is a database. If not, it must be a 'page'.",
-    false
+    "Whether the root page is a database. If not, it must be a 'page'." +
+      " Default: false"
   )
   .option(
     "-m, --markdown-output-path  <string>",
-    "Root of the hierarchy for md files. WARNING: docu-notion will delete files from this directory. Note also that if it finds localized images, it will create an i18n/ directory as a sibling.",
-    "./docs"
+    "Root of the hierarchy for md files. WARNING: docu-notion will delete files from this directory. Note also that if it finds localized images, it will create an i18n/ directory as a sibling." +
+      " Default: ./docs"
   )
   .option(
     "-t, --status-tag  <string>",
-    "Database pages without a Notion page property 'status' matching this will be ignored. Use '*' to ignore status altogether.",
-    "Publish"
+    "Database pages without a Notion page property 'status' matching this will be ignored. Use '*' to ignore status altogether." +
+      " Default: Publish"
   )
   .option(
     "-c, --clean-cache",
-    "Clear the cache before starting. WARNING: this will remove all files from the cache directory.",
-    false
+    "Clear the cache before starting. WARNING: this will remove all files from the cache directory." +
+      " Default: false"
   )
   .addOption(
     new Option("-l, --log-level <level>", "Log level").choices([
@@ -68,18 +68,17 @@ export const pull = new Command()
   )
   .option(
     "--require-slugs",
-    "If set, docu-notion will fail if any pages it would otherwise publish are missing a slug in Notion.",
-    false
+    "If set, docu-notion will fail if any pages it would otherwise publish are missing a slug in Notion." +
+      " Default: false"
   )
   .addOption(
     new Option(
       "--image-file-name-format <format>",
-      "format:\n- default: {page slug (if any)}.{image block ID}\n- content-hash: Use a hash of the image content.\n- legacy: Use the legacy (before v0.16) method of determining file names. Set this to maintain backward compatibility.\nAll formats will use the original file extension."
-    )
-      .choices(["default", "content-hash", "legacy"])
-      .default("default")
+      "format:\n- default: {page slug (if any)}.{image block ID}\n- content-hash: Use a hash of the image content.\n- legacy: Use the legacy (before v0.16) method of determining file names. Set this to maintain backward compatibility.\nAll formats will use the original file extension. " +
+        "Default: default"
+    ).choices(["default", "content-hash", "legacy"])
   )
-  .option("-o, --overwrite", "overwrite existing files.", false)
+  .option("-o, --overwrite", "overwrite existing files. Default: false")
   .option(
     "-c, --cwd <cwd>",
     "the working directory. defaults to the current directory.",
