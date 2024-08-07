@@ -289,20 +289,19 @@ async function outputPages(
         `Skipping page because status is not '${context.options.statusTag}': ${page.nameOrTitle}`
       )
       ++context.counts.skipped_because_status
-    } else {
-      if (options.requireSlugs && !page.hasExplicitSlug) {
-        error(
-          `Page "${page.nameOrTitle}" is missing a required slug. (--require-slugs is set.)`
-        )
-        ++counts.error_because_no_slug
-      }
-
-      const markdown = await getMarkdownForPage(config, context, page)
-      writePage(markdown, mdPathWithRoot)
+      continue
     }
-  }
+    if (options.requireSlugs && !page.hasExplicitSlug) {
+      error(
+        `Page "${page.nameOrTitle}" is missing a required slug. (--require-slugs is set.)`
+      )
+      ++counts.error_because_no_slug
+      exit(1)
+    }
 
-  if (counts.error_because_no_slug > 0) exit(1)
+    const markdown = await getMarkdownForPage(config, context, page)
+    writePage(markdown, mdPathWithRoot)
+  }
 
   info(`Finished processing ${pages.length} pages`)
   info(JSON.stringify(counts))

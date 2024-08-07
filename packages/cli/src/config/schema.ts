@@ -10,6 +10,11 @@ export const pullOptionsSchema = z.object({
   logLevel: z.string().default("info"),
   imgPrefixInMarkdown: z.string().default(""),
   imgOutputPath: z.string().default(""),
+  requireSlugs: z.boolean().default(false),
+  imageFileNameFormat: z
+    .enum(["default", "content-hash", "legacy"])
+    .optional()
+    .default("default"),
   overwrite: z.boolean().default(false),
   cwd: z.string(),
   titleProperty: z.string().optional(),

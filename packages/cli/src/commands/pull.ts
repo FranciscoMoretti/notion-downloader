@@ -13,6 +13,7 @@ import "dotenv/config"
 import { execa } from "execa"
 import ora from "ora"
 import prompts from "prompts"
+import { z } from "zod"
 
 import { pullOptionsSchema } from "../config/schema"
 import { setLogLevel } from "../log"
@@ -86,23 +87,11 @@ export const pull = new Command()
   )
   .action(async (opts) => {
     try {
-      // Get secrets from .env if they exist
-
-      // Prefer options to en vars
-      const optionsWithDotEnv = {
-        ...opts,
-        notionToken: opts.notionToken || process.env.NOTION_TOKEN,
-        rootPage: opts.rootPage || process.env.NOTION_ROOT_PAGE,
-      }
-
-      const options = pullOptionsSchema.parse({
-        ...optionsWithDotEnv,
-      })
-
-      setLogLevel(opts.logLevel)
-
-      const cwd = path.resolve(options.cwd)
-
+      // Validate the cwd option with zod
+      const cwdSchema = z.string()
+      cwdSchema.parse(opts.cwd)
+      // Ensure target directory exists.
+      const cwd = path.resolve(opts.cwd)
       if (!existsSync(cwd)) {
         logger.error(`The path ${cwd} does not exist. Please try again.`)
         process.exit(1)
@@ -117,6 +106,21 @@ export const pull = new Command()
         )
         process.exit(1)
       }
+      // Prefer options to config, and config to env vars
+      const mergedOptions = {
+        ...config,
+        ...opts,
+        // Get secrets from .env if they exist
+        // TODO: Decide if notion token should be in config file or not
+        notionToken:
+          opts.notionToken || config.notionToken || process.env.NOTION_TOKEN,
+        rootPage:
+          opts.rootPage || config.rootPage || process.env.NOTION_ROOT_PAGE,
+      }
+
+      const options = pullOptionsSchema.parse(mergedOptions)
+
+      setLogLevel(opts.logLevel)
 
       // pull and convert
       const spinner = ora(`Pulling pages...`).start()
