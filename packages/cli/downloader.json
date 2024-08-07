@@ -1,5 +1,10 @@
 {
     "titleProperty": "title",
     "slugProperty": "slug",
-    "rootDbAsFolder": true
+    "rootDbAsFolder": true,
+    "cleanCache": true,
+    "imgOutputPath": "public",
+    "imgPrefixInMarkdown": "/public",
+    "markdownOutputPath": "./content",
+    "logLevel": "debug"
 }
