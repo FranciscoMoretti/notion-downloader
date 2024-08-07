@@ -5,7 +5,7 @@ import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPage2, fromPageId, getPageContentInfo } from "./NotionPage2"
 import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
-import { OutputCounts } from "./pull"
+import { OutputCounts } from "./notionPull"
 
 // TODO: Add support for links
 export async function getTreePages(

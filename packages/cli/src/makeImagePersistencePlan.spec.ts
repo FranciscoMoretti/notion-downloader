@@ -5,7 +5,7 @@ import {
   makeImagePersistencePlan,
 } from "./MakeImagePersistencePlan"
 import { ImageSet } from "./images"
-import { DocuNotionOptions } from "./pull"
+import { DocuNotionOptions } from "./notionPull"
 
 const optionsUsingDefaultNaming: DocuNotionOptions = {
   notionToken: "",

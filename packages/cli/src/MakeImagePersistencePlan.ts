@@ -1,9 +1,10 @@
-import { ImageSet } from "./images";
-import * as Path from "path";
-import { error } from "./log";
-import { exit } from "process";
-import crypto from "crypto";
-import { DocuNotionOptions } from "./pull";
+import crypto from "crypto"
+import * as Path from "path"
+import { exit } from "process"
+
+import { ImageSet } from "./images"
+import { error } from "./log"
+import { DocuNotionOptions } from "./notionPull"
 
 export function makeImagePersistencePlan(
   options: DocuNotionOptions,
@@ -12,18 +13,18 @@ export function makeImagePersistencePlan(
   imageOutputRootPath: string,
   imagePrefix: string
 ): void {
-  const urlBeforeQuery = imageSet.primaryUrl.split("?")[0];
+  const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
 
-  let imageFileExtension: string | undefined = imageSet.fileType?.ext;
+  let imageFileExtension: string | undefined = imageSet.fileType?.ext
   if (!imageFileExtension) {
     // Try to get the extension from the url
-    imageFileExtension = urlBeforeQuery.split(".").pop();
+    imageFileExtension = urlBeforeQuery.split(".").pop()
 
     if (!imageFileExtension) {
       error(
         `Something wrong with the filetype extension on the blob we got from ${imageSet.primaryUrl}`
-      );
-      exit(1);
+      )
+      exit(1)
     }
   }
 
@@ -35,10 +36,10 @@ export function makeImagePersistencePlan(
     //   But around Sept 2023, they changed the url to be something like:
     //      https://prod-files-secure.s3.us-west-2.amazonaws.com/d9a2b712-cf69-4bd6-9d65-87a4ceeacca2/d1bcdc8c-b065-4e40-9a11-392aabeb220e/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230915%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230915T161258Z&X-Amz-Expires=3600&X-Amz-Signature=28fca48e65fba86d539c3c4b7676fce1fa0857aa194f7b33dd4a468ecca6ab24&X-Amz-SignedHeaders=host&x-id=GetObject
     //   The thing we want is the last UUID before the ?
-    const thingToHash = findLastUuid(urlBeforeQuery) ?? urlBeforeQuery;
+    const thingToHash = findLastUuid(urlBeforeQuery) ?? urlBeforeQuery
 
-    const hash = hashOfString(thingToHash);
-    imageSet.outputFileName = `${hash}.${imageFileExtension}`;
+    const hash = hashOfString(thingToHash)
+    imageSet.outputFileName = `${hash}.${imageFileExtension}`
   } else if (options.imageFileNameFormat === "content-hash") {
     // This was requested by a user: https://github.com/sillsdev/docu-notion/issues/76.
     // We chose not to include it in the default file name because we want to maintain
@@ -46,8 +47,8 @@ export function makeImagePersistencePlan(
     // However, particularly in a workflow which is not concerned with localization,
     // this could be a good option. One benefit is that the image only needs to exist once
     // in the file system regardless of how many times it is used in the site.
-    const imageHash = hashOfBufferContent(imageSet.primaryBuffer!);
-    imageSet.outputFileName = `${imageHash}.${imageFileExtension}`;
+    const imageHash = hashOfBufferContent(imageSet.primaryBuffer!)
+    imageSet.outputFileName = `${imageHash}.${imageFileExtension}`
   } else {
     // We decided not to do this for the default format because it means
     // instability for the file name in Crowdin, which causes loss of localizations.
@@ -67,8 +68,8 @@ export function makeImagePersistencePlan(
     // The block ID is a unique GUID and thus provides a unique file name.
     const pageSlugPart = imageSet.pageInfo?.slug
       ? `${imageSet.pageInfo.slug.replace(/^\//, "")}.`
-      : "";
-    imageSet.outputFileName = `${pageSlugPart}${imageBlockId}.${imageFileExtension}`;
+      : ""
+    imageSet.outputFileName = `${pageSlugPart}${imageBlockId}.${imageFileExtension}`
   }
 
   imageSet.primaryFileOutputPath = Path.posix.join(
@@ -76,41 +77,41 @@ export function makeImagePersistencePlan(
       ? imageOutputRootPath
       : imageSet.pageInfo!.directoryContainingMarkdown,
     decodeURI(imageSet.outputFileName)
-  );
+  )
 
   if (imageOutputRootPath && imageSet.localizedUrls.length) {
     error(
       "imageOutputPath was declared, but one or more localizedUrls were found too. If you are going to localize screenshots, then you can't declare an imageOutputPath."
-    );
-    exit(1);
+    )
+    exit(1)
   }
 
   imageSet.filePathToUseInMarkdown =
     (imagePrefix?.length > 0 ? imagePrefix : ".") +
     "/" +
-    imageSet.outputFileName;
+    imageSet.outputFileName
 }
 
 function findLastUuid(url: string): string | null {
   // Regex for a UUID surrounded by slashes
   const uuidPattern =
-    /(?<=\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}(?=\/)/gi;
+    /(?<=\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}(?=\/)/gi
 
   // Find all UUIDs
-  const uuids = url.match(uuidPattern);
+  const uuids = url.match(uuidPattern)
   // Return the last UUID if any exist, else return null
-  return uuids ? uuids[uuids.length - 1].trim() : null;
+  return uuids ? uuids[uuids.length - 1].trim() : null
 }
 
 export function hashOfString(s: string): number {
-  let hash = 0;
+  let hash = 0
   for (let i = 0; i < s.length; ++i)
-    hash = Math.imul(31, hash) + s.charCodeAt(i);
+    hash = Math.imul(31, hash) + s.charCodeAt(i)
 
-  return Math.abs(hash);
+  return Math.abs(hash)
 }
 
 function hashOfBufferContent(buffer: Buffer): string {
-  const hash = crypto.createHash("sha256").update(buffer).digest("hex");
-  return hash.slice(0, 20);
+  const hash = crypto.createHash("sha256").update(buffer).digest("hex")
+  return hash.slice(0, 20)
 }

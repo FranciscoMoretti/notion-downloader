@@ -2,7 +2,7 @@ import * as Path from "path"
 import fs from "fs-extra"
 
 import { verbose } from "./log"
-import { counts } from "./pull"
+import { counts } from "./notionPull"
 
 export function writePage(finalMarkdown: string, mdPath: string) {
   verbose(`writing ${mdPath}`)

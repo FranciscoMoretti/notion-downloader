@@ -17,7 +17,7 @@ import { z } from "zod"
 
 import { pullOptionsSchema } from "../config/schema"
 import { setLogLevel } from "../log"
-import { notionPull } from "../pull"
+import { notionPull } from "../notionPull"
 
 dotenv.config()
 export const pull = new Command()
