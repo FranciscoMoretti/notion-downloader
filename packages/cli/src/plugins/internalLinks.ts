@@ -1,3 +1,5 @@
+import path from "path"
+
 import { NotionPage2 } from "../NotionPage2"
 import { error, warning } from "../log"
 import { IDocuNotionContext, IPlugin } from "./pluginTypes"
@@ -91,6 +93,9 @@ function convertLinkHref(
   url: string
 ): string {
   let convertedLink = context.filesMap.page[targetPage.id]
+  if (!context.options.pageLinkHasExtension) {
+    convertedLink = path.basename(convertedLink, path.extname(convertedLink))
+  }
 
   /*****************************
   NOTE: as of this writing, the official Notion API completely drops links

@@ -6,6 +6,7 @@
     "imgOutputPath": "public/assets/",
     "imgPrefixInMarkdown": "assets",
     "markdownOutputPath": "./content",
-    "logLevel": "debug"
+    "logLevel": "debug",
+    "pageLinkHasExtension": false
 
 }
