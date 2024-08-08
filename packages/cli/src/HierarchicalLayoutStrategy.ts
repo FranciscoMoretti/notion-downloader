@@ -10,7 +10,7 @@ import { NamingStrategy } from "./namingStrategy"
 // Each level in the outline becomes a directory, and each file bears the name of the Notion document.
 // As long as you use slugs, the urls is still just something like https://site/slug
 
-export class HierarchicalNamedLayoutStrategy extends LayoutStrategy {
+export class HierarchicalLayoutStrategy extends LayoutStrategy {
   namingStrategy: NamingStrategy
 
   constructor(namingStrategy: NamingStrategy) {

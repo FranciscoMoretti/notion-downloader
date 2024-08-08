@@ -14,8 +14,8 @@ import { z } from "zod"
 
 import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
-import { FlatGuidLayoutStrategy } from "./FlatGuidLayoutStrategy"
-import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
+import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
+import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2, NotionPageConfig, fromPageId } from "./NotionPage2"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
@@ -123,8 +123,8 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
       : new TitleNamingStrategy()
   const layoutStrategy =
     options.layoutStrategy === "FlatGuidLayoutStrategy"
-      ? new FlatGuidLayoutStrategy(namingStrategy)
-      : new HierarchicalNamedLayoutStrategy(namingStrategy)
+      ? new FlatLayoutStrategy(namingStrategy)
+      : new HierarchicalLayoutStrategy(namingStrategy)
 
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 

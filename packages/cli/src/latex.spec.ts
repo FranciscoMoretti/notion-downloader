@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client"
 import { NotionToMarkdown } from "notion-to-md"
 import { describe, expect, test } from "vitest"
 
-import { HierarchicalNamedLayoutStrategy } from "./HierarchicalNamedLayoutStrategy"
+import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig } from "./config/configuration"
 import defaultConfig from "./config/default.docunotion.config"
@@ -24,7 +24,7 @@ test("Latex Rendering", async () => {
     auth: "",
   })
 
-  const layoutStrategy = new HierarchicalNamedLayoutStrategy()
+  const layoutStrategy = new HierarchicalLayoutStrategy()
 
   const config: IDocuNotionConfig = defaultConfig
 

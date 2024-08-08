@@ -12,7 +12,7 @@ import { NamingStrategy } from "./namingStrategy"
 
 // TODO: Fill this with the new interface of pagename databasename etc once its ready
 // the directory/file structure itself is no longer representative of the outline we want.
-export class FlatGuidLayoutStrategy extends LayoutStrategy {
+export class FlatLayoutStrategy extends LayoutStrategy {
   namingStrategy: NamingStrategy
 
   constructor(namingStrategy: NamingStrategy) {
