@@ -7,4 +7,5 @@
     "imgPrefixInMarkdown": "assets",
     "markdownOutputPath": "./content",
     "logLevel": "debug"
+
 }

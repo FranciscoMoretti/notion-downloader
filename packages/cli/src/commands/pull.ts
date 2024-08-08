@@ -67,11 +67,6 @@ export const pull = new Command()
     "-i, --img-output-path  <string>",
     "Path to directory where images will be stored. If this is not included, images will be placed in the same directory as the document that uses them, which then allows for localization of screenshots."
   )
-  .option(
-    "--require-slugs",
-    "If set, docu-notion will fail if any pages it would otherwise publish are missing a slug in Notion." +
-      " Default: false"
-  )
   .addOption(
     new Option(
       "--image-file-name-format <format>",

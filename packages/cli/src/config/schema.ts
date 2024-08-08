@@ -10,7 +10,6 @@ export const pullOptionsSchema = z.object({
   logLevel: z.string().default("info"),
   imgPrefixInMarkdown: z.string().default(""),
   imgOutputPath: z.string().default(""),
-  requireSlugs: z.boolean().default(false),
   imageFileNameFormat: z
     .enum(["default", "content-hash", "legacy"])
     .optional()
@@ -24,6 +23,9 @@ export const pullOptionsSchema = z.object({
   layoutStrategy: z
     .enum(["HierarchicalNamedLayoutStrategy", "FlatGuidLayoutStrategy"])
     .default("HierarchicalNamedLayoutStrategy"),
+  namingStrategy: z
+    .enum(["github-slug", "notion-slug", "guid", "title"])
+    .default("github-slug"),
 })
 
 // Same as pullOptionsSchema but all the properties are optional

@@ -24,6 +24,12 @@ import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { cleanupOldImages, initImageHandling } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
+import {
+  GithubSlugNamingStrategy,
+  GuidNamingStrategy,
+  NotionSlugNamingStrategy,
+  TitleNamingStrategy,
+} from "./namingStrategy"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
@@ -107,10 +113,19 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     notionClient: cachedNotionClient,
   })
 
-  let layoutStrategy =
+  const namingStrategy =
+    options.namingStrategy === "github-slug"
+      ? new GithubSlugNamingStrategy(options.slugProperty || "")
+      : options.namingStrategy === "notion-slug"
+      ? new NotionSlugNamingStrategy(options.slugProperty || "")
+      : options.namingStrategy === "guid"
+      ? new GuidNamingStrategy()
+      : new TitleNamingStrategy()
+  const layoutStrategy =
     options.layoutStrategy === "FlatGuidLayoutStrategy"
-      ? new FlatGuidLayoutStrategy()
-      : new HierarchicalNamedLayoutStrategy()
+      ? new FlatGuidLayoutStrategy(namingStrategy)
+      : new HierarchicalNamedLayoutStrategy(namingStrategy)
+
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
@@ -268,7 +283,9 @@ async function outputPages(
     context.pageInfo.relativeFilePathToFolderContainingPage = Path.basename(
       Path.dirname(mdPathWithRoot)
     )
-    context.pageInfo.slug = page.slug
+
+    // Get the filename without extension
+    context.pageInfo.slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
 
     if (
       page.isDatabasePage &&
@@ -280,13 +297,6 @@ async function outputPages(
       )
       ++context.counts.skipped_because_status
       continue
-    }
-    if (options.requireSlugs && !page.hasExplicitSlug) {
-      error(
-        `Page "${page.nameOrTitle}" is missing a required slug. (--require-slugs is set.)`
-      )
-      ++counts.error_because_no_slug
-      exit(1)
     }
 
     const markdown = await getMarkdownForPage(config, context, page)

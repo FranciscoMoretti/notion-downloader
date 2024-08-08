@@ -1,6 +1,7 @@
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2 } from "./NotionPage2"
+import { NamingStrategy } from "./namingStrategy"
 
 // This strategy creates a flat list of files that have notion-id for file names.
 // Pros: the urls will never change so long as the notion pages are not delete and re-recreated.
@@ -12,8 +13,17 @@ import { NotionPage2 } from "./NotionPage2"
 // TODO: Fill this with the new interface of pagename databasename etc once its ready
 // the directory/file structure itself is no longer representative of the outline we want.
 export class FlatGuidLayoutStrategy extends LayoutStrategy {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public newLevel(context: string, levelLabel: string): string {
+  namingStrategy: NamingStrategy
+
+  constructor(namingStrategy: NamingStrategy) {
+    super()
+    this.namingStrategy = namingStrategy
+  }
+
+  public newLevel(
+    context: string,
+    pageOrDatabaseName: NotionPage2 | NotionDatabase
+  ): string {
     // In this strategy, we ignore context and don't create any directories to match the levels.
     // Just return the following for the benefit of logging.
     return context
@@ -21,13 +31,6 @@ export class FlatGuidLayoutStrategy extends LayoutStrategy {
 
   public getPathForPage2(page: NotionPage2, currentPath: string): string {
     // In this strategy, we don't care about the location or the title
-    return "/" + page.id + ".md"
-  }
-
-  public getPathForDatabase(
-    database: NotionDatabase,
-    currentPath: string
-  ): string {
-    return currentPath
+    return "/" + this.namingStrategy.nameForPage(page) + ".md"
   }
 }

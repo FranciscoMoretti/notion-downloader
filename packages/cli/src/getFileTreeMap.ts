@@ -18,7 +18,7 @@ export async function getFileTreeMap(
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
     const layoutContext = !databaseIsRootLevel
-      ? layoutStrategy.newLevel(incomingContext, database.title)
+      ? layoutStrategy.newLevel(incomingContext, database)
       : incomingContext
     filesMap.database[currentID] = layoutContext
 
@@ -53,10 +53,7 @@ export async function getFileTreeMap(
     const pageInfo = await getPageContentInfo(pageBlocksResponse.results)
     // TODO: Also handle blocks that have block/page children (e.g. columns)
     if (pageInfo.childDatabaseIdsAndOrder || pageInfo.childPageIdsAndOrder) {
-      const layoutContext = layoutStrategy.newLevel(
-        incomingContext,
-        page.nameOrTitle
-      )
+      const layoutContext = layoutStrategy.newLevel(incomingContext, page)
       for (const page of pageInfo.childPageIdsAndOrder) {
         await getFileTreeMap(
           layoutContext,

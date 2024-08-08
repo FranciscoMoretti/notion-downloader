@@ -26,7 +26,7 @@ export class NotionPage2 {
     this.metadata = metadata
     this.config = {
       titleProperty: "Name",
-      slugProperty: "Slug",
+      slugProperty: "Slug", // TODO: Eliminate
       ...config,
     }
 
@@ -92,43 +92,6 @@ export class NotionPage2 {
   // In Notion, pages from the Database have "Name"s.
   private get name(): string {
     return this.getPlainTextProperty(this.config.titleProperty, "name missing")
-  }
-
-  private explicitSlug(): string | undefined {
-    const explicitSlug = this.getPlainTextProperty(this.config.slugProperty, "")
-    if (explicitSlug) {
-      if (explicitSlug === "/") return explicitSlug
-      // the root page
-      else
-        return (
-          "/" +
-          encodeURIComponent(
-            explicitSlug
-              .replace(/^\//, "")
-              // If for some reason someone types in a slug with special characters,
-              //we really don't want to see ugly entities in the URL, so first
-              // we replace a bunch of likely suspects with dashes. This will not
-              // adequately handle the case where there is one pag with slug:"foo-bar"
-              // and another with "foo?bar". Both will come out "foo-bar"
-              .replaceAll(" ", "-")
-              .replaceAll("?", "-")
-              .replaceAll("/", "-")
-              .replaceAll("#", "-")
-              .replaceAll("&", "-")
-              .replaceAll("%", "-")
-              // remove consecutive dashes
-              .replaceAll("--", "-")
-          )
-        )
-      return undefined // this page has no slug property
-    }
-  }
-
-  public get slug(): string {
-    return this.explicitSlug() ?? "/" + this.id
-  }
-  public get hasExplicitSlug(): boolean {
-    return this.explicitSlug() !== undefined
   }
 
   public get status(): string | undefined {

@@ -66,6 +66,7 @@ export function makeImagePersistencePlan(
     // using the Replace feature. Also, image blocks can be moved using the Move To feature.
     // We decided to include the page slug for easier workflow during localization, particularly in Crowdin.
     // The block ID is a unique GUID and thus provides a unique file name.
+    // TODO: Manage image paths with FilesMap
     const pageSlugPart = imageSet.pageInfo?.slug
       ? `${imageSet.pageInfo.slug.replace(/^\//, "")}.`
       : ""

@@ -1,7 +1,9 @@
 import { Client } from "@notionhq/client"
+import { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
+import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage2, fromPageId, getPageContentInfo } from "./NotionPage2"
 import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
@@ -33,7 +35,7 @@ export async function getTreePages(
       layoutContext = layoutStrategy.newLevel(
         incomingContext,
         // TODO: Improve how this property is handled
-        databaseResponse.title[0].plain_text || "Untitled"
+        new NotionDatabase(databaseResponse as DatabaseObjectResponse)
       )
     }
 
@@ -86,10 +88,7 @@ export async function getTreePages(
     ) {
       let layoutContext = incomingContext
       if (!rootLevel) {
-        layoutContext = layoutStrategy.newLevel(
-          incomingContext,
-          currentPage.nameOrTitle
-        )
+        layoutContext = layoutStrategy.newLevel(incomingContext, currentPage)
       }
       for (const childDatabaseInfo of pageInfo.childDatabaseIdsAndOrder) {
         await getTreePages(

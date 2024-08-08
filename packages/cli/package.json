@@ -58,6 +58,7 @@
     "fast-glob": "^3.3.2",
     "file-type": "16.5.3",
     "fs-extra": "^11.1.0",
+    "github-slugger": "^2.0.0",
     "https-proxy-agent": "^6.2.0",
     "limiter-es6-compat": "^2.1.2",
     "lodash.template": "^4.5.0",
