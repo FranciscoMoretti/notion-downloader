@@ -26,12 +26,12 @@ export async function getFileTreeMap(
     const databaseChildrenResponse = await client.databases.query({
       database_id: currentID,
     })
-    for (const page of databaseChildrenResponse.results) {
+    for (const childObject of databaseChildrenResponse.results) {
       // TODO: Consider using just id from objectTreeMap instead of the database query here
       await getFileTreeMap(
         layoutContext,
-        page.id,
-        "page",
+        childObject.id,
+        childObject.object,
         false,
         client,
         layoutStrategy,
@@ -54,6 +54,7 @@ export async function getFileTreeMap(
     // TODO: Also handle blocks that have block/page children (e.g. columns)
     if (pageInfo.childDatabaseIdsAndOrder || pageInfo.childPageIdsAndOrder) {
       const layoutContext = layoutStrategy.newLevel(incomingContext, page)
+      // TODO: Consolidate these as generic object children, instead of using the `pageInfo`
       for (const page of pageInfo.childPageIdsAndOrder) {
         await getFileTreeMap(
           layoutContext,
