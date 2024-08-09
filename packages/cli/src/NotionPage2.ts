@@ -99,7 +99,7 @@ export class NotionPage2 {
   }
 
   public getGenericProperty(property: string): string | undefined {
-    const type = (this.metadata as any).properties?.[property].type
+    const type = (this.metadata as any).properties?.[property]?.type
     if (!type) return undefined
     switch (type) {
       case "text":
