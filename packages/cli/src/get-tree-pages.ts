@@ -4,7 +4,7 @@ import { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
+import { NotionPage, getPageContentInfo, notionPageFromId } from "./NotionPage"
 import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
 import { OutputCounts } from "./notionPull"
@@ -60,7 +60,7 @@ export async function getTreePages(
       )
     }
   } else if (currentType == "page") {
-    const currentPage = await fromPageId(currentID, client)
+    const currentPage = await notionPageFromId(currentID, client)
     const blocks = await getBlockChildren(currentPage.id, client)
     const pageInfo = await getPageContentInfo(blocks)
 

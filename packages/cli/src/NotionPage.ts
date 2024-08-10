@@ -333,7 +333,7 @@ export async function getPageContentInfo(
   }
 }
 
-export async function fromPageId(
+export async function notionPageFromId(
   pageId: string,
   client: Client,
   config?: NotionPageConfig

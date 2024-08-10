@@ -17,7 +17,7 @@ import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage, NotionPageConfig, fromPageId } from "./NotionPage"
+import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { pullOptionsSchema } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
@@ -214,7 +214,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
   )
 
   const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
-    (id) => fromPageId(id, cachedNotionClient, pageConfig)
+    (id) => notionPageFromId(id, cachedNotionClient, pageConfig)
   )
 
   const pages = await Promise.all(pagesPromises)
