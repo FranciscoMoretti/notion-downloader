@@ -97,7 +97,7 @@ importers:
         specifier: ^5.4.2
         version: 5.4.5
 
-  packages/cli:
+  packages/download-notion:
     dependencies:
       '@antfu/ni':
         specifier: ^0.21.4
@@ -4904,7 +4904,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.12.12
+      '@types/node': 20.14.10
       '@types/responselike': 1.0.3
 
   '@types/diff@5.2.1': {}
@@ -4957,7 +4957,7 @@ snapshots:
 
   '@types/prompts@2.4.9':
     dependencies:
-      '@types/node': 20.12.12
+      '@types/node': 20.14.10
       kleur: 3.0.3
 
   '@types/prop-types@15.7.12': {}
