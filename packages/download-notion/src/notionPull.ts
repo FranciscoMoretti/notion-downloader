@@ -223,7 +223,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
   await saveDataToJson(
     filesMap,
-    sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/file_map.json"
+    sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
   )
 
   info(`Found ${pages.length} pages`)

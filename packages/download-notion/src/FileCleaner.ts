@@ -1,17 +1,31 @@
 import fs from "fs-extra"
 
+import { FilesMap } from "./FilesMap"
 import { verbose } from "./log"
 
 export class FileCleaner {
+  // TODO: Do everything with a FilesMap interface directly
   // Reads previous files and keeps tracks of them
   // Has methods to cleanup old files
 
   protected rootDirectory = ""
+  protected filesMap?: FilesMap
   protected starterFiles: string[] = []
 
   public constructor(rootDirectory: string) {
     this.rootDirectory = rootDirectory
-    this.starterFiles = this.getListOfExistingFiles(rootDirectory)
+    this.filesMap = this.loadFilesMapFile(rootDirectory + "/files_map.json")
+    this.starterFiles = this.filesMap
+      ? Object.values(this.filesMap.page)
+      : this.getListOfExistingFiles(rootDirectory)
+  }
+
+  private loadFilesMapFile(filePath: string): FilesMap | undefined {
+    if (fs.existsSync(filePath)) {
+      const jsonData = fs.readFileSync(filePath, "utf8")
+      return JSON.parse(jsonData)
+    }
+    return undefined
   }
 
   public async cleanupOldFiles(whitelistedFiles: string[]): Promise<void> {
