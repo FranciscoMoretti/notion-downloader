@@ -17,7 +17,7 @@ export enum PageType {
   Simple,
 }
 
-export class NotionPage {
+export class NotionPageLegacy {
   public metadata: GetPageResponse
   public pageId: string
   public order: number
@@ -345,7 +345,7 @@ export class NotionPage {
   }
 }
 
-export async function getPageContentInfo(
+export async function getPageContentInfoLegacy(
   children: ListBlockChildrenResponseResults
 ): Promise<{
   childPageIdsAndOrder: { id: string; order: number }[]
@@ -374,19 +374,19 @@ export async function getPageContentInfo(
   }
 }
 
-export async function fromPageId(
+export async function fromPageIdLegacy(
   context: string,
   pageId: string,
   order: number,
   foundDirectlyInOutline: boolean,
   client: Client
-): Promise<NotionPage> {
+): Promise<NotionPageLegacy> {
   const metadata = await client.pages.retrieve({
     page_id: pageId,
   })
 
   //logDebug("notion metadata", JSON.stringify(metadata));
-  return new NotionPage({
+  return new NotionPageLegacy({
     layoutContext: context,
     pageId,
     order,

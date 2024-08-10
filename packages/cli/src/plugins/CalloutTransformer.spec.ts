@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from "vitest"
 
-import { NotionPage } from "../NotionPage"
+import { NotionPageLegacy } from "../NotionPageLegacy"
 import { NotionBlock } from "../types"
 import { standardCalloutTransformer } from "./CalloutTransformer"
 import { standardExternalLinkConversion } from "./externalLinks"
@@ -129,7 +129,7 @@ test("internal link inside callout, bold preserved", async () => {
       standardExternalLinkConversion,
     ],
   }
-  const slugTargetPage: NotionPage = makeSamplePageObject({
+  const slugTargetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: "123",

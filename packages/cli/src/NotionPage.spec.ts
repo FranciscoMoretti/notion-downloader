@@ -1,7 +1,7 @@
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
 import { describe, expect, it } from "vitest"
 
-import { NotionPage } from "./NotionPage"
+import { NotionPageLegacy } from "./NotionPageLegacy"
 
 describe("NotionPage", () => {
   const mockMetadata: GetPageResponse = {
@@ -86,7 +86,7 @@ describe("NotionPage", () => {
 
   describe("getPlainTextProperty", () => {
     it("should return the plain text value of a property", () => {
-      const page = new NotionPage({
+      const page = new NotionPageLegacy({
         layoutContext: "Test Context",
         pageId: "123",
         order: 1,
@@ -100,7 +100,7 @@ describe("NotionPage", () => {
     })
 
     it("should return the default value if the property is not found", () => {
-      const page = new NotionPage({
+      const page = new NotionPageLegacy({
         layoutContext: "Test Context",
         pageId: "123",
         order: 1,
@@ -116,7 +116,7 @@ describe("NotionPage", () => {
 
   describe("getDateProperty", () => {
     it("should return the start date property by default", () => {
-      const page = new NotionPage({
+      const page = new NotionPageLegacy({
         layoutContext: "Test Context",
         pageId: "123",
         order: 1,
@@ -130,7 +130,7 @@ describe("NotionPage", () => {
     })
 
     it("should return the end date if start is false", () => {
-      const page = new NotionPage({
+      const page = new NotionPageLegacy({
         layoutContext: "Test Context",
         pageId: "123",
         order: 1,
@@ -144,7 +144,7 @@ describe("NotionPage", () => {
     })
 
     it("should return the default value if the property is not found", () => {
-      const page = new NotionPage({
+      const page = new NotionPageLegacy({
         layoutContext: "Test Context",
         pageId: "123",
         order: 1,

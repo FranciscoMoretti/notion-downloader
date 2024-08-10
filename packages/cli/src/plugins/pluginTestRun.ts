@@ -2,8 +2,8 @@ import { Client } from "@notionhq/client"
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { NotionPage } from "../NotionPage"
 import { NotionPage2 } from "../NotionPage2"
+import { NotionPageLegacy } from "../NotionPageLegacy"
 import { IDocuNotionConfig } from "../config/configuration"
 import { numberChildrenIfNumberedList } from "../getBlockChildren"
 import { getMarkdownFromNotionBlocks } from "../transform"
@@ -109,7 +109,7 @@ export function makeSamplePageObject(options: {
   slug?: string
   name?: string
   id?: string
-}): NotionPage {
+}): NotionPageLegacy {
   let slugObject: any = {
     Slug: {
       id: "%7D%3D~K",
@@ -222,7 +222,7 @@ export function makeSamplePageObject(options: {
     url: `https://www.notion.so/Hello-World-${id}`,
   }
 
-  const p = new NotionPage({
+  const p = new NotionPageLegacy({
     layoutContext: "/Second-Level/Third-Level",
     pageId: id,
     order: 0,
@@ -238,8 +238,8 @@ export function makeSamplePageObject(options: {
 export async function oneBlockToMarkdown(
   config: IDocuNotionConfig,
   block: Record<string, unknown>,
-  targetPage?: NotionPage,
-  targetPage2?: NotionPage
+  targetPage?: NotionPageLegacy,
+  targetPage2?: NotionPageLegacy
 ): Promise<string> {
   // just in case someone expects these other properties that aren't normally relevant,
   // we merge the given block properties into an actual, full block

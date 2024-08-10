@@ -3,7 +3,7 @@ import { NotionToMarkdown } from "notion-to-md"
 import { describe, expect, test } from "vitest"
 
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
-import { NotionPage } from "./NotionPage"
+import { NotionPageLegacy } from "./NotionPageLegacy"
 import { IDocuNotionConfig } from "./config/configuration"
 import defaultConfig from "./config/default.docunotion.config"
 import { convertInternalUrl } from "./plugins/internalLinks"
@@ -12,7 +12,7 @@ import { getMarkdownFromNotionBlocks } from "./transform"
 import { NotionBlock } from "./types"
 
 test("Latex Rendering", async () => {
-  const pages = new Array<NotionPage>()
+  const pages = new Array<NotionPageLegacy>()
   const counts = {
     output_normally: 0,
     skipped_because_empty: 0,

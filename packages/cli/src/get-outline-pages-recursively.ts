@@ -1,7 +1,11 @@
 import { Client } from "@notionhq/client"
 
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
+import {
+  NotionPageLegacy,
+  fromPageIdLegacy,
+  getPageContentInfoLegacy,
+} from "./NotionPageLegacy"
 import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
 import { OutputCounts } from "./notionPull"
@@ -19,11 +23,11 @@ export async function getOutlinePagesRecursively(
   orderOfThisParent: number,
   rootLevel: boolean,
   client: Client,
-  pages: Array<NotionPage>,
+  pages: Array<NotionPageLegacy>,
   layoutStrategy: LayoutStrategy,
   counts: OutputCounts
 ) {
-  const pageInTheOutline = await fromPageId(
+  const pageInTheOutline = await fromPageIdLegacy(
     incomingContext,
     pageIdOfThisParent,
     orderOfThisParent,
@@ -36,7 +40,7 @@ export async function getOutlinePagesRecursively(
   )
 
   const r = await getBlockChildren(pageInTheOutline.pageId, client)
-  const pageInfo = await getPageContentInfo(r)
+  const pageInfo = await getPageContentInfoLegacy(r)
 
   if (
     !rootLevel &&
@@ -92,7 +96,7 @@ export async function getOutlinePagesRecursively(
 
     for (const linkPageInfo of pageInfo.linksPageIdsAndOrder) {
       pages.push(
-        await fromPageId(
+        await fromPageIdLegacy(
           layoutContext,
           linkPageInfo.id,
           linkPageInfo.order,

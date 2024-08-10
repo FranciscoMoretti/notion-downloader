@@ -1,13 +1,13 @@
 import { expect, test } from "vitest"
 
-import { NotionPage } from "../NotionPage"
+import { NotionPageLegacy } from "../NotionPageLegacy"
 import { error } from "../log"
 import { makeSamplePageObject, oneBlockToMarkdown } from "./pluginTestRun"
 import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 
 test("raw url inside a mermaid codeblock gets converted to path using slug of that page", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "slug-of-target",
     name: "My Target Page",
     id: targetPageId,

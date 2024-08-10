@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 
-import { NotionPage } from "../NotionPage"
+import { NotionPageLegacy } from "../NotionPageLegacy"
 import { setLogLevel } from "../log"
 import { standardCalloutTransformer } from "./CalloutTransformer"
 import { standardExternalLinkConversion } from "./externalLinks"
@@ -35,7 +35,7 @@ test("urls that show up as raw text get left that way", async () => {
 // See https://github.com/sillsdev/docu-notion/issues/97
 test("mention-style link to an existing page", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: undefined,
     name: "Hello World",
     id: targetPageId,
@@ -76,7 +76,7 @@ test("mention-style link to an existing page", async () => {
 
 test("link to an existing page on this site that has no slug", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: undefined,
     name: "Hello World",
     id: targetPageId,
@@ -197,7 +197,7 @@ test("link to a heading block on a page", async () => {
     },
   }
   setLogLevel("verbose")
-  const noSlugTargetPage: NotionPage = makeSamplePageObject({
+  const noSlugTargetPage: NotionPageLegacy = makeSamplePageObject({
     slug: undefined,
     name: "Hello World",
     id: targetPageId,
@@ -210,7 +210,7 @@ test("link to a heading block on a page", async () => {
     `(Inline [heading on some page](/${targetPageId}#456) the end.)`
   )
 
-  const slugTargetPage: NotionPage = makeSamplePageObject({
+  const slugTargetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -224,7 +224,7 @@ test("link to a heading block on a page", async () => {
 // Text that has been selected and turned into a link to one of our pages
 test("inline link to an existing page on this site uses slug", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -278,7 +278,7 @@ test("inline link to an existing page on this site uses slug", async () => {
 // this is the kind of link you get if you just insert a "link to page" to Notion
 test("raw link to an existing page on this site that has a slug", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "point-to-me",
     name: "Point to Me",
     id: targetPageId,
@@ -309,7 +309,7 @@ test("raw link to an existing page on this site that has a slug", async () => {
 
 test("link in a bulleted list", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "the-page",
     name: "Something",
     id: targetPageId,
@@ -349,7 +349,7 @@ test("link in a bulleted list", async () => {
 test("link to an a heading on a page on this site uses slug", async () => {
   const targetPageId = "123"
   const headingBlockId = "456"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -491,7 +491,7 @@ test("links to other notion pages that are not in this site give PROBLEM LINK", 
 
 test("internal link inside callout", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -565,7 +565,7 @@ Callouts inline [great page](/hello-world).
 
 test("internal link inside codeblock ignored", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPage = makeSamplePageObject({
+  const targetPage: NotionPageLegacy = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -609,13 +609,13 @@ test("internal link inside codeblock ignored", async () => {
 
 test("multiple internal links in a paragraph", async () => {
   const targetPageAId = "123"
-  const targetPageA: NotionPage = makeSamplePageObject({
+  const targetPageA: NotionPageLegacy = makeSamplePageObject({
     slug: undefined,
     name: "Hello World A",
     id: targetPageAId,
   })
   const targetPageBId = "456"
-  const targetPageB: NotionPage = makeSamplePageObject({
+  const targetPageB: NotionPageLegacy = makeSamplePageObject({
     slug: undefined,
     name: "Hello World B",
     id: targetPageBId,
@@ -686,8 +686,8 @@ test("multiple internal links in a paragraph", async () => {
 
 async function getMarkdown(
   block: Record<string, unknown>,
-  targetPage?: NotionPage,
-  targetPage2?: NotionPage
+  targetPage?: NotionPageLegacy,
+  targetPage2?: NotionPageLegacy
 ) {
   const config = {
     plugins: [
