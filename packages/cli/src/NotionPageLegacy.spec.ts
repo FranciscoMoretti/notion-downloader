@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { NotionPageLegacy } from "./NotionPageLegacy"
 
-describe("NotionPage", () => {
+describe("NotionPageLegacy", () => {
   const mockMetadata: GetPageResponse = {
     object: "page",
     id: "6e6921b9-b1f5-4614-ab3c-bf1a73358a1f",
