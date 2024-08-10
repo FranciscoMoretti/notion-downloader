@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "build:cli": "turbo --filter=download-notion build",
+    "build:cli": "turbo --filter=notion-downloader-cli build",
     "dev": "turbo run dev --parallel",
     "cli:dev": "turbo --filter=notion-download dev",
     "cli:start": "pnpm --filter=notion-download start:dev",
