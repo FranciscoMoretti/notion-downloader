@@ -4,10 +4,10 @@ import { exit } from "process"
 
 import { ImageSet } from "./images"
 import { error } from "./log"
-import { DocuNotionOptions } from "./notionPull"
+import { NotionPullOptions } from "./notionPull"
 
 export function makeImagePersistencePlan(
-  options: DocuNotionOptions,
+  options: NotionPullOptions,
   imageSet: ImageSet,
   imageBlockId: string,
   imageOutputRootPath: string,

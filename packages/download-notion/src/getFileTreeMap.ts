@@ -3,7 +3,7 @@ import { Client } from "@notionhq/client"
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionPageConfig, getPageContentInfo } from "./NotionPage"
-import { getNotionDatabase, getNotionPage2 } from "./notionPull"
+import { getNotionDatabase, getNotionPage } from "./notionPull"
 
 export async function getFileTreeMap(
   incomingContext: string,
@@ -40,7 +40,7 @@ export async function getFileTreeMap(
       )
     }
   } else if (currentType === "page") {
-    const page = await getNotionPage2(client, currentID, pageConfig)
+    const page = await getNotionPage(client, currentID, pageConfig)
     filesMap.page[currentID] = layoutStrategy.getPathForPage2(
       page,
       incomingContext

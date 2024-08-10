@@ -4,7 +4,7 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 import { FilesMap } from "../FilesMap"
 import { NotionPage } from "../NotionPage"
 import { ICounts, NotionBlock } from "../index"
-import { DocuNotionOptions } from "../notionPull"
+import { NotionPullOptions } from "../notionPull"
 
 type linkConversionFunction = (
   context: IDocuNotionContext,
@@ -68,7 +68,7 @@ export type ICustomNotionToMarkdownConversion = (
 export type IGetBlockChildrenFn = (id: string) => Promise<NotionBlock[]>
 
 export type IDocuNotionContext = {
-  options: DocuNotionOptions
+  options: NotionPullOptions
   getBlockChildren: IGetBlockChildrenFn
   notionToMarkdown: NotionToMarkdown
   pageInfo: IDocuNotionContextPageInfo

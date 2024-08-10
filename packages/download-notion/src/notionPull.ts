@@ -37,7 +37,7 @@ import { convertToUUID, saveDataToJson } from "./utils"
 import { configSchema } from "./utils/get-config"
 import { writePage } from "./writePage"
 
-export type DocuNotionOptions = z.infer<typeof pullOptionsSchema>
+export type NotionPullOptions = z.infer<typeof pullOptionsSchema>
 
 export interface OutputCounts {
   output_normally: number
@@ -55,7 +55,7 @@ export const counts: OutputCounts = {
   error_because_no_slug: 0,
 }
 
-export async function getNotionPage2(
+export async function getNotionPage(
   client: Client,
   currentID: string,
   pageConfig: NotionPageConfig
@@ -83,7 +83,7 @@ function sanitizeMarkdownOutputPath(path: string) {
   return path.replace(/\/+$/, "")
 }
 
-export async function notionPull(options: DocuNotionOptions): Promise<void> {
+export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const optionsForLogging = { ...options }
@@ -248,7 +248,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 }
 
 async function outputPages(
-  options: DocuNotionOptions,
+  options: NotionPullOptions,
   config: IDocuNotionConfig,
   pages: Array<NotionPage>,
   client: Client,

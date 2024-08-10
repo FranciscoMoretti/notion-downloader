@@ -5,9 +5,9 @@ import {
   makeImagePersistencePlan,
 } from "./MakeImagePersistencePlan"
 import { ImageSet } from "./images"
-import { DocuNotionOptions } from "./notionPull"
+import { NotionPullOptions } from "./notionPull"
 
-const optionsUsingDefaultNaming: DocuNotionOptions = {
+const optionsUsingDefaultNaming: NotionPullOptions = {
   notionToken: "",
   rootPage: "",
   locales: [],
@@ -99,7 +99,7 @@ test("handles encoded characters", () => {
   expect(imageSet.filePathToUseInMarkdown).toBe(`./my-page%281%29.ABC-123.png`)
 })
 
-const optionsUsingHashNaming: DocuNotionOptions = {
+const optionsUsingHashNaming: NotionPullOptions = {
   ...optionsUsingDefaultNaming,
   imageFileNameFormat: "content-hash",
 }
@@ -115,7 +115,7 @@ test("hash naming", () => {
   expect(testImageSet.outputFileName).toBe(`${expectedFileName}`)
 })
 
-const optionsUsingLegacyNaming: DocuNotionOptions = {
+const optionsUsingLegacyNaming: NotionPullOptions = {
   ...optionsUsingDefaultNaming,
   imageFileNameFormat: "legacy",
 }
