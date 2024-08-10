@@ -105,12 +105,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   // TODO: HACK: until we can add the notion token to the config
-  const CACHE_DIR =
-    options.markdownOutputPath.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
+  const cacheDir = options.cwd.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
 
   const cachedNotionClient = new NotionCacheClient({
     auth: options.notionToken,
-    cacheDirectory: CACHE_FOLDER,
+    cacheDirectory: cacheDir,
   })
 
   const notionToMarkdown = new NotionToMarkdown({
@@ -133,12 +132,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
-  await fs.mkdir(
-    options.markdownOutputPath.replace(/\/+$/, "") + `/${CACHE_FOLDER}`,
-    {
-      recursive: true,
-    }
-  )
+  await fs.mkdir(cacheDir, { recursive: true })
 
   info("Connecting to Notion...")
 
@@ -226,8 +220,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const pages = await Promise.all(pagesPromises)
 
-  await saveDataToJson(objectsTree, CACHE_DIR + "object_tree.json")
-  await saveDataToJson(pages, CACHE_DIR + "pages.json")
+  await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
+  await saveDataToJson(
+    filesMap,
+    sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/file_map.json"
+  )
 
   info(`Found ${pages.length} pages`)
   endGroup()

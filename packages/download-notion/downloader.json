@@ -2,7 +2,7 @@
     "titleProperty": "title",
     "slugProperty": "slug",
     "rootDbAsFolder": true,
-    "cleanCache": true,
+    "cleanCache": false,
     "imgOutputPath": "public/assets/",
     "imgPrefixInMarkdown": "assets",
     "markdownOutputPath": "./content",
