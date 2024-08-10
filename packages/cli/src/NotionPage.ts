@@ -18,7 +18,7 @@ export type NotionPageConfig = {
   slugProperty?: string
 }
 
-export class NotionPage2 {
+export class NotionPage {
   public metadata: PageObjectResponse
   public config: CustomPropertiesConfig
 
@@ -337,7 +337,7 @@ export async function fromPageId(
   pageId: string,
   client: Client,
   config?: NotionPageConfig
-): Promise<NotionPage2> {
+): Promise<NotionPage> {
   const metadata = await client.pages.retrieve({
     page_id: pageId,
   })
@@ -347,5 +347,5 @@ export async function fromPageId(
   }
 
   //logDebug("notion metadata", JSON.stringify(metadata));
-  return new NotionPage2(metadata, config)
+  return new NotionPage(metadata, config)
 }

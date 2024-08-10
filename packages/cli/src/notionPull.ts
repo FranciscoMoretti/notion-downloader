@@ -17,7 +17,7 @@ import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage2, NotionPageConfig, fromPageId } from "./NotionPage2"
+import { NotionPage, NotionPageConfig, fromPageId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { pullOptionsSchema } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
@@ -64,7 +64,7 @@ export async function getNotionPage2(
   if (!isFullPage(pageResponse)) {
     throw Error("Notion page response is not full for " + currentID)
   }
-  const page = new NotionPage2(pageResponse, pageConfig)
+  const page = new NotionPage(pageResponse, pageConfig)
   return page
 }
 
@@ -213,7 +213,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
     pageConfig
   )
 
-  const pagesPromises: Promise<NotionPage2>[] = Object.keys(filesMap.page).map(
+  const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
     (id) => fromPageId(id, cachedNotionClient, pageConfig)
   )
 
@@ -250,7 +250,7 @@ export async function notionPull(options: DocuNotionOptions): Promise<void> {
 async function outputPages(
   options: DocuNotionOptions,
   config: IDocuNotionConfig,
-  pages: Array<NotionPage2>,
+  pages: Array<NotionPage>,
   client: Client,
   notionToMarkdown: NotionToMarkdown,
   filesMap: FilesMap

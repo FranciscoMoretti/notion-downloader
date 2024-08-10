@@ -3,7 +3,7 @@ import sanitize from "sanitize-filename"
 
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage2 } from "./NotionPage2"
+import { NotionPage } from "./NotionPage"
 import { NamingStrategy } from "./namingStrategy"
 
 // This strategy gives us a file tree that mirrors that of notion.
@@ -20,11 +20,11 @@ export class HierarchicalLayoutStrategy extends LayoutStrategy {
 
   public newLevel(
     context: string,
-    pageOrDatabaseName: NotionPage2 | NotionDatabase
+    pageOrDatabaseName: NotionPage | NotionDatabase
   ): string {
     const extendPath =
       pageOrDatabaseName.metadata.object === "page"
-        ? this.namingStrategy.nameForPage(pageOrDatabaseName as NotionPage2)
+        ? this.namingStrategy.nameForPage(pageOrDatabaseName as NotionPage)
         : this.namingStrategy.nameForDatabase(
             pageOrDatabaseName as NotionDatabase
           )
@@ -32,7 +32,7 @@ export class HierarchicalLayoutStrategy extends LayoutStrategy {
     return path
   }
 
-  public getPathForPage2(page: NotionPage2, currentPath: string): string {
+  public getPathForPage2(page: NotionPage, currentPath: string): string {
     const sanitizedName = this.namingStrategy.nameForPage(page)
 
     const context = ("/" + currentPath + "/").replaceAll("//", "/")

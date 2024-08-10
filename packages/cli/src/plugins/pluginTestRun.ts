@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client"
 import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { NotionPage2 } from "../NotionPage2"
+import { NotionPage } from "../NotionPage"
 import { NotionPageLegacy } from "../NotionPageLegacy"
 import { IDocuNotionConfig } from "../config/configuration"
 import { numberChildrenIfNumberedList } from "../getBlockChildren"
@@ -14,7 +14,7 @@ import { IDocuNotionContext } from "./pluginTypes"
 export async function blocksToMarkdown(
   config: IDocuNotionConfig,
   blocks: NotionBlock[],
-  pages?: NotionPage2[],
+  pages?: NotionPage[],
   // Notes on children:
   //   - These children will apply to each block in blocks. (could enhance but not needed yet)
   //   - If you are passing in children, it is probably because your parent block has has_children=true.

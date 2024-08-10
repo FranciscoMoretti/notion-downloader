@@ -4,10 +4,10 @@ import { slug } from "github-slugger"
 import sanitize from "sanitize-filename"
 
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage2 } from "./NotionPage2"
+import { NotionPage } from "./NotionPage"
 
 export abstract class NamingStrategy {
-  public abstract nameForPage(page: NotionPage2): string
+  public abstract nameForPage(page: NotionPage): string
   public abstract nameForDatabase(page: NotionDatabase): string
 }
 
@@ -19,7 +19,7 @@ export abstract class SlugNamingStrategy extends NamingStrategy {
     this.slugProperty = slugProperty || "Slug"
   }
 
-  public nameForPage(page: NotionPage2): string {
+  public nameForPage(page: NotionPage): string {
     // TODO This logic needs to be handled either here or in the page.
     const explicitSlug = page.getPlainTextProperty(this.slugProperty, "")
 
@@ -61,7 +61,7 @@ export class NotionSlugNamingStrategy extends SlugNamingStrategy {
 }
 
 export class GuidNamingStrategy extends NamingStrategy {
-  public nameForPage(page: NotionPage2): string {
+  public nameForPage(page: NotionPage): string {
     return page.id
   }
   public nameForDatabase(database: NotionDatabase): string {
@@ -70,7 +70,7 @@ export class GuidNamingStrategy extends NamingStrategy {
 }
 
 export class TitleNamingStrategy extends NamingStrategy {
-  public nameForPage(page: NotionPage2): string {
+  public nameForPage(page: NotionPage): string {
     return page.nameOrTitle
   }
   public nameForDatabase(database: NotionDatabase): string {

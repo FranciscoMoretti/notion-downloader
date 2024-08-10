@@ -2,7 +2,7 @@ import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
 import { FilesMap } from "../FilesMap"
-import { NotionPage2 } from "../NotionPage2"
+import { NotionPage } from "../NotionPage"
 import { ICounts, NotionBlock } from "../index"
 import { DocuNotionOptions } from "../notionPull"
 
@@ -73,7 +73,7 @@ export type IDocuNotionContext = {
   notionToMarkdown: NotionToMarkdown
   pageInfo: IDocuNotionContextPageInfo
   convertNotionLinkToLocalDocusaurusLink: (url: string) => string | undefined
-  pages: NotionPage2[]
+  pages: NotionPage[]
   counts: ICounts
   filesMap: FilesMap
 

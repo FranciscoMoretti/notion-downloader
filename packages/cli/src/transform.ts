@@ -1,6 +1,6 @@
 import chalk from "chalk"
 
-import { NotionPage2 } from "./NotionPage2"
+import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig } from "./config/configuration"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import {
@@ -12,7 +12,7 @@ import { NotionBlock } from "./types"
 export async function getMarkdownForPage(
   config: IDocuNotionConfig,
   context: IDocuNotionContext,
-  page: NotionPage2
+  page: NotionPage
 ): Promise<string> {
   info(`Reading & converting page ${page.id}/${page.nameOrTitle}`)
 
@@ -248,7 +248,7 @@ function registerNotionToMarkdownCustomTransforms(
 }
 
 // enhance:make this built-in plugin so that it can be overridden
-function getFrontMatter(page: NotionPage2): string {
+function getFrontMatter(page: NotionPage): string {
   const customProperties = Object.fromEntries(
     Object.entries(page.metadata.properties).map(([key, _]) => [
       key,

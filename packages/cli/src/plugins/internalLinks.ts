@@ -1,6 +1,6 @@
 import path from "path"
 
-import { NotionPage2 } from "../NotionPage2"
+import { NotionPage } from "../NotionPage"
 import { error, warning } from "../log"
 import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 
@@ -79,7 +79,7 @@ function convertInternalLink(
   return `[${label}](${url})`
 }
 
-function convertLinkLabel(targetPage: NotionPage2, text: string): string {
+function convertLinkLabel(targetPage: NotionPage, text: string): string {
   // In Notion, if you just add a link to a page without linking it to any text, then in Notion
   // you see the name of the page as the text of the link. But when Notion gives us that same
   // link, it uses "link_to_page" as the text. So we have to look up the name of the page in
@@ -89,7 +89,7 @@ function convertLinkLabel(targetPage: NotionPage2, text: string): string {
 }
 function convertLinkHref(
   context: IDocuNotionContext,
-  targetPage: NotionPage2,
+  targetPage: NotionPage,
   url: string
 ): string {
   let convertedLink = context.filesMap.page[targetPage.id]

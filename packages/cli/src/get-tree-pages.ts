@@ -4,7 +4,7 @@ import { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage2, fromPageId, getPageContentInfo } from "./NotionPage2"
+import { NotionPage, fromPageId, getPageContentInfo } from "./NotionPage"
 import { getBlockChildren } from "./getBlockChildren"
 import { error, info, warning } from "./log"
 import { OutputCounts } from "./notionPull"
@@ -17,7 +17,7 @@ export async function getTreePages(
   currentType: "page" | "database",
   rootLevel: boolean,
   client: Client,
-  pages: Array<NotionPage2>,
+  pages: Array<NotionPage>,
   layoutStrategy: LayoutStrategy,
   counts: OutputCounts,
   filesMap: FilesMap

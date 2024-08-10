@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client"
 
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NotionPageConfig, getPageContentInfo } from "./NotionPage2"
+import { NotionPageConfig, getPageContentInfo } from "./NotionPage"
 import { getNotionDatabase, getNotionPage2 } from "./notionPull"
 
 export async function getFileTreeMap(
