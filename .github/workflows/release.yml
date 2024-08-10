@@ -9,7 +9,7 @@ on:
 
 jobs:
   release:
-    if: ${{ github.repository_owner == 'shadcn-ui' }}
+    if: ${{ github.repository_owner == 'FranciscoMoretti' }}
     name: Create a PR for release workflow
     runs-on: ubuntu-latest
     steps:
