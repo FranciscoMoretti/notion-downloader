@@ -83,6 +83,8 @@ function sanitizeMarkdownOutputPath(path: string) {
   return path.replace(/\/+$/, "")
 }
 
+const CACHE_FOLDER = ".downloader"
+
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -103,10 +105,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   // TODO: HACK: until we can add the notion token to the config
-  const CACHE_DIR = options.markdownOutputPath.replace(/\/+$/, "") + "/.cache/"
+  const CACHE_DIR =
+    options.markdownOutputPath.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
 
   const cachedNotionClient = new NotionCacheClient({
     auth: options.notionToken,
+    cacheDirectory: CACHE_FOLDER,
   })
 
   const notionToMarkdown = new NotionToMarkdown({
@@ -129,9 +133,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
-  await fs.mkdir(options.markdownOutputPath.replace(/\/+$/, "") + "/.cache", {
-    recursive: true,
-  })
+  await fs.mkdir(
+    options.markdownOutputPath.replace(/\/+$/, "") + `/${CACHE_FOLDER}`,
+    {
+      recursive: true,
+    }
+  )
 
   info("Connecting to Notion...")
 
