@@ -91,6 +91,7 @@ export class NotionPage {
   }
   // In Notion, pages from the Database have "Name"s.
   private get name(): string {
+    // TODO: Notion has to specify which property represents the title somehow. Find how to do it automatically
     return this.getPlainTextProperty(this.config.titleProperty, "name missing")
   }
 
