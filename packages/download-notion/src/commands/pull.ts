@@ -115,7 +115,7 @@ export const pull = new Command()
 
       const options = pullOptionsSchema.parse(mergedOptions)
 
-      setLogLevel(opts.logLevel)
+      setLogLevel(mergedOptions.logLevel)
 
       // pull and convert
       const spinner = ora(`Pulling pages...`).start()

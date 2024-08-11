@@ -102,7 +102,7 @@ export async function notionContinuosPull(options: NotionPullOptions) {
 
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
   const optionsForLogging = { ...options }
   // Just show the first few letters of the notion token, which start with "secret" anyhow.
   optionsForLogging.notionToken =
