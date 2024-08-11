@@ -16,7 +16,8 @@ export class FileCleaner {
     this.rootDirectory = rootDirectory
     this.filesMap = this.loadFilesMapFile(rootDirectory + "/files_map.json")
     this.starterFiles = this.filesMap
-      ? Object.values(this.filesMap.page)
+      ? // TODO: Improve path joining in all the app
+        Object.values(this.filesMap.page).map((val) => rootDirectory + val)
       : this.getListOfExistingFiles(rootDirectory)
   }
 
