@@ -27,7 +27,7 @@ export const pullOptionsSchema = z.object({
     .enum(["github-slug", "notion-slug", "guid", "title"])
     .default("github-slug"),
   pageLinkHasExtension: z.boolean().default(true),
-  revalidatePeriod: z.number().default(3*60),
+  revalidatePeriod: z.number().default(-1),
 })
 
 // Same as pullOptionsSchema but all the properties are optional
