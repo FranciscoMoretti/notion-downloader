@@ -17,7 +17,7 @@ import { z } from "zod"
 
 import { pullOptionsSchema } from "../config/schema"
 import { setLogLevel } from "../log"
-import { notionPull } from "../notionPull"
+import { notionContinuosPull } from "../notionPull"
 
 dotenv.config()
 export const pull = new Command()
@@ -120,7 +120,9 @@ export const pull = new Command()
       // pull and convert
       const spinner = ora(`Pulling pages...`).start()
 
-      await notionPull(options).then(() => console.log("docu-notion Finished."))
+      await notionContinuosPull(options).then(() =>
+        console.log("docu-notion Finished.")
+      )
 
       /*
       for (const item of payload) {

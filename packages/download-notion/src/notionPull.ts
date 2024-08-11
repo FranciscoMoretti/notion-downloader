@@ -85,6 +85,21 @@ function sanitizeMarkdownOutputPath(path: string) {
 
 const CACHE_FOLDER = ".downloader"
 
+export async function notionContinuosPull(options: NotionPullOptions) {
+  // Wait forever
+  while (true) {
+    // Wait for the revalidation period after pulling
+    await notionPull(options)
+    if (options.revalidatePeriod < 0) {
+      break
+    }
+    console.log("Waiting for " + options.revalidatePeriod + "s")
+    await new Promise((resolve) =>
+      setTimeout(resolve, options.revalidatePeriod * 1000)
+    )
+  }
+}
+
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
