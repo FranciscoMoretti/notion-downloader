@@ -301,17 +301,15 @@ async function outputPages(
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
 
-    await processCoverImage(page, context)
-
     // most plugins should not write to disk, but those handling image files need these paths
     context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
     context.pageInfo.relativeFilePathToFolderContainingPage = Path.basename(
       Path.dirname(mdPathWithRoot)
     )
-
     // Get the filename without extension
     context.pageInfo.slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
 
+    await processCoverImage(page, context)
     if (
       page.isDatabasePage &&
       context.options.statusTag != "*" &&
