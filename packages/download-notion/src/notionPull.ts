@@ -22,7 +22,11 @@ import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { pullOptionsSchema } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
-import { cleanupOldImages, initImageHandling } from "./images"
+import {
+  cleanupOldImages,
+  initImageHandling,
+  processCoverImage,
+} from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
 import {
   GithubSlugNamingStrategy,
@@ -296,6 +300,8 @@ async function outputPages(
     const mdPath = filesMap.page[page.id]
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
+
+    await processCoverImage(page, context)
 
     // most plugins should not write to disk, but those handling image files need these paths
     context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPathWithRoot)

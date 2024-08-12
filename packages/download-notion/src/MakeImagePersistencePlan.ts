@@ -13,6 +13,7 @@ export function makeImagePersistencePlan(
   imageOutputRootPath: string,
   imagePrefix: string
 ): void {
+  // TODO: This needs to be replaced with FilesMap logic
   const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
 
   let imageFileExtension: string | undefined = imageSet.fileType?.ext

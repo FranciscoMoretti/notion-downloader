@@ -6,6 +6,7 @@ import fs from "fs-extra"
 import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
 import { makeImagePersistencePlan } from "./MakeImagePersistencePlan"
+import { NotionPage } from "./NotionPage"
 import { info, logDebug, verbose, warning } from "./log"
 import {
   IDocuNotionContext,
@@ -251,6 +252,54 @@ export function parseImageBlock(image: any): ImageSet {
   //console.log(JSON.stringify(imageSet, null, 2));
 
   return imageSet
+}
+
+export function parseCover(page: NotionPage): ImageSet | undefined {
+  const cover = page.metadata.cover
+  if (!cover) return undefined
+
+  const imageSet: ImageSet = {
+    primaryUrl: cover["type"] === "file" ? cover.file.url : cover.external.url,
+    caption: "",
+    localizedUrls: [],
+  }
+  return imageSet
+}
+
+export async function processCoverImage(
+  page: NotionPage,
+  context: IDocuNotionContext
+): Promise<void> {
+  const cover = page.metadata.cover
+  if (!cover) return undefined
+  logDebug("processCoverImage for page: ", page.id)
+  const imageSet = parseCover(page)
+  if (!imageSet) return
+  imageSet.pageInfo = context.pageInfo
+  await readPrimaryImage(imageSet)
+
+  // TODO: Include here the NamingStrategy
+  makeImagePersistencePlan(
+    context.options,
+    imageSet,
+    page.id,
+    imageOutputPath,
+    imagePrefix
+  )
+  await saveImage(imageSet)
+
+  // TODO: Do this a bit less hacky. Now it modified the cover object in the page object. It should draw from FilesMap
+
+  if (!imageSet.filePathToUseInMarkdown) {
+    // At this point, filePathToUseInMarkdown should be defined.
+    throw new Error("filePathToUseInMarkdown is undefined")
+  }
+  // change the src to point to our copy of the image
+  if ("file" in cover) {
+    cover.file.url = imageSet.filePathToUseInMarkdown
+  } else {
+    cover.external.url = imageSet.filePathToUseInMarkdown
+  }
 }
 
 function imageWasSeen(path: string) {
