@@ -209,7 +209,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     },
   })
 
-  info(`PULL: Fetched entire page tree`)
+  info("PULL: Notion Download Completed")
 
   const filesMap: FilesMap = {
     page: {},
@@ -237,7 +237,34 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     (id) => notionPageFromId(id, cachedNotionClient, pageConfig)
   )
 
-  const pages = await Promise.all(pagesPromises)
+  const allPages = await Promise.all(pagesPromises)
+
+  // ----- Page filtering ----
+  function shouldSkipPageFilter(page: NotionPage): boolean {
+    return (
+      options.statusTag !== "*" &&
+      page.status !== options.statusTag &&
+      page.status !== ""
+    )
+  }
+  // Filter from pages array
+  const pages = allPages.filter((page) => {
+    const shouldSkip = shouldSkipPageFilter(page)
+    if (shouldSkip) {
+      verbose(
+        `Skipping ${page.nameOrTitle} because it has status ${page.status}`
+      )
+      ++counts.skipped_because_status
+    }
+    return !shouldSkip
+  })
+  // Filter from filesMap
+  Object.keys(filesMap.page).forEach((id) => {
+    const page = pages.find((p) => p.id === id)
+    if (!page) {
+      delete filesMap.page[id]
+    }
+  })
 
   await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
   await saveDataToJson(
@@ -245,10 +272,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
   )
 
-  info(`Found ${pages.length} pages`)
+  info(`Found ${allPages.length} pages`)
   endGroup()
   group(
-    `Stage 2: convert ${pages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
+    `Stage 2: convert ${allPages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
   )
 
   await outputPages(
@@ -310,17 +337,6 @@ async function outputPages(
     context.pageInfo.slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
 
     await processCoverImage(page, context)
-    if (
-      page.isDatabasePage &&
-      context.options.statusTag != "*" &&
-      page.status !== context.options.statusTag
-    ) {
-      verbose(
-        `Skipping page because status is not '${context.options.statusTag}': ${page.nameOrTitle}`
-      )
-      ++context.counts.skipped_because_status
-      continue
-    }
 
     const markdown = await getMarkdownForPage(config, context, page)
     writePage(markdown, mdPathWithRoot)
