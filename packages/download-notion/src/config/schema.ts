@@ -5,7 +5,10 @@ export const pullOptionsSchema = z.object({
   rootPage: z.string(),
   rootIsDb: z.boolean().default(false),
   markdownOutputPath: z.string().default("./docs"),
+
   cleanCache: z.boolean().default(false),
+  cacheStrategy: z.enum(["cache", "no-cache", "force-cache"]).default("cache"),
+
   statusTag: z.string().default("Publish"),
   logLevel: z.string().default("info"),
   imgPrefixInMarkdown: z.string().default(""),
