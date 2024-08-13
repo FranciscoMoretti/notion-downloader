@@ -1,4 +1,4 @@
-import { Client } from "@notionhq/client"
+import { Client, collectPaginatedAPI } from "@notionhq/client"
 
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
@@ -23,10 +23,13 @@ export async function getFileTreeMap(
     filesMap.database[currentID] = layoutContext
 
     // Recurse to children
-    const databaseChildrenResponse = await client.databases.query({
-      database_id: currentID,
-    })
-    for (const childObject of databaseChildrenResponse.results) {
+    const databaseChildrenResults = await collectPaginatedAPI(
+      client.databases.query,
+      {
+        database_id: currentID,
+      }
+    )
+    for (const childObject of databaseChildrenResults) {
       // TODO: Consider using just id from objectTreeMap instead of the database query here
       await getFileTreeMap(
         layoutContext,
@@ -47,10 +50,14 @@ export async function getFileTreeMap(
     )
 
     // Recurse to children
-    const pageBlocksResponse = await client.blocks.children.list({
-      block_id: currentID,
-    })
-    const pageInfo = await getPageContentInfo(pageBlocksResponse.results)
+
+    const pageBlocksResults = await collectPaginatedAPI(
+      client.blocks.children.list,
+      {
+        block_id: currentID,
+      }
+    )
+    const pageInfo = await getPageContentInfo(pageBlocksResults)
     // TODO: Also handle blocks that have block/page children (e.g. columns)
     if (pageInfo.childDatabaseIdsAndOrder || pageInfo.childPageIdsAndOrder) {
       const layoutContext = layoutStrategy.newLevel(incomingContext, page)
