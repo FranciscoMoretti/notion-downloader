@@ -206,9 +206,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       downloadDatabases: true,
       followLinks: true,
     },
-    storageOptions: {
-      cleanCache: options.cleanCache,
-    },
+    cachingOptions: options.cache,
   })
 
   info("PULL: Notion Download Completed")

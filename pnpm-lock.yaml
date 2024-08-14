@@ -266,6 +266,9 @@ importers:
       notion-cache-client:
         specifier: workspace:*
         version: link:../notion-cache-client
+      zod:
+        specifier: ^3.20.2
+        version: 3.23.8
     devDependencies:
       tsup:
         specifier: ^6.6.3

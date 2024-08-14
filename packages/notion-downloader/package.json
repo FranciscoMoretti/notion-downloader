@@ -46,7 +46,8 @@
   "dependencies": {
     "@notionhq/client": "^2.2.15",
     "chalk": "5.2.0",
-    "notion-cache-client": "workspace:*"
+    "notion-cache-client": "workspace:*",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "tsup": "^6.6.3",

@@ -1,8 +1,10 @@
 import { Client, collectPaginatedAPI, isFullBlock } from "@notionhq/client"
 import { NotionCacheClient } from "notion-cache-client"
+import { z } from "zod"
 
 import { info } from "./log"
 import { NotionObjectTreeNode } from "./notion-object-tree"
+import { cacheOptionsSchema } from "./schema"
 
 // TODO: Consider making this compatible with client by returning more data
 
@@ -23,23 +25,22 @@ interface FetchingOptions {
   dataOptions: DownloadObjectsOptions
 }
 
-interface StorageOptions {
-  savePath?: boolean
-  cleanCache?: boolean
-}
+// Infer CachingOptions from cacheOptionsSchema
+
+export type CachingOptions = z.infer<typeof cacheOptionsSchema>
 
 type DownloadOptions = FetchingOptions & {
-  storageOptions: StorageOptions
+  cachingOptions: CachingOptions
 }
 
 export async function downloadObjectTree({
   client,
   startingNode,
   dataOptions,
-  storageOptions,
+  cachingOptions,
 }: DownloadOptions) {
   // TODO Implement the StorageOptions with loadCache and saveCache functions and create a cleanup func
-  if (storageOptions.cleanCache) {
+  if (cachingOptions.cleanCache) {
     await client.cache.clearCache()
   } else {
     await client.cache.loadCache()

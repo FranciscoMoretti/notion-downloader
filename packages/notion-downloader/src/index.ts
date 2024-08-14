@@ -5,3 +5,5 @@ export {
 } from "./fetch-notion-object-tree"
 
 export { NotionObjectTreeNode } from "./notion-object-tree"
+
+export { cacheOptionsSchema } from "./schema"

@@ -47,6 +47,7 @@ export const pull = new Command()
     "Database pages without a Notion page property 'status' matching this will be ignored. Use '*' to ignore status altogether." +
       " Default: Publish"
   )
+  // TODO: Move this option into a group, and then insert in the `cache` group in the schema.
   .option(
     "-c, --clean-cache",
     "Clear the cache before starting. WARNING: this will remove all files from the cache directory." +
