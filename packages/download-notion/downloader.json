@@ -2,8 +2,8 @@
     "titleProperty": "title",
     "slugProperty": "slug",
     "rootDbAsFolder": true,
-    "cachingOptions": {
-        "cleanCache": true,
+    "cache": {
+        "cleanCache": false,
         "cacheStrategy": "cache"
     },
     "imgOutputPath": "public/assets/",
