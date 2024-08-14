@@ -43,7 +43,16 @@ export async function downloadObjectTree({
   if (cachingOptions.cleanCache) {
     await client.cache.clearCache()
   } else {
-    await client.cache.loadCache()
+    if (cachingOptions.cacheStrategy === "cache") {
+      client.cache.setNeedsRefresh()
+      await client.cache.loadCache()
+    } else if (cachingOptions.cacheStrategy === "force-cache") {
+      await client.cache.loadCache()
+    } else if (cachingOptions.cacheStrategy === "no-cache") {
+      // Do nothing
+    } else {
+      throw new Error(`Unknown cache strategy ${cachingOptions.cacheStrategy}`)
+    }
   }
 
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
@@ -53,7 +62,9 @@ export async function downloadObjectTree({
     dataOptions: dataOptions,
   })
 
-  await client.cache.saveCache()
+  if (["cache", "force-cache"].includes(cachingOptions.cacheStrategy)) {
+    await client.cache.saveCache()
+  }
   return objectsTree
 }
 
