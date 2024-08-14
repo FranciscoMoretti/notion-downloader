@@ -128,7 +128,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const cachedNotionClient = new NotionCacheClient({
     auth: options.notionToken,
-    cacheDirectory: cacheDir,
+    cacheOptions: {
+      cacheDirectory: cacheDir,
+    },
   })
 
   const notionToMarkdown = new NotionToMarkdown({
