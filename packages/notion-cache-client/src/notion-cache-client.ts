@@ -110,7 +110,7 @@ export class NotionCacheClient extends Client {
         args: ListBlockChildrenParameters
       ): Promise<ListBlockChildrenResponse> => {
         // When args others than block_id are used, we default to the method from ancestor
-        if (Object.keys(args).length > 1) {
+        if (Object.values(args).filter(Boolean).length > 1) {
           return this.notionClient.blocks.children.list(args)
         }
 
@@ -164,7 +164,7 @@ export class NotionCacheClient extends Client {
 
     query: (args: QueryDatabaseParameters): Promise<QueryDatabaseResponse> => {
       // When args others than block_id are used, we default to the method from ancestor
-      if (Object.keys(args).length > 1) {
+      if (Object.values(args).filter(Boolean).length > 1) {
         return this.notionClient.databases.query(args)
       }
       const databaseChildrenFromCache = this.cache.getDatabaseChildren(
