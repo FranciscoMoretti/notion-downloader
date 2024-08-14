@@ -40,9 +40,9 @@ export async function downloadObjectTree({
 }: DownloadOptions) {
   // TODO Implement the StorageOptions with loadCache and saveCache functions and create a cleanup func
   if (storageOptions.cleanCache) {
-    await client.clearCache()
+    await client.cache.clearCache()
   } else {
-    await client.loadCache()
+    await client.cache.loadCache()
   }
 
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
@@ -52,7 +52,7 @@ export async function downloadObjectTree({
     dataOptions: dataOptions,
   })
 
-  await client.saveCache()
+  await client.cache.saveCache()
   return objectsTree
 }
 
