@@ -44,8 +44,8 @@ export async function downloadObjectTree({
     await client.cache.clearCache()
   } else {
     if (cachingOptions.cacheStrategy === "cache") {
-      client.cache.setNeedsRefresh()
       await client.cache.loadCache()
+      client.cache.setNeedsRefresh()
     } else if (cachingOptions.cacheStrategy === "force-cache") {
       await client.cache.loadCache()
     } else if (cachingOptions.cacheStrategy === "no-cache") {
