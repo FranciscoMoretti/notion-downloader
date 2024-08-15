@@ -86,15 +86,47 @@ export class NotionCache {
     return undefined
   }
 
-  setBlock(response: BlockObjectResponse) {
+  setBlock(response: BlockObjectResponse, level: number = 0) {
+    if (
+      this.blockObjectsCache[response.id]?.data.last_edited_time ===
+      response.last_edited_time
+    ) {
+      this.blockObjectsCache[response.id].__needs_refresh = false
+      this.logCacheMessage({
+        operation: "SET_NO_CHANGE",
+        cache_type: "block",
+        id: response.id,
+        level: level,
+      })
+
+      // Block Children are not changed either
+      if (this.blocksChildrenCache[response.id]) {
+        this.blocksChildrenCache[response.id].__needs_refresh = false
+        this.logCacheMessage({
+          operation: "SET_NO_CHANGE",
+          cache_type: "block_children",
+          id: response.id,
+          level: level,
+        })
+        this.blocksChildrenCache[response.id].data.children.forEach(
+          (childId) => {
+            this.setBlock(this.blockObjectsCache[childId].data, level + 1)
+          }
+        )
+      }
+
+      return
+    }
+
     this.blockObjectsCache[response.id] = {
       data: response,
       __needs_refresh: false,
     }
     this.logCacheMessage({
-      operation: "SAVE",
+      operation: "SET_NEW",
       cache_type: "block",
       id: response.id,
+      level: level,
     })
   }
 
@@ -137,8 +169,31 @@ export class NotionCache {
     return undefined
   }
 
-  setBlockChildren(response: ListBlockChildrenResponse) {
-    this.blocksChildrenCache[response.block.id] = {
+  setBlockChildren(
+    id: string,
+    response: ListBlockChildrenResponse,
+    level: number = 0
+  ) {
+    const newChildren = response.results.map((child) => child.id)
+    if (
+      this.blocksChildrenCache[id]?.data.children.sort().join(",") ===
+      newChildren.sort().join(",")
+    ) {
+      this.blocksChildrenCache[id].__needs_refresh = false
+      this.logCacheMessage({
+        operation: "SET_NO_CHANGE",
+        cache_type: "block_children",
+        id: id,
+        level: level,
+      })
+
+      this.blocksChildrenCache[id].data.children.forEach((child) => {
+        this.setBlock(this.blockObjectsCache[child].data, level + 1)
+      })
+      return
+    }
+
+    this.blocksChildrenCache[id] = {
       data: {
         children: response.results.map((child) => child.id),
       },
@@ -154,9 +209,10 @@ export class NotionCache {
       }
     })
     this.logCacheMessage({
-      operation: "SAVE",
+      operation: "SET_NEW",
       cache_type: "block_children",
-      id: response.block.id,
+      id: id,
+      level: level,
     })
   }
 
@@ -181,15 +237,38 @@ export class NotionCache {
     return undefined
   }
 
-  setDatabase(response: DatabaseObjectResponse) {
+  setDatabase(response: DatabaseObjectResponse, level: number = 0) {
+    // Read last record
+    // TODO: This operation doesn't add much value at the moment
+    if (
+      this.databaseObjectsCache[response.id]?.data.last_edited_time ===
+      response.last_edited_time
+    ) {
+      // Mark as up-to-date
+      this.databaseObjectsCache[response.id].__needs_refresh = false
+      this.logCacheMessage({
+        operation: "SET_NO_CHANGE",
+        cache_type: "database",
+        id: response.id,
+        level: level,
+      })
+      // add/remove children or database properties change the edit time. But changes in the children pages don't
+      // TODO: Mark children as up-to-date if exist? This would cause a problem when trying to get children pages
+      // if (this.databaseChildrenCache[response.id]) {
+      //   this.databaseChildrenCache[response.id].__needs_refresh = false
+      // }
+      return
+    }
+
     this.databaseObjectsCache[response.id] = {
       data: response,
       __needs_refresh: false,
     }
     this.logCacheMessage({
-      operation: "SAVE",
+      operation: "SET_NEW",
       cache_type: "database",
       id: response.id,
+      level: level,
     })
   }
 
@@ -232,42 +311,55 @@ export class NotionCache {
     return undefined
   }
 
-  setDatabaseChildren(response: QueryDatabaseResponse) {
-    this.databaseChildrenCache[response.page_or_database.id] = {
+  setDatabaseChildren(
+    id: string,
+    response: QueryDatabaseResponse,
+    level: number = 0
+  ) {
+    const newChildren = response.results.map((child) => child.id)
+    const operation =
+      this.databaseChildrenCache[id]?.data.children.sort().join(",") ===
+      newChildren.sort().join(",")
+        ? "SET_NO_CHANGE"
+        : "SET_NEW"
+    this.databaseChildrenCache[id] = {
       data: {
-        children: response.results.map((child) => child.id),
+        children: newChildren,
       },
       __needs_refresh: false,
     }
     this.logCacheMessage({
-      operation: "SAVE",
+      operation: operation,
       cache_type: "database_children",
-      id: response.page_or_database.id,
+      id: id,
+      level: level,
     })
     response.results.forEach((child) => {
       if (!isFullPageOrDatabase(child)) {
         throw new Error(`Non full page or database: ${JSON.stringify(child)}`)
       }
       if (isFullPage(child)) {
-        this.logCacheMessage({
-          operation: "SAVE",
-          cache_type: "page",
-          id: child.id,
-        })
-        this.pageObjectsCache[child.id] = {
-          data: child,
-          __needs_refresh: false,
-        }
+        this.setPage(child, level + 1)
+        // this.logCacheMessage({
+        //   operation: "SET_NEW",
+        //   cache_type: "page",
+        //   id: child.id,
+        // })
+        // this.pageObjectsCache[child.id] = {
+        //   data: child,
+        //   __needs_refresh: false,
+        // }
       } else {
-        this.logCacheMessage({
-          operation: "SAVE",
-          cache_type: "database",
-          id: child.id,
-        })
-        this.databaseObjectsCache[child.id] = {
-          data: child,
-          __needs_refresh: false,
-        }
+        this.setDatabase(child, level + 1)
+        // this.logCacheMessage({
+        //   operation: "SET_NEW",
+        //   cache_type: "database",
+        //   id: child.id,
+        // })
+        // this.databaseObjectsCache[child.id] = {
+        //   data: child,
+        //   __needs_refresh: false,
+        // }
       }
     })
   }
@@ -293,40 +385,80 @@ export class NotionCache {
     return undefined
   }
 
-  setPage(response: PageObjectResponse) {
+  setPage(response: PageObjectResponse, level: number = 0) {
+    if (
+      this.pageObjectsCache[response.id]?.data.last_edited_time ===
+      response.last_edited_time
+    ) {
+      // Mark as up-to-date
+      this.pageObjectsCache[response.id].__needs_refresh = false
+      this.logCacheMessage({
+        operation: "SET_NO_CHANGE",
+        cache_type: "page",
+        id: response.id,
+        level: level,
+      })
+      // Mark block children as updated
+      if (this.blocksChildrenCache[response.id]) {
+        this.blocksChildrenCache[response.id].__needs_refresh = false
+        this.logCacheMessage({
+          operation: "SET_NO_CHANGE",
+          cache_type: "block_children",
+          id: response.id,
+          level: level + 1,
+        })
+        this.blocksChildrenCache[response.id].data.children.forEach(
+          (childId) => {
+            this.setBlock(this.blockObjectsCache[childId].data, level + 1)
+          }
+        )
+      }
+      return
+    }
+
     this.pageObjectsCache[response.id] = {
       data: response,
       __needs_refresh: false,
     }
     this.logCacheMessage({
-      operation: "SAVE",
+      operation: "SET_NEW",
       cache_type: "page",
       id: response.id,
     })
   }
 
   private getNonHitOperation(cacheItem: CacheInfo | undefined) {
-    if (cacheItem && cacheItem.__needs_refresh) {
-      return "REFRESH"
+    if (cacheItem?.__needs_refresh) {
+      return "MISS_NEEDS_UPDATE"
     }
-    return "MISS"
+    return "MISS_NO_EXISTS"
   }
 
   private logCacheMessage({
     cache_type,
     operation,
     id,
+    level = 0,
   }: {
     id: string
-    operation: "HIT" | "SAVE" | "MISS" | "REFRESH"
+    operation:
+      | "HIT"
+      | "SET_NEW"
+      | "SET_CHANGE"
+      | "SET_NO_CHANGE"
+      | "MISS_NO_EXISTS"
+      | "MISS_NEEDS_UPDATE"
     cache_type:
       | "block"
       | "database"
       | "page"
       | "block_children"
       | "database_children"
+    level?: number
   }) {
-    info(`CACHE: (${operation}) (${cache_type}) : ${id}`)
+    const levelPadding =
+      "  ".repeat(Math.max(level - 1, 0)) + (level ? "└─" : "")
+    info(`${levelPadding}[CACHE]: (${operation}) (${cache_type}) : ${id}`)
   }
 
   clearCache = () => {

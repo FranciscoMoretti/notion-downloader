@@ -9,7 +9,7 @@
     "imgOutputPath": "public/assets/",
     "imgPrefixInMarkdown": "/assets",
     "markdownOutputPath": "./content",
-    "logLevel": "debug",
+    "logLevel": "info",
     "pageLinkHasExtension": false,
     "revalidatePeriod": -1
 }

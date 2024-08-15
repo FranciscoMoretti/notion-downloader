@@ -126,7 +126,7 @@ export class NotionCacheClient extends Client {
             return this.notionClient.blocks.children.list(args)
           }
         ).then((response) => {
-          this.cache.setBlockChildren(response)
+          this.cache.setBlockChildren(args.block_id, response)
           return response
         })
       },
@@ -181,7 +181,7 @@ export class NotionCacheClient extends Client {
         }
       ).then((response) => {
         // Saving to database children cache
-        this.cache.setDatabaseChildren(response)
+        this.cache.setDatabaseChildren(args.database_id, response)
         return response
       })
     },

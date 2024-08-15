@@ -116,7 +116,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const config = await loadConfigAsync()
   const rootPageUUID = convertToUUID(options.rootPage)
 
-  verbose(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
+  info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
   await initImageHandling(
     options.imgPrefixInMarkdown || options.imgOutputPath || "",
     options.imgOutputPath || "",
