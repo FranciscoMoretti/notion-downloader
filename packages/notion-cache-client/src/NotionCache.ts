@@ -444,14 +444,14 @@ export class NotionCache {
     info(`${levelPadding}[CACHE]: (${operation}) (${cache_type}) : ${id}`)
   }
 
-  clearCache = () => {
+  clearCache = async () => {
     this.blocksChildrenCache = {}
     this.databaseChildrenCache = {}
     this.pageObjectsCache = {}
     this.databaseObjectsCache = {}
     this.blockObjectsCache = {}
 
-    this.saveCache()
+    await this.saveCache()
   }
 
   setNeedsRefresh = () => {
