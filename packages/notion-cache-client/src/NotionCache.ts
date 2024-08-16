@@ -98,23 +98,14 @@ export class NotionCache {
         id: response.id,
         level: level,
       })
-
-      // Block Children are not changed either
+      // Update block children if it has any
       if (this.blocksChildrenCache[response.id]) {
-        this.blocksChildrenCache[response.id].__needs_refresh = false
-        this.logCacheMessage({
-          operation: "SET_NO_CHANGE",
-          cache_type: "block_children",
-          id: response.id,
-          level: level,
-        })
-        this.blocksChildrenCache[response.id].data.children.forEach(
-          (childId) => {
-            this.setBlock(this.blockObjectsCache[childId].data, level + 1)
-          }
+        this.setBlockChildren(
+          response.id,
+          this._buildListBlockChildrenResponseFromCache(response.id),
+          level + 1
         )
       }
-
       return
     }
 
@@ -140,24 +131,17 @@ export class NotionCache {
         cache_type: "block_children",
         id: id,
       })
-      const childrenIds = this.blocksChildrenCache[id].data.children
-      const results = childrenIds
-        .filter((childId) => !this.blockObjectsCache[childId].__needs_refresh)
-        .map((childId) => this.blockObjectsCache[childId].data)
+      const response: ListBlockChildrenResponse =
+        this._buildListBlockChildrenResponseFromCache(id)
+      response.results.forEach((child) => {
+        if (this.blockObjectsCache[child.id].__needs_refresh) {
+          const errorMessage =
+            "Inconsistent state: Block children not HIT in cache." + child.id
+          console.log(errorMessage)
+          throw Error(errorMessage)
+        }
+      })
 
-      if (results.length !== childrenIds.length) {
-        console.log(`NotionCacheClient: Block children not HIT in cache.`)
-        throw Error("Inconsistent state: Block children not HIT in cache.")
-      }
-
-      const response: ListBlockChildrenResponse = {
-        type: "block",
-        block: {},
-        object: "list",
-        next_cursor: null,
-        has_more: false,
-        results: results,
-      }
       return response
     }
 
@@ -167,6 +151,23 @@ export class NotionCache {
       id: id,
     })
     return undefined
+  }
+
+  private _buildListBlockChildrenResponseFromCache(id: string) {
+    const childrenIds = this.blocksChildrenCache[id].data.children
+    const results = childrenIds.map(
+      (childId) => this.blockObjectsCache[childId].data
+    )
+
+    const response: ListBlockChildrenResponse = {
+      type: "block",
+      block: {},
+      object: "list",
+      next_cursor: null,
+      has_more: false,
+      results: results,
+    }
+    return response
   }
 
   setBlockChildren(
@@ -199,20 +200,17 @@ export class NotionCache {
       },
       __needs_refresh: false,
     }
-    response.results.forEach((child) => {
-      if (!isFullBlock(child)) {
-        throw Error(`Non full block: ${JSON.stringify(response)}`)
-      }
-      this.blockObjectsCache[child.id] = {
-        data: child,
-        __needs_refresh: false,
-      }
-    })
     this.logCacheMessage({
       operation: "SET_NEW",
       cache_type: "block_children",
       id: id,
       level: level,
+    })
+    response.results.forEach((child) => {
+      if (!isFullBlock(child)) {
+        throw Error(`Non full block: ${JSON.stringify(response)}`)
+      }
+      this.setBlock(child, level + 1)
     })
   }
 
@@ -311,6 +309,7 @@ export class NotionCache {
     return undefined
   }
 
+  // TODO: This is setting as no-change pages that have blocks that have been modified!!!!
   setDatabaseChildren(
     id: string,
     response: QueryDatabaseResponse,
@@ -340,26 +339,8 @@ export class NotionCache {
       }
       if (isFullPage(child)) {
         this.setPage(child, level + 1)
-        // this.logCacheMessage({
-        //   operation: "SET_NEW",
-        //   cache_type: "page",
-        //   id: child.id,
-        // })
-        // this.pageObjectsCache[child.id] = {
-        //   data: child,
-        //   __needs_refresh: false,
-        // }
       } else {
         this.setDatabase(child, level + 1)
-        // this.logCacheMessage({
-        //   operation: "SET_NEW",
-        //   cache_type: "database",
-        //   id: child.id,
-        // })
-        // this.databaseObjectsCache[child.id] = {
-        //   data: child,
-        //   __needs_refresh: false,
-        // }
       }
     })
   }
@@ -399,20 +380,11 @@ export class NotionCache {
         level: level,
       })
       // Mark block children as updated
-      if (this.blocksChildrenCache[response.id]) {
-        this.blocksChildrenCache[response.id].__needs_refresh = false
-        this.logCacheMessage({
-          operation: "SET_NO_CHANGE",
-          cache_type: "block_children",
-          id: response.id,
-          level: level + 1,
-        })
-        this.blocksChildrenCache[response.id].data.children.forEach(
-          (childId) => {
-            this.setBlock(this.blockObjectsCache[childId].data, level + 1)
-          }
-        )
-      }
+      this.setBlockChildren(
+        response.id,
+        this._buildListBlockChildrenResponseFromCache(response.id),
+        level + 1
+      )
       return
     }
 
@@ -425,6 +397,17 @@ export class NotionCache {
       cache_type: "page",
       id: response.id,
     })
+    // Invalidate dependants
+    // TODO: Operations are the most atomic entity. They remove all descendants together. Can it be more selective?
+    this._deleteBlockChildren(response.id)
+  }
+
+  private _deleteBlockChildren(id: string) {
+    const childBlocks = this.blocksChildrenCache[id]
+    childBlocks?.data.children.forEach((childId) => {
+      delete this.blockObjectsCache[childId]
+    })
+    delete this.blocksChildrenCache[id]
   }
 
   private getNonHitOperation(cacheItem: CacheInfo | undefined) {
