@@ -194,6 +194,19 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
   )
 
+  // Load last edited time of pages from cache
+  let pagesLastEditedTime = null
+  if (options.cache?.cacheStrategy !== "no-cache") {
+    // TODO: There is duplication because this is done both here and in downloadObjectTree
+    await cachedNotionClient.cache.loadCache()
+    pagesLastEditedTime = Object.values(
+      cachedNotionClient.cache.pageObjectsCache
+    ).reduce<Record<string, string>>((acc, page) => {
+      acc[page.data.id] = page.data.last_edited_time
+      return acc
+    }, {})
+  }
+
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
   const objectsTree: NotionObjectTreeNode = await downloadObjectTree({
     client: cachedNotionClient,
@@ -247,7 +260,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       page.status !== ""
     )
   }
-  // Filter from pages array
+  // Filter pages that have an incorrect status
   const pages = allPages.filter((page) => {
     const shouldSkip = shouldSkipPageFilter(page)
     if (shouldSkip) {
@@ -258,12 +271,20 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     }
     return !shouldSkip
   })
+
   // Filter from filesMap
   Object.keys(filesMap.page).forEach((id) => {
     const page = pages.find((p) => p.id === id)
     if (!page) {
       delete filesMap.page[id]
     }
+  })
+
+  // Only output pages that changed! The rest already exist.
+  const pagesToOutput = pages.filter((page) => {
+    return pagesLastEditedTime
+      ? page.metadata.last_edited_time !== pagesLastEditedTime[page.id]
+      : true
   })
 
   await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
@@ -273,15 +294,16 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   info(`Found ${allPages.length} pages`)
+  info(`Found ${pagesToOutput.length} new pages`)
   endGroup()
   group(
-    `Stage 2: convert ${allPages.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
+    `Stage 2: convert ${pagesToOutput.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
   )
 
   await outputPages(
     options,
     config,
-    pages,
+    pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,
     filesMap
