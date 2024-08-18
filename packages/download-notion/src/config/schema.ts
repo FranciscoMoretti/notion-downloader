@@ -35,3 +35,5 @@ export const pullOptionsSchema = z.object({
 export const configFileOptionsSchema = pullOptionsSchema
   .partial()
   .omit({ cwd: true })
+
+export type NotionPullOptions = z.infer<typeof pullOptionsSchema>

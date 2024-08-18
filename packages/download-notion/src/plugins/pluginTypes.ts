@@ -3,8 +3,8 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
 import { FilesMap } from "../FilesMap"
 import { NotionPage } from "../NotionPage"
+import { NotionPullOptions } from "../config/schema"
 import { ICounts, NotionBlock } from "../index"
-import { NotionPullOptions } from "../notionPull"
 
 type linkConversionFunction = (
   context: IDocuNotionContext,

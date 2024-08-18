@@ -4,8 +4,8 @@ import {
   hashOfString,
   makeImagePersistencePlan,
 } from "./MakeImagePersistencePlan"
+import { NotionPullOptions } from "./config/schema"
 import { ImageSet } from "./images"
-import { NotionPullOptions } from "./notionPull"
 
 const optionsUsingDefaultNaming: NotionPullOptions = {
   notionToken: "",

@@ -10,7 +10,6 @@ import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
-import { z } from "zod"
 
 import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
@@ -19,7 +18,7 @@ import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
-import { pullOptionsSchema } from "./config/schema"
+import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import {
@@ -40,8 +39,6 @@ import { getMarkdownForPage } from "./transform"
 import { convertToUUID, saveDataToJson } from "./utils"
 import { configSchema } from "./utils/get-config"
 import { writePage } from "./writePage"
-
-export type NotionPullOptions = z.infer<typeof pullOptionsSchema>
 
 export interface OutputCounts {
   output_normally: number

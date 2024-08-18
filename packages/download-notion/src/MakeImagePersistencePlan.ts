@@ -2,9 +2,9 @@ import crypto from "crypto"
 import * as Path from "path"
 import { exit } from "process"
 
+import { NotionPullOptions } from "./config/schema"
 import { ImageSet } from "./images"
 import { error } from "./log"
-import { NotionPullOptions } from "./notionPull"
 
 export function makeImagePersistencePlan(
   options: NotionPullOptions,

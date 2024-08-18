@@ -1,5 +1,4 @@
 import { exit } from "process"
-import * as Cosmic from "cosmiconfig"
 
 import { error, verbose } from "../log"
 import { IPlugin } from "../plugins/pluginTypes"
