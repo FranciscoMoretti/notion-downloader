@@ -15,8 +15,8 @@ interface DownloadObjectsOptions {
 }
 
 interface StartingNode {
-  rootPageUUID: string
-  rootIsDb: boolean
+  rootUUID: string
+  rootObjectType: "page" | "database"
 }
 
 interface FetchingOptions {
@@ -74,8 +74,8 @@ export async function fetchNotionObjectTree({
   dataOptions: options,
 }: FetchingOptions) {
   const objectsTree: NotionObjectTreeNode = {
-    id: startingNode.rootPageUUID,
-    object: startingNode.rootIsDb ? "database" : "page",
+    id: startingNode.rootUUID,
+    object: startingNode.rootObjectType,
     children: [],
   }
 

@@ -111,7 +111,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   // TODO: This should be moved up to the pull command that already loads configs
   const config = await loadConfigAsync()
-  const rootPageUUID = convertToUUID(options.rootPage)
+  const rootUUID = convertToUUID(options.rootId)
 
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
   await initImageHandling(
@@ -155,37 +155,21 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info("Connecting to Notion...")
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
-  // TODO: SHould move page type detection of root to a utility function. Here it retries 10 times before exiting if we use the cache client
-  try {
-    let pageResult = undefined
-    if (!options.rootIsDb) {
-      try {
-        pageResult = await cachedNotionClient.pages.retrieve({
-          page_id: rootPageUUID,
-        })
-      } catch (e: any) {
-        // Catch APIResponseError
-        if (e.code !== "object_not_found") {
-          throw e
-        }
-      }
-    }
-    if (options.rootIsDb || !pageResult) {
-      await cachedNotionClient.databases.retrieve({ database_id: rootPageUUID })
-      options.rootIsDb = true
-    }
-  } catch (e: any) {
+  const rootObjectType = await tryGetFirstPageWithType({
+    cachedNotionClient: cachedNotionClient,
+    rootUUID: rootUUID,
+    rootObjectType: options.rootObjectType,
+  }).catch((e) => {
     error(
-      `docu-notion could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${rootPageUUID}".\r\nb) Check that your Notion API token (the "Integration Secret") is correct. It starts with "${
-        optionsForLogging.notionToken
-      }".\r\nc) Check that your root page includes your "integration" in its "connections".\r\nThis internal error message may help:\r\n    ${
+      `docu-notion could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${rootUUID}".\r\nb) Check that your Notion API token (the "Integration Secret") is correct.
+      .\r\nc) Check that your root page includes your "integration" in its "connections".\r\nThis internal error message may help:\r\n    ${
         e.message as string
       }".\r\nd) Check that your root-is-db option is being used correctly. Current value is: ${
-        options.rootIsDb
+        options.rootObjectType
       }\r\n`
     )
     exit(1)
-  }
+  })
 
   group(
     "Stage 1: walk children of the page named 'Outline', looking for pages..."
@@ -208,8 +192,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const objectsTree: NotionObjectTreeNode = await downloadObjectTree({
     client: cachedNotionClient,
     startingNode: {
-      rootPageUUID: rootPageUUID,
-      rootIsDb: options.rootIsDb || false,
+      rootUUID: rootUUID,
+      rootObjectType: rootObjectType,
     },
     dataOptions: {
       downloadAllPages: true,
@@ -234,8 +218,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   await getFileTreeMap(
     "", // Start context
-    rootPageUUID,
-    options.rootIsDb ? "database" : "page",
+    rootUUID,
+    rootObjectType,
     options.rootDbAsFolder,
     cachedNotionClient,
     layoutStrategy,
@@ -314,6 +298,41 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   await cleanupOldImages()
   endGroup()
+}
+
+async function tryGetFirstPageWithType({
+  cachedNotionClient,
+  rootObjectType,
+  rootUUID,
+}: {
+  cachedNotionClient: NotionCacheClient
+  rootObjectType: "page" | "database" | "auto"
+  rootUUID: string
+}): Promise<"page" | "database"> {
+  // TODO: Here it retries 10 times before exiting if we use the cache client
+  try {
+    let pageResult = undefined
+    if (["auto", "page"].includes(rootObjectType)) {
+      try {
+        pageResult = await cachedNotionClient.pages.retrieve({
+          page_id: rootUUID,
+        })
+        return Promise.resolve("page")
+      } catch (e: any) {
+        // Catch APIResponseError
+        if (e.code !== "object_not_found") {
+          throw e
+        }
+      }
+    }
+    if (["auto", "database"].includes(rootObjectType) || !pageResult) {
+      await cachedNotionClient.databases.retrieve({ database_id: rootUUID })
+      return Promise.resolve("database")
+    }
+  } catch (e: any) {
+    Promise.reject(e)
+  }
+  return Promise.reject("Error found: Unexpected code path")
 }
 
 async function outputPages(

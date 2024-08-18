@@ -56,7 +56,7 @@ export async function blocksToMarkdown(
     },
     options: {
       notionToken: "",
-      rootPage: "",
+      rootId: "",
       locales: [],
       markdownOutputPath: "",
       imgOutputPath: "",

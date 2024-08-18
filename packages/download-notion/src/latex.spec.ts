@@ -44,7 +44,7 @@ test("Latex Rendering", async () => {
     notionToMarkdown: new NotionToMarkdown({ notionClient }),
     options: {
       notionToken: "",
-      rootPage: "",
+      rootId: "",
       locales: [""],
       markdownOutputPath: "",
       imgOutputPath: "",

@@ -9,7 +9,7 @@ import { ImageSet } from "./images"
 
 const optionsUsingDefaultNaming: NotionPullOptions = {
   notionToken: "",
-  rootPage: "",
+  rootId: "",
   locales: [],
   markdownOutputPath: "",
   imgOutputPath: "",

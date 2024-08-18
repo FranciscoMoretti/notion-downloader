@@ -110,8 +110,7 @@ export const pull = new Command()
         // TODO: Decide if notion token should be in config file or not
         notionToken:
           opts.notionToken || config.notionToken || process.env.NOTION_TOKEN,
-        rootPage:
-          opts.rootPage || config.rootPage || process.env.NOTION_ROOT_PAGE,
+        rootId: opts.rootId || config.rootId || process.env.NOTION_ROOT_ID,
       }
 
       const options = pullOptionsSchema.parse(mergedOptions)

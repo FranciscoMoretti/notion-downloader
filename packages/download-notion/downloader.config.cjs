@@ -3,6 +3,7 @@ module.exports = {
   titleProperty: "title",
   slugProperty: "slug",
   rootDbAsFolder: true,
+  rootObjectType: "database",
   cache: {
     cleanCache: false,
     cacheStrategy: "cache",
