@@ -43,3 +43,5 @@ tsconfig.tsbuildinfo
 
 # Downloader
 .downloader
+content
+public
