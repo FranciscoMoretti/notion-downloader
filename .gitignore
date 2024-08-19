@@ -42,6 +42,7 @@ tsconfig.tsbuildinfo
 .vscode
 
 # Downloader
-.downloader
+.downloader/*
+./packages/*/.downloader
 content
 public
