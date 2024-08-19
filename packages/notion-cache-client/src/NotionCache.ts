@@ -17,7 +17,7 @@ import {
   NotionDatabaseObjectsCache,
   NotionPageObjectsCache,
 } from "./notion-structures-types"
-import { saveDataToJson } from "./utils"
+import { loadDataFromJson, saveDataToJson } from "./utils"
 
 export type NotionCacheOptions = {
   pageObjectsCache?: NotionPageObjectsCache
@@ -518,35 +518,17 @@ export class NotionCache {
 
   loadCache = async () => {
     const cacheDir = this.cacheDirectory
-    if (await fs.pathExists(cacheDir + this.blockChildrenCacheFilename)) {
-      this.blocksChildrenCache =
-        this.loadDataFromJson(cacheDir + this.blockChildrenCacheFilename) || {}
-    }
-    if (await fs.pathExists(cacheDir + this.databaseChildrenCacheFilename)) {
-      this.databaseChildrenCache =
-        this.loadDataFromJson(cacheDir + this.databaseChildrenCacheFilename) ||
-        {}
-    }
-    if (await fs.pathExists(cacheDir + this.pageObjectsCacheFilename)) {
-      this.pageObjectsCache =
-        this.loadDataFromJson(cacheDir + this.pageObjectsCacheFilename) || {}
-    }
-    if (await fs.pathExists(cacheDir + this.databaseObjectsCacheFilename)) {
-      this.databaseObjectsCache =
-        this.loadDataFromJson(cacheDir + this.databaseObjectsCacheFilename) ||
-        {}
-    }
-    if (await fs.pathExists(cacheDir + this.blocksObjectsCacheFilename)) {
-      this.blockObjectsCache =
-        this.loadDataFromJson(cacheDir + this.blocksObjectsCacheFilename) || {}
-    }
-  }
-
-  private loadDataFromJson = (filePath: string) => {
-    if (fs.existsSync(filePath)) {
-      const jsonData = fs.readFileSync(filePath, "utf8")
-      return JSON.parse(jsonData)
-    }
-    return undefined
+    this.blocksChildrenCache =
+      (await loadDataFromJson(cacheDir + this.blockChildrenCacheFilename)) || {}
+    this.databaseChildrenCache =
+      (await loadDataFromJson(cacheDir + this.databaseChildrenCacheFilename)) ||
+      {}
+    this.pageObjectsCache =
+      (await loadDataFromJson(cacheDir + this.pageObjectsCacheFilename)) || {}
+    this.databaseObjectsCache =
+      (await loadDataFromJson(cacheDir + this.databaseObjectsCacheFilename)) ||
+      {}
+    this.blockObjectsCache =
+      (await loadDataFromJson(cacheDir + this.blocksObjectsCacheFilename)) || {}
   }
 }
