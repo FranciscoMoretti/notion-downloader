@@ -3,13 +3,19 @@ import { z } from "zod"
 
 export const pullOptionsSchema = z
   .object({
+    // Notion Options
     notionToken: z.string(),
     rootId: z.string(),
     rootObjectType: z.enum(["page", "database", "auto"]).default("auto"),
     markdownOutputPath: z.string().default("./docs"),
+    // Cache
     cache: cacheOptionsSchema,
-    statusTag: z.string().default("Publish"),
+    // System
+    revalidatePeriod: z.number().default(-1),
     logLevel: z.string().default("info"),
+    cwd: z.string(),
+    // Conversion options
+    statusTag: z.string().default("Publish"),
     imgPrefixInMarkdown: z.string().default(""),
     imgOutputPath: z.string().default(""),
     imageFileNameFormat: z
@@ -17,7 +23,6 @@ export const pullOptionsSchema = z
       .optional()
       .default("default"),
     overwrite: z.boolean().default(false),
-    cwd: z.string(),
     titleProperty: z.string().optional(),
     slugProperty: z.string().optional(),
     rootDbAsFolder: z.boolean().default(false),
@@ -29,7 +34,6 @@ export const pullOptionsSchema = z
       .enum(["github-slug", "notion-slug", "guid", "title"])
       .default("github-slug"),
     pageLinkHasExtension: z.boolean().default(true),
-    revalidatePeriod: z.number().default(-1),
   })
   .strict()
 
