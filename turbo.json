@@ -64,6 +64,10 @@
     "test": {
       "cache": false,
       "outputs": []
+    },
+    "update-fixtures": {
+      "cache": false,
+      "outputs": []
     }
   }
 }

@@ -30,6 +30,7 @@
     "release": "changeset version",
     "pub:beta": "cd packages/cli && pnpm pub:beta",
     "pub:release": "cd packages/cli && pnpm pub:release",
+    "update-fixtures": "turbo run update-fixtures",
     "test": "turbo run test --force"
   },
   "packageManager": "pnpm@9.0.6",

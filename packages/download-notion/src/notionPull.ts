@@ -110,7 +110,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     optionsForLogging.notionToken.substring(0, 10) + "..."
 
   // TODO: This should be moved up to the pull command that already loads configs
-  const config = await loadConfigAsync()
+  const pluginsConfig = await loadConfigAsync()
   const rootUUID = convertToUUID(options.rootId)
 
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
@@ -203,7 +203,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     cachingOptions: options.cache,
   })
 
+  await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
   info("PULL: Notion Download Completed")
+  if (options.skipConversion) {
+    return
+  }
 
   const filesMap: FilesMap = {
     page: {},
@@ -268,7 +272,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       : true
   })
 
-  await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
   await saveDataToJson(
     filesMap,
     sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
@@ -283,7 +286,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   await outputPages(
     options,
-    config,
+    pluginsConfig,
     pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,

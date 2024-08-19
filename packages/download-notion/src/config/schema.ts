@@ -15,6 +15,7 @@ export const pullOptionsSchema = z
     logLevel: z.string().default("info"),
     cwd: z.string(),
     // Conversion options
+    skipConversion: z.boolean().default(false),
     statusTag: z.string().default("Publish"),
     imgPrefixInMarkdown: z.string().default(""),
     imgOutputPath: z.string().default(""),
