@@ -1,420 +1,4 @@
 {
-  "efa8d9de-c3bf-420d-8e1d-f8238df144d2": {
-    "data": {
-      "object": "page",
-      "id": "efa8d9de-c3bf-420d-8e1d-f8238df144d2",
-      "created_time": "2024-08-12T08:49:00.000Z",
-      "last_edited_time": "2024-08-18T10:30:00.000Z",
-      "created_by": {
-        "object": "user",
-        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
-      },
-      "last_edited_by": {
-        "object": "user",
-        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
-      },
-      "cover": {
-        "type": "external",
-        "external": {
-          "url": "https://www.notion.so/images/page-cover/woodcuts_3.jpg"
-        }
-      },
-      "icon": null,
-      "parent": {
-        "type": "database_id",
-        "database_id": "bbad12b6-7bcf-4390-bb50-3b177f17a9f1"
-      },
-      "archived": false,
-      "in_trash": false,
-      "properties": {
-        "publish": {
-          "id": "Ch%3Cu",
-          "type": "rich_text",
-          "rich_text": []
-        },
-        "description": {
-          "id": "E%5B%5Dc",
-          "type": "rich_text",
-          "rich_text": []
-        },
-        "slug": {
-          "id": "RGz%3E",
-          "type": "rich_text",
-          "rich_text": []
-        },
-        "date": {
-          "id": "S%3DN%3B",
-          "type": "date",
-          "date": {
-            "start": "2024-08-12",
-            "end": null,
-            "time_zone": null
-          }
-        },
-        "tag": {
-          "id": "Ycze",
-          "type": "multi_select",
-          "multi_select": []
-        },
-        "Last edited time": {
-          "id": "ctK%3A",
-          "type": "last_edited_time",
-          "last_edited_time": "2024-08-18T10:30:00.000Z"
-        },
-        "Status": {
-          "id": "jk%3EJ",
-          "type": "status",
-          "status": {
-            "id": "89c82094-a722-4924-9741-07d42e12d0f3",
-            "name": "Draft",
-            "color": "blue"
-          }
-        },
-        "Created time": {
-          "id": "rvNH",
-          "type": "created_time",
-          "created_time": "2024-08-12T08:49:00.000Z"
-        },
-        "title": {
-          "id": "title",
-          "type": "title",
-          "title": [
-            {
-              "type": "text",
-              "text": {
-                "content": "Node file writing methods createWriteStream vs ",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "Node file writing methods createWriteStream vs ",
-              "href": null
-            },
-            {
-              "type": "text",
-              "text": {
-                "content": "writeFileSync",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": true,
-                "color": "default"
-              },
-              "plain_text": "writeFileSync",
-              "href": null
-            }
-          ]
-        }
-      },
-      "url": "https://www.notion.so/Node-file-writing-methods-createWriteStream-vs-writeFileSync-efa8d9dec3bf420d8e1df8238df144d2",
-      "public_url": null
-    },
-    "__needs_refresh": true
-  },
-  "57701aab-8b5c-4798-9e6d-5b3f9603520b": {
-    "data": {
-      "object": "page",
-      "id": "57701aab-8b5c-4798-9e6d-5b3f9603520b",
-      "created_time": "2024-08-05T07:52:00.000Z",
-      "last_edited_time": "2024-08-12T08:07:00.000Z",
-      "created_by": {
-        "object": "user",
-        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
-      },
-      "last_edited_by": {
-        "object": "user",
-        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
-      },
-      "cover": {
-        "type": "file",
-        "file": {
-          "url": "https://prod-files-secure.s3.us-west-2.amazonaws.com/da68b0e3-871b-4926-8d19-fe9dfdcec60f/4ff61fa1-f273-45d6-bf98-cb26f4245f55/avoiding-mistakes-in-nextjs-using-the-typescript-plugin.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45HZZMZUHI%2F20240819%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240819T083555Z&X-Amz-Expires=3600&X-Amz-Signature=4edcb2396433325f9657b13c4bce60ced21c09bc114bfc060cdd8118cfc35424&X-Amz-SignedHeaders=host&x-id=GetObject",
-          "expiry_time": "2024-08-19T09:35:55.723Z"
-        }
-      },
-      "icon": null,
-      "parent": {
-        "type": "database_id",
-        "database_id": "bbad12b6-7bcf-4390-bb50-3b177f17a9f1"
-      },
-      "archived": false,
-      "in_trash": false,
-      "properties": {
-        "publish": {
-          "id": "Ch%3Cu",
-          "type": "rich_text",
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "true",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "true",
-              "href": null
-            }
-          ]
-        },
-        "description": {
-          "id": "E%5B%5Dc",
-          "type": "rich_text",
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "Learn how to avoid common mistakes in Next.js development by leveraging the power of the TypeScript plugin. Discover the benefits and how to enable it.",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "Learn how to avoid common mistakes in Next.js development by leveraging the power of the TypeScript plugin. Discover the benefits and how to enable it.",
-              "href": null
-            }
-          ]
-        },
-        "slug": {
-          "id": "RGz%3E",
-          "type": "rich_text",
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "avoiding-mistakes-in-nextjs-using-the-typescript-plugin",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "avoiding-mistakes-in-nextjs-using-the-typescript-plugin",
-              "href": null
-            }
-          ]
-        },
-        "date": {
-          "id": "S%3DN%3B",
-          "type": "date",
-          "date": {
-            "start": "2023-07-15",
-            "end": null,
-            "time_zone": null
-          }
-        },
-        "tag": {
-          "id": "Ycze",
-          "type": "multi_select",
-          "multi_select": [
-            {
-              "id": "472ce43d-aee6-4c18-ac75-b1cac3d170f5",
-              "name": "Next.js",
-              "color": "orange"
-            },
-            {
-              "id": "d2b5fd90-8b01-4ce1-9587-bb6777852c13",
-              "name": "TypeScript",
-              "color": "green"
-            },
-            {
-              "id": "d165c739-4aad-4889-bfa9-4c1dfd47b122",
-              "name": "VS Code",
-              "color": "gray"
-            }
-          ]
-        },
-        "Last edited time": {
-          "id": "ctK%3A",
-          "type": "last_edited_time",
-          "last_edited_time": "2024-08-12T08:07:00.000Z"
-        },
-        "Status": {
-          "id": "jk%3EJ",
-          "type": "status",
-          "status": {
-            "id": "380080e4-a6fd-47e4-8edf-dcbf73ecf066",
-            "name": "Publish",
-            "color": "green"
-          }
-        },
-        "Created time": {
-          "id": "rvNH",
-          "type": "created_time",
-          "created_time": "2024-08-05T07:52:00.000Z"
-        },
-        "title": {
-          "id": "title",
-          "type": "title",
-          "title": [
-            {
-              "type": "text",
-              "text": {
-                "content": "Avoiding Mistakes in Next.js using the TypeScript Plugin",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "Avoiding Mistakes in Next.js using the TypeScript Plugin",
-              "href": null
-            }
-          ]
-        }
-      },
-      "url": "https://www.notion.so/Avoiding-Mistakes-in-Next-js-using-the-TypeScript-Plugin-57701aab8b5c47989e6d5b3f9603520b",
-      "public_url": null
-    },
-    "__needs_refresh": true
-  },
-  "c94502e0-2678-4269-baa0-036954ba5649": {
-    "data": {
-      "object": "page",
-      "id": "c94502e0-2678-4269-baa0-036954ba5649",
-      "created_time": "2024-07-25T10:10:00.000Z",
-      "last_edited_time": "2024-08-16T18:36:00.000Z",
-      "created_by": {
-        "object": "user",
-        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
-      },
-      "last_edited_by": {
-        "object": "user",
-        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
-      },
-      "cover": {
-        "type": "file",
-        "file": {
-          "url": "https://prod-files-secure.s3.us-west-2.amazonaws.com/da68b0e3-871b-4926-8d19-fe9dfdcec60f/69972ae3-6b47-4db0-9271-53a6b7bca466/profile_picture.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45HZZMZUHI%2F20240819%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240819T083557Z&X-Amz-Expires=3600&X-Amz-Signature=4e1a46700d217c1b41c3459b507c0ee809b1f33ea243a591b12c953be99a5c5d&X-Amz-SignedHeaders=host&x-id=GetObject",
-          "expiry_time": "2024-08-19T09:35:57.228Z"
-        }
-      },
-      "icon": null,
-      "parent": {
-        "type": "database_id",
-        "database_id": "2eae1488-3b02-4a1a-9929-02f3130ee537"
-      },
-      "archived": false,
-      "in_trash": false,
-      "properties": {
-        "Status": {
-          "id": "%3F~nR",
-          "type": "status",
-          "status": {
-            "id": "94dde9b1-df74-408b-9935-f682f2cf9b64",
-            "name": "Publish",
-            "color": "green"
-          }
-        },
-        "twitter": {
-          "id": "LFcM",
-          "type": "rich_text",
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "franmoretti_",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "franmoretti_",
-              "href": null
-            }
-          ]
-        },
-        "slug": {
-          "id": "XeAe",
-          "type": "rich_text",
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "fmoretti",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "fmoretti",
-              "href": null
-            }
-          ]
-        },
-        "Last edited time": {
-          "id": "jsiy",
-          "type": "last_edited_time",
-          "last_edited_time": "2024-08-16T18:36:00.000Z"
-        },
-        "Name": {
-          "id": "title",
-          "type": "title",
-          "title": [
-            {
-              "type": "text",
-              "text": {
-                "content": "fmoretti",
-                "link": null
-              },
-              "annotations": {
-                "bold": false,
-                "italic": false,
-                "strikethrough": false,
-                "underline": false,
-                "code": false,
-                "color": "default"
-              },
-              "plain_text": "fmoretti",
-              "href": null
-            }
-          ]
-        }
-      },
-      "url": "https://www.notion.so/fmoretti-c94502e026784269baa0036954ba5649",
-      "public_url": null
-    },
-    "__needs_refresh": true
-  },
   "74fe3069-cc48-4ee5-b94f-b76bd67732ae": {
     "data": {
       "object": "page",
@@ -467,7 +51,7 @@
       },
       "url": "https://www.notion.so/docu-notion-sample-site-74fe3069cc484ee5b94fb76bd67732ae",
       "public_url": null,
-      "request_id": "f02f22de-ca5e-49e9-8a79-a3364a02346d"
+      "request_id": "2bb29d40-855b-45c2-b57a-39495fd1759d"
     },
     "__needs_refresh": false
   },
@@ -1355,7 +939,7 @@
       },
       "url": "https://www.notion.so/Facts-about-fruits-vegetables-1418438eaa284692b4c37c6c8fdc257f",
       "public_url": null,
-      "request_id": "8fb40977-0fab-4599-a7e1-9908b6066654"
+      "request_id": "a8cdbf68-a295-4133-b67a-70e802b38056"
     },
     "__needs_refresh": false
   },
@@ -1408,7 +992,7 @@
       },
       "url": "https://www.notion.so/Links-to-Headings-no-slug-1f6abac6ffe74137bedabd606371f2c0",
       "public_url": null,
-      "request_id": "6aaf5a5e-1d77-4ca9-a72b-b33c37ec5933"
+      "request_id": "8fd24fe6-1961-427c-85a6-d96aaf724559"
     },
     "__needs_refresh": false
   },
@@ -1461,7 +1045,7 @@
       },
       "url": "https://www.notion.so/Notion-Element-Tests-a558b59b146f4df79ba6fc8ad299d4a3",
       "public_url": null,
-      "request_id": "9263273d-3fa6-4ec8-998d-ef17df38d4fd"
+      "request_id": "7b5d8c4a-7031-4800-979f-d57a555e83d8"
     },
     "__needs_refresh": false
   },
@@ -1517,7 +1101,7 @@
       },
       "url": "https://www.notion.so/Outline-17a34e13f95245888e236969eae0c8af",
       "public_url": null,
-      "request_id": "ca5feee7-f4ba-424f-916d-8959e751b841"
+      "request_id": "65bb5d6d-e850-4e95-8b1d-18b7b9ee9fd3"
     },
     "__needs_refresh": false
   },
@@ -1570,7 +1154,7 @@
       },
       "url": "https://www.notion.so/Examples-83ba079db4c34ca895b0236c8b5d4e87",
       "public_url": null,
-      "request_id": "2daf35e5-542f-4b94-bc6d-3dd1a0f6dd93"
+      "request_id": "563433d1-7eb2-4f79-b532-2d414f269024"
     },
     "__needs_refresh": false
   },
@@ -1623,7 +1207,7 @@
       },
       "url": "https://www.notion.so/Fruits-and-Veggies-11979cd88220452b915322870d02e662",
       "public_url": null,
-      "request_id": "7d1c673d-56d2-4de5-b4df-a50a7f99a6cd"
+      "request_id": "4137f7b2-3ba9-4ab4-ba4d-877a80b88d77"
     },
     "__needs_refresh": false
   },
@@ -1676,7 +1260,7 @@
       },
       "url": "https://www.notion.so/Bananas-99c52bb6ec6c424f928ffca3f325a1b2",
       "public_url": null,
-      "request_id": "f2a81f44-dafb-4cb6-b507-50a0869d4285"
+      "request_id": "4a94a125-4222-4f8c-aee0-2581c0d3720d"
     },
     "__needs_refresh": false
   },
@@ -1729,7 +1313,7 @@
       },
       "url": "https://www.notion.so/Page-that-will-be-skipped-d20db9e1b24b45d9917df986271bdc18",
       "public_url": null,
-      "request_id": "946b0016-5bac-4c2e-9c42-f9b489efe87d"
+      "request_id": "8aa1d79c-63c0-45fe-a4e3-f15d9127b0aa"
     },
     "__needs_refresh": false
   },
@@ -1782,7 +1366,7 @@
       },
       "url": "https://www.notion.so/Page-that-won-t-make-it-0492a342ac244ee7914b991115e5e375",
       "public_url": null,
-      "request_id": "7e919b3b-70e0-416b-832e-2b0484319d00"
+      "request_id": "9b194f15-c71a-415a-8e9f-2aa8c538f505"
     },
     "__needs_refresh": false
   },
@@ -1835,7 +1419,7 @@
       },
       "url": "https://www.notion.so/child-f42e639cc7e44de1bf626b2b2af6ebf9",
       "public_url": null,
-      "request_id": "b83d4797-6a39-4255-bca1-3be0fc8dc0c2"
+      "request_id": "a60d6688-1a00-4d70-9edd-bb942a50c1cb"
     },
     "__needs_refresh": false
   }
