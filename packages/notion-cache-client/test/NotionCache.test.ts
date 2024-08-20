@@ -14,11 +14,16 @@ const sampleSiteReader = await buildNotionCacheWithFixture("sample-site")
 const blocksObjectsData = Object.values(sampleSiteReader.blockObjectsCache).map(
   (block) => block.data
 )
+const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
+  acc[block.id] = block
+  return acc
+}, {} as Record<string, BlockObjectResponse>)
+const blocksChildrenMap = sampleSiteReader.blocksChildrenCache
 const blockResponse = blocksObjectsData.find((block) => !block.has_children)
-const blockWithChildren = blocksObjectsData.find((block) => block.has_children)
+const blockWithChildren = blocksObjectsData.find((block) => block.has_children)!
 // A block can be a nested page, which has page as parent type
-const blockChildren = blocksObjectsData.filter(
-  (block) => block.parent[block.parent.type] == blockWithChildren?.id
+const blockChildren = blocksChildrenMap[blockWithChildren.id].data.children.map(
+  (childId) => blockObjectsDataMap[childId]
 )
 const blockChildrenResponse: ListBlockChildrenResponse = {
   type: "block",
@@ -73,6 +78,35 @@ describe("NotionCache - getting and setting blocks", () => {
     expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
       blockChildrenResponse
     )
+  })
+  it("If block needs refresh its not retrieved", async () => {
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    notionClient.setNeedsRefresh()
+    if (!blockWithChildren) throw new Error("No block found")
+    expect(notionClient.getBlockChildren(blockWithChildren.id)).toBeUndefined()
+  })
+  it("Setting a block without change refreshes children", async () => {
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    if (!blockWithChildren) throw new Error("No block found")
+    notionClient.setNeedsRefresh()
+    notionClient.setBlock(blockWithChildren)
+    expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
+      blockChildrenResponse
+    )
+  })
+  it("setting a block with new date invalidates children", async () => {
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    if (!blockWithChildren) throw new Error("No block found")
+    notionClient.setNeedsRefresh()
+    const newDate = new Date(
+      new Date(blockWithChildren.last_edited_time).getTime() + 60000
+    ).toISOString()
+
+    notionClient.setBlock({
+      ...blockWithChildren,
+      last_edited_time: newDate,
+    })
+    expect(notionClient.getBlockChildren(blockWithChildren.id)).toBeUndefined()
   })
 })
 
