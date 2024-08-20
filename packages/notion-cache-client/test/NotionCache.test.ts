@@ -16,8 +16,9 @@ const blocksObjectsData = Object.values(sampleSiteReader.blockObjectsCache).map(
 )
 const blockResponse = blocksObjectsData.find((block) => !block.has_children)
 const blockWithChildren = blocksObjectsData.find((block) => block.has_children)
+// A block can be a nested page, which has page as parent type
 const blockChildren = blocksObjectsData.filter(
-  (block) => block.parent["block_id"] == blockWithChildren?.id
+  (block) => block.parent[block.parent.type] == blockWithChildren?.id
 )
 const blockChildrenResponse: ListBlockChildrenResponse = {
   type: "block",
@@ -33,7 +34,8 @@ describe("NotionCache - getting and setting blocks", () => {
 
   it("gets a hit for existent block", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
-    const block = notionClient.getBlock("9deade73-f736-423e-b649-6628b3efeaa3")
+    if (!blockResponse) throw new Error("No block found")
+    const block = notionClient.getBlock(blockResponse.id)
     expect(block).toBeDefined()
   })
   it("gets a miss for non-existent block", async () => {
@@ -50,11 +52,22 @@ describe("NotionCache - getting and setting blocks", () => {
     notionClient.setBlock(blockResponse)
     expect(notionClient.getBlock(blockResponse.id)).toStrictEqual(blockResponse)
   })
+  it("gets block children from cache", async () => {
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    if (!blockWithChildren) throw new Error("No block found")
+    if (!blockChildrenResponse) throw new Error("No block children found")
+
+    expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
+      blockChildrenResponse
+    )
+  })
+
   it("set and get block children of block", async () => {
     const notionClient = new NotionCache({
       cacheDirectory: "dummy",
     })
     if (!blockWithChildren) throw new Error("No block found")
+    if (!blockChildrenResponse) throw new Error("No block children found")
 
     notionClient.setBlockChildren(blockWithChildren.id, blockChildrenResponse)
     expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
