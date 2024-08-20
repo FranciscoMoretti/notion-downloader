@@ -1,21 +1,65 @@
+import {
+  BlockObjectResponse,
+  ListBlockChildrenParameters,
+  ListBlockChildrenResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { NotionCache } from "../src/NotionCache"
 import { getFixture } from "./fixtureUtils"
 import { createTempDir } from "./utils"
 
-describe("NotionCache - Blocks", () => {
+const sampleSiteReader = await buildNotionCacheWithFixture("sample-site")
+// Find a block without children from the cache by iterating over the blocks objects
+const blocksObjectsData = Object.values(sampleSiteReader.blockObjectsCache).map(
+  (block) => block.data
+)
+const blockResponse = blocksObjectsData.find((block) => !block.has_children)
+const blockWithChildren = blocksObjectsData.find((block) => block.has_children)
+const blockChildren = blocksObjectsData.filter(
+  (block) => block.parent["block_id"] == blockWithChildren?.id
+)
+const blockChildrenResponse: ListBlockChildrenResponse = {
+  type: "block",
+  block: {},
+  object: "list",
+  next_cursor: null,
+  has_more: false,
+  results: blockChildren,
+}
+
+describe("NotionCache - getting and setting blocks", () => {
   // Loads from the fixture Sample-Site before each test
 
   it("gets a hit for existent block", async () => {
-    const notionClient = await buildClientWithFixture("sample-site")
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
     const block = notionClient.getBlock("9deade73-f736-423e-b649-6628b3efeaa3")
     expect(block).toBeDefined()
   })
   it("gets a miss for non-existent block", async () => {
-    const notionClient = await buildClientWithFixture("sample-site")
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
     const block = notionClient.getBlock("non-existent-block")
     expect(block).toBeUndefined()
+  })
+
+  it("sets a block without children", async () => {
+    const notionClient = new NotionCache({
+      cacheDirectory: "dummy",
+    })
+    if (!blockResponse) throw new Error("No block found")
+    notionClient.setBlock(blockResponse)
+    expect(notionClient.getBlock(blockResponse.id)).toStrictEqual(blockResponse)
+  })
+  it("set and get block children of block", async () => {
+    const notionClient = new NotionCache({
+      cacheDirectory: "dummy",
+    })
+    if (!blockWithChildren) throw new Error("No block found")
+
+    notionClient.setBlockChildren(blockWithChildren.id, blockChildrenResponse)
+    expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
+      blockChildrenResponse
+    )
   })
 })
 
@@ -83,7 +127,7 @@ describe("NotionCache - Persistance", () => {
     expect(notionCacheFiles2.blockObjectsCache).toEqual({})
   })
 })
-async function buildClientWithFixture(name: "sample-site") {
+async function buildNotionCacheWithFixture(name: "sample-site") {
   const cacheDirectory = getFixture(name)
   const notionCache = new NotionCache({
     cacheDirectory,
