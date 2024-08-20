@@ -164,8 +164,8 @@ export class NotionCache {
   ) {
     const newChildren = response.results.map((child) => child.id)
     if (
-      this.blocksChildrenCache[id]?.data.children.sort().join(",") ===
-      newChildren.sort().join(",")
+      this.blocksChildrenCache[id]?.data.children.join(",") ===
+      newChildren.join(",")
     ) {
       this.blocksChildrenCache[id].__needs_refresh = false
       this.logCacheMessage({
@@ -304,8 +304,8 @@ export class NotionCache {
   ) {
     const newChildren = response.results.map((child) => child.id)
     const operation =
-      this.databaseChildrenCache[id]?.data.children.sort().join(",") ===
-      newChildren.sort().join(",")
+      this.databaseChildrenCache[id]?.data.children.join(",") ===
+      newChildren.join(",")
         ? "SET_NO_CHANGE"
         : "SET_NEW"
     this.databaseChildrenCache[id] = {
