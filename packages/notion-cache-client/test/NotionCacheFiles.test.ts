@@ -1,9 +1,9 @@
 import * as fs from "fs"
 import * as path from "path"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest"
 
 import { NotionCacheFiles } from "../src/NotionCacheFiles"
-import { loadDataFromJson, saveDataToJson } from "../src/utils"
+import { loadDataFromJson } from "../src/utils"
 import { createTempDir } from "./utils"
 
 const blockChildrenCacheFilename = "block_children_cache.json"

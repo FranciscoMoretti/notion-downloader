@@ -1,17 +1,7 @@
-import * as fs from "fs"
-import * as path from "path"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest"
 
 import { NotionCache } from "../src/NotionCache"
-import { NotionCacheFiles } from "../src/NotionCacheFiles"
-import { loadDataFromJson, saveDataToJson } from "../src/utils"
 import { createTempDir } from "./utils"
-
-const blockChildrenCacheFilename = "block_children_cache.json"
-const databaseChildrenCacheFilename = "database_children_cache.json"
-const pageObjectsCacheFilename = "page_objects_cache.json"
-const databaseObjectsCacheFilename = "database_objects_cache.json"
-const blockObjectsCacheFilename = "block_objects_cache.json"
 
 describe("NotionCache", () => {
   it("saves cache to file system and loads it back", async () => {
