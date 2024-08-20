@@ -6,8 +6,8 @@ import {
   PageObjectResponse,
   QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import fs from "fs-extra"
 
+import { NotionCacheFiles } from "./NotionCacheFiles"
 import { info } from "./log"
 import {
   BlocksChildrenCache,
@@ -17,7 +17,6 @@ import {
   NotionDatabaseObjectsCache,
   NotionPageObjectsCache,
 } from "./notion-structures-types"
-import { loadDataFromJson, saveDataToJson } from "./utils"
 
 export type NotionCacheOptions = {
   pageObjectsCache?: NotionPageObjectsCache
@@ -34,18 +33,7 @@ export class NotionCache {
   pageObjectsCache: NotionPageObjectsCache
   databaseObjectsCache: NotionDatabaseObjectsCache
   blockObjectsCache: NotionBlockObjectsCache
-  cacheDirectory: string
-
-  private readonly blockChildrenCacheFilename = "block_children_cache.json"
-
-  private readonly databaseChildrenCacheFilename =
-    "database_children_cache.json"
-
-  private readonly pageObjectsCacheFilename = "page_objects_cache.json"
-
-  private readonly databaseObjectsCacheFilename = "database_objects_cache.json"
-
-  private readonly blocksObjectsCacheFilename = "block_objects_cache.json"
+  cacheFiles: NotionCacheFiles
 
   constructor({
     pageObjectsCache,
@@ -60,9 +48,8 @@ export class NotionCache {
     this.pageObjectsCache = pageObjectsCache || {}
     this.databaseObjectsCache = databaseObjectsCache || {}
     this.blockObjectsCache = blockObjectsCache || {}
-    this.cacheDirectory = cacheDirectory
-      ? cacheDirectory?.replace(/\/+$/, "") + "/"
-      : "./.cache/"
+
+    this.cacheFiles = new NotionCacheFiles(cacheDirectory)
   }
 
   getBlock(id: string) {
@@ -454,6 +441,30 @@ export class NotionCache {
     await this.saveCache()
   }
 
+  saveCache = async () => {
+    await this.cacheFiles.saveCache({
+      blocksChildrenCache: this.blocksChildrenCache,
+      databaseChildrenCache: this.databaseChildrenCache,
+      pageObjectsCache: this.pageObjectsCache,
+      databaseObjectsCache: this.databaseObjectsCache,
+      blockObjectsCache: this.blockObjectsCache,
+    })
+  }
+  loadCache = async () => {
+    const {
+      blocksChildrenCache,
+      databaseChildrenCache,
+      pageObjectsCache,
+      databaseObjectsCache,
+      blockObjectsCache,
+    } = await this.cacheFiles.loadCache()
+    this.blocksChildrenCache = blocksChildrenCache
+    this.databaseChildrenCache = databaseChildrenCache
+    this.pageObjectsCache = pageObjectsCache
+    this.databaseObjectsCache = databaseObjectsCache
+    this.blockObjectsCache = blockObjectsCache
+  }
+
   setNeedsRefresh = () => {
     Object.values(this.pageObjectsCache).forEach((page) => {
       page.__needs_refresh = true
@@ -470,65 +481,5 @@ export class NotionCache {
     Object.values(this.databaseChildrenCache).forEach((children) => {
       children.__needs_refresh = true
     })
-  }
-
-  saveCache = () => {
-    const cacheDir = this.cacheDirectory
-    if (!fs.existsSync(cacheDir)) {
-      // Make dir recursively
-      fs.mkdirSync(cacheDir, { recursive: true })
-    }
-    const promises = []
-    promises.push(
-      saveDataToJson(
-        this.blocksChildrenCache,
-        cacheDir + this.blockChildrenCacheFilename
-      )
-    )
-
-    promises.push(
-      saveDataToJson(
-        this.databaseChildrenCache,
-        cacheDir + this.databaseChildrenCacheFilename
-      )
-    )
-
-    promises.push(
-      saveDataToJson(
-        this.pageObjectsCache,
-        cacheDir + this.pageObjectsCacheFilename
-      )
-    )
-
-    promises.push(
-      saveDataToJson(
-        this.databaseObjectsCache,
-        cacheDir + this.databaseObjectsCacheFilename
-      )
-    )
-
-    promises.push(
-      saveDataToJson(
-        this.blockObjectsCache,
-        cacheDir + this.blocksObjectsCacheFilename
-      )
-    )
-    return Promise.all(promises)
-  }
-
-  loadCache = async () => {
-    const cacheDir = this.cacheDirectory
-    this.blocksChildrenCache =
-      (await loadDataFromJson(cacheDir + this.blockChildrenCacheFilename)) || {}
-    this.databaseChildrenCache =
-      (await loadDataFromJson(cacheDir + this.databaseChildrenCacheFilename)) ||
-      {}
-    this.pageObjectsCache =
-      (await loadDataFromJson(cacheDir + this.pageObjectsCacheFilename)) || {}
-    this.databaseObjectsCache =
-      (await loadDataFromJson(cacheDir + this.databaseObjectsCacheFilename)) ||
-      {}
-    this.blockObjectsCache =
-      (await loadDataFromJson(cacheDir + this.blocksObjectsCacheFilename)) || {}
   }
 }
