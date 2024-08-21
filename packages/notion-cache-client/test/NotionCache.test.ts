@@ -208,7 +208,7 @@ describe("NotionCache - database children", () => {
 
 
 describe("NotionCache - refresh", () => {
-  // Refresh for blocks
+  // Refresh for blocks and blocks children
   it("If block needs refresh its not retrieved", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     notionCache.setNeedsRefresh()
@@ -305,7 +305,64 @@ describe("NotionCache - refresh", () => {
     // TODO: verify this logic. Not too sure it it gives us any info about its children
     expect(notionCache.getDatabaseChildren(databaseResponse.id)).toBeDefined()
   })
+  // Database Children
+  it("If database children needs refresh its not retrieved", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    notionCache.setNeedsRefresh()
+    if (!databaseResponse) throw new Error("No database found")
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toBeUndefined()
+  })
+  it("Setting a database children without change refreshes itself and its child pages and databases", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+    notionCache.setNeedsRefresh()
+    notionCache.setDatabaseChildren(
+      databaseResponse.id,
+      pageOrDatabaseChildrenOfDatabaseResponse
+    )
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toStrictEqual(
+      pageOrDatabaseChildrenOfDatabaseResponse
+    )
+    const childPagesOrDatabases = pageOrDatabaseChildrenOfDatabaseResponse.results
+    childPagesOrDatabases.forEach((child) => {
+      expect(notionCache.getPage(child.id)).toStrictEqual(child)
+    })
+  })
+  it("setting a database children refreshes children by children based on its date", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+      // TODO Extract as add to edited time function
+    const newDate = new Date(
+      new Date(databaseResponse.last_edited_time).getTime() + 60000
+    ).toISOString()
 
+    // Modify the date of one of the children
+    const firstChild = pageOrDatabaseChildrenOfDatabaseResponse.results[0]
+    const moreRecentChild = {
+      ...firstChild,
+      last_edited_time: newDate,
+    }
+    const moreRecentDatabaseResponse = {
+      ...pageOrDatabaseChildrenOfDatabaseResponse,
+      results: [moreRecentChild, ...pageOrDatabaseChildrenOfDatabaseResponse.results.slice(1)],
+    }
+    notionCache.setDatabaseChildren(
+      databaseResponse.id,
+      moreRecentDatabaseResponse
+    )
+    expect(
+      notionCache.getDatabaseChildren(databaseResponse.id)
+    ).toStrictEqual(moreRecentDatabaseResponse)
+    // The changed child is updated in cache
+    expect(notionCache.getPage(firstChild.id)).toStrictEqual(moreRecentChild)
+    // Its child blocks are removed from cache
+    expect(notionCache.getBlockChildren(firstChild.id)).toBeUndefined()
+    // The other children are not updated in cache and its child block are not removed
+    pageOrDatabaseChildrenOfDatabaseResponse.results.slice(1).forEach((child) => {
+      expect(notionCache.getPage(child.id)).toStrictEqual(child)
+      expect(notionCache.getBlockChildren(child.id)).toBeDefined()
+    })
+  })
 
 })
 
