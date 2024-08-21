@@ -36,7 +36,6 @@ const blockChildrenResponse: ListBlockChildrenResponse = {
 
 describe("NotionCache - getting and setting blocks", () => {
   // Loads from the fixture Sample-Site before each test
-
   it("gets a hit for existent block", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
     if (!blockResponse) throw new Error("No block found")
@@ -79,6 +78,9 @@ describe("NotionCache - getting and setting blocks", () => {
       blockChildrenResponse
     )
   })
+})
+
+describe("NotionCache - refresh", () => {
   it("If block needs refresh its not retrieved", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
     notionClient.setNeedsRefresh()
@@ -107,8 +109,10 @@ describe("NotionCache - getting and setting blocks", () => {
       last_edited_time: newDate,
     })
     expect(notionClient.getBlockChildren(blockWithChildren.id)).toBeUndefined()
-  })
+  })  
+
 })
+
 
 describe("NotionCache - Persistance", () => {
   it("saves cache to file system and loads it back", async () => {
