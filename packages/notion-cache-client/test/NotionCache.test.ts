@@ -203,7 +203,6 @@ describe("NotionCache - refresh", () => {
   it("setting a page with new date refreshes itself and invalidates children", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!pageResponse) throw new Error("No page found")
-      notionCache.setNeedsRefresh()
     const newDate = new Date(
       new Date(pageResponse.last_edited_time).getTime() + 60000
     ).toISOString()
@@ -217,7 +216,40 @@ describe("NotionCache - refresh", () => {
     expect(notionCache.getBlockChildren(pageResponse.id)).toBeUndefined()
   })
   // Refresh for database
+  it("If database needs refresh its not retrieved", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    notionCache.setNeedsRefresh()
+    if (!databaseResponse) throw new Error("No database found")
+    expect(notionCache.getDatabase(databaseResponse.id)).toBeUndefined()
+  })
+  it("Setting a database without change refreshes itself but not its children", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+    notionCache.setNeedsRefresh()
+    notionCache.setDatabase(databaseResponse)
+    expect(notionCache.getDatabase(databaseResponse.id)).toStrictEqual(
+      databaseResponse
+    )
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toBeUndefined()
+  })
+  it("setting a database with new date refreshes itself but not its children", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+    const newDate = new Date(
+      new Date(databaseResponse.last_edited_time).getTime() + 60000
+    ).toISOString()
 
+    const moreRecentDatabaseResponse = {
+      ...databaseResponse,
+      last_edited_time: newDate,
+    }
+    notionCache.setDatabase(moreRecentDatabaseResponse)
+    expect(notionCache.getDatabase(databaseResponse.id)).toStrictEqual(
+      moreRecentDatabaseResponse
+    )
+    // TODO: verify this logic. Not too sure it it gives us any info about its children
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toBeDefined()
+  })
 
 
 })
