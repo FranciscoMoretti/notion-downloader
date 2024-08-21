@@ -73,6 +73,9 @@ describe("NotionCache - getting and setting blocks", () => {
     notionClient.setBlock(blockResponse)
     expect(notionClient.getBlock(blockResponse.id)).toStrictEqual(blockResponse)
   })
+})
+
+describe("NotionCache - getting and setting block children", () => {
   it("gets block children from cache", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
     if (!blockWithChildren) throw new Error("No block found")
