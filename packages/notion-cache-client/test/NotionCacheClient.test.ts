@@ -116,3 +116,72 @@ describe("NotionCacheClient - block", () => {
     })
 })
 
+describe("NotionCacheClient - block children", ()=> {
+  it("gets block children from cache", async () => {
+    const notionClient = await buildNotionCacheClientWithFixture("sample-site")
+    if (!blockWithChildren) throw new Error("No block found")
+    if (!blockChildrenOfBlockResponse) throw new Error("No block children found")
+
+    const blockChildren = await notionClient.blocks.children.list({block_id:blockWithChildren.id})
+    expect(blockChildren).toStrictEqual(
+      blockChildrenOfBlockResponse
+    )
+  })
+
+  it("gets a miss from cache and uses notion-api for non-existent block", async () => {
+    const notionClient = await buildNotionCacheClientWithFixture("sample-site")
+    // Create a spy function with vitest
+    const spy = vi.spyOn(notionClient.notionClient.blocks.children, "list").mockResolvedValue(blockChildrenOfBlockResponse)
+    await notionClient.blocks.children.list({block_id:"non-existent-block"})
+    expect(spy).toHaveBeenCalledOnce()
+  })
+
+  it("after getting the block children once, it gets it from the cache the next time", async () => {
+    const notionClient = new NotionCacheClient({
+      auth: "dummy",
+      cacheOptions: {cacheDirectory: "dummy"},
+    })
+    if (!blockWithChildren) throw new Error("No block found")
+    if (!blockChildrenOfBlockResponse) throw new Error("No block children found")
+
+    const spy = vi.spyOn(notionClient.notionClient.blocks.children, "list").mockResolvedValueOnce(blockChildrenOfBlockResponse)
+    const blockChildren1 = await notionClient.blocks.children.list({block_id:blockWithChildren.id})
+    const blockChildren2 = await notionClient.blocks.children.list({block_id:blockWithChildren.id})
+    expect(blockChildren1).toStrictEqual(blockChildren2)
+    expect(spy).toHaveBeenCalledOnce()
+  })
+})
+
+describe("NotionCacheClient - page", () => {
+  it("gets page from cache", async () => {
+    const notionClient = await buildNotionCacheClientWithFixture("sample-site")
+    if (!pageResponse) throw new Error("No page found")
+    const page = await notionClient.pages.retrieve({page_id:pageResponse.id})
+    expect(page).toStrictEqual(pageResponse)
+  })
+
+  it("gets a miss from cache and uses notion-api for non-existent page", async () => {
+    const notionClient = await buildNotionCacheClientWithFixture("sample-site")
+    // Create a spy function with vitest
+    const spy = vi.spyOn(notionClient.notionClient.pages, "retrieve").mockResolvedValue(pageResponse)
+    await notionClient.pages.retrieve({page_id:"non-existent-page"})
+    expect(spy).toHaveBeenCalledOnce()
+  })
+
+  it("after getting the page once, it gets it from the cache the next time", async () => {
+    const notionClient = new NotionCacheClient({
+      auth: "dummy",
+      cacheOptions: {cacheDirectory: "dummy"},
+    })
+    if (!pageResponse) throw new Error("No page found")
+    if (!blockChildrenOfPageResponse) throw new Error("No page children found")
+
+    const spy = vi.spyOn(notionClient.notionClient.blocks.children, "list").mockResolvedValueOnce(blockChildrenOfPageResponse)
+    const blockChildren1 = await notionClient.blocks.children.list({block_id:pageResponse.id})
+    const blockChildren2 = await notionClient.blocks.children.list({block_id:pageResponse.id})
+    expect(blockChildren1).toStrictEqual(blockChildren2)
+    expect(spy).toHaveBeenCalledOnce()
+  })
+})
+
+
