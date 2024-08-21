@@ -140,22 +140,6 @@ export class NotionCache {
     return undefined
   }
 
-  private _buildListBlockChildrenResponseFromCache(id: string) {
-    const childrenIds = this.blocksChildrenCache[id].data.children
-    const results = childrenIds.map(
-      (childId) => this.blockObjectsCache[childId].data
-    )
-
-    const response: ListBlockChildrenResponse = {
-      type: "block",
-      block: {},
-      object: "list",
-      next_cursor: null,
-      has_more: false,
-      results: results,
-    }
-    return response
-  }
 
   setBlockChildren(
     id: string,
@@ -393,10 +377,27 @@ export class NotionCache {
     const childBlocks = this.blocksChildrenCache[id]
     childBlocks?.data.children.forEach((childId) => {
       delete this.blockObjectsCache[childId]
+      // TODO: This should also delete other kind of children (database, pages))
     })
     delete this.blocksChildrenCache[id]
   }
 
+  private _buildListBlockChildrenResponseFromCache(id: string) {
+    const childrenIds = this.blocksChildrenCache[id].data.children
+    const results = childrenIds.map(
+      (childId) => this.blockObjectsCache[childId].data
+    )
+
+    const response: ListBlockChildrenResponse = {
+      type: "block",
+      block: {},
+      object: "list",
+      next_cursor: null,
+      has_more: false,
+      results: results,
+    }
+    return response
+  }
   private getNonHitOperation(cacheItem: CacheInfo | undefined) {
     if (cacheItem?.__needs_refresh) {
       return "MISS_NEEDS_UPDATE"
@@ -431,6 +432,24 @@ export class NotionCache {
     info(`${levelPadding}[CACHE]: (${operation}) (${cache_type}) : ${id}`)
   }
 
+
+  setNeedsRefresh = () => {
+    Object.values(this.pageObjectsCache).forEach((page) => {
+      page.__needs_refresh = true
+    })
+    Object.values(this.databaseObjectsCache).forEach((database) => {
+      database.__needs_refresh = true
+    })
+    Object.values(this.blockObjectsCache).forEach((block) => {
+      block.__needs_refresh = true
+    })
+    Object.values(this.blocksChildrenCache).forEach((children) => {
+      children.__needs_refresh = true
+    })
+    Object.values(this.databaseChildrenCache).forEach((children) => {
+      children.__needs_refresh = true
+    })
+  }
   clearCache = async () => {
     this.blocksChildrenCache = {}
     this.databaseChildrenCache = {}
@@ -440,7 +459,6 @@ export class NotionCache {
 
     await this.saveCache()
   }
-
   saveCache = async () => {
     await this.cacheFiles.saveCache({
       blocksChildrenCache: this.blocksChildrenCache,
@@ -465,21 +483,5 @@ export class NotionCache {
     this.blockObjectsCache = blockObjectsCache
   }
 
-  setNeedsRefresh = () => {
-    Object.values(this.pageObjectsCache).forEach((page) => {
-      page.__needs_refresh = true
-    })
-    Object.values(this.databaseObjectsCache).forEach((database) => {
-      database.__needs_refresh = true
-    })
-    Object.values(this.blockObjectsCache).forEach((block) => {
-      block.__needs_refresh = true
-    })
-    Object.values(this.blocksChildrenCache).forEach((children) => {
-      children.__needs_refresh = true
-    })
-    Object.values(this.databaseChildrenCache).forEach((children) => {
-      children.__needs_refresh = true
-    })
-  }
+
 }
