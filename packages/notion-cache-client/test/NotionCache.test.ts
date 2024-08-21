@@ -1,7 +1,10 @@
 import {
   BlockObjectResponse,
+  DatabaseObjectResponse,
   ListBlockChildrenParameters,
   ListBlockChildrenResponse,
+  PageObjectResponse,
+  QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -25,10 +28,24 @@ const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
   acc[block.id] = block
   return acc
 }, {} as Record<string, BlockObjectResponse>)
+const pageObjectsDataMap = pageObjectsData.reduce((acc, page) => {
+  acc[page.id] = page
+  return acc
+}, {} as Record<string, PageObjectResponse>)
+const databaseObjectsDataMap = databaseObjectsData.reduce((acc, database) => {
+  acc[database.id] = database
+  return acc
+}, {} as Record<string, DatabaseObjectResponse>)
+
+
 const blocksChildrenMap = sampleSiteReader.blocksChildrenCache
+const databaseChildrenMap = sampleSiteReader.databaseChildrenCache
 const blockResponse = blocksObjectsData[0]
 const pageResponse = pageObjectsData[0]
 const databaseResponse = databaseObjectsData[0]
+const pageOrDatabaseChildrenOfDatabase = databaseChildrenMap[databaseResponse.id].data.children.map<(PageObjectResponse|DatabaseObjectResponse)>(
+  (childId) => pageObjectsDataMap[childId] || databaseObjectsDataMap[childId]
+)
 const blockChildrenOfPage = blocksChildrenMap[pageResponse.id].data.children.map(
   (childId) => blockObjectsDataMap[childId]
 )
@@ -53,6 +70,15 @@ const blockChildrenOfPageResponse: ListBlockChildrenResponse = {
   next_cursor: null,
   has_more: false,
   results: blockChildrenOfPage,
+}
+
+const pageOrDatabaseChildrenOfDatabaseResponse: QueryDatabaseResponse  = {
+  type: "page_or_database",
+  page_or_database: {},
+  object: "list",
+  next_cursor: null,
+  has_more: false,
+  results: pageOrDatabaseChildrenOfDatabase,
 }
 
 
@@ -150,6 +176,35 @@ describe("NotionCache - database", () => {
     expect(notionCache.getDatabase(databaseResponse.id)).toStrictEqual(databaseResponse)
   })
 })
+
+describe("NotionCache - database children", () => {
+  it("gets database children from cache", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+    if (!pageOrDatabaseChildrenOfDatabaseResponse) throw new Error("No database children found")
+
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toStrictEqual(
+      pageOrDatabaseChildrenOfDatabaseResponse
+    )
+  })
+
+  it("set and get database children of database", async () => {
+    const notionCache = new NotionCache({
+      cacheDirectory: "dummy",
+    })
+    if (!databaseResponse) throw new Error("No database found")
+    if (!blockChildrenOfPageResponse) throw new Error("No database children found")
+
+    notionCache.setDatabaseChildren(
+      databaseResponse.id,
+      pageOrDatabaseChildrenOfDatabaseResponse
+    )
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toStrictEqual(
+      pageOrDatabaseChildrenOfDatabaseResponse
+    )
+  })
+})
+
 
 
 describe("NotionCache - refresh", () => {
