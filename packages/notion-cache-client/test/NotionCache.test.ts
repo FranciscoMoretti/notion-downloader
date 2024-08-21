@@ -9,8 +9,9 @@ import {
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { NotionCache } from "../src/NotionCache"
-import { getFixture } from "./fixtureUtils"
 import { createTempDir } from "./utils"
+import { buildNotionCacheWithFixture } from "./fixtureUtils"
+import { addSecondsToIsoString } from "./utils"
 
 const sampleSiteReader = await buildNotionCacheWithFixture("sample-site")
 // Find a block without children from the cache by iterating over the blocks objects
@@ -42,7 +43,7 @@ const blocksChildrenMap = sampleSiteReader.blocksChildrenCache
 const databaseChildrenMap = sampleSiteReader.databaseChildrenCache
 const blockResponse = blocksObjectsData[0]
 const pageResponse = pageObjectsData[0]
-const databaseResponse = databaseObjectsData[0]
+export const databaseResponse = databaseObjectsData[0]
 const pageOrDatabaseChildrenOfDatabase = databaseChildrenMap[databaseResponse.id].data.children.map<(PageObjectResponse|DatabaseObjectResponse)>(
   (childId) => pageObjectsDataMap[childId] || databaseObjectsDataMap[childId]
 )
@@ -332,9 +333,7 @@ describe("NotionCache - refresh", () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!databaseResponse) throw new Error("No database found")
       // TODO Extract as add to edited time function
-    const newDate = new Date(
-      new Date(databaseResponse.last_edited_time).getTime() + 60000
-    ).toISOString()
+    const newDate = addSecondsToIsoString(60)
 
     // Modify the date of one of the children
     const firstChild = pageOrDatabaseChildrenOfDatabaseResponse.results[0]
@@ -431,11 +430,4 @@ describe("NotionCache - Persistance", () => {
     expect(notionCacheFiles2.blockObjectsCache).toEqual({})
   })
 })
-async function buildNotionCacheWithFixture(name: "sample-site") {
-  const cacheDirectory = getFixture(name)
-  const notionCache = new NotionCache({
-    cacheDirectory,
-  })
-  await notionCache.loadCache()
-  return Promise.resolve(notionCache)
-}
+
