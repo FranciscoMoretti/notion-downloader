@@ -11,7 +11,11 @@ import { createTempDir } from "./utils"
 
 const sampleSiteReader = await buildNotionCacheWithFixture("sample-site")
 // Find a block without children from the cache by iterating over the blocks objects
+// TODO: This should be loaded straight from the JSON. Use ZOD to validate the JSON. Validation is great for cache saving and loading.
 const blocksObjectsData = Object.values(sampleSiteReader.blockObjectsCache).map(
+  (block) => block.data
+)
+const pageObjectsData = Object.values(sampleSiteReader.pageObjectsCache).map(
   (block) => block.data
 )
 const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
@@ -19,7 +23,8 @@ const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
   return acc
 }, {} as Record<string, BlockObjectResponse>)
 const blocksChildrenMap = sampleSiteReader.blocksChildrenCache
-const blockResponse = blocksObjectsData.find((block) => !block.has_children)
+const blockResponse = blocksObjectsData[0]
+const pageResponse = pageObjectsData[0]
 const blockWithChildren = blocksObjectsData.find((block) => block.has_children)!
 // A block can be a nested page, which has page as parent type
 const blockChildren = blocksChildrenMap[blockWithChildren.id].data.children.map(
@@ -35,7 +40,6 @@ const blockChildrenResponse: ListBlockChildrenResponse = {
 }
 
 describe("NotionCache - getting and setting blocks", () => {
-  // Loads from the fixture Sample-Site before each test
   it("gets a hit for existent block", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
     if (!blockResponse) throw new Error("No block found")
@@ -48,7 +52,7 @@ describe("NotionCache - getting and setting blocks", () => {
     expect(block).toBeUndefined()
   })
 
-  it("sets a block without children", async () => {
+  it("sets a block and retrieves it", async () => {
     const notionClient = new NotionCache({
       cacheDirectory: "dummy",
     })
@@ -78,6 +82,29 @@ describe("NotionCache - getting and setting blocks", () => {
       blockChildrenResponse
     )
   })
+})
+
+describe("NotionCache - getting and setting pages", () => {
+    it("gets a hit for existent page", async () => {
+      const notionClient = await buildNotionCacheWithFixture("sample-site")
+      if (!pageResponse) throw new Error("No page found")
+      const page = notionClient.getPage(pageResponse.id)
+      expect(page).toBeDefined()
+    })
+    it("gets a miss for non-existent page", async () => {
+      const notionClient = await buildNotionCacheWithFixture("sample-site")
+      const page = notionClient.getPage("non-existent-page")
+      expect(page).toBeUndefined()
+    })
+
+    it("sets a page and retrieves it", async () => {
+      const notionClient = new NotionCache({
+        cacheDirectory: "dummy",
+      })
+      if (!pageResponse) throw new Error("No page found")
+      notionClient.setPage(pageResponse)
+      expect(notionClient.getPage(pageResponse.id)).toStrictEqual(pageResponse)
+    })
 })
 
 describe("NotionCache - refresh", () => {
