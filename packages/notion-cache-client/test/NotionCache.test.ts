@@ -18,6 +18,9 @@ const blocksObjectsData = Object.values(sampleSiteReader.blockObjectsCache).map(
 const pageObjectsData = Object.values(sampleSiteReader.pageObjectsCache).map(
   (block) => block.data
 )
+const databaseObjectsData = Object.values(sampleSiteReader.databaseObjectsCache).map(
+  (block) => block.data
+)
 const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
   acc[block.id] = block
   return acc
@@ -25,6 +28,7 @@ const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
 const blocksChildrenMap = sampleSiteReader.blocksChildrenCache
 const blockResponse = blocksObjectsData[0]
 const pageResponse = pageObjectsData[0]
+const databaseResponse = databaseObjectsData[0]
 const blockChildrenOfPage = blocksChildrenMap[pageResponse.id].data.children.map(
   (childId) => blockObjectsDataMap[childId]
 )
@@ -122,6 +126,31 @@ describe("NotionCache - page", () => {
       expect(notionClient.getPage(pageResponse.id)).toStrictEqual(pageResponse)
     })
 })
+
+
+describe("NotionCache - database", () => {
+  it("gets a hit for existent database", async () => {
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+    const database = notionClient.getDatabase(databaseResponse.id)
+    expect(database).toBeDefined()
+  })
+  it("gets a miss for non-existent database", async () => {
+    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const database = notionClient.getDatabase("non-existent-database")
+    expect(database).toBeUndefined()
+  })
+
+  it("sets a database and retrieves it", async () => {
+    const notionClient = new NotionCache({
+      cacheDirectory: "dummy",
+    })
+    if (!databaseResponse) throw new Error("No database found")
+    notionClient.setDatabase(databaseResponse)
+    expect(notionClient.getDatabase(databaseResponse.id)).toStrictEqual(databaseResponse)
+  })
+})
+
 
 describe("NotionCache - refresh", () => {
   // Refresh for blocks
