@@ -52,7 +52,7 @@ const blockChildrenOfPageResponse: ListBlockChildrenResponse = {
 }
 
 
-describe("NotionCache - getting and setting blocks", () => {
+describe("NotionCache - block", () => {
   it("gets a hit for existent block", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
     if (!blockResponse) throw new Error("No block found")
@@ -75,7 +75,7 @@ describe("NotionCache - getting and setting blocks", () => {
   })
 })
 
-describe("NotionCache - getting and setting block children", () => {
+describe("NotionCache - block children", () => {
   it("gets block children from cache", async () => {
     const notionClient = await buildNotionCacheWithFixture("sample-site")
     if (!blockWithChildren) throw new Error("No block found")
@@ -100,7 +100,7 @@ describe("NotionCache - getting and setting block children", () => {
   })
 })
 
-describe("NotionCache - getting and setting pages", () => {
+describe("NotionCache - page", () => {
     it("gets a hit for existent page", async () => {
       const notionClient = await buildNotionCacheWithFixture("sample-site")
       if (!pageResponse) throw new Error("No page found")
