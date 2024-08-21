@@ -58,47 +58,47 @@ const blockChildrenOfPageResponse: ListBlockChildrenResponse = {
 
 describe("NotionCache - block", () => {
   it("gets a hit for existent block", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!blockResponse) throw new Error("No block found")
-    const block = notionClient.getBlock(blockResponse.id)
+    const block = notionCache.getBlock(blockResponse.id)
     expect(block).toBeDefined()
   })
   it("gets a miss for non-existent block", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
-    const block = notionClient.getBlock("non-existent-block")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    const block = notionCache.getBlock("non-existent-block")
     expect(block).toBeUndefined()
   })
 
   it("sets a block and retrieves it", async () => {
-    const notionClient = new NotionCache({
+    const notionCache = new NotionCache({
       cacheDirectory: "dummy",
     })
     if (!blockResponse) throw new Error("No block found")
-    notionClient.setBlock(blockResponse)
-    expect(notionClient.getBlock(blockResponse.id)).toStrictEqual(blockResponse)
+    notionCache.setBlock(blockResponse)
+    expect(notionCache.getBlock(blockResponse.id)).toStrictEqual(blockResponse)
   })
 })
 
 describe("NotionCache - block children", () => {
   it("gets block children from cache", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!blockWithChildren) throw new Error("No block found")
     if (!blockChildrenOfBlockResponse) throw new Error("No block children found")
 
-    expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
+    expect(notionCache.getBlockChildren(blockWithChildren.id)).toStrictEqual(
       blockChildrenOfBlockResponse
     )
   })
 
   it("set and get block children of block", async () => {
-    const notionClient = new NotionCache({
+    const notionCache = new NotionCache({
       cacheDirectory: "dummy",
     })
     if (!blockWithChildren) throw new Error("No block found")
     if (!blockChildrenOfBlockResponse) throw new Error("No block children found")
 
-    notionClient.setBlockChildren(blockWithChildren.id, blockChildrenOfBlockResponse)
-    expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
+    notionCache.setBlockChildren(blockWithChildren.id, blockChildrenOfBlockResponse)
+    expect(notionCache.getBlockChildren(blockWithChildren.id)).toStrictEqual(
       blockChildrenOfBlockResponse
     )
   })
@@ -106,48 +106,48 @@ describe("NotionCache - block children", () => {
 
 describe("NotionCache - page", () => {
     it("gets a hit for existent page", async () => {
-      const notionClient = await buildNotionCacheWithFixture("sample-site")
+      const notionCache = await buildNotionCacheWithFixture("sample-site")
       if (!pageResponse) throw new Error("No page found")
-      const page = notionClient.getPage(pageResponse.id)
+      const page = notionCache.getPage(pageResponse.id)
       expect(page).toBeDefined()
     })
     it("gets a miss for non-existent page", async () => {
-      const notionClient = await buildNotionCacheWithFixture("sample-site")
-      const page = notionClient.getPage("non-existent-page")
+      const notionCache = await buildNotionCacheWithFixture("sample-site")
+      const page = notionCache.getPage("non-existent-page")
       expect(page).toBeUndefined()
     })
 
     it("sets a page and retrieves it", async () => {
-      const notionClient = new NotionCache({
+      const notionCache = new NotionCache({
         cacheDirectory: "dummy",
       })
       if (!pageResponse) throw new Error("No page found")
-      notionClient.setPage(pageResponse)
-      expect(notionClient.getPage(pageResponse.id)).toStrictEqual(pageResponse)
+      notionCache.setPage(pageResponse)
+      expect(notionCache.getPage(pageResponse.id)).toStrictEqual(pageResponse)
     })
 })
 
 
 describe("NotionCache - database", () => {
   it("gets a hit for existent database", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!databaseResponse) throw new Error("No database found")
-    const database = notionClient.getDatabase(databaseResponse.id)
+    const database = notionCache.getDatabase(databaseResponse.id)
     expect(database).toBeDefined()
   })
   it("gets a miss for non-existent database", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
-    const database = notionClient.getDatabase("non-existent-database")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    const database = notionCache.getDatabase("non-existent-database")
     expect(database).toBeUndefined()
   })
 
   it("sets a database and retrieves it", async () => {
-    const notionClient = new NotionCache({
+    const notionCache = new NotionCache({
       cacheDirectory: "dummy",
     })
     if (!databaseResponse) throw new Error("No database found")
-    notionClient.setDatabase(databaseResponse)
-    expect(notionClient.getDatabase(databaseResponse.id)).toStrictEqual(databaseResponse)
+    notionCache.setDatabase(databaseResponse)
+    expect(notionCache.getDatabase(databaseResponse.id)).toStrictEqual(databaseResponse)
   })
 })
 
@@ -155,64 +155,64 @@ describe("NotionCache - database", () => {
 describe("NotionCache - refresh", () => {
   // Refresh for blocks
   it("If block needs refresh its not retrieved", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
-    notionClient.setNeedsRefresh()
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    notionCache.setNeedsRefresh()
     if (!blockWithChildren) throw new Error("No block found")
-    expect(notionClient.getBlockChildren(blockWithChildren.id)).toBeUndefined()
+    expect(notionCache.getBlockChildren(blockWithChildren.id)).toBeUndefined()
   })
   it("Setting a block without change refreshes children", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!blockWithChildren) throw new Error("No block found")
-    notionClient.setNeedsRefresh()
-    notionClient.setBlock(blockWithChildren)
-    expect(notionClient.getBlockChildren(blockWithChildren.id)).toStrictEqual(
+    notionCache.setNeedsRefresh()
+    notionCache.setBlock(blockWithChildren)
+    expect(notionCache.getBlockChildren(blockWithChildren.id)).toStrictEqual(
       blockChildrenOfBlockResponse
     )
   })
   it("setting a block with new date invalidates children", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!blockWithChildren) throw new Error("No block found")
-    notionClient.setNeedsRefresh()
+    notionCache.setNeedsRefresh()
     const newDate = new Date(
       new Date(blockWithChildren.last_edited_time).getTime() + 60000
     ).toISOString()
 
-    notionClient.setBlock({
+    notionCache.setBlock({
       ...blockWithChildren,
       last_edited_time: newDate,
     })
-    expect(notionClient.getBlockChildren(blockWithChildren.id)).toBeUndefined()
+    expect(notionCache.getBlockChildren(blockWithChildren.id)).toBeUndefined()
   })
   // Refresh for pages
   it("If page needs refresh its not retrieved", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
-    notionClient.setNeedsRefresh()
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    notionCache.setNeedsRefresh()
     if (!pageResponse) throw new Error("No page found")
-    expect(notionClient.getPage(pageResponse.id)).toBeUndefined()
+    expect(notionCache.getPage(pageResponse.id)).toBeUndefined()
   })
   it("Setting a page without change refreshes children", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!pageResponse) throw new Error("No page found")
-    notionClient.setNeedsRefresh()
-    notionClient.setPage(pageResponse)
-    expect(notionClient.getPage(pageResponse.id)).toStrictEqual(pageResponse)
-    expect(notionClient.getBlockChildren(pageResponse.id)).toStrictEqual(
+    notionCache.setNeedsRefresh()
+    notionCache.setPage(pageResponse)
+    expect(notionCache.getPage(pageResponse.id)).toStrictEqual(pageResponse)
+    expect(notionCache.getBlockChildren(pageResponse.id)).toStrictEqual(
       blockChildrenOfPageResponse
     )
   })
   it("setting a page with new date invalidates children", async () => {
-    const notionClient = await buildNotionCacheWithFixture("sample-site")
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!pageResponse) throw new Error("No page found")
-      notionClient.setNeedsRefresh()
+      notionCache.setNeedsRefresh()
     const newDate = new Date(
       new Date(pageResponse.last_edited_time).getTime() + 60000
     ).toISOString()
 
-    notionClient.setPage({
+    notionCache.setPage({
       ...pageResponse,
       last_edited_time: newDate,
     })
-    expect(notionClient.getBlockChildren(pageResponse.id)).toBeUndefined()
+    expect(notionCache.getBlockChildren(pageResponse.id)).toBeUndefined()
   })
 
 })
