@@ -190,7 +190,7 @@ describe("NotionCache - refresh", () => {
     if (!pageResponse) throw new Error("No page found")
     expect(notionCache.getPage(pageResponse.id)).toBeUndefined()
   })
-  it("Setting a page without change refreshes children", async () => {
+  it("Setting a page without change refreshes itself and its children", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!pageResponse) throw new Error("No page found")
     notionCache.setNeedsRefresh()
@@ -200,7 +200,7 @@ describe("NotionCache - refresh", () => {
       blockChildrenOfPageResponse
     )
   })
-  it("setting a page with new date invalidates children", async () => {
+  it("setting a page with new date refreshes itself and invalidates children", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!pageResponse) throw new Error("No page found")
       notionCache.setNeedsRefresh()
@@ -208,12 +208,17 @@ describe("NotionCache - refresh", () => {
       new Date(pageResponse.last_edited_time).getTime() + 60000
     ).toISOString()
 
-    notionCache.setPage({
+    const moreRecentPageResponse = {
       ...pageResponse,
       last_edited_time: newDate,
-    })
+    }
+    notionCache.setPage(moreRecentPageResponse)
+    expect(notionCache.getPage(pageResponse.id)).toStrictEqual(moreRecentPageResponse)
     expect(notionCache.getBlockChildren(pageResponse.id)).toBeUndefined()
   })
+  // Refresh for database
+
+
 
 })
 
