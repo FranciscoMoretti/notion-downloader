@@ -1,5 +1,5 @@
 import { Client, collectPaginatedAPI, isFullBlock } from "@notionhq/client"
-import { NotionCacheClient } from "notion-cache-client"
+import { NotionCacheClient, logOperation } from "notion-cache-client"
 import { z } from "zod"
 
 import { info } from "./log"
@@ -79,33 +79,47 @@ export async function fetchNotionObjectTree({
     children: [],
   }
 
-  await fetchTreeRecursively(objectsTree, client, options)
+  await fetchTreeRecursively(objectsTree, 0, client, options)
   return objectsTree
 }
 
 async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
-  client: Client,
+  level: number,
+  client: NotionCacheClient,
   options?: DownloadObjectsOptions
 ) {
-  info(
-    `Looking for children of {object_id: "${objectNode.id}", object: "${objectNode.object}"}`
-  )
-
   if (
     objectNode.object === "database" ||
     (objectNode.object === "block" && objectNode.type === "child_database")
   ) {
     if (options?.downloadDatabases) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
-      const databaseResponse = await client.databases.retrieve({
-        database_id: objectNode.id,
+      logOperation({
+        level: level,
+        source: "WALKER",
+        operation: "RETRIEVE",
+        resource_type: objectNode.object,
+        id: objectNode.id,
       })
+      const databaseResponse = await client.databases.retrieve(
+        {
+          database_id: objectNode.id,
+        },
+        level + 1
+      )
     }
 
     // TODO: Decide how to process a child_database block that also has children.
+    logOperation({
+      level: level,
+      source: "WALKER",
+      operation: "RETRIEVE",
+      resource_type: "database_children",
+      id: objectNode.id,
+    })
     const databaseChildrenResults = await collectPaginatedAPI(
-      client.databases.query,
+      (args) => client.databases.query(args, level + 1),
       {
         database_id: objectNode.id,
       }
@@ -118,7 +132,7 @@ async function fetchTreeRecursively(
       }
 
       objectNode.children.push(newNode)
-      await fetchTreeRecursively(newNode, client, options)
+      await fetchTreeRecursively(newNode, level + 1, client, options)
     }
   } else if (
     objectNode.object === "page" ||
@@ -131,13 +145,30 @@ async function fetchTreeRecursively(
         (objectNode.object === "block" && objectNode.type === "child_page"))
     ) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
-      const pageResponse = await client.pages.retrieve({
-        page_id: objectNode.id,
+      logOperation({
+        level: level,
+        source: "WALKER",
+        operation: "RETRIEVE",
+        resource_type: objectNode.object,
+        id: objectNode.id,
       })
+      const pageResponse = await client.pages.retrieve(
+        {
+          page_id: objectNode.id,
+        },
+        level + 1
+      )
     }
 
+    logOperation({
+      level: level,
+      source: "WALKER",
+      operation: "RETRIEVE",
+      resource_type: "block_children",
+      id: objectNode.id,
+    })
     const blocksChildrenResults = await collectPaginatedAPI(
-      client.blocks.children.list,
+      (args) => client.blocks.children.list(args, level + 1),
       {
         block_id: objectNode.id,
       }
@@ -161,7 +192,7 @@ async function fetchTreeRecursively(
         childBlock.has_children
       ) {
         // Recurse if page or database (with children)
-        await fetchTreeRecursively(newNode, client, options)
+        await fetchTreeRecursively(newNode, level + 1, client, options)
       }
     }
   }
