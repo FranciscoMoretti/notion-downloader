@@ -68,8 +68,10 @@ export class NotionCacheClient extends Client {
     /**
      * Retrieve block
      */
-    retrieve: (args: GetBlockParameters): Promise<GetBlockResponse> => {
-      const level = 0
+    retrieve: (
+      args: GetBlockParameters,
+      level: number = 0
+    ): Promise<GetBlockResponse> => {
       this.logClientMessage({
         resource_type: "block",
         source: "CLIENT",
