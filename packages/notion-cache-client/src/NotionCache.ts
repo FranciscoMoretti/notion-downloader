@@ -140,7 +140,6 @@ export class NotionCache {
     return undefined
   }
 
-
   setBlockChildren(
     id: string,
     response: ListBlockChildrenResponse,
@@ -427,11 +426,14 @@ export class NotionCache {
       | "database_children"
     level?: number
   }) {
-    const levelPadding =
-      "  ".repeat(Math.max(level - 1, 0)) + (level ? "└─" : "")
-    info(`${levelPadding}[CACHE]: (${operation}) (${cache_type}) : ${id}`)
+    logOperation({
+      level,
+      source: "CACHE",
+      operation,
+      resource_type: cache_type,
+      id,
+    })
   }
-
 
   setNeedsRefresh = () => {
     Object.values(this.pageObjectsCache).forEach((page) => {
@@ -482,6 +484,21 @@ export class NotionCache {
     this.databaseObjectsCache = databaseObjectsCache
     this.blockObjectsCache = blockObjectsCache
   }
+}
 
-
+function logOperation({
+  level,
+  source,
+  operation,
+  resource_type,
+  id,
+}: {
+  level: number
+  source: string
+  operation: string
+  resource_type: string
+  id: string
+}) {
+  const levelPadding = "  ".repeat(Math.max(level - 1, 0)) + (level ? "└─" : "")
+  info(`${levelPadding}[${source}]: (${operation}) (${resource_type}) : ${id}`)
 }
