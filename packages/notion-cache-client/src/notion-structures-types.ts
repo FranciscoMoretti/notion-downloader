@@ -8,7 +8,7 @@ export type CacheInfo = {
   __needs_refresh: boolean
 }
 
-type CacheData<T> = {
+export type CacheData<T> = {
   data: T
 } & CacheInfo
 

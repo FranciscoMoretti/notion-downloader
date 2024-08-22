@@ -246,7 +246,8 @@ export class NotionCacheClient extends Client {
         return this.notionClient.databases.query(args)
       }
       const databaseChildrenFromCache = this.cache.getDatabaseChildren(
-        args.database_id
+        args.database_id,
+        level + 1
       )
       if (databaseChildrenFromCache) {
         return Promise.resolve(databaseChildrenFromCache)
@@ -266,7 +267,7 @@ export class NotionCacheClient extends Client {
         }
       ).then((response) => {
         // Saving to database children cache
-        this.cache.setDatabaseChildren(args.database_id, response)
+        this.cache.setDatabaseChildren(args.database_id, response, level + 1)
         return response
       })
     },
