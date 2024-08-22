@@ -214,3 +214,36 @@ describe("NotionCacheClient - database", () => {
   })
 })
 
+describe("NotionCacheClient - database children", () => {
+  it("gets database children from cache", async () => {
+    const notionClient = await buildNotionCacheClientWithFixture("sample-site")
+    if (!databaseResponse) throw new Error("No database found")
+    if (!pageOrDatabaseChildrenOfDatabaseResponse) throw new Error("No database children found")
+    const databaseChildren = await notionClient.databases.query({database_id:databaseResponse.id})
+    expect(databaseChildren).toStrictEqual(pageOrDatabaseChildrenOfDatabaseResponse)
+  })
+
+  it("gets a miss from cache and uses notion-api for non-existent database children", async () => {
+    const notionClient = await buildNotionCacheClientWithFixture("sample-site")
+    // Create a spy function with vitest
+    const spy = vi.spyOn(notionClient.notionClient.databases, "query").mockResolvedValue(pageOrDatabaseChildrenOfDatabaseResponse)
+    await notionClient.databases.query({database_id:"non-existent-database"})
+    expect(spy).toHaveBeenCalledOnce()
+  })
+
+  it("after getting the database children once, it gets it from the cache the next time", async () => {
+    const notionClient = new NotionCacheClient({
+      auth: "dummy",
+      cacheOptions: {cacheDirectory: "dummy"},
+    })
+    if (!databaseResponse) throw new Error("No database found")
+    if (!pageOrDatabaseChildrenOfDatabaseResponse) throw new Error("No database children found")
+
+    const spy = vi.spyOn(notionClient.notionClient.databases, "query").mockResolvedValueOnce(pageOrDatabaseChildrenOfDatabaseResponse)
+    const databaseChildren1 = await notionClient.databases.query({database_id:databaseResponse.id})
+    const databaseChildren2 = await notionClient.databases.query({database_id:databaseResponse.id})
+    expect(databaseChildren1).toStrictEqual(databaseChildren2)
+    expect(spy).toHaveBeenCalledOnce()
+  })
+})
+
