@@ -43,6 +43,7 @@ import {
 
 import { NotionCache, NotionCacheOptions } from "./NotionCache"
 import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
+import { logOperation } from "./logOperation"
 
 export class NotionCacheClient extends Client {
   cache: NotionCache
@@ -68,8 +69,16 @@ export class NotionCacheClient extends Client {
      * Retrieve block
      */
     retrieve: (args: GetBlockParameters): Promise<GetBlockResponse> => {
+      const level = 0
+      this.logClientMessage({
+        resource_type: "block",
+        source: "CLIENT",
+        operation: "RETRIEVE",
+        id: args.block_id,
+        level: level,
+      })
       // Check if we have it in cache
-      const blockFromCache = this.cache.getBlock(args.block_id)
+      const blockFromCache = this.cache.getBlock(args.block_id, level + 1)
       if (blockFromCache) {
         return Promise.resolve(blockFromCache)
       }
@@ -77,13 +86,20 @@ export class NotionCacheClient extends Client {
       return executeWithRateLimitAndRetries(
         `blocks.retrieve(${args.block_id})`,
         () => {
+          this.logClientMessage({
+            resource_type: "block",
+            source: "NOTION",
+            operation: "RETRIEVE",
+            id: args.block_id,
+            level: level + 1,
+          })
           return this.notionClient.blocks.retrieve(args)
         }
       ).then((response) => {
         if (!isFullBlock(response)) {
           throw Error(`Non full page: ${JSON.stringify(response)}`)
         }
-        this.cache.setBlock(response)
+        this.cache.setBlock(response, level + 1)
         return response
       })
     },
@@ -107,15 +123,33 @@ export class NotionCacheClient extends Client {
       },
 
       list: (
-        args: ListBlockChildrenParameters
+        args: ListBlockChildrenParameters,
+        level: number = 0
       ): Promise<ListBlockChildrenResponse> => {
         // When args others than block_id are used, we default to the method from ancestor
+        this.logClientMessage({
+          resource_type: "block_children",
+          source: "CLIENT",
+          operation: "RETRIEVE",
+          id: args.block_id,
+          level: level,
+        })
         if (Object.values(args).filter(Boolean).length > 1) {
+          this.logClientMessage({
+            resource_type: "block_children",
+            source: "NOTION",
+            operation: "RETRIEVE",
+            id: args.block_id,
+            level: level + 1,
+          })
           return this.notionClient.blocks.children.list(args)
         }
 
         // Check if we have it in cache
-        const childrenFromCache = this.cache.getBlockChildren(args.block_id)
+        const childrenFromCache = this.cache.getBlockChildren(
+          args.block_id,
+          level + 1
+        )
         if (childrenFromCache) {
           return Promise.resolve(childrenFromCache)
         }
@@ -123,10 +157,17 @@ export class NotionCacheClient extends Client {
         return executeWithRateLimitAndRetries(
           `blocks.children.list(${args.block_id})`,
           () => {
+            this.logClientMessage({
+              resource_type: "block_children",
+              source: "NOTION",
+              operation: "RETRIEVE",
+              id: args.block_id,
+              level: level + 1,
+            })
             return this.notionClient.blocks.children.list(args)
           }
         ).then((response) => {
-          this.cache.setBlockChildren(args.block_id, response)
+          this.cache.setBlockChildren(args.block_id, response, level + 1)
           return response
         })
       },
@@ -141,15 +182,35 @@ export class NotionCacheClient extends Client {
     /**
      * Retrieve database
      */
-    retrieve: (args: GetDatabaseParameters): Promise<GetDatabaseResponse> => {
+    retrieve: (
+      args: GetDatabaseParameters,
+      level: number = 0
+    ): Promise<GetDatabaseResponse> => {
       // Check if we have it in cache
-      const databaseFromCache = this.cache.getDatabase(args.database_id)
+      this.logClientMessage({
+        resource_type: "database",
+        source: "CLIENT",
+        operation: "RETRIEVE",
+        id: args.database_id,
+        level: level,
+      })
+      const databaseFromCache = this.cache.getDatabase(
+        args.database_id,
+        level + 1
+      )
       if (databaseFromCache) {
         return Promise.resolve(databaseFromCache)
       }
       return executeWithRateLimitAndRetries(
         `databases.retrieve(${args.database_id})`,
         () => {
+          this.logClientMessage({
+            resource_type: "database",
+            source: "NOTION",
+            operation: "RETRIEVE",
+            id: args.database_id,
+            level: level + 1,
+          })
           return this.notionClient.databases.retrieve(args)
         }
       ).then((response) => {
@@ -157,14 +218,31 @@ export class NotionCacheClient extends Client {
         if (!isFullDatabase(response)) {
           throw Error(`Non full database: ${JSON.stringify(response)}`)
         }
-        this.cache.setDatabase(response)
+        this.cache.setDatabase(response, level + 1)
         return response
       })
     },
 
-    query: (args: QueryDatabaseParameters): Promise<QueryDatabaseResponse> => {
+    query: (
+      args: QueryDatabaseParameters,
+      level: number = 0
+    ): Promise<QueryDatabaseResponse> => {
       // When args others than block_id are used, we default to the method from ancestor
+      this.logClientMessage({
+        resource_type: "database_children",
+        source: "CLIENT",
+        operation: "RETRIEVE",
+        id: args.database_id,
+        level,
+      })
       if (Object.values(args).filter(Boolean).length > 1) {
+        this.logClientMessage({
+          resource_type: "database_children",
+          source: "NOTION",
+          operation: "RETRIEVE",
+          id: args.database_id,
+          level: level + 1,
+        })
         return this.notionClient.databases.query(args)
       }
       const databaseChildrenFromCache = this.cache.getDatabaseChildren(
@@ -177,6 +255,13 @@ export class NotionCacheClient extends Client {
       return executeWithRateLimitAndRetries(
         `database.query(${args.database_id})`,
         () => {
+          this.logClientMessage({
+            resource_type: "database_children",
+            source: "NOTION",
+            operation: "RETRIEVE",
+            id: args.database_id,
+            level: level + 1,
+          })
           return this.notionClient.databases.query(args)
         }
       ).then((response) => {
@@ -208,9 +293,19 @@ export class NotionCacheClient extends Client {
     /**
      * Retrieve page
      */
-    retrieve: (args: GetPageParameters): Promise<GetPageResponse> => {
+    retrieve: (
+      args: GetPageParameters,
+      level: number = 0
+    ): Promise<GetPageResponse> => {
+      this.logClientMessage({
+        resource_type: "page",
+        source: "CLIENT",
+        operation: "RETRIEVE",
+        id: args.page_id,
+        level: level,
+      })
       // Check if we have it in cache
-      const pageFromCache = this.cache.getPage(args.page_id)
+      const pageFromCache = this.cache.getPage(args.page_id, level + 1)
       if (pageFromCache) {
         return Promise.resolve(pageFromCache)
       }
@@ -218,6 +313,13 @@ export class NotionCacheClient extends Client {
       return executeWithRateLimitAndRetries(
         `pages.retrieve(${args.page_id})`,
         () => {
+          this.logClientMessage({
+            resource_type: "page",
+            source: "NOTION",
+            operation: "RETRIEVE",
+            id: args.page_id,
+            level: level + 1,
+          })
           return this.notionClient.pages.retrieve(args)
         }
       ).then((response) => {
@@ -225,7 +327,7 @@ export class NotionCacheClient extends Client {
         if (!isFullPage(response)) {
           throw Error(`Non full page: ${JSON.stringify(response)}`)
         }
-        this.cache.setPage(response)
+        this.cache.setPage(response, level + 1)
         return response
       })
     },
@@ -240,5 +342,32 @@ export class NotionCacheClient extends Client {
         return this.notionClient.pages.properties.retrieve(args)
       },
     },
+  }
+
+  private logClientMessage({
+    resource_type,
+    operation,
+    source,
+    id,
+    level,
+  }: {
+    id: string
+    source: "CLIENT" | "NOTION"
+    operation: "RETRIEVE" | "CREATE" | "UPDATE"
+    resource_type:
+      | "block"
+      | "database"
+      | "page"
+      | "block_children"
+      | "database_children"
+    level: number
+  }) {
+    logOperation({
+      level,
+      source: source,
+      operation,
+      resource_type,
+      id,
+    })
   }
 }

@@ -8,9 +8,10 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 
 import { NotionCacheFiles } from "./NotionCacheFiles"
-import { info } from "./log"
+import { logOperation } from "./logOperation"
 import {
   BlocksChildrenCache,
+  CacheData,
   CacheInfo,
   DatabaseChildrenCache,
   NotionBlockObjectsCache,
@@ -52,7 +53,7 @@ export class NotionCache {
     this.cacheFiles = new NotionCacheFiles(cacheDirectory)
   }
 
-  getBlock(id: string) {
+  getBlock(id: string, level: number = 0) {
     if (
       this.blockObjectsCache[id] &&
       !this.blockObjectsCache[id].__needs_refresh
@@ -61,6 +62,7 @@ export class NotionCache {
         operation: "HIT",
         cache_type: "block",
         id: id,
+        level,
       })
       return this.blockObjectsCache[id].data
     }
@@ -69,6 +71,7 @@ export class NotionCache {
       operation: this.getNonHitOperation(this.blockObjectsCache[id]),
       cache_type: "block",
       id: id,
+      level,
     })
     return undefined
   }
@@ -108,7 +111,7 @@ export class NotionCache {
     })
   }
 
-  getBlockChildren(id: string) {
+  getBlockChildren(id: string, level: number = 0) {
     if (
       this.blocksChildrenCache[id] &&
       !this.blocksChildrenCache[id].__needs_refresh
@@ -117,6 +120,7 @@ export class NotionCache {
         operation: "HIT",
         cache_type: "block_children",
         id: id,
+        level,
       })
       const response: ListBlockChildrenResponse =
         this._buildListBlockChildrenResponseFromCache(id)
@@ -136,6 +140,7 @@ export class NotionCache {
       operation: this.getNonHitOperation(this.blocksChildrenCache[id]),
       cache_type: "block_children",
       id: id,
+      level: level,
     })
     return undefined
   }
@@ -184,7 +189,7 @@ export class NotionCache {
     })
   }
 
-  getDatabase(id: string) {
+  getDatabase(id: string, level: number = 0) {
     if (
       this.databaseObjectsCache[id] &&
       !this.databaseObjectsCache[id].__needs_refresh
@@ -193,6 +198,7 @@ export class NotionCache {
         operation: "HIT",
         cache_type: "database",
         id: id,
+        level,
       })
       return this.databaseObjectsCache[id].data
     }
@@ -201,6 +207,7 @@ export class NotionCache {
       operation: this.getNonHitOperation(this.databaseObjectsCache[id]),
       cache_type: "database",
       id: id,
+      level,
     })
     return undefined
   }
@@ -240,7 +247,7 @@ export class NotionCache {
     })
   }
 
-  getDatabaseChildren(id: string) {
+  getDatabaseChildren(id: string, level: number = 0) {
     if (
       this.databaseChildrenCache[id] &&
       !this.databaseChildrenCache[id].__needs_refresh
@@ -249,13 +256,22 @@ export class NotionCache {
         operation: "HIT",
         cache_type: "database_children",
         id: id,
+        level,
       })
       const childrenIds = this.databaseChildrenCache[id].data.children
-      const cacheItems = childrenIds.map(
-        (id) => this.pageObjectsCache[id] || this.databaseObjectsCache[id]
-      )
+      const cacheItems = childrenIds.map<
+        CacheData<PageObjectResponse | DatabaseObjectResponse>
+      >((id) => this.pageObjectsCache[id] || this.databaseObjectsCache[id])
       const isAnyStale = cacheItems.some((item) => item?.__needs_refresh)
-      const results = cacheItems.map((item) => item?.data)
+      const results = cacheItems.map((item) => {
+        this.logCacheMessage({
+          operation: "HIT",
+          cache_type: item.data.object,
+          id: item?.data.id,
+          level: level + 1,
+        })
+        return item?.data
+      })
 
       if (results.length !== childrenIds.length || isAnyStale) {
         console.log(`NotionCacheClient: Database children not HIT in cache.`)
@@ -275,6 +291,7 @@ export class NotionCache {
       operation: this.getNonHitOperation(this.databaseChildrenCache[id]),
       cache_type: "database_children",
       id: id,
+      level,
     })
     return undefined
   }
@@ -315,7 +332,7 @@ export class NotionCache {
     })
   }
 
-  getPage(id: string) {
+  getPage(id: string, level: number = 0) {
     if (
       this.pageObjectsCache[id] &&
       !this.pageObjectsCache[id].__needs_refresh
@@ -324,6 +341,7 @@ export class NotionCache {
         operation: "HIT",
         cache_type: "page",
         id: id,
+        level,
       })
       return this.pageObjectsCache[id].data
     }
@@ -332,6 +350,7 @@ export class NotionCache {
       operation: this.getNonHitOperation(this.pageObjectsCache[id]),
       cache_type: "page",
       id: id,
+      level,
     })
     return undefined
   }
@@ -366,15 +385,28 @@ export class NotionCache {
       operation: "SET_NEW",
       cache_type: "page",
       id: response.id,
+      level,
     })
     // Invalidate dependants
     // TODO: Operations are the most atomic entity. They remove all descendants together. Can it be more selective?
-    this._deleteBlockChildren(response.id)
+    this._deleteBlockChildren(response.id, level + 1)
   }
 
-  private _deleteBlockChildren(id: string) {
+  private _deleteBlockChildren(id: string, level: number = 0) {
+    this.logCacheMessage({
+      operation: "DELETE",
+      cache_type: "block_children",
+      id: id,
+      level,
+    })
     const childBlocks = this.blocksChildrenCache[id]
     childBlocks?.data.children.forEach((childId) => {
+      this.logCacheMessage({
+        operation: "DELETE",
+        cache_type: "block",
+        id: childId,
+        level,
+      })
       delete this.blockObjectsCache[childId]
       // TODO: This should also delete other kind of children (database, pages))
     })
@@ -408,7 +440,7 @@ export class NotionCache {
     cache_type,
     operation,
     id,
-    level = 0,
+    level,
   }: {
     id: string
     operation:
@@ -418,13 +450,14 @@ export class NotionCache {
       | "SET_NO_CHANGE"
       | "MISS_NO_EXISTS"
       | "MISS_NEEDS_UPDATE"
+      | "DELETE"
     cache_type:
       | "block"
       | "database"
       | "page"
       | "block_children"
       | "database_children"
-    level?: number
+    level: number
   }) {
     logOperation({
       level,
@@ -484,21 +517,4 @@ export class NotionCache {
     this.databaseObjectsCache = databaseObjectsCache
     this.blockObjectsCache = blockObjectsCache
   }
-}
-
-function logOperation({
-  level,
-  source,
-  operation,
-  resource_type,
-  id,
-}: {
-  level: number
-  source: string
-  operation: string
-  resource_type: string
-  id: string
-}) {
-  const levelPadding = "  ".repeat(Math.max(level - 1, 0)) + (level ? "└─" : "")
-  info(`${levelPadding}[${source}]: (${operation}) (${resource_type}) : ${id}`)
 }
