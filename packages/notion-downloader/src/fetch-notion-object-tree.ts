@@ -119,7 +119,7 @@ async function fetchTreeRecursively(
       id: objectNode.id,
     })
     const databaseChildrenResults = await collectPaginatedAPI(
-      (args) => client.databases.query(args, level + 1),
+      (args: any) => client.databases.query(args, level + 1),
       {
         database_id: objectNode.id,
       }
@@ -168,7 +168,7 @@ async function fetchTreeRecursively(
       id: objectNode.id,
     })
     const blocksChildrenResults = await collectPaginatedAPI(
-      (args) => client.blocks.children.list(args, level + 1),
+      (args: any) => client.blocks.children.list(args, level + 1),
       {
         block_id: objectNode.id,
       }
