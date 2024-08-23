@@ -140,24 +140,25 @@ async function fetchTreeRecursively(
     (objectNode.object === "block" && objectNode.has_children)
   ) {
     if (
-      options?.downloadAllPages &&
-      (objectNode.object === "page" ||
-        (objectNode.object === "block" && objectNode.type === "child_page"))
+      objectNode.object === "page" ||
+      (objectNode.object === "block" && objectNode.type === "child_page")
     ) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
-      logOperation({
-        level: level,
-        source: "WALKER",
-        operation: "RETRIEVE",
-        resource_type: objectNode.object,
-        id: objectNode.id,
-      })
-      const pageResponse = await client.pages.retrieve(
-        {
-          page_id: objectNode.id,
-        },
-        level + 1
-      )
+      if (options?.downloadAllPages) {
+        logOperation({
+          level: level,
+          source: "WALKER",
+          operation: "RETRIEVE",
+          resource_type: objectNode.object,
+          id: objectNode.id,
+        })
+        const pageResponse = await client.pages.retrieve(
+          {
+            page_id: objectNode.id,
+          },
+          level + 1
+        )
+      }
     }
 
     logOperation({
