@@ -1,4 +1,8 @@
 import { Client, collectPaginatedAPI, isFullBlock } from "@notionhq/client"
+import {
+  ListBlockChildrenParameters,
+  QueryDatabaseParameters,
+} from "@notionhq/client/build/src/api-endpoints"
 import { NotionCacheClient, logOperation } from "notion-cache-client"
 import { z } from "zod"
 
@@ -119,7 +123,8 @@ async function fetchTreeRecursively(
       id: objectNode.id,
     })
     const databaseChildrenResults = await collectPaginatedAPI(
-      (args: any) => client.databases.query(args, level + 1),
+      (args: QueryDatabaseParameters) =>
+        client.databases.query(args, level + 1),
       {
         database_id: objectNode.id,
       }
@@ -169,7 +174,8 @@ async function fetchTreeRecursively(
       id: objectNode.id,
     })
     const blocksChildrenResults = await collectPaginatedAPI(
-      (args: any) => client.blocks.children.list(args, level + 1),
+      (args: ListBlockChildrenParameters) =>
+        client.blocks.children.list(args, level + 1),
       {
         block_id: objectNode.id,
       }
