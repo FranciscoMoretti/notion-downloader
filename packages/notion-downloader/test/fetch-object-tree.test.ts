@@ -13,7 +13,12 @@ import {
   StartingNode,
   fetchNotionObjectTree,
 } from "../src/fetch-notion-object-tree"
-import { groupIdsByType, objectTreeToObjectIds } from "../src/object-tree-utils"
+import {
+  groupIdsByType,
+  idFromIdWithType,
+  objectTreeToObjectIds,
+  objectTreeToPlainObjects,
+} from "../src/object-tree-utils"
 import {
   buildNotionCacheClientWithFixture,
   buildNotionCacheWithFixture,
@@ -147,6 +152,38 @@ describe("FetchTreeRecursively", () => {
     expect(toSorted(block_id)).toEqual(
       toSorted(Object.keys(blockObjectsDataMap))
     )
+  })
+
+  it("The tree contains the correct parent-child relationships", async () => {
+    const notionCacheClient = await buildNotionCacheClientWithFixture(
+      "sample-site"
+    )
+    const objectTree = await fetchNotionObjectTree({
+      startingNode: startingNode,
+      client: notionCacheClient,
+      dataOptions: commonDataOptions,
+    })
+    expect(objectTree).toBeDefined()
+    const plainObjects = objectTreeToPlainObjects(objectTree)
+    expect(plainObjects).toBeDefined()
+    const plainObjectsMap = plainObjects.reduce((acc, plainObject) => {
+      acc[plainObject.id] = plainObject
+      return acc
+    }, {} as Record<string, any>)
+
+    function expectParentInObjects(
+      object: BlockObjectResponse | PageObjectResponse | DatabaseObjectResponse
+    ) {
+      const parent = object.parent
+      if (parent.type !== "workspace") {
+        expect(plainObjectsMap[idFromIdWithType(parent)].children).toContain(
+          object.id
+        )
+      }
+    }
+    Object.values(blockObjectsDataMap).forEach(expectParentInObjects)
+    Object.values(pageObjectsDataMap).forEach(expectParentInObjects)
+    Object.values(databaseObjectsDataMap).forEach(expectParentInObjects)
   })
 })
 
