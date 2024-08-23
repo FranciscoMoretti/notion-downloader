@@ -14,17 +14,6 @@ import {
   IPlugin,
 } from "./plugins/pluginTypes"
 
-// We handle several things here:
-// 1) copy images locally instead of leaving them in Notion
-// 2) change the links to point here
-// 3) read the caption and if there are localized images, get those too
-// 4) prepare for localized documents, which need a copy of every image
-
-let existingImagesNotSeenYetInPull: string[] = []
-let imageOutputPath = "" // default to putting in the same directory as the document referring to it.
-let imagePrefix = "" // default to "./"
-let locales: string[]
-
 // we parse a notion image and its caption into what we need, which includes any urls to localized versions
 // of the image that may be embedded in the caption.
 export type ImageSet = {
@@ -51,24 +40,44 @@ export type ImageSet = {
   filePathToUseInMarkdown?: string
 }
 
-export async function initImageHandling(
-  prefix: string,
-  outputPath: string,
-  incomingLocales: string[]
-): Promise<void> {
-  // If they gave us a trailing slash, remove it because we add it back later.
-  // Note that it's up to the caller to have a *leading* slash or not.
-  imagePrefix = prefix.replace(/\/$/, "")
-  imageOutputPath = outputPath
-  locales = incomingLocales
+// We handle several things here:
+// 1) copy images locally instead of leaving them in Notion
+// 2) change the links to point here
+// 3) read the caption and if there are localized images, get those too
+// 4) prepare for localized documents, which need a copy of every image
 
-  // Currently we don't delete the image directory, because if an image
-  // changes, it gets a new id. This way can then prevent downloading
-  // and image after the 1st time. The downside is currently we don't
-  // have the smarts to remove unused images.
-  if (imageOutputPath) {
-    await fs.mkdir(imageOutputPath, { recursive: true })
+export class ImageHandler {
+  public imagePrefix: string
+  public imageOutputPath: string
+  public locales: string[]
+  public existingImagesNotSeenYetInPull: string[]
+
+  constructor(prefix: string, outputPath: string, incomingLocales: string[]) {
+    this.imagePrefix = prefix.replace(/\/$/, "")
+    this.imageOutputPath = outputPath
+    this.locales = incomingLocales
+    this.existingImagesNotSeenYetInPull = []
   }
+
+  public async initImageHandling(): Promise<void> {
+    // Currently we don't delete the image directory, because if an image
+    // changes, it gets a new id. This way can then prevent downloading
+    // and image after the 1st time. The downside is currently we don't
+    // have the smarts to remove unused images.
+    if (this.imageOutputPath) {
+      await fs.mkdir(this.imageOutputPath, { recursive: true })
+    }
+  }
+}
+
+let imageHandler: ImageHandler | null = null
+export async function initImageHandling(
+  imagePrefix: string,
+  imageOutputPath: string,
+  locales: string[]
+) {
+  imageHandler = new ImageHandler(imagePrefix, imageOutputPath, locales)
+  await imageHandler.initImageHandling()
 }
 
 export const standardImageTransformer: IPlugin = {
@@ -112,6 +121,9 @@ async function processImageBlock(
   context: IDocuNotionContext
 ): Promise<void> {
   const imageBlock = block.image
+  if (!imageHandler) {
+    throw Error("ImageHandler not initialized")
+  }
 
   // TODOL: Fix ISSUE Getting a "socket hung up" error when getting the image.
   logDebug("processImageBlock", JSON.stringify(imageBlock))
@@ -127,8 +139,8 @@ async function processImageBlock(
     context.options,
     imageSet,
     block.id,
-    imageOutputPath,
-    imagePrefix
+    imageHandler.imageOutputPath,
+    imageHandler.imagePrefix
   )
   await saveImage(imageSet)
 
@@ -214,11 +226,14 @@ function writeImageIfNew(path: string, buffer: Buffer) {
 }
 
 export function parseImageBlock(image: any): ImageSet {
-  if (!locales) throw Error("Did you call initImageHandling()?")
+  if (!imageHandler) throw Error("Did you call initImageHandling()?")
   const imageSet: ImageSet = {
     primaryUrl: "",
     caption: "",
-    localizedUrls: locales.map((l) => ({ iso632Code: l, url: "" })),
+    localizedUrls: imageHandler.locales.map((l) => ({
+      iso632Code: l,
+      url: "",
+    })),
   }
 
   if ("file" in image) {
@@ -272,6 +287,9 @@ export async function processCoverImage(
   page: NotionPage,
   context: IDocuNotionContext
 ): Promise<void> {
+  if (!imageHandler) {
+    throw Error("ImageHandler not initialized")
+  }
   const cover = page.metadata.cover
   if (!cover) return undefined
   logDebug("processCoverImage for page: ", page.id)
@@ -285,8 +303,8 @@ export async function processCoverImage(
     context.options,
     imageSet,
     page.id,
-    imageOutputPath,
-    imagePrefix
+    imageHandler.imageOutputPath,
+    imageHandler.imagePrefix
   )
   await saveImage(imageSet)
 
@@ -305,13 +323,14 @@ export async function processCoverImage(
 }
 
 function imageWasSeen(path: string) {
-  existingImagesNotSeenYetInPull = existingImagesNotSeenYetInPull.filter(
-    (p) => p !== path
-  )
+  if (!imageHandler) throw Error("Did you call initImageHandling()?")
+  imageHandler.existingImagesNotSeenYetInPull =
+    imageHandler.existingImagesNotSeenYetInPull.filter((p) => p !== path)
 }
 
 export async function cleanupOldImages(): Promise<void> {
-  for (const p of existingImagesNotSeenYetInPull) {
+  if (!imageHandler) throw Error("Did you call initImageHandling()?")
+  for (const p of imageHandler.existingImagesNotSeenYetInPull) {
     verbose(`Removing old image: ${p}`)
     await fs.rm(p)
   }
