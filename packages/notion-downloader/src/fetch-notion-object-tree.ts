@@ -14,7 +14,7 @@ interface DownloadObjectsOptions {
   followLinks?: boolean
 }
 
-interface StartingNode {
+export interface StartingNode {
   rootUUID: string
   rootObjectType: "page" | "database"
 }
