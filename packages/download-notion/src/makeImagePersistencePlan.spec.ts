@@ -8,7 +8,6 @@ import { hashOfString } from "./utils"
 const optionsUsingDefaultNaming: NotionPullOptions = {
   notionToken: "",
   rootId: "",
-  locales: [],
   markdownOutputPath: "",
   imgOutputPath: "",
   imgPrefixInMarkdown: "",
@@ -34,7 +33,6 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
 
 const testImageSet: ImageSet = {
   primaryUrl: "https://s3.us-west-2.amazonaws.com/primaryImage?Blah=foo",
-  localizedUrls: [],
   pageInfo: {
     directoryContainingMarkdown: "/pathToParentSomewhere/",
     relativeFilePathToFolderContainingPage: "",

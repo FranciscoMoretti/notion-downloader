@@ -27,7 +27,6 @@ export const pullOptionsSchema = z
     titleProperty: z.string().optional(),
     slugProperty: z.string().optional(),
     rootDbAsFolder: z.boolean().default(false),
-    locales: z.array(z.string()).default([]),
     layoutStrategy: z
       .enum(["HierarchicalNamedLayoutStrategy", "FlatGuidLayoutStrategy"])
       .default("HierarchicalNamedLayoutStrategy"),

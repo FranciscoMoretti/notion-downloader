@@ -21,11 +21,6 @@ export type ImageSet = {
   primaryUrl: string
   // caption may contain a caption and/or URLs to localized versions
   caption?: string
-  // We use entries in localizedUrls whether or not we have a url, because if we don't have
-  // a localized image, we then need to copy the primary image in, instead, to
-  // get image fallback. In that case, the placeholder at least tells us what languages
-  // are being supported.
-  localizedUrls: Array<{ iso632Code: string; url: string }>
 
   // then we fill this in from processImageBlock():
   pageInfo?: IDocuNotionContextPageInfo
@@ -49,13 +44,11 @@ export type ImageSet = {
 export class ImageHandler {
   public imagePrefix: string
   public imageOutputPath: string
-  public locales: string[]
   public existingImagesNotSeenYetInPull: string[]
 
-  constructor(prefix: string, outputPath: string, incomingLocales: string[]) {
+  constructor(prefix: string, outputPath: string) {
     this.imagePrefix = prefix.replace(/\/$/, "")
     this.imageOutputPath = outputPath
-    this.locales = incomingLocales
     this.existingImagesNotSeenYetInPull = []
   }
 
@@ -72,10 +65,9 @@ export class ImageHandler {
 
 export async function initImageHandling(
   imagePrefix: string,
-  imageOutputPath: string,
-  locales: string[]
+  imageOutputPath: string
 ): Promise<ImageHandler> {
-  const imageHandler = new ImageHandler(imagePrefix, imageOutputPath, locales)
+  const imageHandler = new ImageHandler(imagePrefix, imageOutputPath)
   await imageHandler.initImageHandling()
   return imageHandler
 }
@@ -125,7 +117,7 @@ async function processImageBlock(
   // TODOL: Fix ISSUE Getting a "socket hung up" error when getting the image.
   logDebug("processImageBlock", JSON.stringify(imageBlock))
 
-  const imageSet = parseImageBlock(imageBlock, context.imageHandler)
+  const imageSet = parseImageBlock(imageBlock)
   imageSet.pageInfo = context.pageInfo
 
   // enhance: it would much better if we could split the changes to markdown separately from actual reading/writing,
@@ -175,32 +167,6 @@ async function readPrimaryImage(imageSet: ImageSet) {
 
 async function saveImage(imageSet: ImageSet): Promise<void> {
   writeImageIfNew(imageSet.primaryFileOutputPath!, imageSet.primaryBuffer!)
-
-  for (const localizedImage of imageSet.localizedUrls) {
-    let buffer = imageSet.primaryBuffer!
-    // if we have a urls for the localized screenshot, download it
-    if (localizedImage?.url.length > 0) {
-      verbose(`Retrieving ${localizedImage.iso632Code} version...`)
-      const response = await fetch(localizedImage.url)
-      const arrayBuffer = await response.arrayBuffer()
-      buffer = Buffer.from(arrayBuffer)
-    } else {
-      verbose(
-        `No localized image specified for ${localizedImage.iso632Code}, will use primary image.`
-      )
-      // otherwise, we're going to fall back to outputting the primary image here
-    }
-    const directory = `./i18n/${
-      localizedImage.iso632Code
-    }/docusaurus-plugin-content-docs/current/${
-      imageSet.pageInfo!.relativeFilePathToFolderContainingPage
-    }`
-
-    writeImageIfNew(
-      (directory + "/" + imageSet.outputFileName!).replaceAll("//", "/"),
-      buffer
-    )
-  }
 }
 
 function writeImageIfNew(path: string, buffer: Buffer) {
@@ -222,50 +188,20 @@ function writeImageIfNew(path: string, buffer: Buffer) {
   writeStream.end()
 }
 
-export function parseImageBlock(
-  image: any,
-  imageHandler: ImageHandler
-): ImageSet {
+export function parseImageBlock(image: any): ImageSet {
   const imageSet: ImageSet = {
     primaryUrl: "",
     caption: "",
-    localizedUrls: imageHandler.locales.map((l) => ({
-      iso632Code: l,
-      url: "",
-    })),
   }
 
   if ("file" in image) {
-    imageSet.primaryUrl = image.file.url // image saved on notion (actually AWS)
+    imageSet.primaryUrl = image.file.url
   } else {
-    imageSet.primaryUrl = image.external.url // image still pointing somewhere else. I've see this happen when copying a Google Doc into Notion. Notion kep pointing at the google doc.
+    imageSet.primaryUrl = image.external.url
   }
 
-  const mergedCaption: string = image.caption
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    .map((c: any) => c.plain_text)
-    .join("")
-  const lines = mergedCaption.split("\n")
-
-  // Example:
-  // Caption before images.\nfr https://i.imgur.com/pYmE7OJ.png\nES  https://i.imgur.com/8paSZ0i.png\nCaption after images
-
-  lines.forEach((l) => {
-    const match = /\s*(..)\s*(https:\/\/.*)/.exec(l)
-    if (match) {
-      imageSet.localizedUrls.push({
-        iso632Code: match[1].toLowerCase(),
-        url: match[2],
-      })
-    } else {
-      // NB: carriage returns seem to mess up the markdown, so should be removed
-      imageSet.caption += l + " "
-    }
-  })
-  // NB: currently notion-md puts the caption in Alt, which noone sees (unless the image isn't found)
-  // We could inject a custom element handler to emit a <figure> in order to show the caption.
-  imageSet.caption = imageSet.caption?.trim()
-  //console.log(JSON.stringify(imageSet, null, 2));
+  // Keep the caption as-is
+  imageSet.caption = image.caption.map((c: any) => c.plain_text).join("")
 
   return imageSet
 }
@@ -277,7 +213,6 @@ export function parseCover(page: NotionPage): ImageSet | undefined {
   const imageSet: ImageSet = {
     primaryUrl: cover["type"] === "file" ? cover.file.url : cover.external.url,
     caption: "",
-    localizedUrls: [],
   }
   return imageSet
 }

@@ -117,8 +117,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
   const imageHandler = await initImageHandling(
     options.imgPrefixInMarkdown || options.imgOutputPath || "",
-    options.imgOutputPath || "",
-    options.locales
+    options.imgOutputPath || ""
   )
 
   // TODO: HACK: until we can add the notion token to the config

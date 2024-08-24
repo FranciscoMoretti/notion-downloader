@@ -45,7 +45,6 @@ test("Latex Rendering", async () => {
     options: {
       notionToken: "",
       rootId: "",
-      locales: [""],
       markdownOutputPath: "",
       imgOutputPath: "",
       imgPrefixInMarkdown: "",

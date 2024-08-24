@@ -81,13 +81,6 @@ export function makeImagePersistencePlan(
     decodeURI(imageSet.outputFileName)
   )
 
-  if (imageOutputRootPath && imageSet.localizedUrls.length) {
-    error(
-      "imageOutputPath was declared, but one or more localizedUrls were found too. If you are going to localize screenshots, then you can't declare an imageOutputPath."
-    )
-    exit(1)
-  }
-
   imageSet.filePathToUseInMarkdown =
     (imagePrefix?.length > 0 ? imagePrefix : ".") +
     "/" +
