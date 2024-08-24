@@ -1,4 +1,5 @@
 import crypto from "crypto"
+import * as Path from "path"
 import fs from "fs-extra"
 
 export function convertToUUID(str: string): string {
@@ -35,4 +36,9 @@ export function hashOfString(s: string): number {
 export function hashOfBufferContent(buffer: Buffer): string {
   const hash = crypto.createHash("sha256").update(buffer).digest("hex")
   return hash.slice(0, 20)
+}
+
+export function filenameFromPath(path: string) {
+  const filenameWithoutExtension = Path.basename(path, Path.extname(path))
+  return filenameWithoutExtension
 }

@@ -82,15 +82,15 @@ export async function initImageHandling(
 export const standardImageTransformer: IPlugin = {
   name: "DownloadImagesToRepo",
   notionToMarkdownTransforms: [
-    {
-      type: "image",
-      // we have to set this one up for each page because we need to
-      // give it two extra parameters that are context for each page
-      getStringFromBlock: (
-        context: IDocuNotionContext,
-        block: ListBlockChildrenResponseResult
-      ) => markdownToMDImageTransformer(block, context),
-    },
+    // {
+    //   type: "image",
+    //   // we have to set this one up for each page because we need to
+    //   // give it two extra parameters that are context for each page
+    //   getStringFromBlock: (
+    //     context: IDocuNotionContext,
+    //     block: ListBlockChildrenResponseResult
+    //   ) => markdownToMDImageTransformer(block, context),
+    // },
   ],
 }
 
@@ -118,20 +118,24 @@ async function processImageBlock(
   block: any,
   context: IDocuNotionContext
 ): Promise<void> {
-  const imageBlock = block.image
+  const imageBlockimage = block.image
 
   // TODOL: Fix ISSUE Getting a "socket hung up" error when getting the image.
-  logDebug("processImageBlock", JSON.stringify(imageBlock))
+  logDebug("processImageBlock", JSON.stringify(imageBlockimage))
 
-  const minimalImageSet = parseImageBlock(imageBlock)
-  const imageSet = {
+  const minimalImageSet = parseImageBlock(imageBlockimage)
+  const imageSet: ImageSet = {
     ...minimalImageSet,
     pageInfo: context.pageInfo,
   }
   // enhance: it would much better if we could split the changes to markdown separately from actual reading/writing,
   // so that this wasn't part of the markdown-creation loop. It's already almost there; we just need to
   // save the imageSets somewhere and then do the actual reading/writing later.
-  await readPrimaryImage(imageSet)
+  const { primaryBuffer, fileType } = await readPrimaryImage(
+    imageSet.primaryUrl
+  )
+  imageSet.primaryBuffer = primaryBuffer
+  imageSet.fileType = fileType
   makeImagePersistencePlan(
     context.options,
     imageSet,
@@ -139,43 +143,59 @@ async function processImageBlock(
     context.imageHandler.imageOutputPath,
     context.imageHandler.imagePrefix
   )
-  await saveImage(imageSet)
+  await saveImage(imageSet.primaryFileOutputPath!, imageSet.primaryBuffer!)
 
   // change the src to point to our copy of the image
   // TODO: Changes here are being applied to the actual block. This feels like another responsibility.
+  updateImageUrlToMarkdownImagePath(
+    imageBlockimage,
+    imageSet.filePathToUseInMarkdown || ""
+  )
+  // TODO: Remove this if it wasn't necessary. Not sure if it is.
+  // // put back the simplified caption, stripped of the meta information
+  // if (imageSet.caption) {
+  //   imageBlock.caption = [
+  //     {
+  //       type: "text",
+  //       text: { content: imageSet.caption, link: null },
+  //       plain_text: imageSet.caption,
+  //     },
+  //   ]
+  // } else {
+  //   imageBlock.caption = []
+  // }
+}
+
+export function updateImageUrlToMarkdownImagePath(
+  imageBlock: ImageBlockObjectResponse["image"],
+  filePathToUseInMarkdown: string
+) {
   if ("file" in imageBlock) {
-    imageBlock.file.url = imageSet.filePathToUseInMarkdown
+    imageBlock.file.url = filePathToUseInMarkdown
   } else {
-    imageBlock.external.url = imageSet.filePathToUseInMarkdown
-  }
-  // put back the simplified caption, stripped of the meta information
-  if (imageSet.caption) {
-    imageBlock.caption = [
-      {
-        type: "text",
-        text: { content: imageSet.caption, link: null },
-        plain_text: imageSet.caption,
-      },
-    ]
-  } else {
-    imageBlock.caption = []
+    imageBlock.external.url = filePathToUseInMarkdown
   }
 }
 
-async function readPrimaryImage(imageSet: ImageSet) {
+export async function readPrimaryImage(url: string) {
   // Keep alive with a long timeout solved some image retrieval issues. Maybe we should consider retries with exponential
   // back-offs if this becomes an issue again.
-  const response = await axios.get(imageSet.primaryUrl, {
+  const response = await axios.get(url, {
     responseType: "arraybuffer",
     httpsAgent: new https.Agent({ keepAlive: true }),
     timeout: 10000,
   })
-  imageSet.primaryBuffer = Buffer.from(response.data, "utf-8")
-  imageSet.fileType = await FileType.fromBuffer(imageSet.primaryBuffer)
+  const primaryBuffer = Buffer.from(response.data, "utf-8")
+  const fileType = await FileType.fromBuffer(primaryBuffer)
+
+  return {
+    primaryBuffer,
+    fileType,
+  }
 }
 
-async function saveImage(imageSet: ImageSet): Promise<void> {
-  writeImageIfNew(imageSet.primaryFileOutputPath!, imageSet.primaryBuffer!)
+export async function saveImage(path: string, buffer: Buffer): Promise<void> {
+  writeImageIfNew(path, buffer)
 }
 
 function writeImageIfNew(path: string, buffer: Buffer) {
@@ -234,7 +254,11 @@ export async function processCoverImage(
   const imageSet = parseCover(page)
   if (!imageSet) return
   imageSet.pageInfo = context.pageInfo
-  await readPrimaryImage(imageSet)
+  const { primaryBuffer, fileType } = await readPrimaryImage(
+    imageSet.primaryUrl
+  )
+  imageSet.primaryBuffer = primaryBuffer
+  imageSet.fileType = fileType
 
   // TODO: Include here the NamingStrategy
   makeImagePersistencePlan(
@@ -244,7 +268,7 @@ export async function processCoverImage(
     context.imageHandler.imageOutputPath,
     context.imageHandler.imagePrefix
   )
-  await saveImage(imageSet)
+  await saveImage(imageSet.primaryFileOutputPath!, imageSet.primaryBuffer!)
 
   // TODO: Do this a bit less hacky. Now it modified the cover object in the page object. It should draw from FilesMap
 

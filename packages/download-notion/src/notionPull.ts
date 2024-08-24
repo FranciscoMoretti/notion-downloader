@@ -1,15 +1,32 @@
 import * as Path from "path"
 import { exit } from "process"
 import { Client, isFullBlock } from "@notionhq/client"
+import {
+  BlockObjectResponse,
+  DatabaseObjectResponse,
+  ImageBlockObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
-import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
+import {
+  IdWithType,
+  NotionObjectTreeNode,
+  downloadObjectTree,
+  idFromIdWithType,
+  idTypeToObjectType,
+  objectTreeToObjectIds,
+} from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
+import {
+  getImagePaths,
+  getOutputImageFileName,
+} from "./MakeImagePersistencePlan"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
@@ -17,9 +34,14 @@ import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import {
   ImageHandler,
+  ImageSet,
   cleanupOldImages,
   initImageHandling,
+  parseImageBlock,
   processCoverImage,
+  readPrimaryImage,
+  saveImage,
+  updateImageUrlToMarkdownImagePath,
 } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
 import {
@@ -28,10 +50,16 @@ import {
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
 } from "./namingStrategy"
+import { getImageBlockUrl } from "./notion_objects_utils"
+import {
+  getAllObjectsInObjectsTree,
+  getPageAncestorId,
+  objectsToObjectsMap,
+} from "./objects_utils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
-import { convertToUUID, saveDataToJson } from "./utils"
+import { convertToUUID, filenameFromPath, saveDataToJson } from "./utils"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {
@@ -123,7 +151,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   await fs.mkdir(cacheDir, { recursive: true })
 
   info("Connecting to Notion...")
-
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
   const rootObjectType = await getRootObjectType({
     cachedNotionClient,
@@ -167,7 +194,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return
   }
 
-  // TODO: Support images file map
   const filesMap: FilesMap = {
     page: {},
     database: {},
@@ -189,6 +215,70 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     filesMap,
     pageConfig
   )
+
+  const objects = await getAllObjectsInObjectsTree(
+    objectsTree,
+    cachedNotionClient
+  )
+  const allObjectsMap = objectsToObjectsMap(objects)
+
+  const imageBlocks = Object.values(objects.block).filter(
+    (block) => block.type === "image"
+  )
+
+  // Get Image path for each image block in filesMap.image
+  for (const block of imageBlocks) {
+    const { primaryUrl, caption } = parseImageBlock(block.image)
+    const { primaryBuffer, fileType } = await readPrimaryImage(
+      getImageBlockUrl(block.image)
+    )
+    const ancestorPageId = getPageAncestorId(block.id, allObjectsMap)
+    if (!ancestorPageId) {
+      throw new Error("Ancestor page not found for image block " + block.id)
+    }
+    const ancestorPagePath = filesMap.page[ancestorPageId]
+    const ancestorPageName = filenameFromPath(ancestorPagePath)
+
+    const imageSet: ImageSet = {
+      caption,
+      fileType,
+      primaryBuffer,
+      primaryUrl,
+    }
+
+    // TODO: Here use the filename strategy to create different filenames
+    const imageFilename = getOutputImageFileName(
+      options,
+      imageSet,
+      block.id,
+      ancestorPageName
+    )
+
+    const mdPath = filesMap.page[ancestorPageId]
+    const mdPathWithRoot =
+      sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
+
+    const directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
+
+    const imagePaths = getImagePaths(
+      directoryContainingMarkdown,
+      imageFilename,
+      // TODO: Get from options instgead of imageHandler?
+      imageHandler.imageOutputPath,
+      imageHandler.imagePrefix
+    )
+
+    // TODO: Here use the Layout Strategy to get the image filepath. Use the rest of props in imagePaths in relation with this
+    filesMap.image[block.id] = imagePaths.filePathToUseInMarkdown
+    // Set the updated path
+    updateImageUrlToMarkdownImagePath(
+      block.image,
+      imagePaths.filePathToUseInMarkdown
+    )
+
+    // TODO: this save image can be a promise and all the images can be saved at the same time
+    await saveImage(imagePaths.primaryFileOutputPath, imageSet.primaryBuffer!)
+  }
 
   const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
     (id) => notionPageFromId(id, cachedNotionClient, pageConfig)

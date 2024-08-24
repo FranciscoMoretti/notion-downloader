@@ -1,6 +1,6 @@
 import { NotionObjectPlain, NotionObjectTreeNode } from "./notion-object-tree"
 
-type IdWithType =
+export type IdWithType =
   | { page_id: string; type: "page_id" }
   | { database_id: string; type: "database_id" }
   | { block_id: string; type: "block_id" }
@@ -45,6 +45,21 @@ export function objectTreeToObjectIds(
     }
   })
   return ids
+}
+
+export function idTypeToObjectType(
+  idWithType: IdWithType["type"]
+): "page" | "database" | "block" {
+  if (idWithType === "page_id") {
+    return "page"
+  }
+  if (idWithType === "database_id") {
+    return "database"
+  }
+  if (idWithType === "block_id") {
+    return "block"
+  }
+  throw new Error(`Invalid id type: ${idWithType}`)
 }
 
 export function idFromIdWithType(idWithType: IdWithType): string {

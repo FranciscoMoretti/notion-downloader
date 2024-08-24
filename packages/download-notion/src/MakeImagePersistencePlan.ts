@@ -6,10 +6,11 @@ import { ImageSet } from "./images"
 import { error } from "./log"
 import { findLastUuid, hashOfBufferContent, hashOfString } from "./utils"
 
-function getOutputFileName(
+export function getOutputImageFileName(
   options: NotionPullOptions,
   imageSet: ImageSet,
-  imageBlockId: string
+  imageBlockId: string,
+  ancestorPageName?: string
 ): string {
   const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
 
@@ -63,30 +64,34 @@ function getOutputFileName(
     // We decided to include the page slug for easier workflow during localization, particularly in Crowdin.
     // The block ID is a unique GUID and thus provides a unique file name.
     // TODO: Manage image paths with FilesMap
-    const pageSlugPart = imageSet.pageInfo?.slug
-      ? `${imageSet.pageInfo.slug.replace(/^\//, "")}.`
+    const pageSlugPart = ancestorPageName
+      ? `${ancestorPageName.replace(/^\//, "")}.`
       : ""
     return `${pageSlugPart}${imageBlockId}.${imageFileExtension}`
   }
 }
 
-function setImagePaths(
-  imageSet: ImageSet,
+export function getImagePaths(
+  directoryContainingMarkdown: string,
   outputFileName: string,
   imageOutputRootPath: string,
   imagePrefix: string
-): void {
-  imageSet.outputFileName = outputFileName
-
-  imageSet.primaryFileOutputPath = Path.posix.join(
+) {
+  const primaryFileOutputPath = Path.posix.join(
     imageOutputRootPath?.length > 0
       ? imageOutputRootPath
-      : imageSet.pageInfo!.directoryContainingMarkdown,
+      : directoryContainingMarkdown,
     decodeURI(outputFileName)
   )
 
-  imageSet.filePathToUseInMarkdown =
+  const filePathToUseInMarkdown =
     (imagePrefix?.length > 0 ? imagePrefix : ".") + "/" + outputFileName
+
+  return {
+    outputFileName,
+    primaryFileOutputPath,
+    filePathToUseInMarkdown,
+  }
 }
 
 export function makeImagePersistencePlan(
@@ -96,6 +101,19 @@ export function makeImagePersistencePlan(
   imageOutputRootPath: string,
   imagePrefix: string
 ): void {
-  const outputFileName = getOutputFileName(options, imageSet, imageBlockId)
-  setImagePaths(imageSet, outputFileName, imageOutputRootPath, imagePrefix)
+  const outputFileName = getOutputImageFileName(
+    options,
+    imageSet,
+    imageBlockId,
+    imageSet.pageInfo?.slug
+  )
+  const { filePathToUseInMarkdown, primaryFileOutputPath } = getImagePaths(
+    imageSet.pageInfo!.directoryContainingMarkdown,
+    outputFileName,
+    imageOutputRootPath,
+    imagePrefix
+  )
+  imageSet.filePathToUseInMarkdown = filePathToUseInMarkdown
+  imageSet.primaryFileOutputPath = primaryFileOutputPath
+  imageSet.outputFileName = outputFileName
 }
