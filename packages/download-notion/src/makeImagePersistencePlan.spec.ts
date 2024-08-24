@@ -1,11 +1,9 @@
 import { describe, expect, test } from "vitest"
 
-import {
-  hashOfString,
-  makeImagePersistencePlan,
-} from "./MakeImagePersistencePlan"
+import { makeImagePersistencePlan } from "./MakeImagePersistencePlan"
 import { NotionPullOptions } from "./config/schema"
 import { ImageSet } from "./images"
+import { hashOfString } from "./utils"
 
 const optionsUsingDefaultNaming: NotionPullOptions = {
   notionToken: "",
