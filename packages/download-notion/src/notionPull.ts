@@ -104,8 +104,6 @@ export async function notionContinuosPull(options: NotionPullOptions) {
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
 
-  // TODO: Support images file map
-
   const optionsForLogging = { ...options }
   // Just show the first few letters of the notion token, which start with "secret" anyhow.
   optionsForLogging.notionToken =
@@ -157,20 +155,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info("Connecting to Notion...")
 
   // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
-  const rootObjectType = await tryGetFirstPageWithType({
-    cachedNotionClient: cachedNotionClient,
-    rootUUID: rootUUID,
+  const rootObjectType = await getRootObjectType({
+    cachedNotionClient,
+    rootUUID,
     rootObjectType: options.rootObjectType,
-  }).catch((e) => {
-    error(
-      `docu-notion could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${rootUUID}".\r\nb) Check that your Notion API token (the "Integration Secret") is correct.
-      .\r\nc) Check that your root page includes your "integration" in its "connections".\r\nThis internal error message may help:\r\n    ${
-        e.message as string
-      }".\r\nd) Check that your root-is-db option is being used correctly. Current value is: ${
-        options.rootObjectType
-      }\r\n`
-    )
-    exit(1)
   })
 
   group(
@@ -211,6 +199,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return
   }
 
+  // TODO: Support images file map
   const filesMap: FilesMap = {
     page: {},
     database: {},
@@ -387,4 +376,19 @@ async function outputPages(
 
   info(`Finished processing ${pages.length} pages`)
   info(JSON.stringify(counts))
+}
+async function getRootObjectType(
+  params: Parameters<typeof tryGetFirstPageWithType>[0]
+) {
+  return tryGetFirstPageWithType(params).catch((e) => {
+    error(
+      `notion downloader could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${rootUUID}".\r\nb) Check that your Notion API token (the "Integration Secret") is correct.
+      .\r\nc) Check that your root page includes your "integration" in its "connections".\r\nThis internal error message may help:\r\n    ${
+        e.message as string
+      }".\r\nd) Check that your root-is-db option is being used correctly. Current value is: ${
+        params.rootObjectType
+      }\r\n`
+    )
+    exit(1)
+  })
 }
