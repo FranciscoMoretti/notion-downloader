@@ -1,5 +1,6 @@
 import https from "https"
 import * as Path from "path"
+import { ImageBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import axios from "axios"
 import FileType, { FileTypeResult } from "file-type"
 import fs from "fs-extra"
@@ -8,6 +9,7 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 import { makeImagePersistencePlan } from "./MakeImagePersistencePlan"
 import { NotionPage } from "./NotionPage"
 import { info, logDebug, verbose, warning } from "./log"
+import { getImageBlockUrl, getPageCoverUrl } from "./notion_objects_utils"
 import {
   IDocuNotionContext,
   IDocuNotionContextPageInfo,
@@ -33,6 +35,11 @@ export type ImageSet = {
   primaryFileOutputPath?: string
   outputFileName?: string
   filePathToUseInMarkdown?: string
+}
+
+export type MinimalImageSet = {
+  primaryUrl: string
+  caption?: string
 }
 
 // We handle several things here:
@@ -93,7 +100,7 @@ export async function markdownToMDImageTransformer(
   block: ListBlockChildrenResponseResult,
   context: IDocuNotionContext
 ): Promise<string> {
-  const image = (block as any).image
+  const image = (block as ImageBlockObjectResponse).image
 
   await processImageBlock(block, context)
 
@@ -103,8 +110,7 @@ export async function markdownToMDImageTransformer(
     .map((item: any) => item.plain_text)
     .join("")
 
-  const href: string =
-    image.type === "external" ? image.external.url : image.file.url
+  const href: string = getImageBlockUrl(image)
   return `![${altText}](${href})`
 }
 
@@ -117,9 +123,11 @@ async function processImageBlock(
   // TODOL: Fix ISSUE Getting a "socket hung up" error when getting the image.
   logDebug("processImageBlock", JSON.stringify(imageBlock))
 
-  const imageSet = parseImageBlock(imageBlock)
-  imageSet.pageInfo = context.pageInfo
-
+  const minimalImageSet = parseImageBlock(imageBlock)
+  const imageSet = {
+    ...minimalImageSet,
+    pageInfo: context.pageInfo,
+  }
   // enhance: it would much better if we could split the changes to markdown separately from actual reading/writing,
   // so that this wasn't part of the markdown-creation loop. It's already almost there; we just need to
   // save the imageSets somewhere and then do the actual reading/writing later.
@@ -134,6 +142,7 @@ async function processImageBlock(
   await saveImage(imageSet)
 
   // change the src to point to our copy of the image
+  // TODO: Changes here are being applied to the actual block. This feels like another responsibility.
   if ("file" in imageBlock) {
     imageBlock.file.url = imageSet.filePathToUseInMarkdown
   } else {
@@ -188,17 +197,15 @@ function writeImageIfNew(path: string, buffer: Buffer) {
   writeStream.end()
 }
 
-export function parseImageBlock(image: any): ImageSet {
+export function parseImageBlock(
+  image: ImageBlockObjectResponse["image"]
+): MinimalImageSet {
   const imageSet: ImageSet = {
     primaryUrl: "",
     caption: "",
   }
 
-  if ("file" in image) {
-    imageSet.primaryUrl = image.file.url
-  } else {
-    imageSet.primaryUrl = image.external.url
-  }
+  imageSet.primaryUrl = getImageBlockUrl(image)
 
   // Keep the caption as-is
   imageSet.caption = image.caption.map((c: any) => c.plain_text).join("")
@@ -211,7 +218,7 @@ export function parseCover(page: NotionPage): ImageSet | undefined {
   if (!cover) return undefined
 
   const imageSet: ImageSet = {
-    primaryUrl: cover["type"] === "file" ? cover.file.url : cover.external.url,
+    primaryUrl: getPageCoverUrl(cover),
     caption: "",
   }
   return imageSet
@@ -246,6 +253,7 @@ export async function processCoverImage(
     throw new Error("filePathToUseInMarkdown is undefined")
   }
   // change the src to point to our copy of the image
+  // TODO: Changes here are being applied to the actual page block. This feels like another responsibility.
   if ("file" in cover) {
     cover.file.url = imageSet.filePathToUseInMarkdown
   } else {

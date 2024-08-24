@@ -1,9 +1,14 @@
-import { Client, collectPaginatedAPI } from "@notionhq/client"
+import {
+  Client,
+  collectPaginatedAPI,
+  isFullDatabase,
+  isFullPage,
+} from "@notionhq/client"
 
 import { FilesMap } from "./FilesMap"
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NotionPageConfig, getPageContentInfo } from "./NotionPage"
-import { getNotionDatabase, getNotionPage } from "./notionPull"
+import { NotionDatabase } from "./NotionDatabase"
+import { NotionPage, NotionPageConfig, getPageContentInfo } from "./NotionPage"
 
 export async function getFileTreeMap(
   incomingContext: string,
@@ -90,4 +95,25 @@ export async function getFileTreeMap(
   } else {
     throw new Error(`Unknown type ${currentType}`)
   }
+}
+export async function getNotionPage(
+  client: Client,
+  currentID: string,
+  pageConfig: NotionPageConfig
+) {
+  const pageResponse = await client.pages.retrieve({ page_id: currentID })
+  if (!isFullPage(pageResponse)) {
+    throw Error("Notion page response is not full for " + currentID)
+  }
+  const page = new NotionPage(pageResponse, pageConfig)
+  return page
+}
+export async function getNotionDatabase(client: Client, currentID: string) {
+  const databaseResponse = await client.databases.retrieve({
+    database_id: currentID,
+  })
+  if (!isFullDatabase(databaseResponse)) {
+    throw Error("Notion database response is not full for " + currentID)
+  }
+  return new NotionDatabase(databaseResponse)
 }

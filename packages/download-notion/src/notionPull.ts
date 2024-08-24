@@ -1,11 +1,6 @@
 import * as Path from "path"
 import { exit } from "process"
-import {
-  Client,
-  isFullBlock,
-  isFullDatabase,
-  isFullPage,
-} from "@notionhq/client"
+import { Client, isFullBlock } from "@notionhq/client"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
@@ -15,7 +10,6 @@ import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
-import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
@@ -38,7 +32,6 @@ import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
 import { convertToUUID, saveDataToJson } from "./utils"
-import { configSchema } from "./utils/get-config"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {
@@ -55,29 +48,6 @@ export const counts: OutputCounts = {
   skipped_because_status: 0,
   skipped_because_level_cannot_have_content: 0,
   error_because_no_slug: 0,
-}
-
-export async function getNotionPage(
-  client: Client,
-  currentID: string,
-  pageConfig: NotionPageConfig
-) {
-  const pageResponse = await client.pages.retrieve({ page_id: currentID })
-  if (!isFullPage(pageResponse)) {
-    throw Error("Notion page response is not full for " + currentID)
-  }
-  const page = new NotionPage(pageResponse, pageConfig)
-  return page
-}
-
-export async function getNotionDatabase(client: Client, currentID: string) {
-  const databaseResponse = await client.databases.retrieve({
-    database_id: currentID,
-  })
-  if (!isFullDatabase(databaseResponse)) {
-    throw Error("Notion database response is not full for " + currentID)
-  }
-  return new NotionDatabase(databaseResponse)
 }
 
 function sanitizeMarkdownOutputPath(path: string) {
