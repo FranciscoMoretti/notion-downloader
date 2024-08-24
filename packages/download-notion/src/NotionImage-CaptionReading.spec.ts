@@ -1,6 +1,6 @@
-import { describe, expect, test } from "vitest"
+import { expect, test } from "vitest"
 
-import { initImageHandling, parseImageBlock } from "./images"
+import { parseImageBlock } from "./images"
 
 const kPrimaryImageUrl =
   "https://s3.us-west-2.amazonaws.com/primaryImage.png?Blah=foo"
