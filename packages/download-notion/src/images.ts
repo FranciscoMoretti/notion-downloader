@@ -1,6 +1,9 @@
 import https from "https"
 import * as Path from "path"
-import { ImageBlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import {
+  ImageBlockObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 import axios from "axios"
 import FileType, { FileTypeResult } from "file-type"
 import fs from "fs-extra"
@@ -167,13 +170,16 @@ async function processImageBlock(
 }
 
 export function updateImageUrlToMarkdownImagePath(
-  imageBlock: ImageBlockObjectResponse["image"],
+  imageOrCover: ImageBlockObjectResponse["image"] | PageObjectResponse["cover"],
   filePathToUseInMarkdown: string
 ) {
-  if ("file" in imageBlock) {
-    imageBlock.file.url = filePathToUseInMarkdown
+  if (!imageOrCover) {
+    throw Error("Image block not found")
+  }
+  if ("file" in imageOrCover) {
+    imageOrCover.file.url = filePathToUseInMarkdown
   } else {
-    imageBlock.external.url = filePathToUseInMarkdown
+    imageOrCover.external.url = filePathToUseInMarkdown
   }
 }
 
@@ -233,15 +239,13 @@ export function parseImageBlock(
   return imageSet
 }
 
-export function parseCover(page: NotionPage): ImageSet | undefined {
-  const cover = page.metadata.cover
-  if (!cover) return undefined
-
-  const imageSet: ImageSet = {
+export function parseCover(
+  cover: NonNullable<PageObjectResponse["cover"]>
+): MinimalImageSet {
+  return {
     primaryUrl: getPageCoverUrl(cover),
     caption: "",
   }
-  return imageSet
 }
 
 export async function processCoverImage(
@@ -251,14 +255,17 @@ export async function processCoverImage(
   const cover = page.metadata.cover
   if (!cover) return undefined
   logDebug("processCoverImage for page: ", page.id)
-  const imageSet = parseCover(page)
-  if (!imageSet) return
+  if (!page.metadata.cover) return
+  const { primaryUrl, caption } = parseCover(page.metadata.cover)
+  const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
+  const imageSet: ImageSet = {
+    primaryUrl,
+    caption,
+    primaryBuffer,
+    fileType,
+  }
+
   imageSet.pageInfo = context.pageInfo
-  const { primaryBuffer, fileType } = await readPrimaryImage(
-    imageSet.primaryUrl
-  )
-  imageSet.primaryBuffer = primaryBuffer
-  imageSet.fileType = fileType
 
   // TODO: Include here the NamingStrategy
   makeImagePersistencePlan(

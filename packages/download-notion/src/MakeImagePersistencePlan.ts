@@ -2,13 +2,13 @@ import * as Path from "path"
 import { exit } from "process"
 
 import { NotionPullOptions } from "./config/schema"
-import { ImageSet } from "./images"
+import { ImageSet, MinimalImageSet } from "./images"
 import { error } from "./log"
 import { findLastUuid, hashOfBufferContent, hashOfString } from "./utils"
 
 export function getOutputImageFileName(
   options: NotionPullOptions,
-  imageSet: ImageSet,
+  imageSet: MinimalImageSet,
   imageBlockId: string,
   ancestorPageName?: string
 ): string {

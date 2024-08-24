@@ -37,6 +37,7 @@ import {
   ImageSet,
   cleanupOldImages,
   initImageHandling,
+  parseCover,
   parseImageBlock,
   processCoverImage,
   readPrimaryImage,
@@ -422,15 +423,49 @@ async function outputPages(
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
 
     // most plugins should not write to disk, but those handling image files need these paths
-    context.pageInfo.directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
+    const directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
+    context.pageInfo.directoryContainingMarkdown = directoryContainingMarkdown
     context.pageInfo.relativeFilePathToFolderContainingPage = Path.basename(
       Path.dirname(mdPathWithRoot)
     )
     // Get the filename without extension
-    context.pageInfo.slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
+    const slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
+    context.pageInfo.slug = slug
 
-    await processCoverImage(page, context)
+    // ------ Replacement of cover image
+    if (page.metadata.cover) {
+      // await processCoverImage(page, context)
+      const { caption, primaryUrl } = parseCover(page.metadata.cover)
+      const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
+      const imageSet: ImageSet = {
+        caption,
+        fileType,
+        primaryBuffer,
+        primaryUrl,
+      }
 
+      const outputFileName = getOutputImageFileName(
+        options,
+        imageSet,
+        page.id,
+        slug
+      )
+      const { filePathToUseInMarkdown, primaryFileOutputPath } = getImagePaths(
+        directoryContainingMarkdown,
+        outputFileName,
+        imageHandler.imageOutputPath,
+        imageHandler.imagePrefix
+      )
+
+      await saveImage(primaryFileOutputPath, primaryBuffer)
+
+      updateImageUrlToMarkdownImagePath(
+        page.metadata.cover,
+        filePathToUseInMarkdown
+      )
+
+      // --- Done cover image handling
+    }
     const markdown = await getMarkdownForPage(config, context, page)
     writePage(markdown, mdPathWithRoot)
   }
