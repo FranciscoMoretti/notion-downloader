@@ -161,21 +161,19 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     rootObjectType: options.rootObjectType,
   })
 
-  group(
-    "Stage 1: walk children of the page named 'Outline', looking for pages..."
-  )
+  group("Stage 1: walk children of the root page, looking for pages...")
 
   // Load last edited time of pages from cache
   let pagesLastEditedTime = null
   if (options.cache?.cacheStrategy !== "no-cache") {
     // TODO: There is duplication because this is done both here and in downloadObjectTree
     await cachedNotionClient.cache.loadCache()
-    pagesLastEditedTime = Object.values(
-      cachedNotionClient.cache.pageObjectsCache
-    ).reduce<Record<string, string>>((acc, page) => {
-      acc[page.data.id] = page.data.last_edited_time
-      return acc
-    }, {})
+    pagesLastEditedTime = Object.fromEntries(
+      Object.values(cachedNotionClient.cache.pageObjectsCache).map((page) => [
+        page.data.id,
+        page.data.last_edited_time,
+      ])
+    )
   }
 
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
