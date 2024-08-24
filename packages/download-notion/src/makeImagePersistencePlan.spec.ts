@@ -15,6 +15,23 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
   imgOutputPath: "",
   imgPrefixInMarkdown: "",
   statusTag: "",
+  rootObjectType: "page",
+  cache: {
+    cacheDirectory: "",
+    cleanCache: false,
+    cacheStrategy: "cache",
+  },
+  logLevel: "info",
+  cwd: "",
+  skipConversion: false,
+  revalidatePeriod: 0,
+  slugProperty: "",
+  overwrite: false,
+  rootDbAsFolder: false,
+  layoutStrategy: "HierarchicalNamedLayoutStrategy",
+  imageFileNameFormat: "default",
+  namingStrategy: "guid",
+  pageLinkHasExtension: false,
 }
 
 const testImageSet: ImageSet = {
