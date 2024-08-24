@@ -136,8 +136,8 @@ async function processImageBlock(
     context.options,
     imageSet,
     block.id,
-    imageHandler.imageOutputPath,
-    imageHandler.imagePrefix
+    context.imageHandler.imageOutputPath,
+    context.imageHandler.imagePrefix
   )
   await saveImage(imageSet)
 

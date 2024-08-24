@@ -384,7 +384,9 @@ async function getRootObjectType(
 ) {
   return tryGetFirstPageWithType(params).catch((e) => {
     error(
-      `notion downloader could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${rootUUID}".\r\nb) Check that your Notion API token (the "Integration Secret") is correct.
+      `notion downloader could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${
+        params.rootUUID
+      }".\r\nb) Check that your Notion API token (the "Integration Secret") is correct.
       .\r\nc) Check that your root page includes your "integration" in its "connections".\r\nThis internal error message may help:\r\n    ${
         e.message as string
       }".\r\nd) Check that your root-is-db option is being used correctly. Current value is: ${
