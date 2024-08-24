@@ -4,6 +4,7 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 import { FilesMap } from "../FilesMap"
 import { NotionPage } from "../NotionPage"
 import { NotionPullOptions } from "../config/schema"
+import { ImageHandler } from "../images"
 import { ICounts, NotionBlock } from "../index"
 
 type linkConversionFunction = (
@@ -76,6 +77,7 @@ export type IDocuNotionContext = {
   pages: NotionPage[]
   counts: ICounts
   filesMap: FilesMap
+  imageHandler: ImageHandler
 
   // If the output is creating things like react elements, you can append their import definitions
   // to this array so they get added to the page.

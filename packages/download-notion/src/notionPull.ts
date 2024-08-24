@@ -22,6 +22,7 @@ import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import {
+  ImageHandler,
   cleanupOldImages,
   initImageHandling,
   processCoverImage,
@@ -114,7 +115,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const rootUUID = convertToUUID(options.rootId)
 
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
-  await initImageHandling(
+  const imageHandler = await initImageHandling(
     options.imgPrefixInMarkdown || options.imgOutputPath || "",
     options.imgOutputPath || "",
     options.locales
@@ -279,7 +280,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,
-    filesMap
+    filesMap,
+    imageHandler
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
@@ -288,7 +290,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       (p) => sanitizeMarkdownOutputPath(options.markdownOutputPath) + p
     )
   )
-  await cleanupOldImages()
+  await cleanupOldImages(imageHandler)
   endGroup()
 }
 
@@ -333,7 +335,8 @@ async function outputPages(
   pages: Array<NotionPage>,
   client: Client,
   notionToMarkdown: NotionToMarkdown,
-  filesMap: FilesMap
+  filesMap: FilesMap,
+  imageHandler: ImageHandler
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
@@ -351,6 +354,7 @@ async function outputPages(
     imports: [],
     convertNotionLinkToLocalDocusaurusLink: (url: string) =>
       convertInternalUrl(context, url),
+    imageHandler: imageHandler,
   }
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
