@@ -6,21 +6,16 @@ import { ImageSet } from "./images"
 import { error } from "./log"
 import { findLastUuid, hashOfBufferContent, hashOfString } from "./utils"
 
-export function makeImagePersistencePlan(
+function getOutputFileName(
   options: NotionPullOptions,
   imageSet: ImageSet,
-  imageBlockId: string,
-  imageOutputRootPath: string,
-  imagePrefix: string
-): void {
-  // TODO: This needs to be replaced with FilesMap logic
+  imageBlockId: string
+): string {
   const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
 
   let imageFileExtension: string | undefined = imageSet.fileType?.ext
   if (!imageFileExtension) {
-    // Try to get the extension from the url
     imageFileExtension = urlBeforeQuery.split(".").pop()
-
     if (!imageFileExtension) {
       error(
         `Something wrong with the filetype extension on the blob we got from ${imageSet.primaryUrl}`
@@ -40,7 +35,7 @@ export function makeImagePersistencePlan(
     const thingToHash = findLastUuid(urlBeforeQuery) ?? urlBeforeQuery
 
     const hash = hashOfString(thingToHash)
-    imageSet.outputFileName = `${hash}.${imageFileExtension}`
+    return `${hash}.${imageFileExtension}`
   } else if (options.imageFileNameFormat === "content-hash") {
     // This was requested by a user: https://github.com/sillsdev/docu-notion/issues/76.
     // We chose not to include it in the default file name because we want to maintain
@@ -49,7 +44,7 @@ export function makeImagePersistencePlan(
     // this could be a good option. One benefit is that the image only needs to exist once
     // in the file system regardless of how many times it is used in the site.
     const imageHash = hashOfBufferContent(imageSet.primaryBuffer!)
-    imageSet.outputFileName = `${imageHash}.${imageFileExtension}`
+    return `${imageHash}.${imageFileExtension}`
   } else {
     // We decided not to do this for the default format because it means
     // instability for the file name in Crowdin, which causes loss of localizations.
@@ -71,18 +66,36 @@ export function makeImagePersistencePlan(
     const pageSlugPart = imageSet.pageInfo?.slug
       ? `${imageSet.pageInfo.slug.replace(/^\//, "")}.`
       : ""
-    imageSet.outputFileName = `${pageSlugPart}${imageBlockId}.${imageFileExtension}`
+    return `${pageSlugPart}${imageBlockId}.${imageFileExtension}`
   }
+}
+
+function setImagePaths(
+  imageSet: ImageSet,
+  outputFileName: string,
+  imageOutputRootPath: string,
+  imagePrefix: string
+): void {
+  imageSet.outputFileName = outputFileName
 
   imageSet.primaryFileOutputPath = Path.posix.join(
     imageOutputRootPath?.length > 0
       ? imageOutputRootPath
       : imageSet.pageInfo!.directoryContainingMarkdown,
-    decodeURI(imageSet.outputFileName)
+    decodeURI(outputFileName)
   )
 
   imageSet.filePathToUseInMarkdown =
-    (imagePrefix?.length > 0 ? imagePrefix : ".") +
-    "/" +
-    imageSet.outputFileName
+    (imagePrefix?.length > 0 ? imagePrefix : ".") + "/" + outputFileName
+}
+
+export function makeImagePersistencePlan(
+  options: NotionPullOptions,
+  imageSet: ImageSet,
+  imageBlockId: string,
+  imageOutputRootPath: string,
+  imagePrefix: string
+): void {
+  const outputFileName = getOutputFileName(options, imageSet, imageBlockId)
+  setImagePaths(imageSet, outputFileName, imageOutputRootPath, imagePrefix)
 }
