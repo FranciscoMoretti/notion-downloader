@@ -2,19 +2,20 @@ import * as Path from "path"
 import { exit } from "process"
 
 import { NotionPullOptions } from "./config/schema"
-import { ImageSet, MinimalImageSet, OutputPaths } from "./images"
+import { FileData, ImageSet, OutputPaths } from "./images"
 import { error } from "./log"
 import { findLastUuid, hashOfBufferContent, hashOfString } from "./utils"
 
 export function getOutputImageFileName(
   options: NotionPullOptions,
   imageSet: ImageSet,
+  fileData: FileData,
   imageBlockId: string,
   ancestorPageName?: string
 ): string {
   const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
 
-  let imageFileExtension: string | undefined = imageSet.fileData?.ext
+  let imageFileExtension: string | undefined = fileData.ext
   if (!imageFileExtension) {
     imageFileExtension = urlBeforeQuery.split(".").pop()
     if (!imageFileExtension) {
@@ -44,7 +45,7 @@ export function getOutputImageFileName(
     // However, particularly in a workflow which is not concerned with localization,
     // this could be a good option. One benefit is that the image only needs to exist once
     // in the file system regardless of how many times it is used in the site.
-    const imageHash = hashOfBufferContent(imageSet.fileData?.buffer!)
+    const imageHash = hashOfBufferContent(fileData.buffer!)
     return `${imageHash}.${imageFileExtension}`
   } else {
     // We decided not to do this for the default format because it means
@@ -97,6 +98,7 @@ export function getImagePaths(
 export function makeImagePersistencePlan(
   options: NotionPullOptions,
   imageSet: ImageSet,
+  fileData: FileData,
   imageBlockId: string,
   imageOutputRootPath: string,
   imagePrefix: string,
@@ -106,6 +108,7 @@ export function makeImagePersistencePlan(
   const outputFileName = getOutputImageFileName(
     options,
     imageSet,
+    fileData,
     imageBlockId,
     pageSlug
   )

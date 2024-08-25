@@ -62,13 +62,13 @@ export async function getTreePages(
   } else if (currentType == "page") {
     const currentPage = await notionPageFromId(currentID, client)
     const blocks = await getBlockChildren(currentPage.id, client)
-    const pageInfo = await getPageContentInfo(blocks)
+    const pageContentInfo = await getPageContentInfo(blocks)
 
     // TODO: Consider dropping this restriction of not having content and children. An MD File can be at the same level as a folder
     if (
       !rootLevel &&
-      pageInfo.hasParagraphs &&
-      pageInfo.childPageIdsAndOrder.length
+      pageContentInfo.hasParagraphs &&
+      pageContentInfo.childPageIdsAndOrder.length
     ) {
       error(
         `Skipping "${currentPage.nameOrTitle}"  and its children. docu-notion does not support pages that are both levels and have text content (paragraphs) at the same time. Normally outline pages should just be composed of 1) links to other pages and 2) child pages (other levels of the outline). Note that @-mention style links appear as text paragraphs to docu-notion so must not be used to form the outline.`
@@ -76,21 +76,21 @@ export async function getTreePages(
       ++counts.skipped_because_level_cannot_have_content
       return
     }
-    if (!rootLevel && pageInfo.hasParagraphs) {
+    if (!rootLevel && pageContentInfo.hasParagraphs) {
       filesMap.page[currentID] = incomingContext
       pages.push(currentPage)
     }
 
     // a normal outline page that exists just to create the level, pointing at database pages that belong in this level
     else if (
-      pageInfo.childPageIdsAndOrder.length ||
-      pageInfo.childDatabaseIdsAndOrder.length
+      pageContentInfo.childPageIdsAndOrder.length ||
+      pageContentInfo.childDatabaseIdsAndOrder.length
     ) {
       let layoutContext = incomingContext
       if (!rootLevel) {
         layoutContext = layoutStrategy.newLevel(incomingContext, currentPage)
       }
-      for (const childDatabaseInfo of pageInfo.childDatabaseIdsAndOrder) {
+      for (const childDatabaseInfo of pageContentInfo.childDatabaseIdsAndOrder) {
         await getTreePages(
           outputRootPath,
           layoutContext,
@@ -105,7 +105,7 @@ export async function getTreePages(
         )
       }
 
-      for (const childPageInfo of pageInfo.childPageIdsAndOrder) {
+      for (const childPageInfo of pageContentInfo.childPageIdsAndOrder) {
         await getTreePages(
           outputRootPath,
           layoutContext,

@@ -31,17 +31,17 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
   pageLinkHasExtension: false,
 }
 
+const directoryContainingMarkdown = "/pathToParentSomewhere/"
+const slug = "my-page"
+const testFileData = {
+  ext: "png",
+  mime: "image/png",
+  buffer: Buffer.from("some fake image content"),
+}
+
 const testImageSet: ImageSet = {
   primaryUrl: "https://s3.us-west-2.amazonaws.com/primaryImage?Blah=foo",
-  pageInfo: {
-    directoryContainingMarkdown: "/pathToParentSomewhere/",
-    slug: "my-page",
-  },
-  fileData: {
-    ext: "png",
-    mime: "image/png",
-    buffer: Buffer.from("some fake image content"),
-  },
+  caption: "my caption",
 }
 
 test("primary file with explicit file output path and prefix", () => {
@@ -50,6 +50,7 @@ test("primary file with explicit file output path and prefix", () => {
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     testImageSet,
+    testFileData,
     "ABC-123",
     "./static/notion_imgs",
     "/notion_imgs",
@@ -71,6 +72,7 @@ test("primary file with defaults for image output path and prefix", () => {
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     testImageSet,
+    testFileData,
     "ABC-123",
     "",
     "",
@@ -92,6 +94,7 @@ test("falls back to getting file extension from url if not in fileType", () => {
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     testImageSet,
+    testFileData,
     "ABC-123",
     "",
     "",
@@ -113,6 +116,7 @@ test("handles encoded characters", () => {
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     imageSet,
+    testFileData,
     "ABC-123",
     "",
     "",
@@ -137,6 +141,7 @@ test("hash naming", () => {
   const outputPaths = makeImagePersistencePlan(
     optionsUsingHashNaming,
     testImageSet,
+    testFileData,
     "ABC-123",
     "",
     "",
@@ -157,6 +162,7 @@ test("Legacy naming", () => {
   const outputPaths = makeImagePersistencePlan(
     optionsUsingLegacyNaming,
     testImageSet,
+    testFileData,
     "ABC-123",
     "./static/notion_imgs",
     "/notion_imgs",
@@ -179,6 +185,7 @@ test("Legacy naming - properly extract UUID from old-style notion image url", ()
   const outputPaths = makeImagePersistencePlan(
     optionsUsingLegacyNaming,
     imageSet,
+    testFileData,
     "ABC-123",
     "./static/notion_imgs",
     "/notion_imgs",
@@ -199,6 +206,7 @@ test("Legacy naming - properly extract UUID from new-style (Sept 2023) notion im
   const outputPaths = makeImagePersistencePlan(
     optionsUsingLegacyNaming,
     imageSet,
+    testFileData,
     "ABC-123",
     "./static/notion_imgs",
     "/notion_imgs",

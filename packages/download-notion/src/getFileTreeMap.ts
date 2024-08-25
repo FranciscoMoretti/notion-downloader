@@ -62,12 +62,15 @@ export async function getFileTreeMap(
         block_id: currentID,
       }
     )
-    const pageInfo = await getPageContentInfo(pageBlocksResults)
+    const pageContentInfo = await getPageContentInfo(pageBlocksResults)
     // TODO: Also handle blocks that have block/page children (e.g. columns)
-    if (pageInfo.childDatabaseIdsAndOrder || pageInfo.childPageIdsAndOrder) {
+    if (
+      pageContentInfo.childDatabaseIdsAndOrder ||
+      pageContentInfo.childPageIdsAndOrder
+    ) {
       const layoutContext = layoutStrategy.newLevel(incomingContext, page)
-      // TODO: Consolidate these as generic object children, instead of using the `pageInfo`
-      for (const page of pageInfo.childPageIdsAndOrder) {
+      // TODO: Consolidate these as generic object children, instead of using the `pageContentInfo`
+      for (const page of pageContentInfo.childPageIdsAndOrder) {
         await getFileTreeMap(
           layoutContext,
           page.id,
@@ -79,7 +82,7 @@ export async function getFileTreeMap(
           pageConfig
         )
       }
-      for (const database of pageInfo.childDatabaseIdsAndOrder) {
+      for (const database of pageContentInfo.childDatabaseIdsAndOrder) {
         await getFileTreeMap(
           layoutContext,
           database.id,

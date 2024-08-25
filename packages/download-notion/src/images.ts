@@ -35,7 +35,6 @@ export type OutputPaths = {
 export type ImageSet = {
   primaryUrl: string
   caption?: string
-  fileData?: FileData // New property to hold ext, mime, and buffer data
 }
 
 export type MinimalImageSet = {
@@ -134,7 +133,7 @@ async function processImageBlock(
   const { primaryBuffer, fileType } = await readPrimaryImage(
     imageSet.primaryUrl
   )
-  imageSet.fileData = {
+  const fileData = {
     buffer: primaryBuffer,
     mime: fileType?.mime,
     ext: fileType?.ext,
@@ -142,6 +141,7 @@ async function processImageBlock(
   const outputPaths = makeImagePersistencePlan(
     context.options,
     imageSet,
+    fileData,
     block.id,
     context.imageHandler.imageOutputPath,
     context.imageHandler.imagePrefix,
@@ -263,30 +263,28 @@ export async function processCoverImage(
   if (!page.metadata.cover) return
   const { primaryUrl, caption } = parseCover(page.metadata.cover)
   const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
+  const fileData: FileData = {
+    ext: fileType?.ext,
+    mime: fileType?.mime,
+    buffer: primaryBuffer,
+  }
   const imageSet: ImageSet = {
     primaryUrl,
     caption,
-    fileData: {
-      mime: fileType?.mime,
-      ext: fileType?.ext,
-      buffer: primaryBuffer,
-    },
   }
 
   // TODO: Include here the NamingStrategy
   const outputPaths = makeImagePersistencePlan(
     context.options,
     imageSet,
+    fileData,
     page.id,
     context.imageHandler.imageOutputPath,
     context.imageHandler.imagePrefix,
     context.pageInfo.directoryContainingMarkdown,
     context.pageInfo.slug
   )
-  await saveImage(
-    outputPaths?.primaryFileOutputPath!,
-    imageSet.fileData!.buffer!
-  )
+  await saveImage(outputPaths?.primaryFileOutputPath!, fileData!.buffer!)
 
   // TODO: Do this a bit less hacky. Now it modified the cover object in the page object. It should draw from FilesMap
 

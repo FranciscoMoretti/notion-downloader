@@ -33,6 +33,7 @@ import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import {
+  FileData,
   ImageHandler,
   ImageSet,
   cleanupOldImages,
@@ -239,14 +240,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     }
     const ancestorPagePath = filesMap.page[ancestorPageId]
     const ancestorPageName = filenameFromPath(ancestorPagePath)
-
+    const fileData: FileData = {
+      ext: fileType?.ext,
+      mime: fileType?.mime,
+      buffer: primaryBuffer,
+    }
     const imageSet: ImageSet = {
       caption,
-      fileData: {
-        mime: fileType?.mime,
-        ext: fileType?.ext,
-        buffer: primaryBuffer,
-      },
       primaryUrl,
     }
 
@@ -254,6 +254,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     const imageFilename = getOutputImageFileName(
       options,
       imageSet,
+      fileData,
       block.id,
       ancestorPageName
     )
@@ -281,10 +282,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     )
 
     // TODO: this save image can be a promise and all the images can be saved at the same time
-    await saveImage(
-      imagePaths.primaryFileOutputPath,
-      imageSet.fileData!.buffer!
-    )
+    await saveImage(imagePaths.primaryFileOutputPath, fileData!.buffer!)
   }
 
   const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
@@ -429,30 +427,30 @@ async function outputPages(
 
     // most plugins should not write to disk, but those handling image files need these paths
     const directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
-    context.pageInfo.directoryContainingMarkdown = directoryContainingMarkdown
 
     // Get the filename without extension
     const slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
-    context.pageInfo.slug = slug
 
     // ------ Replacement of cover image
     if (page.metadata.cover) {
       // await processCoverImage(page, context)
       const { caption, primaryUrl } = parseCover(page.metadata.cover)
       const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
+      const fileData: FileData = {
+        ext: fileType?.ext,
+        mime: fileType?.mime,
+        buffer: primaryBuffer,
+      }
       const imageSet: ImageSet = {
         caption,
-        fileData: {
-          mime: fileType?.mime,
-          ext: fileType?.ext,
-          buffer: primaryBuffer,
-        },
+
         primaryUrl,
       }
 
       const outputFileName = getOutputImageFileName(
         options,
         imageSet,
+        fileData,
         page.id,
         slug
       )
