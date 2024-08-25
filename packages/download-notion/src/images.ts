@@ -307,9 +307,6 @@ export async function processCoverImage(
 function imageWasSeen(path: string) {
   // TODO: Fix this. For now we mock it returning true.
   return true
-  const imageHandler = context.imageHandler
-  imageHandler.existingImagesNotSeenYetInPull =
-    imageHandler.existingImagesNotSeenYetInPull.filter((p) => p !== path)
 }
 
 export async function cleanupOldImages(
