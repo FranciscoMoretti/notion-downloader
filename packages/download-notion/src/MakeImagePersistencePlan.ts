@@ -99,16 +99,18 @@ export function makeImagePersistencePlan(
   imageSet: ImageSet,
   imageBlockId: string,
   imageOutputRootPath: string,
-  imagePrefix: string
+  imagePrefix: string,
+  directoryConrtainingMardown: string,
+  pageSlug: string
 ): OutputPaths {
   const outputFileName = getOutputImageFileName(
     options,
     imageSet,
     imageBlockId,
-    imageSet.pageInfo?.slug
+    pageSlug
   )
   const { filePathToUseInMarkdown, primaryFileOutputPath } = getImagePaths(
-    imageSet.pageInfo!.directoryContainingMarkdown,
+    directoryConrtainingMardown,
     outputFileName,
     imageOutputRootPath,
     imagePrefix

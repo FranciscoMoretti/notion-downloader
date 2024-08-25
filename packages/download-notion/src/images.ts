@@ -35,7 +35,6 @@ export type OutputPaths = {
 export type ImageSet = {
   primaryUrl: string
   caption?: string
-  pageInfo?: IDocuNotionContextPageInfo
   fileData?: FileData // New property to hold ext, mime, and buffer data
 }
 
@@ -128,7 +127,6 @@ async function processImageBlock(
   const minimalImageSet = parseImageBlock(imageBlockimage)
   const imageSet: ImageSet = {
     ...minimalImageSet,
-    pageInfo: context.pageInfo,
   }
   // enhance: it would much better if we could split the changes to markdown separately from actual reading/writing,
   // so that this wasn't part of the markdown-creation loop. It's already almost there; we just need to
@@ -146,7 +144,9 @@ async function processImageBlock(
     imageSet,
     block.id,
     context.imageHandler.imageOutputPath,
-    context.imageHandler.imagePrefix
+    context.imageHandler.imagePrefix,
+    context.pageInfo.directoryContainingMarkdown,
+    context.pageInfo.slug
   )
   await saveImage(
     outputPaths?.primaryFileOutputPath!,
@@ -273,15 +273,15 @@ export async function processCoverImage(
     },
   }
 
-  imageSet.pageInfo = context.pageInfo
-
   // TODO: Include here the NamingStrategy
   const outputPaths = makeImagePersistencePlan(
     context.options,
     imageSet,
     page.id,
     context.imageHandler.imageOutputPath,
-    context.imageHandler.imagePrefix
+    context.imageHandler.imagePrefix,
+    context.pageInfo.directoryContainingMarkdown,
+    context.pageInfo.slug
   )
   await saveImage(
     outputPaths?.primaryFileOutputPath!,

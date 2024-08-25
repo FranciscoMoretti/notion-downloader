@@ -45,12 +45,16 @@ const testImageSet: ImageSet = {
 }
 
 test("primary file with explicit file output path and prefix", () => {
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     testImageSet,
     "ABC-123",
     "./static/notion_imgs",
-    "/notion_imgs"
+    "/notion_imgs",
+    directoryConrtainingMardown,
+    pageSlug
   )
   const expectedFileName = "my-page.ABC-123.png"
   expect(outputPaths?.outputFileName).toBe(`${expectedFileName}`)
@@ -62,12 +66,16 @@ test("primary file with explicit file output path and prefix", () => {
   )
 })
 test("primary file with defaults for image output path and prefix", () => {
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     testImageSet,
     "ABC-123",
     "",
-    ""
+    "",
+    directoryConrtainingMardown,
+    pageSlug
   )
   const expectedFileName = "my-page.ABC-123.png"
   expect(outputPaths?.outputFileName).toBe(`${expectedFileName}`)
@@ -79,12 +87,16 @@ test("primary file with defaults for image output path and prefix", () => {
   expect(outputPaths?.filePathToUseInMarkdown).toBe(`./${expectedFileName}`)
 })
 test("falls back to getting file extension from url if not in fileType", () => {
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     testImageSet,
     "ABC-123",
     "",
-    ""
+    "",
+    directoryConrtainingMardown,
+    pageSlug
   )
   expect(outputPaths?.outputFileName).toBe("my-page.ABC-123.png")
 })
@@ -95,17 +107,17 @@ test("falls back to getting file extension from url if not in fileType", () => {
 test("handles encoded characters", () => {
   const imageSet: ImageSet = {
     ...testImageSet,
-    pageInfo: {
-      directoryContainingMarkdown: "/pathToParentSomewhere/",
-      slug: "my-page%281%29",
-    },
   }
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page%281%29"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingDefaultNaming,
     imageSet,
     "ABC-123",
     "",
-    ""
+    "",
+    directoryConrtainingMardown,
+    pageSlug
   )
   expect(outputPaths.primaryFileOutputPath).toBe(
     `/pathToParentSomewhere/my-page(1).ABC-123.png`
@@ -120,12 +132,16 @@ const optionsUsingHashNaming: NotionPullOptions = {
   imageFileNameFormat: "content-hash",
 }
 test("hash naming", () => {
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page%281%29"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingHashNaming,
     testImageSet,
     "ABC-123",
     "",
-    ""
+    "",
+    directoryConrtainingMardown,
+    pageSlug
   )
   const expectedFileName = "fe3f26fd515b3cf299ac.png"
   expect(outputPaths?.outputFileName).toBe(`${expectedFileName}`)
@@ -136,12 +152,16 @@ const optionsUsingLegacyNaming: NotionPullOptions = {
   imageFileNameFormat: "legacy",
 }
 test("Legacy naming", () => {
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page%281%29"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingLegacyNaming,
     testImageSet,
     "ABC-123",
     "./static/notion_imgs",
-    "/notion_imgs"
+    "/notion_imgs",
+    directoryConrtainingMardown,
+    pageSlug
   )
   const expectedHash = hashOfString(
     "https://s3.us-west-2.amazonaws.com/primaryImage"
@@ -149,6 +169,8 @@ test("Legacy naming", () => {
   expect(outputPaths.outputFileName).toBe(`${expectedHash}.png`)
 })
 test("Legacy naming - properly extract UUID from old-style notion image url", () => {
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page%281%29"
   const imageSet: ImageSet = {
     ...testImageSet,
     primaryUrl:
@@ -159,7 +181,9 @@ test("Legacy naming - properly extract UUID from old-style notion image url", ()
     imageSet,
     "ABC-123",
     "./static/notion_imgs",
-    "/notion_imgs"
+    "/notion_imgs",
+    directoryConrtainingMardown,
+    pageSlug
   )
   const expectedHash = hashOfString("e1058f46-4d2f-4292-8388-4ad393383439")
   expect(outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
@@ -170,12 +194,16 @@ test("Legacy naming - properly extract UUID from new-style (Sept 2023) notion im
     primaryUrl:
       "https://prod-files-secure.s3.us-west-2.amazonaws.com/d9a2b712-cf69-4bd6-9d65-87a4ceeacca2/d1bcdc8c-b065-4e40-9a11-392aabeb220e/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230915%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230915T161258Z&X-Amz-Expires=3600&X-Amz-Signature=28fca48e65fba86d539c3c4b7676fce1fa0857aa194f7b33dd4a468ecca6ab24&X-Amz-SignedHeaders=host&x-id=GetObject",
   }
+  const directoryConrtainingMardown = "/pathToParentSomewhere/"
+  const pageSlug = "my-page%281%29"
   const outputPaths = makeImagePersistencePlan(
     optionsUsingLegacyNaming,
     imageSet,
     "ABC-123",
     "./static/notion_imgs",
-    "/notion_imgs"
+    "/notion_imgs",
+    directoryConrtainingMardown,
+    pageSlug
   )
   const expectedHash = hashOfString("d1bcdc8c-b065-4e40-9a11-392aabeb220e")
   expect(outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
