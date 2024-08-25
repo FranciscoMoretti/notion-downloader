@@ -100,7 +100,7 @@ export function makeImagePersistencePlan(
   imageBlockId: string,
   imageOutputRootPath: string,
   imagePrefix: string
-): void {
+): OutputPaths {
   const outputFileName = getOutputImageFileName(
     options,
     imageSet,
@@ -113,7 +113,7 @@ export function makeImagePersistencePlan(
     imageOutputRootPath,
     imagePrefix
   )
-  imageSet.outputPaths = {
+  return {
     filePathToUseInMarkdown,
     primaryFileOutputPath,
     outputFileName,

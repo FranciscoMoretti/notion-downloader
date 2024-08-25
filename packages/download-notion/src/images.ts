@@ -36,7 +36,6 @@ export type ImageSet = {
   primaryUrl: string
   caption?: string
   pageInfo?: IDocuNotionContextPageInfo
-  outputPaths?: OutputPaths
   fileData?: FileData // New property to hold ext, mime, and buffer data
 }
 
@@ -142,7 +141,7 @@ async function processImageBlock(
     mime: fileType?.mime,
     ext: fileType?.ext,
   }
-  makeImagePersistencePlan(
+  const outputPaths = makeImagePersistencePlan(
     context.options,
     imageSet,
     block.id,
@@ -150,7 +149,7 @@ async function processImageBlock(
     context.imageHandler.imagePrefix
   )
   await saveImage(
-    imageSet.outputPaths?.primaryFileOutputPath!,
+    outputPaths?.primaryFileOutputPath!,
     imageSet.fileData!.buffer!
   )
 
@@ -158,7 +157,7 @@ async function processImageBlock(
   // TODO: Changes here are being applied to the actual block. This feels like another responsibility.
   updateImageUrlToMarkdownImagePath(
     imageBlockimage,
-    imageSet.outputPaths?.filePathToUseInMarkdown || ""
+    outputPaths?.filePathToUseInMarkdown || ""
   )
   // TODO: Remove this if it wasn't necessary. Not sure if it is.
   // // put back the simplified caption, stripped of the meta information
@@ -277,7 +276,7 @@ export async function processCoverImage(
   imageSet.pageInfo = context.pageInfo
 
   // TODO: Include here the NamingStrategy
-  makeImagePersistencePlan(
+  const outputPaths = makeImagePersistencePlan(
     context.options,
     imageSet,
     page.id,
@@ -285,22 +284,22 @@ export async function processCoverImage(
     context.imageHandler.imagePrefix
   )
   await saveImage(
-    imageSet.outputPaths?.primaryFileOutputPath!,
+    outputPaths?.primaryFileOutputPath!,
     imageSet.fileData!.buffer!
   )
 
   // TODO: Do this a bit less hacky. Now it modified the cover object in the page object. It should draw from FilesMap
 
-  if (!imageSet.outputPaths?.filePathToUseInMarkdown) {
+  if (!outputPaths?.filePathToUseInMarkdown) {
     // At this point, filePathToUseInMarkdown should be defined.
     throw new Error("filePathToUseInMarkdown is undefined")
   }
   // change the src to point to our copy of the image
   // TODO: Changes here are being applied to the actual page block. This feels like another responsibility.
   if ("file" in cover) {
-    cover.file.url = imageSet.outputPaths.filePathToUseInMarkdown
+    cover.file.url = outputPaths.filePathToUseInMarkdown
   } else {
-    cover.external.url = imageSet.outputPaths.filePathToUseInMarkdown
+    cover.external.url = outputPaths.filePathToUseInMarkdown
   }
 }
 
