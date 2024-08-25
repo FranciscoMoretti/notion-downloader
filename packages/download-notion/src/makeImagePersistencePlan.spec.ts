@@ -35,7 +35,6 @@ const testImageSet: ImageSet = {
   primaryUrl: "https://s3.us-west-2.amazonaws.com/primaryImage?Blah=foo",
   pageInfo: {
     directoryContainingMarkdown: "/pathToParentSomewhere/",
-    : "",
     slug: "my-page",
   },
   fileData: {
