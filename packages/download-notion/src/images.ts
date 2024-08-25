@@ -19,25 +19,21 @@ import {
   IPlugin,
 } from "./plugins/pluginTypes"
 
-// we parse a notion image and its caption into what we need, which includes any urls to localized versions
-// of the image that may be embedded in the caption.
+// Extracting ext, mime, and buffer data into a separate type called FileData
+export type FileData = {
+  ext?: string
+  mime?: string
+  buffer?: Buffer
+}
+
 export type ImageSet = {
-  // We get these from parseImageBlock():
   primaryUrl: string
-  // caption may contain a caption and/or URLs to localized versions
   caption?: string
-
-  // then we fill this in from processImageBlock():
   pageInfo?: IDocuNotionContextPageInfo
-
-  // then we fill these in readPrimaryImage():
-  primaryBuffer?: Buffer
-  fileType?: FileTypeResult
-
-  // then we fill these in from makeImagePersistencePlan():
   primaryFileOutputPath?: string
   outputFileName?: string
   filePathToUseInMarkdown?: string
+  fileData?: FileData // New property to hold ext, mime, and buffer data
 }
 
 export type MinimalImageSet = {
@@ -137,8 +133,11 @@ async function processImageBlock(
   const { primaryBuffer, fileType } = await readPrimaryImage(
     imageSet.primaryUrl
   )
-  imageSet.primaryBuffer = primaryBuffer
-  imageSet.fileType = fileType
+  imageSet.fileData = {
+    buffer: primaryBuffer,
+    mime: fileType?.mime,
+    ext: fileType?.ext,
+  }
   makeImagePersistencePlan(
     context.options,
     imageSet,
@@ -146,7 +145,7 @@ async function processImageBlock(
     context.imageHandler.imageOutputPath,
     context.imageHandler.imagePrefix
   )
-  await saveImage(imageSet.primaryFileOutputPath!, imageSet.primaryBuffer!)
+  await saveImage(imageSet.primaryFileOutputPath!, imageSet.fileData!.buffer!)
 
   // change the src to point to our copy of the image
   // TODO: Changes here are being applied to the actual block. This feels like another responsibility.
@@ -261,8 +260,11 @@ export async function processCoverImage(
   const imageSet: ImageSet = {
     primaryUrl,
     caption,
-    primaryBuffer,
-    fileType,
+    fileData: {
+      mime: fileType?.mime,
+      ext: fileType?.ext,
+      buffer: primaryBuffer,
+    },
   }
 
   imageSet.pageInfo = context.pageInfo
@@ -275,7 +277,7 @@ export async function processCoverImage(
     context.imageHandler.imageOutputPath,
     context.imageHandler.imagePrefix
   )
-  await saveImage(imageSet.primaryFileOutputPath!, imageSet.primaryBuffer!)
+  await saveImage(imageSet.primaryFileOutputPath!, imageSet.fileData!.buffer!)
 
   // TODO: Do this a bit less hacky. Now it modified the cover object in the page object. It should draw from FilesMap
 

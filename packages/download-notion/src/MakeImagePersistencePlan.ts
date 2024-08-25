@@ -8,13 +8,13 @@ import { findLastUuid, hashOfBufferContent, hashOfString } from "./utils"
 
 export function getOutputImageFileName(
   options: NotionPullOptions,
-  imageSet: MinimalImageSet,
+  imageSet: ImageSet,
   imageBlockId: string,
   ancestorPageName?: string
 ): string {
   const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
 
-  let imageFileExtension: string | undefined = imageSet.fileType?.ext
+  let imageFileExtension: string | undefined = imageSet.fileData?.ext
   if (!imageFileExtension) {
     imageFileExtension = urlBeforeQuery.split(".").pop()
     if (!imageFileExtension) {
@@ -44,7 +44,7 @@ export function getOutputImageFileName(
     // However, particularly in a workflow which is not concerned with localization,
     // this could be a good option. One benefit is that the image only needs to exist once
     // in the file system regardless of how many times it is used in the site.
-    const imageHash = hashOfBufferContent(imageSet.primaryBuffer!)
+    const imageHash = hashOfBufferContent(imageSet.fileData?.buffer!)
     return `${imageHash}.${imageFileExtension}`
   } else {
     // We decided not to do this for the default format because it means

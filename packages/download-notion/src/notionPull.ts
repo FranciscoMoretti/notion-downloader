@@ -242,8 +242,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
     const imageSet: ImageSet = {
       caption,
-      fileType,
-      primaryBuffer,
+      fileData: {
+        mime: fileType?.mime,
+        ext: fileType?.ext,
+        buffer: primaryBuffer,
+      },
       primaryUrl,
     }
 
@@ -278,7 +281,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     )
 
     // TODO: this save image can be a promise and all the images can be saved at the same time
-    await saveImage(imagePaths.primaryFileOutputPath, imageSet.primaryBuffer!)
+    await saveImage(
+      imagePaths.primaryFileOutputPath,
+      imageSet.fileData!.buffer!
+    )
   }
 
   const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
@@ -439,8 +445,11 @@ async function outputPages(
       const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
       const imageSet: ImageSet = {
         caption,
-        fileType,
-        primaryBuffer,
+        fileData: {
+          mime: fileType?.mime,
+          ext: fileType?.ext,
+          buffer: primaryBuffer,
+        },
         primaryUrl,
       }
 

@@ -38,8 +38,11 @@ const testImageSet: ImageSet = {
     relativeFilePathToFolderContainingPage: "",
     slug: "my-page",
   },
-  fileType: { ext: "png", mime: "image/png" },
-  primaryBuffer: Buffer.from("some fake image content"),
+  fileData: {
+    ext: "png",
+    mime: "image/png",
+    buffer: Buffer.from("some fake image content"),
+  },
 }
 
 test("primary file with explicit file output path and prefix", () => {
