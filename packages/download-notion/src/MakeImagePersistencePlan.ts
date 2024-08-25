@@ -2,7 +2,7 @@ import * as Path from "path"
 import { exit } from "process"
 
 import { NotionPullOptions } from "./config/schema"
-import { ImageSet, MinimalImageSet } from "./images"
+import { ImageSet, MinimalImageSet, OutputPaths } from "./images"
 import { error } from "./log"
 import { findLastUuid, hashOfBufferContent, hashOfString } from "./utils"
 
@@ -76,7 +76,7 @@ export function getImagePaths(
   outputFileName: string,
   imageOutputRootPath: string,
   imagePrefix: string
-) {
+): OutputPaths {
   const primaryFileOutputPath = Path.posix.join(
     imageOutputRootPath?.length > 0
       ? imageOutputRootPath
@@ -113,7 +113,9 @@ export function makeImagePersistencePlan(
     imageOutputRootPath,
     imagePrefix
   )
-  imageSet.filePathToUseInMarkdown = filePathToUseInMarkdown
-  imageSet.primaryFileOutputPath = primaryFileOutputPath
-  imageSet.outputFileName = outputFileName
+  imageSet.outputPaths = {
+    filePathToUseInMarkdown,
+    primaryFileOutputPath,
+    outputFileName,
+  }
 }

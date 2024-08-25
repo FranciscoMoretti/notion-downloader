@@ -54,11 +54,11 @@ test("primary file with explicit file output path and prefix", () => {
     "/notion_imgs"
   )
   const expectedFileName = "my-page.ABC-123.png"
-  expect(testImageSet.outputFileName).toBe(`${expectedFileName}`)
-  expect(testImageSet.primaryFileOutputPath).toBe(
+  expect(testImageSet.outputPaths?.outputFileName).toBe(`${expectedFileName}`)
+  expect(testImageSet.outputPaths?.primaryFileOutputPath).toBe(
     `static/notion_imgs/${expectedFileName}`
   )
-  expect(testImageSet.filePathToUseInMarkdown).toBe(
+  expect(testImageSet.outputPaths?.filePathToUseInMarkdown).toBe(
     `/notion_imgs/${expectedFileName}`
   )
 })
@@ -71,13 +71,15 @@ test("primary file with defaults for image output path and prefix", () => {
     ""
   )
   const expectedFileName = "my-page.ABC-123.png"
-  expect(testImageSet.outputFileName).toBe(`${expectedFileName}`)
+  expect(testImageSet.outputPaths?.outputFileName).toBe(`${expectedFileName}`)
 
   // the default behavior is to put the image next to the markdown file
-  expect(testImageSet.primaryFileOutputPath).toBe(
+  expect(testImageSet.outputPaths?.primaryFileOutputPath).toBe(
     `/pathToParentSomewhere/${expectedFileName}`
   )
-  expect(testImageSet.filePathToUseInMarkdown).toBe(`./${expectedFileName}`)
+  expect(testImageSet.outputPaths?.filePathToUseInMarkdown).toBe(
+    `./${expectedFileName}`
+  )
 })
 test("falls back to getting file extension from url if not in fileType", () => {
   makeImagePersistencePlan(
@@ -87,7 +89,7 @@ test("falls back to getting file extension from url if not in fileType", () => {
     "",
     ""
   )
-  expect(testImageSet.outputFileName).toBe("my-page.ABC-123.png")
+  expect(testImageSet.outputPaths?.outputFileName).toBe("my-page.ABC-123.png")
 })
 
 // I'm not sure it is even possible to have encoded characters in the slug, but this proves
@@ -109,10 +111,12 @@ test("handles encoded characters", () => {
     "",
     ""
   )
-  expect(imageSet.primaryFileOutputPath).toBe(
+  expect(imageSet.outputPaths?.primaryFileOutputPath).toBe(
     `/pathToParentSomewhere/my-page(1).ABC-123.png`
   )
-  expect(imageSet.filePathToUseInMarkdown).toBe(`./my-page%281%29.ABC-123.png`)
+  expect(imageSet.outputPaths?.filePathToUseInMarkdown).toBe(
+    `./my-page%281%29.ABC-123.png`
+  )
 })
 
 const optionsUsingHashNaming: NotionPullOptions = {
@@ -128,7 +132,7 @@ test("hash naming", () => {
     ""
   )
   const expectedFileName = "fe3f26fd515b3cf299ac.png"
-  expect(testImageSet.outputFileName).toBe(`${expectedFileName}`)
+  expect(testImageSet.outputPaths?.outputFileName).toBe(`${expectedFileName}`)
 })
 
 const optionsUsingLegacyNaming: NotionPullOptions = {
@@ -146,7 +150,7 @@ test("Legacy naming", () => {
   const expectedHash = hashOfString(
     "https://s3.us-west-2.amazonaws.com/primaryImage"
   )
-  expect(testImageSet.outputFileName).toBe(`${expectedHash}.png`)
+  expect(testImageSet.outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
 })
 test("Legacy naming - properly extract UUID from old-style notion image url", () => {
   const imageSet: ImageSet = {
@@ -162,7 +166,7 @@ test("Legacy naming - properly extract UUID from old-style notion image url", ()
     "/notion_imgs"
   )
   const expectedHash = hashOfString("e1058f46-4d2f-4292-8388-4ad393383439")
-  expect(imageSet.outputFileName).toBe(`${expectedHash}.png`)
+  expect(imageSet.outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
 })
 test("Legacy naming - properly extract UUID from new-style (Sept 2023) notion image url", () => {
   const imageSet: ImageSet = {
@@ -178,7 +182,7 @@ test("Legacy naming - properly extract UUID from new-style (Sept 2023) notion im
     "/notion_imgs"
   )
   const expectedHash = hashOfString("d1bcdc8c-b065-4e40-9a11-392aabeb220e")
-  expect(imageSet.outputFileName).toBe(`${expectedHash}.png`)
+  expect(imageSet.outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
 })
 
 // In order to make image fallback work with other languages, we have to have
