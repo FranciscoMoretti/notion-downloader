@@ -87,6 +87,5 @@ export type IDocuNotionContext = {
 
 export type IDocuNotionContextPageInfo = {
   directoryContainingMarkdown: string
-  relativeFilePathToFolderContainingPage: string
   slug: string
 }

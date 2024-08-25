@@ -409,7 +409,6 @@ async function outputPages(
     // this changes with each page
     pageInfo: {
       directoryContainingMarkdown: "",
-      relativeFilePathToFolderContainingPage: "",
       slug: "",
     },
     notionToMarkdown: notionToMarkdown,
@@ -431,9 +430,7 @@ async function outputPages(
     // most plugins should not write to disk, but those handling image files need these paths
     const directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
     context.pageInfo.directoryContainingMarkdown = directoryContainingMarkdown
-    context.pageInfo.relativeFilePathToFolderContainingPage = Path.basename(
-      Path.dirname(mdPathWithRoot)
-    )
+
     // Get the filename without extension
     const slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
     context.pageInfo.slug = slug

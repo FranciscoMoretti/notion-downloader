@@ -35,7 +35,7 @@ const testImageSet: ImageSet = {
   primaryUrl: "https://s3.us-west-2.amazonaws.com/primaryImage?Blah=foo",
   pageInfo: {
     directoryContainingMarkdown: "/pathToParentSomewhere/",
-    relativeFilePathToFolderContainingPage: "",
+    : "",
     slug: "my-page",
   },
   fileData: {
@@ -98,7 +98,6 @@ test("handles encoded characters", () => {
     ...testImageSet,
     pageInfo: {
       directoryContainingMarkdown: "/pathToParentSomewhere/",
-      relativeFilePathToFolderContainingPage: "",
       slug: "my-page%281%29",
     },
   }

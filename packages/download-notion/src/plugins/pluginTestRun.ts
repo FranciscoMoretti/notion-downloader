@@ -51,7 +51,6 @@ export async function blocksToMarkdown(
     //TODO might be needed for some tests, e.g. the image transformer...
     pageInfo: {
       directoryContainingMarkdown: "not yet",
-      relativeFilePathToFolderContainingPage: "not yet",
       slug: "not yet",
     },
     options: {

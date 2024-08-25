@@ -37,7 +37,6 @@ test("Latex Rendering", async () => {
     // this changes with each page
     pageInfo: {
       directoryContainingMarkdown: "",
-      relativeFilePathToFolderContainingPage: "",
       slug: "",
     },
     layoutStrategy: layoutStrategy,
