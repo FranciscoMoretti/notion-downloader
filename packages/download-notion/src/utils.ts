@@ -26,12 +26,12 @@ export function findLastUuid(url: string): string | null {
   return uuids ? uuids[uuids.length - 1].trim() : null
 }
 
-export function hashOfString(s: string): number {
+export function hashOfString(s: string): string {
   let hash = 0
   for (let i = 0; i < s.length; ++i)
     hash = Math.imul(31, hash) + s.charCodeAt(i)
 
-  return Math.abs(hash)
+  return Math.abs(hash).toString()
 }
 export function hashOfBufferContent(buffer: Buffer): string {
   const hash = crypto.createHash("sha256").update(buffer).digest("hex")

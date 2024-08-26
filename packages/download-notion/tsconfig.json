@@ -8,6 +8,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "test/**/*.test.ts"],
   "exclude": ["node_modules"]
 }

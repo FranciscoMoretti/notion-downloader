@@ -239,7 +239,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     const ancestorPagePath = filesMap.page[ancestorPageId]
     const ancestorPageName = filenameFromPath(ancestorPagePath)
     const fileData: FileData = {
-      ext: fileType?.ext,
+      extension: fileType?.extension,
       mime: fileType?.mime,
       buffer: primaryBuffer,
     }
@@ -435,7 +435,7 @@ async function outputPages(
       const { caption, primaryUrl } = parseCover(page.metadata.cover)
       const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
       const fileData: FileData = {
-        ext: fileType?.ext,
+        extension: fileType?.extension,
         mime: fileType?.mime,
         buffer: primaryBuffer,
       }

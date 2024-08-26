@@ -19,9 +19,9 @@ import {
   IPlugin,
 } from "./plugins/pluginTypes"
 
-// Extracting ext, mime, and buffer data into a separate type called FileData
+// Extracting extension, mime, and buffer data into a separate type called FileData
 export type FileData = {
-  ext?: string
+  extension?: string
   mime?: string
   buffer?: Buffer
 }
@@ -135,7 +135,7 @@ async function processImageBlock(
   const fileData = {
     buffer: primaryBuffer,
     mime: fileType?.mime,
-    ext: fileType?.ext,
+    extension: fileType?.extension,
   }
   const outputPaths = makeImagePersistencePlan(
     context.options,
@@ -260,7 +260,7 @@ export async function processCoverImage(
   const { primaryUrl, caption } = parseCover(page.metadata.cover)
   const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
   const fileData: FileData = {
-    ext: fileType?.ext,
+    extension: fileType?.extension,
     mime: fileType?.mime,
     buffer: primaryBuffer,
   }

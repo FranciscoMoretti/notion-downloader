@@ -34,7 +34,7 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
 const directoryContainingMarkdown = "/pathToParentSomewhere/"
 const slug = "my-page"
 const testFileData = {
-  ext: "png",
+  extension: "png",
   mime: "image/png",
   buffer: Buffer.from("some fake image content"),
 }
