@@ -12,7 +12,7 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 import { makeImagePersistencePlan } from "./MakeImagePersistencePlan"
 import { NotionPage } from "./NotionPage"
 import { info, logDebug, verbose, warning } from "./log"
-import { getImageBlockUrl, getPageCoverUrl } from "./notion_objects_utils"
+import { getImageUrl, getPageCoverUrl } from "./notion_objects_utils"
 import {
   IDocuNotionContext,
   IDocuNotionContextPageInfo,
@@ -21,9 +21,9 @@ import {
 
 // Extracting extension, mime, and buffer data into a separate type called FileData
 export type FileData = {
-  extension?: string
-  mime?: string
-  buffer?: Buffer
+  extension: string
+  mime: string
+  buffer: Buffer
 }
 
 export type OutputPaths = {
@@ -109,7 +109,7 @@ export async function markdownToMDImageTransformer(
     .map((item: any) => item.plain_text)
     .join("")
 
-  const href: string = getImageBlockUrl(image)
+  const href: string = getImageUrl(image)
   return `![${altText}](${href})`
 }
 
@@ -236,7 +236,7 @@ export function parseImageBlock(
     caption: "",
   }
 
-  imageSet.primaryUrl = getImageBlockUrl(image)
+  imageSet.primaryUrl = getImageUrl(image)
 
   // Keep the caption as-is
   imageSet.caption = image.caption.map((c: any) => c.plain_text).join("")

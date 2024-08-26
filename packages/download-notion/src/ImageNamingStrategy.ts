@@ -1,10 +1,6 @@
+import { NotionImage } from "./NotionImage"
 import { FileData, ImageSet } from "./images"
 
 export interface ImageNamingStrategy {
-  getFileName(
-    imageSet: ImageSet,
-    fileData: FileData,
-    imageBlockId: string,
-    ancestorPageName?: string
-  ): string
+  getFileName(image: NotionImage): string
 }

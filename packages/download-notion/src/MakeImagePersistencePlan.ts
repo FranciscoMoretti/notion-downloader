@@ -1,7 +1,6 @@
 import * as Path from "path"
 
 import { NotionPullOptions } from "./config/schema"
-import { getOutputImageFileName } from "./getOutputImageFileName"
 import { FileData, ImageSet, OutputPaths } from "./images"
 
 export function getImagePaths(

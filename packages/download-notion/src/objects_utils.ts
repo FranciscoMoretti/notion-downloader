@@ -10,11 +10,16 @@ import {
   objectTreeToObjectIds,
 } from "notion-downloader"
 
+export type PlainObjectsMap = Record<
+  string,
+  PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
+>
+
 export function objectsToObjectsMap(objects: {
   page: Record<string, PageObjectResponse>
   database: Record<string, DatabaseObjectResponse>
   block: Record<string, BlockObjectResponse>
-}) {
+}): PlainObjectsMap {
   return Object.values(objects).reduce((acc, object) => {
     Object.entries(object).forEach(([id, object]) => {
       acc[id] = object

@@ -23,13 +23,15 @@ import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
+import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { getImagePaths } from "./MakeImagePersistencePlan"
+import { NotionImage, PageObjectResponseWithCover } from "./NotionImage"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
-import { getOutputImageFileName } from "./getOutputImageFileName"
+import { getOutputImageFileName, getStrategy } from "./getOutputImageFileName"
 import {
   FileData,
   ImageHandler,
@@ -50,8 +52,9 @@ import {
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
 } from "./namingStrategies"
-import { getImageBlockUrl } from "./notion_objects_utils"
+import { getImageUrl } from "./notion_objects_utils"
 import {
+  PlainObjectsMap,
   getAllObjectsInObjectsTree,
   getPageAncestorId,
   objectsToObjectsMap,
@@ -98,6 +101,19 @@ export async function notionContinuosPull(options: NotionPullOptions) {
       setTimeout(resolve, options.revalidatePeriod * 1000)
     )
   }
+}
+
+function getPageAncestorFilename(
+  image: NotionImage,
+  objectsMap: PlainObjectsMap,
+  filesMap: FilesMap
+): string {
+  const ancestorPageId = getPageAncestorId(image.id, objectsMap)
+  if (!ancestorPageId) {
+    throw new Error("Ancestor page not found for image " + image.id)
+  }
+  const filepath = filesMap.page[ancestorPageId]
+  return filenameFromPath(filepath)
 }
 
 export async function notionPull(options: NotionPullOptions): Promise<void> {
@@ -228,37 +244,19 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   // Get Image path for each image block in filesMap.image
   for (const block of imageBlocks) {
-    const ancestorPageId = getPageAncestorId(block.id, allObjectsMap)
+    const image = new NotionImage(block)
+    const fileData = await image.read()
+
+    const strategy: ImageNamingStrategy = getStrategy("default", (image) =>
+      getPageAncestorFilename(image, allObjectsMap, filesMap)
+    )
+    const imageFilename = strategy.getFileName(image)
+
+    //TODO: Solve all of the rest of this for. All this part is only to get the outputPat and the path to set in Markdown
+    const ancestorPageId = getPageAncestorId(image.id, allObjectsMap)
     if (!ancestorPageId) {
-      throw new Error("Ancestor page not found for image block " + block.id)
+      throw new Error("Ancestor page not found for image " + image.id)
     }
-    const ancestorPagePath = filesMap.page[ancestorPageId]
-    const ancestorPageName = filenameFromPath(ancestorPagePath)
-
-    const { primaryUrl, caption } = parseImageBlock(block.image)
-    const { primaryBuffer, fileType } = await readPrimaryImage(
-      getImageBlockUrl(block.image)
-    )
-
-    const fileData: FileData = {
-      extension: fileType.ext,
-      mime: fileType.mime,
-      buffer: primaryBuffer,
-    }
-    const imageSet: ImageSet = {
-      caption,
-      primaryUrl,
-    }
-
-    // TODO: Here use the filename strategy to create different filenames
-    const imageFilename = getOutputImageFileName(
-      options,
-      imageSet,
-      fileData,
-      block.id,
-      ancestorPageName
-    )
-
     const mdPath = filesMap.page[ancestorPageId]
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
@@ -345,7 +343,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     cachedNotionClient,
     notionToMarkdown,
     filesMap,
-    imageHandler
+    imageHandler,
+    allObjectsMap
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
@@ -400,7 +399,8 @@ async function outputPages(
   client: Client,
   notionToMarkdown: NotionToMarkdown,
   filesMap: FilesMap,
-  imageHandler: ImageHandler
+  imageHandler: ImageHandler,
+  allObjectsMap: PlainObjectsMap
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
@@ -432,36 +432,25 @@ async function outputPages(
     const slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
 
     // ------ Replacement of cover image
-    if (page.metadata.cover) {
+    const pageResponse = page.metadata
+    if (pageResponse.cover) {
       // await processCoverImage(page, context)
-      const { caption, primaryUrl } = parseCover(page.metadata.cover)
-      const { primaryBuffer, fileType } = await readPrimaryImage(primaryUrl)
-      const fileData: FileData = {
-        extension: fileType?.extension,
-        mime: fileType?.mime,
-        buffer: primaryBuffer,
-      }
-      const imageSet: ImageSet = {
-        caption,
+      const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
+      const fileData = await image.read()
 
-        primaryUrl,
-      }
-
-      const outputFileName = getOutputImageFileName(
-        options,
-        imageSet,
-        fileData,
-        page.id,
-        slug
+      const strategy: ImageNamingStrategy = getStrategy("default", (image) =>
+        getPageAncestorFilename(image, allObjectsMap, filesMap)
       )
+      const imageFilename = strategy.getFileName(image)
+
       const { filePathToUseInMarkdown, primaryFileOutputPath } = getImagePaths(
         directoryContainingMarkdown,
-        outputFileName,
+        imageFilename,
         imageHandler.imageOutputPath,
         imageHandler.imagePrefix
       )
 
-      await saveImage(primaryFileOutputPath, primaryBuffer)
+      await saveImage(primaryFileOutputPath, image.buffer)
 
       updateImageUrlToMarkdownImagePath(
         page.metadata.cover,

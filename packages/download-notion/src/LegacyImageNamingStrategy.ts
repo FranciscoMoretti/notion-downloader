@@ -1,4 +1,5 @@
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
+import { NotionImage } from "./NotionImage"
 import { NotionPullOptions } from "./config/schema"
 import { getImageFileExtension } from "./getImageFileExtension"
 import { FileData, ImageSet } from "./images"
@@ -13,15 +14,10 @@ import { findLastUuid, hashOfString } from "./utils"
 //   The thing we want is the last UUID before the ?
 
 export class LegacyImageNamingStrategy implements ImageNamingStrategy {
-  getFileName(
-    imageSet: ImageSet,
-    fileData: FileData,
-    imageBlockId: string,
-    ancestorPageName?: string
-  ): string {
-    const urlBeforeQuery = imageSet.primaryUrl.split("?")[0]
+  getFileName(image: NotionImage): string {
+    const urlBeforeQuery = image.getImageSet().primaryUrl.split("?")[0]
     const thingToHash = findLastUuid(urlBeforeQuery) ?? urlBeforeQuery
     const hash = hashOfString(thingToHash)
-    return `${hash}.${getImageFileExtension(fileData, urlBeforeQuery)}`
+    return `${hash}.${image.extension}`
   }
 }

@@ -1,22 +1,21 @@
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
+import { NotionImage } from "./NotionImage"
 import { NotionPullOptions } from "./config/schema"
 import { getImageFileExtension } from "./getImageFileExtension"
-import { FileData, ImageSet } from "./images"
+import { PlainObjectsMap } from "./objects_utils"
 
 export class DefaultImageNamingStrategy implements ImageNamingStrategy {
-  getFileName(
-    imageSet: ImageSet,
-    fileData: FileData,
-    imageBlockId: string,
-    ancestorPageName: string
-  ): string {
+  private readonly getPageAncestorFilename: (image: NotionImage) => string
+
+  constructor(getPageAncestorFilename: (image: NotionImage) => string) {
+    this.getPageAncestorFilename = getPageAncestorFilename
+  }
+
+  getFileName(image: NotionImage): string {
     // Don't start with . for empty ancestor page name
-    const pageSlugPart = ancestorPageName
-      ? `${ancestorPageName.replace(/^\//, "")}.`
+    const pageSlugPart = this.getPageAncestorFilename(image)
+      ? `${this.getPageAncestorFilename(image)}.`
       : ""
-    return `${pageSlugPart}${imageBlockId}.${getImageFileExtension(
-      fileData,
-      imageSet.primaryUrl
-    )}`
+    return `${pageSlugPart}${image.id}.${image.extension}`
   }
 }
