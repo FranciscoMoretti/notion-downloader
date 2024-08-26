@@ -1,3 +1,4 @@
+import * as Path from "path"
 import { isFullBlock, isFullPage } from "@notionhq/client"
 import {
   ImageBlockObjectResponse,
@@ -22,9 +23,9 @@ export class NotionImage {
   private metadata: ImageBlockObjectResponse | PageObjectResponseWithCover
 
   constructor(imageResponse: NotionImageResponses) {
-    if (isFullBlock(imageResponse) && imageResponse.type === "image") {
+    if (imageResponse.object == "block" && imageResponse.type === "image") {
       this.imageSet = this.parseImageBlock(imageResponse)
-    } else if (isFullPage(imageResponse)) {
+    } else if (imageResponse.object == "page") {
       this.imageSet = this.parseCoverImage(imageResponse)
     } else {
       throw new Error("Invalid image response")
@@ -61,9 +62,14 @@ export class NotionImage {
   }
 
   async save(path: string) {
-    const writeStream = fs.createWriteStream(path)
-    writeStream.write(this.buffer) // async but we're not waiting
-    writeStream.end()
+    // Create the directory recursively if it doesn't exist
+    fs.ensureDirSync(Path.dirname(path))
+    // Save with fs
+    fs.writeFileSync(path, this.buffer)
+
+    // const writeStream = fs.createWriteStream(path)
+    // writeStream.write(this.buffer) // async but we're not waiting
+    // writeStream.end()
   }
 
   get url(): string {
@@ -90,5 +96,16 @@ export class NotionImage {
 
   get buffer(): Buffer {
     return this.getFileData().buffer
+  }
+
+  get object(): "page" | "block" {
+    return this.metadata.object
+  }
+
+  private getFileData(): FileData {
+    if (!this.fileData) {
+      throw new Error("File data not read. Run read() before accessing")
+    }
+    return this.fileData
   }
 }

@@ -31,7 +31,7 @@ import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
-import { getOutputImageFileName, getStrategy } from "./getOutputImageFileName"
+import { getStrategy } from "./getOutputImageFileName"
 import {
   FileData,
   ImageHandler,
@@ -108,6 +108,9 @@ function getPageAncestorFilename(
   objectsMap: PlainObjectsMap,
   filesMap: FilesMap
 ): string {
+  if (image.object == "page") {
+    return filesMap.page[image.id]
+  }
   const ancestorPageId = getPageAncestorId(image.id, objectsMap)
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
@@ -265,7 +268,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     const filePathToUseInMarkdown =
       imageMarkdownPathStrategy.getPath(imageFilename)
 
-    filesMap.image[image.id] = filePathToUseInMarkdown
+    filesMap.image[image.id] = imageFileOutputPath
     // Set the updated path
     updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
 
@@ -314,11 +317,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       : true
   })
 
-  await saveDataToJson(
-    filesMap,
-    sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
-  )
-
   info(`Found ${allPages.length} pages`)
   info(`Found ${pagesToOutput.length} new pages`)
   endGroup()
@@ -340,6 +338,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
+  await saveDataToJson(
+    filesMap,
+    sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
+  )
   await fileCleaner.cleanupOldFiles(
     Object.values(filesMap.page).map(
       (p) => sanitizeMarkdownOutputPath(options.markdownOutputPath) + p
@@ -433,7 +435,7 @@ async function outputPages(
 
       // TODO: All saves could be done in parallel
       await image.save(imageFileOutputPath)
-      filesMap.image[image.id] = filePathToUseInMarkdown
+      filesMap.image[image.id] = imageFileOutputPath
 
       updateImageUrlToMarkdownImagePath(
         page.metadata.cover,

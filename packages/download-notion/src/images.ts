@@ -12,7 +12,7 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 import { makeImagePersistencePlan } from "./MakeImagePersistencePlan"
 import { NotionPage } from "./NotionPage"
 import { info, logDebug, verbose, warning } from "./log"
-import { getImageUrl, getPageCoverUrl } from "./notion_objects_utils"
+import { getImageUrl } from "./notion_objects_utils"
 import {
   IDocuNotionContext,
   IDocuNotionContextPageInfo,
