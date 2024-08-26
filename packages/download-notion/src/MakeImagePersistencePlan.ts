@@ -3,25 +3,40 @@ import * as Path from "path"
 import { NotionPullOptions } from "./config/schema"
 import { FileData, ImageSet, OutputPaths } from "./images"
 
+export interface PathStrategyOptions {
+  pathPrefix?: string
+}
+
+export class PathStrategy {
+  private pathPrefix: string
+
+  constructor(options: PathStrategyOptions = {}) {
+    this.pathPrefix = options.pathPrefix || ""
+  }
+
+  getPath(filename: string): string {
+    const decodedFilename = decodeURI(filename)
+    return Path.posix.join(this.pathPrefix, decodedFilename)
+  }
+}
+
 export function getImagePaths(
   directoryContainingMarkdown: string,
   outputFileName: string,
   imageOutputRootPath: string,
-  imagePrefix: string
+  imagePrefixInMarkdown: string
 ): OutputPaths {
-  const primaryFileOutputPath = Path.posix.join(
-    imageOutputRootPath?.length > 0
-      ? imageOutputRootPath
-      : directoryContainingMarkdown,
-    decodeURI(outputFileName)
-  )
+  const primaryPathStrategy = new PathStrategy({
+    pathPrefix: imageOutputRootPath || directoryContainingMarkdown,
+  })
 
-  const filePathToUseInMarkdown =
-    (imagePrefix?.length > 0 ? imagePrefix : ".") + "/" + outputFileName
+  const markdownPathStrategy = new PathStrategy({
+    pathPrefix: imagePrefixInMarkdown || ".",
+  })
 
   return {
-    primaryFileOutputPath,
-    filePathToUseInMarkdown,
+    primaryFileOutputPath: primaryPathStrategy.getPath(outputFileName),
+    filePathToUseInMarkdown: markdownPathStrategy.getPath(outputFileName),
   }
 }
 
@@ -31,7 +46,7 @@ export function makeImagePersistencePlan(
   fileData: FileData,
   imageBlockId: string,
   imageOutputRootPath: string,
-  imagePrefix: string,
+  imagePrefixInMarkdown: string,
   directoryContainingMarkdown: string,
   pageSlug: string
 ): OutputPaths {
@@ -46,7 +61,7 @@ export function makeImagePersistencePlan(
     directoryContainingMarkdown,
     outputFileName,
     imageOutputRootPath,
-    imagePrefix
+    imagePrefixInMarkdown
   )
   return {
     filePathToUseInMarkdown,

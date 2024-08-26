@@ -48,12 +48,12 @@ export type MinimalImageSet = {
 // 4) prepare for localized documents, which need a copy of every image
 
 export class ImageHandler {
-  public imagePrefix: string
+  public imagePrefixInMarkdown: string
   public imageOutputPath: string
   public existingImagesNotSeenYetInPull: string[]
 
   constructor(prefix: string, outputPath: string) {
-    this.imagePrefix = prefix.replace(/\/$/, "")
+    this.imagePrefixInMarkdown = prefix.replace(/\/$/, "")
     this.imageOutputPath = outputPath
     this.existingImagesNotSeenYetInPull = []
   }
@@ -70,10 +70,10 @@ export class ImageHandler {
 }
 
 export async function initImageHandling(
-  imagePrefix: string,
+  imagePrefixInMarkdown: string,
   imageOutputPath: string
 ): Promise<ImageHandler> {
-  const imageHandler = new ImageHandler(imagePrefix, imageOutputPath)
+  const imageHandler = new ImageHandler(imagePrefixInMarkdown, imageOutputPath)
   await imageHandler.initImageHandling()
   return imageHandler
 }
@@ -143,7 +143,7 @@ async function processImageBlock(
     fileData,
     block.id,
     context.imageHandler.imageOutputPath,
-    context.imageHandler.imagePrefix,
+    context.imageHandler.imagePrefixInMarkdown,
     context.pageInfo.directoryContainingMarkdown,
     context.pageInfo.slug
   )
@@ -276,7 +276,7 @@ export async function processCoverImage(
     fileData,
     page.id,
     context.imageHandler.imageOutputPath,
-    context.imageHandler.imagePrefix,
+    context.imageHandler.imagePrefixInMarkdown,
     context.pageInfo.directoryContainingMarkdown,
     context.pageInfo.slug
   )

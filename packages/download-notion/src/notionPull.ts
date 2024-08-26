@@ -24,7 +24,7 @@ import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
-import { getImagePaths } from "./MakeImagePersistencePlan"
+import { PathStrategy, getImagePaths } from "./MakeImagePersistencePlan"
 import { NotionImage, PageObjectResponseWithCover } from "./NotionImage"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
@@ -163,6 +163,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
+  const imageMarkdownPathStrategy = new PathStrategy({
+    pathPrefix:
+      imageHandler.imagePrefixInMarkdown || imageHandler.imageOutputPath || ".",
+  })
+  const imageFilePathStrategy = new PathStrategy({
+    pathPrefix: imageHandler.imageOutputPath,
+  })
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
   await fs.mkdir(cacheDir, { recursive: true })
 
@@ -241,46 +248,29 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const imageBlocks = Object.values(objects.block).filter(
     (block) => block.type === "image"
   )
+  const imageNamingStrategy: ImageNamingStrategy = getStrategy(
+    "default",
+    (image) => getPageAncestorFilename(image, allObjectsMap, filesMap)
+  )
 
   // Get Image path for each image block in filesMap.image
   for (const block of imageBlocks) {
     const image = new NotionImage(block)
     await image.read()
 
-    const strategy: ImageNamingStrategy = getStrategy("default", (image) =>
-      getPageAncestorFilename(image, allObjectsMap, filesMap)
-    )
-    const imageFilename = strategy.getFileName(image)
+    const imageFilename = imageNamingStrategy.getFileName(image)
 
-    //TODO: Solve all of the rest of this for. All this part is only to get the outputPat and the path to set in Markdown
-    const ancestorPageId = getPageAncestorId(image.id, allObjectsMap)
-    if (!ancestorPageId) {
-      throw new Error("Ancestor page not found for image " + image.id)
-    }
-    const mdPath = filesMap.page[ancestorPageId]
-    const mdPathWithRoot =
-      sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
+    // TODO: Include layout strategy to get a potential layout from filename before adding prefix
+    const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
+    const filePathToUseInMarkdown =
+      imageMarkdownPathStrategy.getPath(imageFilename)
 
-    const directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
-
-    const imagePaths = getImagePaths(
-      directoryContainingMarkdown,
-      imageFilename,
-      // TODO: Get from options instgead of imageHandler?
-      imageHandler.imageOutputPath,
-      imageHandler.imagePrefix
-    )
-
-    // TODO: Here use the Layout Strategy to get the image filepath. Use the rest of props in imagePaths in relation with this
-    filesMap.image[image.id] = imagePaths.filePathToUseInMarkdown
+    filesMap.image[image.id] = filePathToUseInMarkdown
     // Set the updated path
-    updateImageUrlToMarkdownImagePath(
-      block.image,
-      imagePaths.filePathToUseInMarkdown
-    )
+    updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
 
     // TODO: this save image can be a promise and all the images can be saved at the same time
-    await image.save(imagePaths.primaryFileOutputPath)
+    await image.save(imageFileOutputPath)
   }
 
   const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
@@ -344,7 +334,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     notionToMarkdown,
     filesMap,
     imageHandler,
-    allObjectsMap
+    imageMarkdownPathStrategy,
+    imageFilePathStrategy,
+    imageNamingStrategy
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
@@ -400,7 +392,9 @@ async function outputPages(
   notionToMarkdown: NotionToMarkdown,
   filesMap: FilesMap,
   imageHandler: ImageHandler,
-  allObjectsMap: PlainObjectsMap
+  imageMarkdownPathStrategy: PathStrategy,
+  imageFilePathStrategy: PathStrategy,
+  imageNamingStrategy: ImageNamingStrategy
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
@@ -425,40 +419,25 @@ async function outputPages(
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
 
-    // most plugins should not write to disk, but those handling image files need these paths
-    const directoryContainingMarkdown = Path.dirname(mdPathWithRoot)
-
-    // Get the filename without extension
-    const slug = Path.basename(mdPathWithRoot, Path.extname(mdPath))
-
     // ------ Replacement of cover image
     const pageResponse = page.metadata
     if (pageResponse.cover) {
-      // await processCoverImage(page, context)
       const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
       await image.read()
 
-      const strategy: ImageNamingStrategy = getStrategy("default", (image) =>
-        getPageAncestorFilename(image, allObjectsMap, filesMap)
-      )
-      const imageFilename = strategy.getFileName(image)
+      const imageFilename = imageNamingStrategy.getFileName(image)
 
-      const { filePathToUseInMarkdown, primaryFileOutputPath } = getImagePaths(
-        directoryContainingMarkdown,
-        imageFilename,
-        imageHandler.imageOutputPath,
-        imageHandler.imagePrefix
-      )
+      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
+      const filePathToUseInMarkdown =
+        imageMarkdownPathStrategy.getPath(imageFilename)
 
-      await image.save(primaryFileOutputPath)
+      await image.save(imageFileOutputPath)
       filesMap.image[image.id] = filePathToUseInMarkdown
 
       updateImageUrlToMarkdownImagePath(
         page.metadata.cover,
         filePathToUseInMarkdown
       )
-
-      // --- Done cover image handling
     }
     const markdown = await getMarkdownForPage(config, context, page)
     writePage(markdown, mdPathWithRoot)
