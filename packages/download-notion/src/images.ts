@@ -27,8 +27,23 @@ export type ImageSet = {
   caption?: string
 }
 
+type FileObject =
+  | {
+      type: "external"
+      external: {
+        url: string
+      }
+    }
+  | {
+      type: "file"
+      file: {
+        url: string
+        expiry_time: string
+      }
+    }
+
 export function updateImageUrlToMarkdownImagePath(
-  imageOrCover: ImageBlockObjectResponse["image"] | PageObjectResponse["cover"],
+  imageOrCover: FileObject,
   filePathToUseInMarkdown: string
 ) {
   if (!imageOrCover) {

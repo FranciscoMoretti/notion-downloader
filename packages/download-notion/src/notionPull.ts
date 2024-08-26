@@ -270,7 +270,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   for (const page of pages) {
     // ------ Replacement of cover image
     const pageResponse = page.metadata
-    if (pageResponse.cover) {
+    const cover = pageResponse.cover
+    if (cover) {
+      // TODO: Optimize by copying info from old images if page date is not new. Read should be skipped
       const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
       await image.read()
 
@@ -286,11 +288,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
         path: imageFileOutputPath,
         lastEditedTime: image.lastEditedTime,
       })
-
-      updateImageUrlToMarkdownImagePath(
-        page.metadata.cover,
-        filePathToUseInMarkdown
-      )
+      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
     }
   }
 
