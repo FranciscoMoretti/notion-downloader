@@ -269,7 +269,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     // Set the updated path
     updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
 
-    // TODO: this save image can be a promise and all the images can be saved at the same time
+    // TODO: All saves could be done in parallel
     await image.save(imageFileOutputPath)
   }
 
@@ -431,6 +431,7 @@ async function outputPages(
       const filePathToUseInMarkdown =
         imageMarkdownPathStrategy.getPath(imageFilename)
 
+      // TODO: All saves could be done in parallel
       await image.save(imageFileOutputPath)
       filesMap.image[image.id] = filePathToUseInMarkdown
 
