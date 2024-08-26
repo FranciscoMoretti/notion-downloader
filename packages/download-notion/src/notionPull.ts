@@ -6,19 +6,19 @@ import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesManager } from "./FilesManager"
-import { FilesMap } from "./FilesMap"
+import { FilesMap, ObjectsDirectories } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
-import { PathStrategy } from "./MakeImagePersistencePlan"
 import { NotionImage, PageObjectResponseWithCover } from "./NotionImage"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
+import { PathStrategy } from "./PathStrategy"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { getStrategy } from "./getOutputImageFileName"
-import { cleanupOldImages, updateImageUrlToMarkdownImagePath } from "./images"
+import { updateImageUrlToMarkdownImagePath } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
 import {
   GithubSlugNamingStrategy,
@@ -58,6 +58,7 @@ export const counts: OutputCounts = {
 }
 
 const CACHE_FOLDER = ".downloader"
+const FILES_MAP_FILE_PATH = "files_map.json"
 
 export async function notionContinuosPull(options: NotionPullOptions) {
   // Wait forever
@@ -72,6 +73,14 @@ export async function notionContinuosPull(options: NotionPullOptions) {
       setTimeout(resolve, options.revalidatePeriod * 1000)
     )
   }
+}
+
+function loadFilesMapFile(filePath: string): FilesMap | undefined {
+  if (fs.existsSync(filePath)) {
+    const jsonData = fs.readFileSync(filePath, "utf8")
+    return FilesMap.fromJson(jsonData)
+  }
+  return undefined
 }
 
 export async function notionPull(options: NotionPullOptions): Promise<void> {
@@ -114,7 +123,16 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
 
-  const filesManager = new FilesManager(options.markdownOutputPath)
+  const objectsDirectories: ObjectsDirectories = {
+    pagesDirectory: options.markdownOutputPath,
+    databasesDirectory: options.markdownOutputPath,
+    imagesDirectory: options.imgOutputPath,
+  }
+
+  const filesMapFilePath =
+    options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
+  const initialFilesMap = loadFilesMapFile(filesMapFilePath)
+  const filesManager = new FilesManager(initialFilesMap)
 
   const imageMarkdownPathStrategy = new PathStrategy({
     pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
@@ -229,7 +247,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   ).map((id) => notionPageFromId(id, cachedNotionClient, pageConfig))
 
   const allPages = await Promise.all(pagesPromises)
-
   // ----- Page filtering ----
   function shouldSkipPageFilter(page: NotionPage): boolean {
     return (
@@ -249,6 +266,33 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     }
     return !shouldSkip
   })
+  // Processing of cover images of pages
+  for (const page of pages) {
+    // ------ Replacement of cover image
+    const pageResponse = page.metadata
+    if (pageResponse.cover) {
+      const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
+      await image.read()
+
+      const imageFilename = imageNamingStrategy.getFileName(image)
+
+      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
+      const filePathToUseInMarkdown =
+        imageMarkdownPathStrategy.getPath(imageFilename)
+
+      // TODO: All saves could be done in parallel
+      await image.save(imageFileOutputPath)
+      filesMap.set("image", image.id, {
+        path: imageFileOutputPath,
+        lastEditedTime: image.lastEditedTime,
+      })
+
+      updateImageUrlToMarkdownImagePath(
+        page.metadata.cover,
+        filePathToUseInMarkdown
+      )
+    }
+  }
 
   // Filter from filesMap
   Object.keys(filesMap.getAllOfType("page")).forEach((id) => {
@@ -278,20 +322,18 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,
-    filesMap,
-    imageMarkdownPathStrategy,
-    imageFilePathStrategy,
-    imageNamingStrategy
+    filesMap
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  await saveDataToJson(
+  const fromRootFilesMap = filesMap.toRootRelativePath(
     filesMap,
-    sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
+    objectsDirectories
   )
-  await filesManager.cleanOldFiles(filesMap)
+
+  await filesManager.cleanOldFiles(fromRootFilesMap)
+  await saveDataToJson(fromRootFilesMap.getAll(), filesMapFilePath)
   // TODO: Ceanup images based on filesMap
-  await cleanupOldImages({})
   endGroup()
 }
 
@@ -336,10 +378,7 @@ async function outputPages(
   pages: Array<NotionPage>,
   client: Client,
   notionToMarkdown: NotionToMarkdown,
-  filesMap: FilesMap,
-  imageMarkdownPathStrategy: PathStrategy,
-  imageFilePathStrategy: PathStrategy,
-  imageNamingStrategy: ImageNamingStrategy
+  filesMap: FilesMap
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
@@ -362,31 +401,6 @@ async function outputPages(
     const mdPath = filesMap.get("page", page.id)?.path
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
-
-    // ------ Replacement of cover image
-    const pageResponse = page.metadata
-    if (pageResponse.cover) {
-      const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
-      await image.read()
-
-      const imageFilename = imageNamingStrategy.getFileName(image)
-
-      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
-      const filePathToUseInMarkdown =
-        imageMarkdownPathStrategy.getPath(imageFilename)
-
-      // TODO: All saves could be done in parallel
-      await image.save(imageFileOutputPath)
-      filesMap.set("image", image.id, {
-        path: imageFileOutputPath,
-        lastEditedTime: image.lastEditedTime,
-      })
-
-      updateImageUrlToMarkdownImagePath(
-        page.metadata.cover,
-        filePathToUseInMarkdown
-      )
-    }
     const markdown = await getMarkdownForPage(config, context, page)
     writePage(markdown, mdPathWithRoot)
   }

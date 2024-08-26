@@ -5,19 +5,10 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import axios from "axios"
-import FileType, { FileTypeResult } from "file-type"
+import FileType from "file-type"
 import fs from "fs-extra"
-import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
-import { makeImagePersistencePlan } from "./MakeImagePersistencePlan"
-import { NotionPage } from "./NotionPage"
-import { info, logDebug, verbose, warning } from "./log"
-import { getImageUrl } from "./notion_objects_utils"
-import {
-  IDocuNotionContext,
-  IDocuNotionContextPageInfo,
-  IPlugin,
-} from "./plugins/pluginTypes"
+import { verbose } from "./log"
 
 // Extracting extension, mime, and buffer data into a separate type called FileData
 export type FileData = {
@@ -88,14 +79,4 @@ function writeImageIfNew(path: string, buffer: Buffer) {
     fs.mkdirsSync(Path.dirname(path))
   }
   // Save image with image here
-}
-
-export async function cleanupOldImages(
-  imageHandler: ImageHandler
-): Promise<void> {
-  return
-  for (const p of imageHandler.existingImagesNotSeenYetInPull) {
-    verbose(`Removing old image: ${p}`)
-    await fs.rm(p)
-  }
 }

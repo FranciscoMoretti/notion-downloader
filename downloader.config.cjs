@@ -6,13 +6,13 @@ module.exports = {
   rootObjectType: "database",
   rootId: "c974ccd9c70c4abd8a5bd4f5a294e5dd",
   cache: {
-    cleanCache: true,
+    cleanCache: false,
     cacheStrategy: "cache",
   },
   imgOutputPath: "./public/assets/",
   imgPrefixInMarkdown: "/assets",
   markdownOutputPath: "./content",
-  logLevel: "info",
+  logLevel: "debug",
   pageLinkHasExtension: false,
   revalidatePeriod: -1,
 }

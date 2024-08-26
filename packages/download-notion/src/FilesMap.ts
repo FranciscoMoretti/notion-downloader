@@ -1,3 +1,5 @@
+import path from "path"
+
 export type FileRecord = {
   path: string
   lastEditedTime: string
@@ -5,8 +7,16 @@ export type FileRecord = {
 
 type FileType = "page" | "database" | "image"
 
+type FilesMapData = Record<FileType, Record<string, FileRecord>>
+
+export type ObjectsDirectories = {
+  pagesDirectory: string
+  databasesDirectory: string
+  imagesDirectory: string
+}
+
 export class FilesMap {
-  private map: Record<FileType, Record<string, FileRecord>> = {
+  private map: FilesMapData = {
     page: {},
     database: {},
     image: {},
@@ -48,5 +58,77 @@ export class FilesMap {
     return map
   }
 
-  // Additional methods can be added as needed
+  toJson(): string {
+    return JSON.stringify(this.map)
+  }
+
+  toRootRelativePath(
+    filesMap: FilesMap,
+    objectsDirectories: ObjectsDirectories
+  ): FilesMap {
+    const { pagesDirectory, databasesDirectory, imagesDirectory } =
+      objectsDirectories
+    const { page, database, image } = filesMap.getAll()
+
+    const fromRootFilesMapData: FilesMapData = {
+      page: withPathPrefix(page, pagesDirectory),
+      database: withPathPrefix(database, databasesDirectory),
+      image: withPathPrefix(image, imagesDirectory),
+    }
+    const fromRootFilesMap = new FilesMap()
+    fromRootFilesMap.map = fromRootFilesMapData
+    return fromRootFilesMap
+  }
+
+  toDirectoriesRelativePath(
+    filesMap: FilesMap,
+    objectsDirectories: ObjectsDirectories
+  ): FilesMap {
+    const { pagesDirectory, databasesDirectory, imagesDirectory } =
+      objectsDirectories
+    const { page, database, image } = filesMap.getAll()
+
+    const toDirectoriesFilesMapData: FilesMapData = {
+      page: withoutPathPrefix(page, pagesDirectory),
+      database: withoutPathPrefix(database, databasesDirectory),
+      image: withoutPathPrefix(image, imagesDirectory),
+    }
+    const toDirectoriesFilesMap = new FilesMap()
+    toDirectoriesFilesMap.map = toDirectoriesFilesMapData
+    return toDirectoriesFilesMap
+  }
+}
+
+function withPathPrefix(
+  recordMap: Record<string, FileRecord>,
+  prefix: string
+): Record<string, FileRecord> {
+  return Object.fromEntries(
+    Object.entries(recordMap).map(
+      ([id, record]: [string, FileRecord]): [string, FileRecord] => [
+        id,
+        {
+          ...record,
+          path: path.join(prefix, record.path),
+        },
+      ]
+    )
+  )
+}
+
+function withoutPathPrefix(
+  recordMap: Record<string, FileRecord>,
+  prefix: string
+): Record<string, FileRecord> {
+  return Object.fromEntries(
+    Object.entries(recordMap).map(
+      ([id, record]: [string, FileRecord]): [string, FileRecord] => [
+        id,
+        {
+          ...record,
+          path: record.path.replace(prefix, ""),
+        },
+      ]
+    )
+  )
 }
