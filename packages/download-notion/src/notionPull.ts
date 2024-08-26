@@ -158,19 +158,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Stage 1: walk children of the root page, looking for pages...")
 
-  // Load last edited time of pages from cache
-  let pagesLastEditedTime = null
-  if (options.cache?.cacheStrategy !== "no-cache") {
-    // TODO: There is duplication because this is done both here and in downloadObjectTree
-    await cachedNotionClient.cache.loadCache()
-    pagesLastEditedTime = Object.fromEntries(
-      Object.values(cachedNotionClient.cache.pageObjectsCache).map((page) => [
-        page.data.id,
-        page.data.last_edited_time,
-      ])
-    )
-  }
-
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
   const objectsTree: NotionObjectTreeNode = await downloadObjectTree({
     client: cachedNotionClient,
@@ -336,8 +323,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   // Only output pages that changed! The rest already exist.
   const pagesToOutput = pages.filter((page) => {
-    return pagesLastEditedTime
-      ? page.metadata.last_edited_time !== pagesLastEditedTime[page.id]
+    // TODO: We need a function from Files Manager that tells if output should be processes again (e.g. path move, was updated, etc)
+    return initialFilesMap
+      ? !initialFilesMap.exists("page", page.id) ||
+          page.metadata.last_edited_time !==
+            initialFilesMap.get("page", page.id).lastEditedTime
       : true
   })
 
