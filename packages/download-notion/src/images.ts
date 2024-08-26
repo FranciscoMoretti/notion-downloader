@@ -93,6 +93,7 @@ function writeImageIfNew(path: string, buffer: Buffer) {
 export async function cleanupOldImages(
   imageHandler: ImageHandler
 ): Promise<void> {
+  return
   for (const p of imageHandler.existingImagesNotSeenYetInPull) {
     verbose(`Removing old image: ${p}`)
     await fs.rm(p)

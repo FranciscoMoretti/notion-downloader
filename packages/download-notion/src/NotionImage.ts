@@ -102,6 +102,10 @@ export class NotionImage {
     return this.metadata.object
   }
 
+  get lastEditedTime(): string {
+    return this.metadata.last_edited_time
+  }
+
   private getFileData(): FileData {
     if (!this.fileData) {
       throw new Error("File data not read. Run read() before accessing")

@@ -52,14 +52,13 @@ export function getPageAncestorFilename(
   filesMap: FilesMap
 ): string {
   if (image.object == "page") {
-    return filesMap.page[image.id]
+    return filesMap.get("page", image.id).path
   }
   const ancestorPageId = getPageAncestorId(image.id, objectsMap)
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
   }
-  const filepath = filesMap.page[ancestorPageId]
-  return filenameFromPath(filepath)
+  return filenameFromPath(filesMap.get("page", ancestorPageId).path)
 }
 export function sanitizeMarkdownOutputPath(path: string) {
   // Remove trailing slashes

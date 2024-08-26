@@ -25,7 +25,10 @@ export async function getFileTreeMap(
     const layoutContext = !databaseIsRootLevel
       ? layoutStrategy.newLevel(incomingContext, database)
       : incomingContext
-    filesMap.database[currentID] = layoutContext
+    filesMap.set("database", currentID, {
+      path: layoutContext,
+      lastEditedTime: database.metadata.last_edited_time,
+    })
 
     // Recurse to children
     const databaseChildrenResults = await collectPaginatedAPI(
@@ -49,10 +52,10 @@ export async function getFileTreeMap(
     }
   } else if (currentType === "page") {
     const page = await getNotionPage(client, currentID, pageConfig)
-    filesMap.page[currentID] = layoutStrategy.getPathForPage2(
-      page,
-      incomingContext
-    )
+    filesMap.set("page", currentID, {
+      path: layoutStrategy.getPathForPage2(page, incomingContext),
+      lastEditedTime: page.metadata.last_edited_time,
+    })
 
     // Recurse to children
 

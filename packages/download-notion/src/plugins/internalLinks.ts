@@ -92,7 +92,7 @@ function convertLinkHref(
   targetPage: NotionPage,
   url: string
 ): string {
-  let convertedLink = context.filesMap.page[targetPage.id]
+  let convertedLink = context.filesMap.get("page", targetPage.id)?.path
   if (!context.options.pageLinkHasExtension) {
     convertedLink = path.basename(convertedLink, path.extname(convertedLink))
   }

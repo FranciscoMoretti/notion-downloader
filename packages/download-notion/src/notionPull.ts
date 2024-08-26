@@ -5,7 +5,7 @@ import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { FileCleaner } from "./FileCleaner"
+import { FilesManager } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
@@ -18,11 +18,7 @@ import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { getStrategy } from "./getOutputImageFileName"
-import {
-  cleanupOldImages,
-  initImageHandling,
-  updateImageUrlToMarkdownImagePath,
-} from "./images"
+import { cleanupOldImages, updateImageUrlToMarkdownImagePath } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
 import {
   GithubSlugNamingStrategy,
@@ -118,7 +114,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
 
-  const fileCleaner = new FileCleaner(options.markdownOutputPath)
+  const filesManager = new FilesManager(options.markdownOutputPath)
 
   const imageMarkdownPathStrategy = new PathStrategy({
     pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
@@ -173,11 +169,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return
   }
 
-  const filesMap: FilesMap = {
-    page: {},
-    database: {},
-    image: {},
-  }
+  const filesMap = new FilesMap()
 
   const pageConfig: NotionPageConfig = {
     titleProperty: options.titleProperty,
@@ -221,7 +213,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     const filePathToUseInMarkdown =
       imageMarkdownPathStrategy.getPath(imageFilename)
 
-    filesMap.image[image.id] = imageFileOutputPath
+    filesMap.set("image", image.id, {
+      path: imageFileOutputPath,
+      lastEditedTime: image.lastEditedTime,
+    })
     // Set the updated path
     updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
 
@@ -229,9 +224,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     await image.save(imageFileOutputPath)
   }
 
-  const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
-    (id) => notionPageFromId(id, cachedNotionClient, pageConfig)
-  )
+  const pagesPromises: Promise<NotionPage>[] = Object.keys(
+    filesMap.getAllOfType("page")
+  ).map((id) => notionPageFromId(id, cachedNotionClient, pageConfig))
 
   const allPages = await Promise.all(pagesPromises)
 
@@ -256,10 +251,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   // Filter from filesMap
-  Object.keys(filesMap.page).forEach((id) => {
+  Object.keys(filesMap.getAllOfType("page")).forEach((id) => {
     const page = pages.find((p) => p.id === id)
     if (!page) {
-      delete filesMap.page[id]
+      filesMap.delete("page", id)
     }
   })
 
@@ -294,12 +289,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     filesMap,
     sanitizeMarkdownOutputPath(options.markdownOutputPath) + "/files_map.json"
   )
-  await fileCleaner.cleanupOldFiles(
-    Object.values(filesMap.page).map(
-      (p) => sanitizeMarkdownOutputPath(options.markdownOutputPath) + p
-    )
-  )
-  await cleanupOldImages(imageHandler)
+  await filesManager.cleanOldFiles(filesMap)
+  // TODO: Ceanup images based on filesMap
+  await cleanupOldImages({})
   endGroup()
 }
 
@@ -367,7 +359,7 @@ async function outputPages(
   }
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
-    const mdPath = filesMap.page[page.id]
+    const mdPath = filesMap.get("page", page.id)?.path
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
 
@@ -385,7 +377,10 @@ async function outputPages(
 
       // TODO: All saves could be done in parallel
       await image.save(imageFileOutputPath)
-      filesMap.image[image.id] = imageFileOutputPath
+      filesMap.set("image", image.id, {
+        path: imageFileOutputPath,
+        lastEditedTime: image.lastEditedTime,
+      })
 
       updateImageUrlToMarkdownImagePath(
         page.metadata.cover,
