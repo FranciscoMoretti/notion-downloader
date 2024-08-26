@@ -1,7 +1,7 @@
 import { LayoutStrategy } from "./LayoutStrategy"
+import { NamingStrategy } from "./NamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
-import { NamingStrategy } from "./namingStrategy"
 
 // This strategy creates a flat list of files that have notion-id for file names.
 // Pros: the urls will never change so long as the notion pages are not delete and re-recreated.

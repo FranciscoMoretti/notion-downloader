@@ -195,6 +195,10 @@ export async function readPrimaryImage(url: string) {
   const primaryBuffer = Buffer.from(response.data, "utf-8")
   const fileType = await FileType.fromBuffer(primaryBuffer)
 
+  if (!fileType) {
+    throw new Error(`Failed to determine file type for image at ${url}`)
+  }
+
   return {
     primaryBuffer,
     fileType,

@@ -49,7 +49,7 @@ import {
   GuidNamingStrategy,
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
-} from "./namingStrategy"
+} from "./namingStrategies"
 import { getImageBlockUrl } from "./notion_objects_utils"
 import {
   getAllObjectsInObjectsTree,
@@ -228,19 +228,21 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   // Get Image path for each image block in filesMap.image
   for (const block of imageBlocks) {
-    const { primaryUrl, caption } = parseImageBlock(block.image)
-    const { primaryBuffer, fileType } = await readPrimaryImage(
-      getImageBlockUrl(block.image)
-    )
     const ancestorPageId = getPageAncestorId(block.id, allObjectsMap)
     if (!ancestorPageId) {
       throw new Error("Ancestor page not found for image block " + block.id)
     }
     const ancestorPagePath = filesMap.page[ancestorPageId]
     const ancestorPageName = filenameFromPath(ancestorPagePath)
+
+    const { primaryUrl, caption } = parseImageBlock(block.image)
+    const { primaryBuffer, fileType } = await readPrimaryImage(
+      getImageBlockUrl(block.image)
+    )
+
     const fileData: FileData = {
-      extension: fileType?.extension,
-      mime: fileType?.mime,
+      extension: fileType.ext,
+      mime: fileType.mime,
       buffer: primaryBuffer,
     }
     const imageSet: ImageSet = {

@@ -3,13 +3,9 @@
 import { slug } from "github-slugger"
 import sanitize from "sanitize-filename"
 
+import { NamingStrategy } from "./NamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
-
-export abstract class NamingStrategy {
-  public abstract nameForPage(page: NotionPage): string
-  public abstract nameForDatabase(page: NotionDatabase): string
-}
 
 export abstract class SlugNamingStrategy extends NamingStrategy {
   public slugProperty: string
