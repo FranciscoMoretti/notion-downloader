@@ -272,7 +272,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     )
 
     // TODO: Here use the Layout Strategy to get the image filepath. Use the rest of props in imagePaths in relation with this
-    filesMap.image[block.id] = imagePaths.filePathToUseInMarkdown
+    filesMap.image[image.id] = imagePaths.filePathToUseInMarkdown
     // Set the updated path
     updateImageUrlToMarkdownImagePath(
       block.image,
@@ -451,6 +451,7 @@ async function outputPages(
       )
 
       await image.save(primaryFileOutputPath)
+      filesMap.image[image.id] = filePathToUseInMarkdown
 
       updateImageUrlToMarkdownImagePath(
         page.metadata.cover,
