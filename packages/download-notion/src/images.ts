@@ -210,8 +210,6 @@ export async function saveImage(path: string, buffer: Buffer): Promise<void> {
 }
 
 function writeImageIfNew(path: string, buffer: Buffer) {
-  imageWasSeen(path)
-
   // Note: it's tempting to not spend time writing this out if we already have
   // it from a previous run. But we don't really know it's the same. A) it
   // could just have the same name, B) it could have been previously
@@ -223,9 +221,7 @@ function writeImageIfNew(path: string, buffer: Buffer) {
     verbose("Adding image " + path)
     fs.mkdirsSync(Path.dirname(path))
   }
-  const writeStream = fs.createWriteStream(path)
-  writeStream.write(buffer) // async but we're not waiting
-  writeStream.end()
+  // Save image with image here
 }
 
 export function parseImageBlock(
@@ -284,7 +280,6 @@ export async function processCoverImage(
     context.pageInfo.directoryContainingMarkdown,
     context.pageInfo.slug
   )
-  await saveImage(outputPaths?.primaryFileOutputPath!, fileData!.buffer!)
 
   // TODO: Do this a bit less hacky. Now it modified the cover object in the page object. It should draw from FilesMap
 
@@ -299,11 +294,6 @@ export async function processCoverImage(
   } else {
     cover.external.url = outputPaths.filePathToUseInMarkdown
   }
-}
-
-function imageWasSeen(path: string) {
-  // TODO: Fix this. For now we mock it returning true.
-  return true
 }
 
 export async function cleanupOldImages(

@@ -280,7 +280,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     )
 
     // TODO: this save image can be a promise and all the images can be saved at the same time
-    await saveImage(imagePaths.primaryFileOutputPath, fileData!.buffer!)
+    await image.save(imagePaths.primaryFileOutputPath)
   }
 
   const pagesPromises: Promise<NotionPage>[] = Object.keys(filesMap.page).map(
@@ -450,7 +450,7 @@ async function outputPages(
         imageHandler.imagePrefix
       )
 
-      await saveImage(primaryFileOutputPath, image.buffer)
+      await image.save(primaryFileOutputPath)
 
       updateImageUrlToMarkdownImagePath(
         page.metadata.cover,

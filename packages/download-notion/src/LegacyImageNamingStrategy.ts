@@ -15,7 +15,7 @@ import { findLastUuid, hashOfString } from "./utils"
 
 export class LegacyImageNamingStrategy implements ImageNamingStrategy {
   getFileName(image: NotionImage): string {
-    const urlBeforeQuery = image.getImageSet().primaryUrl.split("?")[0]
+    const urlBeforeQuery = image.url.split("?")[0]
     const thingToHash = findLastUuid(urlBeforeQuery) ?? urlBeforeQuery
     const hash = hashOfString(thingToHash)
     return `${hash}.${image.extension}`

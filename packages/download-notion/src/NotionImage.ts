@@ -3,6 +3,7 @@ import {
   ImageBlockObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import fs from "fs-extra"
 
 import { getImageFileExtension } from "./getImageFileExtension"
 import { FileData, ImageSet, readPrimaryImage } from "./images"
@@ -60,15 +61,18 @@ export class NotionImage {
     return this.fileData
   }
 
-  getImageSet(): ImageSet {
-    return this.imageSet
+  async save(path: string) {
+    const writeStream = fs.createWriteStream(path)
+    writeStream.write(this.buffer) // async but we're not waiting
+    writeStream.end()
   }
 
-  private getFileData(): FileData {
-    if (!this.fileData) {
-      throw new Error("File data not read yet")
-    }
-    return this.fileData
+  get url(): string {
+    return this.imageSet.primaryUrl
+  }
+
+  get caption(): string | undefined {
+    return this.imageSet.caption
   }
 
   //   Property id access the id from the image block

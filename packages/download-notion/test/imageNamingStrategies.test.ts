@@ -8,7 +8,7 @@ import { NotionImage } from "../src/NotionImage"
 
 describe("Image Naming Strategies", () => {
   const mockNotionImage = {
-    getImageSet: () => ({ primaryUrl: "https://example.com/image.png" }),
+    url: "https://example.com/image.png",
     id: "mock-block-id",
     extension: "png",
     buffer: Buffer.from("mock image data"),
@@ -47,9 +47,7 @@ describe("Image Naming Strategies", () => {
       const UUID = "d1bcdc8c-b065-4e40-9a11-392aabeb220e"
       const mockImageWithUUID = {
         ...mockNotionImage,
-        getImageSet: () => ({
-          primaryUrl: `https://prod-files-secure.s3.us-west-2.amazonaws.com/d9a2b712-cf69-4bd6-9d65-87a4ceeacca2/${UUID}/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230915%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230915T161258Z&X-Amz-Expires=3600&X-Amz-Signature=28fca48e65fba86d539c3c4b7676fce1fa0857aa194f7b33dd4a468ecca6ab24&X-Amz-SignedHeaders=host&x-id=GetObject`,
-        }),
+        url: `https://prod-files-secure.s3.us-west-2.amazonaws.com/d9a2b712-cf69-4bd6-9d65-87a4ceeacca2/${UUID}/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230915%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230915T161258Z&X-Amz-Expires=3600&X-Amz-Signature=28fca48e65fba86d539c3c4b7676fce1fa0857aa194f7b33dd4a468ecca6ab24&X-Amz-SignedHeaders=host&x-id=GetObject`,
       }
       const result = strategy.getFileName(mockImageWithUUID as NotionImage)
       expect(result).toBe("1786534424.png")
@@ -59,9 +57,7 @@ describe("Image Naming Strategies", () => {
     it("should use full URL if no UUID found", () => {
       const result = strategy.getFileName(mockNotionImage)
       expect(result).toBe("1057079531.png")
-      expect(result).toBe(
-        `${hashOfString(mockNotionImage.getImageSet().primaryUrl)}.png`
-      )
+      expect(result).toBe(`${hashOfString(mockNotionImage.url)}.png`)
     })
   })
 })
