@@ -23,15 +23,13 @@ import { FileCleaner } from "./FileCleaner"
 import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
-import {
-  getImagePaths,
-  getOutputImageFileName,
-} from "./MakeImagePersistencePlan"
+import { getImagePaths } from "./MakeImagePersistencePlan"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
+import { getOutputImageFileName } from "./getOutputImageFileName"
 import {
   FileData,
   ImageHandler,
