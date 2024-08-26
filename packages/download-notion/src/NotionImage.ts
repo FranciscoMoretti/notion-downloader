@@ -45,7 +45,7 @@ export class NotionImage {
     return { primaryUrl, caption: "" }
   }
 
-  async read(): Promise<FileData> {
+  async read() {
     if (this.fileData) {
       return this.fileData
     }
@@ -58,7 +58,6 @@ export class NotionImage {
       mime: fileType.mime,
       buffer: primaryBuffer,
     }
-    return this.fileData
   }
 
   async save(path: string) {

@@ -245,7 +245,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   // Get Image path for each image block in filesMap.image
   for (const block of imageBlocks) {
     const image = new NotionImage(block)
-    const fileData = await image.read()
+    await image.read()
 
     const strategy: ImageNamingStrategy = getStrategy("default", (image) =>
       getPageAncestorFilename(image, allObjectsMap, filesMap)
@@ -436,7 +436,7 @@ async function outputPages(
     if (pageResponse.cover) {
       // await processCoverImage(page, context)
       const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
-      const fileData = await image.read()
+      await image.read()
 
       const strategy: ImageNamingStrategy = getStrategy("default", (image) =>
         getPageAncestorFilename(image, allObjectsMap, filesMap)
