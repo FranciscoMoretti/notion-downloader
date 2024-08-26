@@ -1,6 +1,5 @@
 import { ContentHashImageNamingStrategy } from "./ContentHashImageNamingStrategy"
 import { DefaultImageNamingStrategy } from "./DefaultImageNamingStrategy"
-import { FilesMap } from "./FilesMap"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
 import { NotionImage } from "./NotionImage"

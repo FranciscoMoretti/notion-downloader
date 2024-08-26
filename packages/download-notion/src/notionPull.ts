@@ -1,22 +1,8 @@
-import * as Path from "path"
 import { exit } from "process"
-import { Client, isFullBlock } from "@notionhq/client"
-import {
-  BlockObjectResponse,
-  DatabaseObjectResponse,
-  ImageBlockObjectResponse,
-  PageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints"
+import { Client } from "@notionhq/client"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
-import {
-  IdWithType,
-  NotionObjectTreeNode,
-  downloadObjectTree,
-  idFromIdWithType,
-  idTypeToObjectType,
-  objectTreeToObjectIds,
-} from "notion-downloader"
+import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FileCleaner } from "./FileCleaner"
@@ -24,7 +10,7 @@ import { FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
-import { PathStrategy, getImagePaths } from "./MakeImagePersistencePlan"
+import { PathStrategy } from "./MakeImagePersistencePlan"
 import { NotionImage, PageObjectResponseWithCover } from "./NotionImage"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
@@ -33,16 +19,9 @@ import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { getStrategy } from "./getOutputImageFileName"
 import {
-  FileData,
   ImageHandler,
-  ImageSet,
   cleanupOldImages,
   initImageHandling,
-  parseCover,
-  parseImageBlock,
-  processCoverImage,
-  readPrimaryImage,
-  saveImage,
   updateImageUrlToMarkdownImagePath,
 } from "./images"
 import { endGroup, error, group, info, verbose } from "./log"
@@ -52,7 +31,6 @@ import {
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
 } from "./namingStrategies"
-import { getImageUrl } from "./notion_objects_utils"
 import {
   PlainObjectsMap,
   getAllObjectsInObjectsTree,
