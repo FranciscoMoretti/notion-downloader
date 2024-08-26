@@ -19,7 +19,6 @@ import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { getStrategy } from "./getOutputImageFileName"
 import {
-  ImageHandler,
   cleanupOldImages,
   initImageHandling,
   updateImageUrlToMarkdownImagePath,
@@ -32,15 +31,18 @@ import {
   TitleNamingStrategy,
 } from "./namingStrategies"
 import {
-  PlainObjectsMap,
   getAllObjectsInObjectsTree,
-  getPageAncestorId,
   objectsToObjectsMap,
 } from "./objects_utils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
-import { convertToUUID, filenameFromPath, saveDataToJson } from "./utils"
+import {
+  convertToUUID,
+  getPageAncestorFilename,
+  sanitizeMarkdownOutputPath,
+  saveDataToJson,
+} from "./utils"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {
@@ -57,11 +59,6 @@ export const counts: OutputCounts = {
   skipped_because_status: 0,
   skipped_because_level_cannot_have_content: 0,
   error_because_no_slug: 0,
-}
-
-function sanitizeMarkdownOutputPath(path: string) {
-  // Remove trailing slashes
-  return path.replace(/\/+$/, "")
 }
 
 const CACHE_FOLDER = ".downloader"
@@ -81,22 +78,6 @@ export async function notionContinuosPull(options: NotionPullOptions) {
   }
 }
 
-function getPageAncestorFilename(
-  image: NotionImage,
-  objectsMap: PlainObjectsMap,
-  filesMap: FilesMap
-): string {
-  if (image.object == "page") {
-    return filesMap.page[image.id]
-  }
-  const ancestorPageId = getPageAncestorId(image.id, objectsMap)
-  if (!ancestorPageId) {
-    throw new Error("Ancestor page not found for image " + image.id)
-  }
-  const filepath = filesMap.page[ancestorPageId]
-  return filenameFromPath(filepath)
-}
-
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
 
@@ -110,11 +91,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const rootUUID = convertToUUID(options.rootId)
 
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
-  const imageHandler = await initImageHandling(
-    options.imgPrefixInMarkdown || options.imgOutputPath || "",
-    options.imgOutputPath || ""
-  )
-
   // TODO: HACK: until we can add the notion token to the config
   const cacheDir = options.cwd.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
 
@@ -145,11 +121,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const fileCleaner = new FileCleaner(options.markdownOutputPath)
 
   const imageMarkdownPathStrategy = new PathStrategy({
-    pathPrefix:
-      imageHandler.imagePrefixInMarkdown || imageHandler.imageOutputPath || ".",
+    pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
   })
   const imageFilePathStrategy = new PathStrategy({
-    pathPrefix: imageHandler.imageOutputPath,
+    pathPrefix: options.imgOutputPath,
   })
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
   await fs.mkdir(cacheDir, { recursive: true })
@@ -309,7 +284,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     cachedNotionClient,
     notionToMarkdown,
     filesMap,
-    imageHandler,
     imageMarkdownPathStrategy,
     imageFilePathStrategy,
     imageNamingStrategy
@@ -371,7 +345,6 @@ async function outputPages(
   client: Client,
   notionToMarkdown: NotionToMarkdown,
   filesMap: FilesMap,
-  imageHandler: ImageHandler,
   imageMarkdownPathStrategy: PathStrategy,
   imageFilePathStrategy: PathStrategy,
   imageNamingStrategy: ImageNamingStrategy
@@ -391,7 +364,6 @@ async function outputPages(
     imports: [],
     convertNotionLinkToLocalDocusaurusLink: (url: string) =>
       convertInternalUrl(context, url),
-    imageHandler: imageHandler,
   }
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree

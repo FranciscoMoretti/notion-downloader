@@ -2,6 +2,10 @@ import crypto from "crypto"
 import * as Path from "path"
 import fs from "fs-extra"
 
+import { FilesMap } from "./FilesMap"
+import { NotionImage } from "./NotionImage"
+import { PlainObjectsMap, getPageAncestorId } from "./objects_utils"
+
 export function convertToUUID(str: string): string {
   if (str.length !== 32) {
     throw new Error("Input string must be 32 characters long")
@@ -41,4 +45,23 @@ export function hashOfBufferContent(buffer: Buffer): string {
 export function filenameFromPath(path: string) {
   const filenameWithoutExtension = Path.basename(path, Path.extname(path))
   return filenameWithoutExtension
+}
+export function getPageAncestorFilename(
+  image: NotionImage,
+  objectsMap: PlainObjectsMap,
+  filesMap: FilesMap
+): string {
+  if (image.object == "page") {
+    return filesMap.page[image.id]
+  }
+  const ancestorPageId = getPageAncestorId(image.id, objectsMap)
+  if (!ancestorPageId) {
+    throw new Error("Ancestor page not found for image " + image.id)
+  }
+  const filepath = filesMap.page[ancestorPageId]
+  return filenameFromPath(filepath)
+}
+export function sanitizeMarkdownOutputPath(path: string) {
+  // Remove trailing slashes
+  return path.replace(/\/+$/, "")
 }

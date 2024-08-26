@@ -1,4 +1,3 @@
-import { standardImageTransformer } from "../images"
 import { standardCalloutTransformer } from "../plugins/CalloutTransformer"
 import { standardColumnListTransformer } from "../plugins/ColumnListTransformer"
 import { standardColumnTransformer } from "../plugins/ColumnTransformer"
@@ -22,7 +21,6 @@ const defaultConfig: IDocuNotionConfig = {
     // but some things need special handling.
     standardColumnTransformer,
     standardColumnListTransformer,
-    standardImageTransformer,
     standardCalloutTransformer,
     standardTableTransformer,
     standardVideoTransformer,
