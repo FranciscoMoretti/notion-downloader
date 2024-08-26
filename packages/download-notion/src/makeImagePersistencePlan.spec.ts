@@ -57,13 +57,11 @@ test("primary file with explicit file output path and prefix", () => {
     directoryConrtainingMardown,
     pageSlug
   )
-  const expectedFileName = "my-page.ABC-123.png"
-  expect(outputPaths?.outputFileName).toBe(`${expectedFileName}`)
   expect(outputPaths?.primaryFileOutputPath).toBe(
-    `static/notion_imgs/${expectedFileName}`
+    `static/notion_imgs/my-page.ABC-123.png`
   )
   expect(outputPaths?.filePathToUseInMarkdown).toBe(
-    `/notion_imgs/${expectedFileName}`
+    `/notion_imgs/my-page.ABC-123.png`
   )
 })
 test("primary file with defaults for image output path and prefix", () => {
@@ -79,14 +77,10 @@ test("primary file with defaults for image output path and prefix", () => {
     directoryConrtainingMardown,
     pageSlug
   )
-  const expectedFileName = "my-page.ABC-123.png"
-  expect(outputPaths?.outputFileName).toBe(`${expectedFileName}`)
-
-  // the default behavior is to put the image next to the markdown file
   expect(outputPaths?.primaryFileOutputPath).toBe(
-    `/pathToParentSomewhere/${expectedFileName}`
+    `/pathToParentSomewhere/my-page.ABC-123.png`
   )
-  expect(outputPaths?.filePathToUseInMarkdown).toBe(`./${expectedFileName}`)
+  expect(outputPaths?.filePathToUseInMarkdown).toBe(`./my-page.ABC-123.png`)
 })
 test("falls back to getting file extension from url if not in fileType", () => {
   const directoryConrtainingMardown = "/pathToParentSomewhere/"
@@ -101,7 +95,10 @@ test("falls back to getting file extension from url if not in fileType", () => {
     directoryConrtainingMardown,
     pageSlug
   )
-  expect(outputPaths?.outputFileName).toBe("my-page.ABC-123.png")
+  expect(outputPaths?.primaryFileOutputPath).toBe(
+    `/pathToParentSomewhere/my-page.ABC-123.png`
+  )
+  expect(outputPaths?.filePathToUseInMarkdown).toBe(`./my-page.ABC-123.png`)
 })
 
 // I'm not sure it is even possible to have encoded characters in the slug, but this proves
@@ -148,8 +145,12 @@ test("hash naming", () => {
     directoryConrtainingMardown,
     pageSlug
   )
-  const expectedFileName = "fe3f26fd515b3cf299ac.png"
-  expect(outputPaths?.outputFileName).toBe(`${expectedFileName}`)
+  expect(outputPaths?.primaryFileOutputPath).toBe(
+    `/pathToParentSomewhere/fe3f26fd515b3cf299ac.png`
+  )
+  expect(outputPaths?.filePathToUseInMarkdown).toBe(
+    `./fe3f26fd515b3cf299ac.png`
+  )
 })
 
 const optionsUsingLegacyNaming: NotionPullOptions = {
@@ -172,7 +173,12 @@ test("Legacy naming", () => {
   const expectedHash = hashOfString(
     "https://s3.us-west-2.amazonaws.com/primaryImage"
   )
-  expect(outputPaths.outputFileName).toBe(`${expectedHash}.png`)
+  expect(outputPaths.primaryFileOutputPath).toBe(
+    `static/notion_imgs/${expectedHash}.png`
+  )
+  expect(outputPaths.filePathToUseInMarkdown).toBe(
+    `/notion_imgs/${expectedHash}.png`
+  )
 })
 test("Legacy naming - properly extract UUID from old-style notion image url", () => {
   const directoryConrtainingMardown = "/pathToParentSomewhere/"
@@ -193,7 +199,12 @@ test("Legacy naming - properly extract UUID from old-style notion image url", ()
     pageSlug
   )
   const expectedHash = hashOfString("e1058f46-4d2f-4292-8388-4ad393383439")
-  expect(outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
+  expect(outputPaths?.primaryFileOutputPath).toBe(
+    `static/notion_imgs/${expectedHash}.png`
+  )
+  expect(outputPaths?.filePathToUseInMarkdown).toBe(
+    `/notion_imgs/${expectedHash}.png`
+  )
 })
 test("Legacy naming - properly extract UUID from new-style (Sept 2023) notion image url", () => {
   const imageSet: ImageSet = {
@@ -214,11 +225,22 @@ test("Legacy naming - properly extract UUID from new-style (Sept 2023) notion im
     pageSlug
   )
   const expectedHash = hashOfString("d1bcdc8c-b065-4e40-9a11-392aabeb220e")
-  expect(outputPaths?.outputFileName).toBe(`${expectedHash}.png`)
+  expect(outputPaths?.primaryFileOutputPath).toBe(
+    `static/notion_imgs/${expectedHash}.png`
+  )
+  expect(outputPaths?.filePathToUseInMarkdown).toBe(
+    `/notion_imgs/${expectedHash}.png`
+  )
 })
 
 // In order to make image fallback work with other languages, we have to have
 // a file for each image, in each Docusaurus language directory. This is true
+// whether we have a localized version of the image or not.
+// The imageSet is initially populated with placeholders for each language.
+// This test ensures that these placeholders are replaced with actual urls
+// when localized versions of the image are listed.
+// TODO write this test
+
 // whether we have a localized version of the image or not.
 // The imageSet is initially populated with placeholders for each language.
 // This test ensures that these placeholders are replaced with actual urls

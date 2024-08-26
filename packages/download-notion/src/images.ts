@@ -28,7 +28,6 @@ export type FileData = {
 
 export type OutputPaths = {
   primaryFileOutputPath: string
-  outputFileName: string
   filePathToUseInMarkdown: string
 }
 
@@ -148,10 +147,7 @@ async function processImageBlock(
     context.pageInfo.directoryContainingMarkdown,
     context.pageInfo.slug
   )
-  await saveImage(
-    outputPaths?.primaryFileOutputPath!,
-    imageSet.fileData!.buffer!
-  )
+  await saveImage(outputPaths?.primaryFileOutputPath!, fileData.buffer!)
 
   // change the src to point to our copy of the image
   // TODO: Changes here are being applied to the actual block. This feels like another responsibility.

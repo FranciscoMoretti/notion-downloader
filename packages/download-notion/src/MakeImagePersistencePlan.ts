@@ -89,7 +89,6 @@ export function getImagePaths(
     (imagePrefix?.length > 0 ? imagePrefix : ".") + "/" + outputFileName
 
   return {
-    outputFileName,
     primaryFileOutputPath,
     filePathToUseInMarkdown,
   }
@@ -102,7 +101,7 @@ export function makeImagePersistencePlan(
   imageBlockId: string,
   imageOutputRootPath: string,
   imagePrefix: string,
-  directoryConrtainingMardown: string,
+  directoryContainingMarkdown: string,
   pageSlug: string
 ): OutputPaths {
   const outputFileName = getOutputImageFileName(
@@ -113,7 +112,7 @@ export function makeImagePersistencePlan(
     pageSlug
   )
   const { filePathToUseInMarkdown, primaryFileOutputPath } = getImagePaths(
-    directoryConrtainingMardown,
+    directoryContainingMarkdown,
     outputFileName,
     imageOutputRootPath,
     imagePrefix
@@ -121,6 +120,5 @@ export function makeImagePersistencePlan(
   return {
     filePathToUseInMarkdown,
     primaryFileOutputPath,
-    outputFileName,
   }
 }
