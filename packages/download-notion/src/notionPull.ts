@@ -10,7 +10,12 @@ import { FilesMap, ObjectsDirectories } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
-import { NotionImage, PageObjectResponseWithCover } from "./NotionImage"
+import { NotionDatabase } from "./NotionDatabase"
+import {
+  DatabaseObjectResponseWithCover,
+  NotionImage,
+  PageObjectResponseWithCover,
+} from "./NotionImage"
 import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
 import { PathStrategy } from "./PathStrategy"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
@@ -35,7 +40,7 @@ import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
-  getPageAncestorFilename,
+  getAncestorPageOrDatabaseFilename,
   sanitizeMarkdownOutputPath,
   saveDataToJson,
 } from "./utils"
@@ -216,7 +221,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     "default",
-    (image) => getPageAncestorFilename(image, allObjectsMap, filesMap)
+    (image) => getAncestorPageOrDatabaseFilename(image, allObjectsMap, filesMap)
   )
 
   // Get Image path for each image block in filesMap.image
@@ -242,11 +247,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     await image.save(imageFileOutputPath)
   }
 
-  const pagesPromises: Promise<NotionPage>[] = Object.keys(
-    filesMap.getAllOfType("page")
-  ).map((id) => notionPageFromId(id, cachedNotionClient, pageConfig))
-
-  const allPages = await Promise.all(pagesPromises)
+  const allPages = Object.values(objects.page).map(
+    (page) => new NotionPage(page, pageConfig)
+  )
   // ----- Page filtering ----
   function shouldSkipPageFilter(page: NotionPage): boolean {
     return (
@@ -274,6 +277,37 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     if (cover) {
       // TODO: Optimize by copying info from old images if page date is not new. Read should be skipped
       const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
+      await image.read()
+
+      const imageFilename = imageNamingStrategy.getFileName(image)
+
+      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
+      const filePathToUseInMarkdown =
+        imageMarkdownPathStrategy.getPath(imageFilename)
+
+      // TODO: All saves could be done in parallel
+      await image.save(imageFileOutputPath)
+      filesMap.set("image", image.id, {
+        path: imageFileOutputPath,
+        lastEditedTime: image.lastEditedTime,
+      })
+      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
+    }
+  }
+
+  // Processing of cover images of databases
+  const databases: NotionDatabase[] = Object.values(objects.database).map(
+    (db) => new NotionDatabase(db)
+  )
+  for (const database of databases) {
+    // ------ Replacement of cover image
+    const databaseResponse = database.metadata
+    const cover = databaseResponse.cover
+    if (cover) {
+      // TODO: Optimize by copying info from old images if page date is not new. Read should be skipped
+      const image = new NotionImage(
+        databaseResponse as DatabaseObjectResponseWithCover
+      )
       await image.read()
 
       const imageFilename = imageNamingStrategy.getFileName(image)

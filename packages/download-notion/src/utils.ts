@@ -46,14 +46,18 @@ export function filenameFromPath(path: string) {
   const filenameWithoutExtension = Path.basename(path, Path.extname(path))
   return filenameWithoutExtension
 }
-export function getPageAncestorFilename(
+export function getAncestorPageOrDatabaseFilename(
   image: NotionImage,
   objectsMap: PlainObjectsMap,
   filesMap: FilesMap
 ): string {
   if (image.object == "page") {
     return filesMap.get("page", image.id).path
+  } else if (image.object == "database") {
+    return filesMap.get("database", image.id).path
   }
+
+  // It's a block. Ancestor is page
   const ancestorPageId = getPageAncestorId(image.id, objectsMap)
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)

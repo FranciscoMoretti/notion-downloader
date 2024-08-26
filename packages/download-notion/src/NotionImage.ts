@@ -1,6 +1,7 @@
 import * as Path from "path"
 import { isFullBlock, isFullPage } from "@notionhq/client"
 import {
+  DatabaseObjectResponse,
   ImageBlockObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
@@ -13,19 +14,28 @@ import { getImageUrl } from "./notion_objects_utils"
 export type PageObjectResponseWithCover = PageObjectResponse & {
   cover: NonNullable<PageObjectResponse["cover"]>
 }
+
+export type DatabaseObjectResponseWithCover = DatabaseObjectResponse & {
+  cover: NonNullable<DatabaseObjectResponse["cover"]>
+}
+
 type NotionImageResponses =
   | ImageBlockObjectResponse
   | PageObjectResponseWithCover
+  | DatabaseObjectResponseWithCover
 
 export class NotionImage {
   private imageSet: ImageSet
   private fileData: FileData | null = null
-  private metadata: ImageBlockObjectResponse | PageObjectResponseWithCover
+  private metadata: NotionImageResponses
 
   constructor(imageResponse: NotionImageResponses) {
     if (imageResponse.object == "block" && imageResponse.type === "image") {
       this.imageSet = this.parseImageBlock(imageResponse)
-    } else if (imageResponse.object == "page") {
+    } else if (
+      imageResponse.object == "page" ||
+      imageResponse.object == "database"
+    ) {
       this.imageSet = this.parseCoverImage(imageResponse)
     } else {
       throw new Error("Invalid image response")
@@ -41,7 +51,9 @@ export class NotionImage {
         imageBlock.image.caption?.map((c) => c.plain_text).join("") || "",
     }
   }
-  private parseCoverImage(page: PageObjectResponseWithCover): ImageSet {
+  private parseCoverImage(
+    page: PageObjectResponseWithCover | DatabaseObjectResponseWithCover
+  ): ImageSet {
     const primaryUrl = getImageUrl(page.cover)
     return { primaryUrl, caption: "" }
   }
@@ -98,7 +110,7 @@ export class NotionImage {
     return this.getFileData().buffer
   }
 
-  get object(): "page" | "block" {
+  get object(): "page" | "block" | "database" {
     return this.metadata.object
   }
 
