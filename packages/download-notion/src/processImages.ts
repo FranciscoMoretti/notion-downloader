@@ -1,4 +1,8 @@
-import { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import {
+  BlockObjectResponse,
+  DatabaseObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
 
 import { FilesManager } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
@@ -91,15 +95,11 @@ export async function processImages({
     )
   }
 
-  // Processing of cover images of pages
-  for (const page of pages) {
-    // ------ Replacement of cover image
-    const pageResponse = page.metadata
-    const cover = pageResponse.cover
-    if (!cover) {
-      continue
-    }
-    const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
+  const pagesResponsesWithCover: PageObjectResponseWithCover[] = pages
+    .map((page) => page.metadata)
+    .filter(pageHasCover)
+  for (const pageResponse of pagesResponsesWithCover) {
+    const image = new NotionImage(pageResponse)
     await processImage(
       image,
       filesManager,
@@ -111,18 +111,10 @@ export async function processImages({
     )
   }
 
-  for (const database of databases) {
-    // ------ Replacement of cover image
-    const databaseResponse = database.metadata
-    const cover = databaseResponse.cover
-    if (!cover) {
-      continue
-    }
-
-    // TODO: Write/keep logic should go first. Cover writing `if` should go inside. Should save to filemap if exists
-    const image = new NotionImage(
-      databaseResponse as DatabaseObjectResponseWithCover
-    )
+  const databasesResponsesWithCover: DatabaseObjectResponseWithCover[] =
+    databases.map((database) => database.metadata).filter(databaseHasCover)
+  for (const databaseResponse of databasesResponsesWithCover) {
+    const image = new NotionImage(databaseResponse)
     await processImage(
       image,
       filesManager,
@@ -133,4 +125,15 @@ export async function processImages({
       filesMap
     )
   }
+}
+
+function pageHasCover(
+  metadata: PageObjectResponse
+): metadata is PageObjectResponseWithCover {
+  return Boolean(metadata.cover)
+}
+function databaseHasCover(
+  metadata: DatabaseObjectResponse
+): metadata is DatabaseObjectResponseWithCover {
+  return Boolean(metadata.cover)
 }
