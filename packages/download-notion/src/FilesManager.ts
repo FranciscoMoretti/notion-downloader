@@ -1,6 +1,10 @@
 import fs from "fs-extra"
 
-import { FileRecord, FilesMap } from "./FilesMap"
+import { FileRecord, FileType, FilesMap, ObjectsDirectories } from "./FilesMap"
+import { NotionDatabase } from "./NotionDatabase"
+import { NotionImage } from "./NotionImage"
+import { NotionObject } from "./NotionObject"
+import { NotionPage } from "./NotionPage"
 import { info, verbose } from "./log"
 
 type ExtendedFileRecord = FileRecord & {
@@ -8,22 +12,28 @@ type ExtendedFileRecord = FileRecord & {
 }
 
 export class FilesManager {
-  protected filesMap?: FilesMap
+  public initialFilesMap?: FilesMap
+  protected objectsDirectories: ObjectsDirectories
 
-  public constructor(initialFilesMap: FilesMap | undefined) {
-    this.filesMap = initialFilesMap
+  public constructor(
+    initialFilesMap: FilesMap | undefined,
+    objectsDirectories: ObjectsDirectories
+  ) {
+    this.initialFilesMap = initialFilesMap
+    // TODO: If directories changed, cleanup all files in directories changed here
+    this.objectsDirectories = objectsDirectories
   }
 
   public async cleanOldFiles(newFilesMap: FilesMap): Promise<void> {
-    if (!this.filesMap) {
+    if (!this.initialFilesMap) {
       info("No files map found, skipping cleanup")
       return
     }
     info("Cleaning up old files")
 
-    const oldFiles = this.getFileRecords(this.filesMap, "page")
+    const oldFiles = this.getFileRecords(this.initialFilesMap, "page")
     const newFiles = this.getFileRecords(newFilesMap, "page")
-    const oldImages = this.getFileRecords(this.filesMap, "image")
+    const oldImages = this.getFileRecords(this.initialFilesMap, "image")
     const newImages = this.getFileRecords(newFilesMap, "image")
 
     const filesToRemove = this.getFilesToRemove(oldFiles, newFiles)
@@ -93,6 +103,58 @@ export class FilesManager {
 
     // We should never get here
     throw new Error("get removal reason failed")
+  }
+
+  public shouldProcessObject(pageOrDatabase: NotionObject): boolean {
+    if (!this.initialFilesMap) {
+      return true // Process all pages if there's no initial files map
+    }
+
+    if (
+      !this.initialFilesMap.exists(
+        // TODO: Make this FilesMa structure more generic when we want to store more than images
+        pageOrDatabase.object == "block" ? "image" : pageOrDatabase.object,
+        pageOrDatabase.id
+      )
+    ) {
+      return true // Process new pages
+    }
+    const existingRecord = this.initialFilesMap.get(
+      pageOrDatabase.object == "block" ? "image" : pageOrDatabase.object,
+      pageOrDatabase.id
+    )
+    // If new file date is older than old file date, the state is inconcistent and we throw an error
+    if (
+      new Date(pageOrDatabase.lastEditedTime) >
+      new Date(existingRecord.lastEditedTime)
+    ) {
+      return true
+    }
+
+    return false
+  }
+
+  public get(
+    relativeTo: "directory" | "root",
+    type: FileType,
+    id: string
+  ): FileRecord {
+    if (!this.initialFilesMap) {
+      throw new Error(
+        "Trying to get file record from files map that does not exist"
+      )
+    }
+
+    const recordFromRoot = this.initialFilesMap.get(type, id)
+
+    if (relativeTo === "directory") {
+      return this.initialFilesMap.recordToDirectoriesRelativePath(
+        recordFromRoot,
+        this.objectsDirectories[type]
+      )
+    } else {
+      return recordFromRoot
+    }
   }
 }
 

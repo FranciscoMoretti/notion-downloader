@@ -5,6 +5,7 @@ import { Client, isFullPage } from "@notionhq/client"
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
+import { NotionObject } from "./NotionObject"
 import { error } from "./log"
 import { parseLinkId } from "./plugins/internalLinks"
 
@@ -18,7 +19,7 @@ export type NotionPageConfig = {
   slugProperty?: string
 }
 
-export class NotionPage {
+export class NotionPage implements NotionObject {
   public metadata: PageObjectResponse
   public config: CustomPropertiesConfig
 
@@ -54,7 +55,15 @@ export class NotionPage {
     return this.metadata.id
   }
 
-  public get isDatabasePage(): boolean {
+  public get lastEditedTime(): string {
+    return this.metadata.last_edited_time
+  }
+
+  public get object(): "page" {
+    return this.metadata.object
+  }
+
+  public get isDatabaseChild(): boolean {
     /*
     {
         "object": "page",
@@ -70,13 +79,13 @@ export class NotionPage {
 
   // In Notion, pages from the Database have names and simple pages have titles.
   public get nameOrTitle(): string {
-    return this.isDatabasePage ? this.name : this.title
+    return this.isDatabaseChild ? this.name : this.title
   }
 
   // TODO: This responsibility of naming should go to an external class
   public nameForFile(): string {
     // In Notion, pages from the Database have names and simple pages have titles.
-    return !this.isDatabasePage
+    return !this.isDatabaseChild
       ? this.title
       : // if it's a Database page, then we'll use the slug unless there is none, then we'd rather have the
         // page name than an ugly id for the file name

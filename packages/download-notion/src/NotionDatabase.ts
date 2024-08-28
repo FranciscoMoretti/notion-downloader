@@ -3,10 +3,11 @@ import {
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
+import { NotionObject } from "./NotionObject"
 import { parseLinkId } from "./plugins/internalLinks"
 
 // Response wrapper access class
-export class NotionDatabase {
+export class NotionDatabase implements NotionObject {
   public metadata: DatabaseObjectResponse
 
   public constructor(metadata: DatabaseObjectResponse) {
@@ -18,8 +19,8 @@ export class NotionDatabase {
     const { baseLinkId } = parseLinkId(id)
 
     const match =
-      baseLinkId === this.databaseId || // from a link_to_page.pageId, which still has the dashes
-      baseLinkId === this.databaseId.replaceAll("-", "") // from inline links, which are lacking the dashes
+      baseLinkId === this.id || // from a link_to_page.pageId, which still has the dashes
+      baseLinkId === this.id.replaceAll("-", "") // from inline links, which are lacking the dashes
 
     // logDebug(
     //   `matchedLinkId`,
@@ -32,6 +33,15 @@ export class NotionDatabase {
     return this.metadata.id
   }
 
+  public get lastEditedTime() {
+    return this.metadata.last_edited_time
+  }
+
+  public get object() {
+    return this.metadata.object
+  }
+
+  // Deprecated
   public get type() {
     return this.metadata.object
   }

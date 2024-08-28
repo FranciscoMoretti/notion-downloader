@@ -1,19 +1,18 @@
+import assert from "assert"
 import path from "path"
+
+import { addPathPrefix, removePathPrefix } from "./pathUtils"
 
 export type FileRecord = {
   path: string
   lastEditedTime: string
 }
 
-type FileType = "page" | "database" | "image"
+export type FileType = "page" | "database" | "image"
 
 type FilesMapData = Record<FileType, Record<string, FileRecord>>
 
-export type ObjectsDirectories = {
-  pagesDirectory: string
-  databasesDirectory: string
-  imagesDirectory: string
-}
+export type ObjectsDirectories = Record<FileType, string>
 
 export class FilesMap {
   private map: FilesMapData = {
@@ -62,36 +61,53 @@ export class FilesMap {
     return JSON.stringify(this.map)
   }
 
-  toRootRelativePath(
+  recordToRootRelativePath(fileRecord: FileRecord, prefix: string): FileRecord {
+    return recordWithPathPrefix(fileRecord, prefix)
+  }
+
+  recordToDirectoriesRelativePath(
+    fileRecord: FileRecord,
+    prefix: string
+  ): FileRecord {
+    return recordWithoutPathPrefix(fileRecord, prefix)
+  }
+
+  allToRootRelativePath(
     filesMap: FilesMap,
     objectsDirectories: ObjectsDirectories
   ): FilesMap {
-    const { pagesDirectory, databasesDirectory, imagesDirectory } =
-      objectsDirectories
+    const {
+      page: pagesDirectory,
+      database: databasesDirectory,
+      image: imagesDirectory,
+    } = objectsDirectories
     const { page, database, image } = filesMap.getAll()
 
     const fromRootFilesMapData: FilesMapData = {
-      page: withPathPrefix(page, pagesDirectory),
-      database: withPathPrefix(database, databasesDirectory),
-      image: withPathPrefix(image, imagesDirectory),
+      page: recordMapwithPathPrefix(page, pagesDirectory),
+      database: recordMapwithPathPrefix(database, databasesDirectory),
+      image: recordMapwithPathPrefix(image, imagesDirectory),
     }
     const fromRootFilesMap = new FilesMap()
     fromRootFilesMap.map = fromRootFilesMapData
     return fromRootFilesMap
   }
 
-  toDirectoriesRelativePath(
+  allToDirectoriesRelativePath(
     filesMap: FilesMap,
     objectsDirectories: ObjectsDirectories
   ): FilesMap {
-    const { pagesDirectory, databasesDirectory, imagesDirectory } =
-      objectsDirectories
+    const {
+      page: pagesDirectory,
+      database: databasesDirectory,
+      image: imagesDirectory,
+    } = objectsDirectories
     const { page, database, image } = filesMap.getAll()
 
     const toDirectoriesFilesMapData: FilesMapData = {
-      page: withoutPathPrefix(page, pagesDirectory),
-      database: withoutPathPrefix(database, databasesDirectory),
-      image: withoutPathPrefix(image, imagesDirectory),
+      page: recordMapwithoutPathPrefix(page, pagesDirectory),
+      database: recordMapwithoutPathPrefix(database, databasesDirectory),
+      image: recordMapwithoutPathPrefix(image, imagesDirectory),
     }
     const toDirectoriesFilesMap = new FilesMap()
     toDirectoriesFilesMap.map = toDirectoriesFilesMapData
@@ -99,7 +115,7 @@ export class FilesMap {
   }
 }
 
-function withPathPrefix(
+function recordMapwithPathPrefix(
   recordMap: Record<string, FileRecord>,
   prefix: string
 ): Record<string, FileRecord> {
@@ -107,16 +123,13 @@ function withPathPrefix(
     Object.entries(recordMap).map(
       ([id, record]: [string, FileRecord]): [string, FileRecord] => [
         id,
-        {
-          ...record,
-          path: path.join(prefix, record.path),
-        },
+        recordWithPathPrefix(record, prefix),
       ]
     )
   )
 }
 
-function withoutPathPrefix(
+function recordMapwithoutPathPrefix(
   recordMap: Record<string, FileRecord>,
   prefix: string
 ): Record<string, FileRecord> {
@@ -124,11 +137,29 @@ function withoutPathPrefix(
     Object.entries(recordMap).map(
       ([id, record]: [string, FileRecord]): [string, FileRecord] => [
         id,
-        {
-          ...record,
-          path: record.path.replace(prefix, ""),
-        },
+        recordWithoutPathPrefix(record, prefix),
       ]
     )
   )
+}
+
+function recordWithPathPrefix(record: FileRecord, prefix: string): FileRecord {
+  const newPath = addPathPrefix(record.path, prefix)
+
+  return {
+    ...record,
+    path: newPath,
+  }
+}
+
+function recordWithoutPathPrefix(
+  record: FileRecord,
+  prefix: string
+): FileRecord {
+  const newPath = removePathPrefix(record.path, prefix)
+
+  return {
+    ...record,
+    path: newPath,
+  }
 }

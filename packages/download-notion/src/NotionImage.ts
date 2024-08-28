@@ -7,6 +7,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 
+import { NotionObject } from "./NotionObject"
 import { getImageFileExtension } from "./getImageFileExtension"
 import { FileData, ImageSet, readPrimaryImage } from "./images"
 import { getImageUrl } from "./notion_objects_utils"
@@ -24,7 +25,7 @@ type NotionImageResponses =
   | PageObjectResponseWithCover
   | DatabaseObjectResponseWithCover
 
-export class NotionImage {
+export class NotionImage implements NotionObject {
   private imageSet: ImageSet
   private fileData: FileData | null = null
   private metadata: NotionImageResponses

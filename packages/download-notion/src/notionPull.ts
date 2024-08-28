@@ -1,3 +1,4 @@
+import path from "path"
 import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
@@ -35,6 +36,7 @@ import {
   getAllObjectsInObjectsTree,
   objectsToObjectsMap,
 } from "./objects_utils"
+import { removePathPrefix } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { getMarkdownForPage } from "./transform"
@@ -129,15 +131,15 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       : new HierarchicalLayoutStrategy(namingStrategy)
 
   const objectsDirectories: ObjectsDirectories = {
-    pagesDirectory: options.markdownOutputPath,
-    databasesDirectory: options.markdownOutputPath,
-    imagesDirectory: options.imgOutputPath,
+    page: options.markdownOutputPath,
+    database: options.markdownOutputPath,
+    image: options.imgOutputPath,
   }
 
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
   const initialFilesMap = loadFilesMapFile(filesMapFilePath)
-  const filesManager = new FilesManager(initialFilesMap)
+  const filesManager = new FilesManager(initialFilesMap, objectsDirectories)
 
   const imageMarkdownPathStrategy = new PathStrategy({
     pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
@@ -211,29 +213,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     (image) => getAncestorPageOrDatabaseFilename(image, allObjectsMap, filesMap)
   )
 
-  // Get Image path for each image block in filesMap.image
-  for (const block of imageBlocks) {
-    const image = new NotionImage(block)
-    await image.read()
-
-    const imageFilename = imageNamingStrategy.getFileName(image)
-
-    // TODO: Include layout strategy to get a potential layout from filename before adding prefix
-    const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
-    const filePathToUseInMarkdown =
-      imageMarkdownPathStrategy.getPath(imageFilename)
-
-    filesMap.set("image", image.id, {
-      path: imageFileOutputPath,
-      lastEditedTime: image.lastEditedTime,
-    })
-    // Set the updated path
-    updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
-
-    // TODO: All saves could be done in parallel
-    await image.save(imageFileOutputPath)
-  }
-
   const allPages = Object.values(objects.page).map(
     (page) => new NotionPage(page, pageConfig)
   )
@@ -256,13 +235,56 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     }
     return !shouldSkip
   })
+
+  // Get Image path for each image block in filesMap.image
+  for (const block of imageBlocks) {
+    const image = new NotionImage(block)
+    if (filesManager.shouldProcessObject(image)) {
+      await image.read()
+      const imageFilename = imageNamingStrategy.getFileName(image)
+
+      // TODO: Include layout strategy to get a potential layout from filename before adding prefix
+      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
+
+      // TODO: All saves could be done in parallel
+      await image.save(imageFileOutputPath)
+
+      const pathFromImageDirectory = removePathPrefix(
+        imageFileOutputPath,
+        options.imgOutputPath
+      )
+      filesMap.set("image", image.id, {
+        path: pathFromImageDirectory,
+        lastEditedTime: image.lastEditedTime,
+      })
+      const filePathToUseInMarkdown =
+        imageMarkdownPathStrategy.getPath(imageFilename)
+      // Set the updated path
+      updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
+    } else {
+      // Save in new filesmap without changes
+      const imageRecordFromRoot = filesManager.get(
+        "directory",
+        "image",
+        image.id
+      )
+      filesMap.set("image", image.id, imageRecordFromRoot)
+      // Update markdown in case pages link to this image
+      const filePathToUseInMarkdown = imageRecordFromRoot.path
+      updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
+    }
+  }
+
   // Processing of cover images of pages
   for (const page of pages) {
     // ------ Replacement of cover image
     const pageResponse = page.metadata
     const cover = pageResponse.cover
-    if (cover) {
-      // TODO: Optimize by copying info from old images if page date is not new. Read should be skipped
+    if (!cover) {
+      continue
+    }
+    const shouldWritePage = filesManager.shouldProcessObject(page)
+    if (shouldWritePage) {
       const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
       await image.read()
 
@@ -274,10 +296,24 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
       // TODO: All saves could be done in parallel
       await image.save(imageFileOutputPath)
+      const pathFromImageDirectory = removePathPrefix(
+        imageFileOutputPath,
+        options.imgOutputPath
+      )
       filesMap.set("image", image.id, {
-        path: imageFileOutputPath,
+        path: pathFromImageDirectory,
         lastEditedTime: image.lastEditedTime,
       })
+      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
+    } else {
+      const imageRecordFromRoot = filesManager.get(
+        "directory",
+        "image",
+        page.id
+      )
+      filesMap.set("image", page.id, imageRecordFromRoot)
+      // Update markdown in case pages link to this image
+      const filePathToUseInMarkdown = imageRecordFromRoot.path
       updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
     }
   }
@@ -290,8 +326,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     // ------ Replacement of cover image
     const databaseResponse = database.metadata
     const cover = databaseResponse.cover
-    if (cover) {
-      // TODO: Optimize by copying info from old images if page date is not new. Read should be skipped
+    if (!cover) {
+      continue
+    }
+
+    const shouldWriteDatabase = filesManager.shouldProcessObject(database)
+    // TODO: Write/keep logic should go first. Cover writing `if` should go inside. Should save to filemap if exists
+    if (shouldWriteDatabase) {
       const image = new NotionImage(
         databaseResponse as DatabaseObjectResponseWithCover
       )
@@ -305,10 +346,25 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
       // TODO: All saves could be done in parallel
       await image.save(imageFileOutputPath)
+      // TODO: This should be handled by FilesManager
+      const pathFromImageDirectory = removePathPrefix(
+        imageFileOutputPath,
+        options.imgOutputPath
+      )
       filesMap.set("image", image.id, {
-        path: imageFileOutputPath,
+        path: pathFromImageDirectory,
         lastEditedTime: image.lastEditedTime,
       })
+      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
+    } else {
+      const imageRecordFromRoot = filesManager.get(
+        "directory",
+        "image",
+        database.id
+      )
+      filesMap.set("image", database.id, imageRecordFromRoot)
+      // Update markdown in case pages link to this image
+      const filePathToUseInMarkdown = imageRecordFromRoot.path
       updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
     }
   }
@@ -323,12 +379,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   // Only output pages that changed! The rest already exist.
   const pagesToOutput = pages.filter((page) => {
-    // TODO: We need a function from Files Manager that tells if output should be processes again (e.g. path move, was updated, etc)
-    return initialFilesMap
-      ? !initialFilesMap.exists("page", page.id) ||
-          page.metadata.last_edited_time !==
-            initialFilesMap.get("page", page.id).lastEditedTime
-      : true
+    return filesManager.shouldProcessObject(page)
   })
 
   info(`Found ${allPages.length} pages`)
@@ -348,7 +399,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  const fromRootFilesMap = filesMap.toRootRelativePath(
+  const fromRootFilesMap = filesMap.allToRootRelativePath(
     filesMap,
     objectsDirectories
   )
