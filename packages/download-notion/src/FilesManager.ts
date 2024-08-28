@@ -1,10 +1,7 @@
 import fs from "fs-extra"
 
 import { FileRecord, FileType, FilesMap, ObjectsDirectories } from "./FilesMap"
-import { NotionDatabase } from "./NotionDatabase"
-import { NotionImage } from "./NotionImage"
 import { NotionObject } from "./NotionObject"
-import { NotionPage } from "./NotionPage"
 import { info, verbose } from "./log"
 
 type ExtendedFileRecord = FileRecord & {

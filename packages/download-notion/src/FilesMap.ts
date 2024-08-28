@@ -1,6 +1,3 @@
-import assert from "assert"
-import path from "path"
-
 import { addPathPrefix, removePathPrefix } from "./pathUtils"
 
 export type FileRecord = {
@@ -72,7 +69,7 @@ export class FilesMap {
     return recordWithoutPathPrefix(fileRecord, prefix)
   }
 
-  allToRootRelativePath(
+  static allToRootRelativePath(
     filesMap: FilesMap,
     objectsDirectories: ObjectsDirectories
   ): FilesMap {
@@ -93,7 +90,7 @@ export class FilesMap {
     return fromRootFilesMap
   }
 
-  allToDirectoriesRelativePath(
+  static allToDirectoriesRelativePath(
     filesMap: FilesMap,
     objectsDirectories: ObjectsDirectories
   ): FilesMap {
