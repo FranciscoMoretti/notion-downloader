@@ -105,7 +105,7 @@ export class FilesManager {
     throw new Error("get removal reason failed")
   }
 
-  public shouldProcessObject(pageOrDatabase: NotionObject): boolean {
+  public shouldProcessObject(notionObject: NotionObject): boolean {
     if (!this.initialFilesMap) {
       return true // Process all pages if there's no initial files map
     }
@@ -113,19 +113,19 @@ export class FilesManager {
     if (
       !this.initialFilesMap.exists(
         // TODO: Make this FilesMa structure more generic when we want to store more than images
-        pageOrDatabase.object == "block" ? "image" : pageOrDatabase.object,
-        pageOrDatabase.id
+        notionObject.object == "block" ? "image" : notionObject.object,
+        notionObject.id
       )
     ) {
       return true // Process new pages
     }
     const existingRecord = this.initialFilesMap.get(
-      pageOrDatabase.object == "block" ? "image" : pageOrDatabase.object,
-      pageOrDatabase.id
+      notionObject.object == "block" ? "image" : notionObject.object,
+      notionObject.id
     )
     // If new file date is older than old file date, the state is inconcistent and we throw an error
     if (
-      new Date(pageOrDatabase.lastEditedTime) >
+      new Date(notionObject.lastEditedTime) >
       new Date(existingRecord.lastEditedTime)
     ) {
       return true

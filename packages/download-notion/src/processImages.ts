@@ -15,6 +15,47 @@ import { NotionPullOptions } from "./config/schema"
 import { updateImageUrlToMarkdownImagePath } from "./images"
 import { removePathPrefix } from "./pathUtils"
 
+async function processImage(
+  image: NotionImage,
+  filesManager: FilesManager,
+  imageNamingStrategy: ImageNamingStrategy,
+  imageFilePathStrategy: PathStrategy,
+  imageMarkdownPathStrategy: PathStrategy,
+  options: NotionPullOptions,
+  filesMap: FilesMap
+) {
+  if (filesManager.shouldProcessObject(image)) {
+    await image.read()
+    const imageFilename = imageNamingStrategy.getFileName(image)
+
+    // TODO: Include layout strategy to get a potential layout from filename before adding prefix
+    const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
+
+    // TODO: All saves could be done in parallel
+    await image.save(imageFileOutputPath)
+
+    // TODO: This should be handled by FilesManager
+    const pathFromImageDirectory = removePathPrefix(
+      imageFileOutputPath,
+      options.imgOutputPath
+    )
+    filesMap.set("image", image.id, {
+      path: pathFromImageDirectory,
+      lastEditedTime: image.lastEditedTime,
+    })
+    return imageMarkdownPathStrategy.getPath(imageFilename)
+  } else {
+    // Save in new filesmap without changes
+    const imageRecordFromDirectory = filesManager.get(
+      "directory",
+      "image",
+      image.id
+    )
+    filesMap.set("image", image.id, imageRecordFromDirectory)
+    updateImageUrlToMarkdownImagePath(image.file, imageRecordFromDirectory.path)
+  }
+}
+
 export async function processImages({
   imageBlocks,
   filesManager,
@@ -26,52 +67,28 @@ export async function processImages({
   pages,
   databases,
 }: {
-  imageBlocks: (BlockObjectResponse & { type: "image" })[]
+  options: NotionPullOptions
   filesManager: FilesManager
   imageNamingStrategy: ImageNamingStrategy
   imageFilePathStrategy: PathStrategy
-  options: NotionPullOptions
   filesMap: FilesMap
   imageMarkdownPathStrategy: PathStrategy
+  imageBlocks: (BlockObjectResponse & { type: "image" })[]
   pages: NotionPage[]
   databases: NotionDatabase[]
 }) {
+  // Process image blocks
   for (const block of imageBlocks) {
     const image = new NotionImage(block)
-    if (filesManager.shouldProcessObject(image)) {
-      await image.read()
-      const imageFilename = imageNamingStrategy.getFileName(image)
-
-      // TODO: Include layout strategy to get a potential layout from filename before adding prefix
-      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
-
-      // TODO: All saves could be done in parallel
-      await image.save(imageFileOutputPath)
-
-      const pathFromImageDirectory = removePathPrefix(
-        imageFileOutputPath,
-        options.imgOutputPath
-      )
-      filesMap.set("image", image.id, {
-        path: pathFromImageDirectory,
-        lastEditedTime: image.lastEditedTime,
-      })
-      const filePathToUseInMarkdown =
-        imageMarkdownPathStrategy.getPath(imageFilename)
-      // Set the updated path
-      updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
-    } else {
-      // Save in new filesmap without changes
-      const imageRecordFromRoot = filesManager.get(
-        "directory",
-        "image",
-        image.id
-      )
-      filesMap.set("image", image.id, imageRecordFromRoot)
-      // Update markdown in case pages link to this image
-      const filePathToUseInMarkdown = imageRecordFromRoot.path
-      updateImageUrlToMarkdownImagePath(block.image, filePathToUseInMarkdown)
-    }
+    await processImage(
+      image,
+      filesManager,
+      imageNamingStrategy,
+      imageFilePathStrategy,
+      imageMarkdownPathStrategy,
+      options,
+      filesMap
+    )
   }
 
   // Processing of cover images of pages
@@ -82,39 +99,16 @@ export async function processImages({
     if (!cover) {
       continue
     }
-    const shouldWritePage = filesManager.shouldProcessObject(page)
-    if (shouldWritePage) {
-      const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
-      await image.read()
-
-      const imageFilename = imageNamingStrategy.getFileName(image)
-
-      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
-      const filePathToUseInMarkdown =
-        imageMarkdownPathStrategy.getPath(imageFilename)
-
-      // TODO: All saves could be done in parallel
-      await image.save(imageFileOutputPath)
-      const pathFromImageDirectory = removePathPrefix(
-        imageFileOutputPath,
-        options.imgOutputPath
-      )
-      filesMap.set("image", image.id, {
-        path: pathFromImageDirectory,
-        lastEditedTime: image.lastEditedTime,
-      })
-      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
-    } else {
-      const imageRecordFromRoot = filesManager.get(
-        "directory",
-        "image",
-        page.id
-      )
-      filesMap.set("image", page.id, imageRecordFromRoot)
-      // Update markdown in case pages link to this image
-      const filePathToUseInMarkdown = imageRecordFromRoot.path
-      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
-    }
+    const image = new NotionImage(pageResponse as PageObjectResponseWithCover)
+    await processImage(
+      image,
+      filesManager,
+      imageNamingStrategy,
+      imageFilePathStrategy,
+      imageMarkdownPathStrategy,
+      options,
+      filesMap
+    )
   }
 
   for (const database of databases) {
@@ -125,42 +119,18 @@ export async function processImages({
       continue
     }
 
-    const shouldWriteDatabase = filesManager.shouldProcessObject(database)
     // TODO: Write/keep logic should go first. Cover writing `if` should go inside. Should save to filemap if exists
-    if (shouldWriteDatabase) {
-      const image = new NotionImage(
-        databaseResponse as DatabaseObjectResponseWithCover
-      )
-      await image.read()
-
-      const imageFilename = imageNamingStrategy.getFileName(image)
-
-      const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
-      const filePathToUseInMarkdown =
-        imageMarkdownPathStrategy.getPath(imageFilename)
-
-      // TODO: All saves could be done in parallel
-      await image.save(imageFileOutputPath)
-      // TODO: This should be handled by FilesManager
-      const pathFromImageDirectory = removePathPrefix(
-        imageFileOutputPath,
-        options.imgOutputPath
-      )
-      filesMap.set("image", image.id, {
-        path: pathFromImageDirectory,
-        lastEditedTime: image.lastEditedTime,
-      })
-      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
-    } else {
-      const imageRecordFromRoot = filesManager.get(
-        "directory",
-        "image",
-        database.id
-      )
-      filesMap.set("image", database.id, imageRecordFromRoot)
-      // Update markdown in case pages link to this image
-      const filePathToUseInMarkdown = imageRecordFromRoot.path
-      updateImageUrlToMarkdownImagePath(cover, filePathToUseInMarkdown)
-    }
+    const image = new NotionImage(
+      databaseResponse as DatabaseObjectResponseWithCover
+    )
+    await processImage(
+      image,
+      filesManager,
+      imageNamingStrategy,
+      imageFilePathStrategy,
+      imageMarkdownPathStrategy,
+      options,
+      filesMap
+    )
   }
 }

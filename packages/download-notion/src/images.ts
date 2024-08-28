@@ -8,6 +8,7 @@ import axios from "axios"
 import FileType from "file-type"
 import fs from "fs-extra"
 
+import { FileObject } from "./NotionImage"
 import { verbose } from "./log"
 
 // Extracting extension, mime, and buffer data into a separate type called FileData
@@ -26,21 +27,6 @@ export type ImageSet = {
   primaryUrl: string
   caption?: string
 }
-
-type FileObject =
-  | {
-      type: "external"
-      external: {
-        url: string
-      }
-    }
-  | {
-      type: "file"
-      file: {
-        url: string
-        expiry_time: string
-      }
-    }
 
 export function updateImageUrlToMarkdownImagePath(
   imageOrCover: FileObject,

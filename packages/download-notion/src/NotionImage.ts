@@ -119,6 +119,12 @@ export class NotionImage implements NotionObject {
     return this.metadata.last_edited_time
   }
 
+  get file(): FileObject {
+    return this.metadata.object == "database" || this.metadata.object == "page"
+      ? this.metadata.cover
+      : this.metadata.image
+  }
+
   private getFileData(): FileData {
     if (!this.fileData) {
       throw new Error("File data not read. Run read() before accessing")
@@ -126,3 +132,17 @@ export class NotionImage implements NotionObject {
     return this.fileData
   }
 }
+export type FileObject =
+  | {
+      type: "external"
+      external: {
+        url: string
+      }
+    }
+  | {
+      type: "file"
+      file: {
+        url: string
+        expiry_time: string
+      }
+    }
