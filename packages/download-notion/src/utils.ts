@@ -46,7 +46,7 @@ export function filenameFromPath(path: string) {
   const filenameWithoutExtension = Path.basename(path, Path.extname(path))
   return filenameWithoutExtension
 }
-export function getAncestorPageOrDatabaseFilename(
+export function getAncestorPageOrDatabaseFilepath(
   image: NotionImage,
   objectsMap: PlainObjectsMap,
   filesMap: FilesMap
@@ -62,8 +62,18 @@ export function getAncestorPageOrDatabaseFilename(
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
   }
-  return filenameFromPath(filesMap.get("page", ancestorPageId).path)
+  return filesMap.get("page", ancestorPageId).path
 }
+
+export function getAncestorPageOrDatabaseFilename(
+  image: NotionImage,
+  filesMap: FilesMap
+): string {
+  return filenameFromPath(
+    getAncestorPageOrDatabaseFilepath(image, objectsMap, filesMap)
+  )
+}
+
 export function sanitizeMarkdownOutputPath(path: string) {
   // Remove trailing slashes
   return path.replace(/\/+$/, "")

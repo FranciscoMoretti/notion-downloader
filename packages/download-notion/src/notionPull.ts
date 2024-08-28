@@ -37,6 +37,7 @@ import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
   getAncestorPageOrDatabaseFilename,
+  getAncestorPageOrDatabaseFilepath,
   sanitizeMarkdownOutputPath,
   saveDataToJson,
 } from "./utils"
@@ -204,7 +205,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     "default",
-    (image) => getAncestorPageOrDatabaseFilename(image, allObjectsMap, filesMap)
+    // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
+    (image) => getAncestorPageOrDatabaseFilepath(image, allObjectsMap, filesMap)
   )
 
   const allPages = Object.values(objects.page).map(
