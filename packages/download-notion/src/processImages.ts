@@ -19,63 +19,68 @@ import { NotionPullOptions } from "./config/schema"
 import { updateImageUrlToMarkdownImagePath } from "./images"
 import { removePathPrefix } from "./pathUtils"
 
-async function processImage(
-  image: NotionImage,
-  filesManager: FilesManager,
-  imageNamingStrategy: ImageNamingStrategy,
-  imageFilePathStrategy: PathStrategy,
-  imageMarkdownPathStrategy: PathStrategy,
-  options: NotionPullOptions,
-  filesMap: FilesMap
-) {
-  if (filesManager.shouldProcessObject(image)) {
+async function processImage({
+  image,
+  existingFilesManager,
+  newFilesManager,
+  imageNamingStrategy,
+  imageFilePathStrategy,
+  imageMarkdownPathStrategy,
+  options,
+}: {
+  image: NotionImage
+  existingFilesManager: FilesManager
+  newFilesManager: FilesManager
+  imageNamingStrategy: ImageNamingStrategy
+  // TODO: The ones below should be replaced by filesmanager
+  imageFilePathStrategy: PathStrategy
+  imageMarkdownPathStrategy: PathStrategy
+  options: NotionPullOptions
+}) {
+  if (existingFilesManager.shouldProcessObject(image)) {
     await image.read()
     const imageFilename = imageNamingStrategy.getFileName(image)
 
-    // TODO: Include layout strategy to get a potential layout from filename before adding prefix
     const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
 
-    // TODO: All saves could be done in parallel
     await image.save(imageFileOutputPath)
 
-    // TODO: This should be handled by FilesManager
     const pathFromImageDirectory = removePathPrefix(
       imageFileOutputPath,
       options.imgOutputPath
     )
-    filesMap.set("image", image.id, {
+    newFilesManager.filesMap.set("image", image.id, {
       path: pathFromImageDirectory,
       lastEditedTime: image.lastEditedTime,
     })
     return imageMarkdownPathStrategy.getPath(imageFilename)
   } else {
-    // Save in new filesmap without changes
-    const imageRecordFromDirectory = filesManager.get(
+    const imageRecordFromDirectory = existingFilesManager.get(
       "directory",
       "image",
       image.id
     )
-    filesMap.set("image", image.id, imageRecordFromDirectory)
+    newFilesManager.filesMap.set("image", image.id, imageRecordFromDirectory)
     updateImageUrlToMarkdownImagePath(image.file, imageRecordFromDirectory.path)
   }
 }
 
 export async function processImages({
   imageBlocks,
-  filesManager,
+  existingFilesManager,
+  newFilesManager,
   imageNamingStrategy,
   imageFilePathStrategy,
   options,
-  filesMap,
   imageMarkdownPathStrategy,
   pages,
   databases,
 }: {
   options: NotionPullOptions
-  filesManager: FilesManager
+  existingFilesManager: FilesManager
+  newFilesManager: FilesManager
   imageNamingStrategy: ImageNamingStrategy
   imageFilePathStrategy: PathStrategy
-  filesMap: FilesMap
   imageMarkdownPathStrategy: PathStrategy
   imageBlocks: (BlockObjectResponse & { type: "image" })[]
   pages: NotionPage[]
@@ -84,15 +89,15 @@ export async function processImages({
   // Process image blocks
   for (const block of imageBlocks) {
     const image = new NotionImage(block)
-    await processImage(
+    await processImage({
       image,
-      filesManager,
+      existingFilesManager,
+      newFilesManager,
       imageNamingStrategy,
       imageFilePathStrategy,
       imageMarkdownPathStrategy,
       options,
-      filesMap
-    )
+    })
   }
 
   const pagesResponsesWithCover: PageObjectResponseWithCover[] = pages
@@ -100,30 +105,30 @@ export async function processImages({
     .filter(pageHasCover)
   for (const pageResponse of pagesResponsesWithCover) {
     const image = new NotionImage(pageResponse)
-    await processImage(
+    await processImage({
       image,
-      filesManager,
+      existingFilesManager,
+      newFilesManager,
       imageNamingStrategy,
       imageFilePathStrategy,
       imageMarkdownPathStrategy,
       options,
-      filesMap
-    )
+    })
   }
 
   const databasesResponsesWithCover: DatabaseObjectResponseWithCover[] =
     databases.map((database) => database.metadata).filter(databaseHasCover)
   for (const databaseResponse of databasesResponsesWithCover) {
     const image = new NotionImage(databaseResponse)
-    await processImage(
+    await processImage({
       image,
-      filesManager,
+      existingFilesManager,
+      newFilesManager,
       imageNamingStrategy,
       imageFilePathStrategy,
       imageMarkdownPathStrategy,
       options,
-      filesMap
-    )
+    })
   }
 }
 

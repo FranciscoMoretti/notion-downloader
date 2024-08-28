@@ -133,9 +133,14 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  const initialFilesMap = loadFilesMapFile(filesMapFilePath)
-  const filesManager = new FilesManager(initialFilesMap, objectsDirectories)
+  const previousFilesMap = loadFilesMapFile(filesMapFilePath)
+  const existingFilesManager = new FilesManager(
+    previousFilesMap,
+    objectsDirectories
+  )
+  const newFilesManager = new FilesManager(new FilesMap(), objectsDirectories)
 
+  // TODO: Path strategies should simply be handled by the FilesManager
   const imageMarkdownPathStrategy = new PathStrategy({
     pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
   })
@@ -176,8 +181,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return
   }
 
-  const filesMap = new FilesMap()
-
   const pageConfig: NotionPageConfig = {
     titleProperty: options.titleProperty,
     slugProperty: options.slugProperty,
@@ -190,7 +193,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.rootDbAsFolder,
     cachedNotionClient,
     layoutStrategy,
-    filesMap,
+    newFilesManager.filesMap,
     pageConfig
   )
 
@@ -206,7 +209,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
-    (image) => getAncestorPageOrDatabaseFilepath(image, allObjectsMap, filesMap)
+    (image) =>
+      getAncestorPageOrDatabaseFilepath(
+        image,
+        allObjectsMap,
+        newFilesManager.filesMap
+      )
   )
 
   const allPages = Object.values(objects.page).map(
@@ -238,27 +246,27 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   await processImages({
     imageBlocks,
-    filesManager,
+    existingFilesManager,
+    newFilesManager,
     imageNamingStrategy,
     imageFilePathStrategy,
     options,
-    filesMap,
     imageMarkdownPathStrategy,
     pages,
     databases,
   })
 
   // Filter from filesMap
-  Object.keys(filesMap.getAllOfType("page")).forEach((id) => {
+  Object.keys(newFilesManager.filesMap.getAllOfType("page")).forEach((id) => {
     const page = pages.find((p) => p.id === id)
     if (!page) {
-      filesMap.delete("page", id)
+      newFilesManager.filesMap.delete("page", id)
     }
   })
 
   // Only output pages that changed! The rest already exist.
   const pagesToOutput = pages.filter((page) => {
-    return filesManager.shouldProcessObject(page)
+    return existingFilesManager.shouldProcessObject(page)
   })
 
   info(`Found ${allPages.length} pages`)
@@ -274,16 +282,16 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,
-    filesMap
+    newFilesManager.filesMap
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  const fromRootFilesMap = filesMap.allToRootRelativePath(
-    filesMap,
+  const fromRootFilesMap = newFilesManager.filesMap.allToRootRelativePath(
+    newFilesManager.filesMap,
     objectsDirectories
   )
 
-  await filesManager.cleanOldFiles(fromRootFilesMap)
+  await existingFilesManager.cleanOldFiles(fromRootFilesMap)
   await saveDataToJson(fromRootFilesMap.getAll(), filesMapFilePath)
   // TODO: Ceanup images based on filesMap
   endGroup()

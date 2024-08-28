@@ -12,28 +12,29 @@ type ExtendedFileRecord = FileRecord & {
 }
 
 export class FilesManager {
-  public initialFilesMap?: FilesMap
+  public filesMap: FilesMap
   protected objectsDirectories: ObjectsDirectories
 
   public constructor(
+    // TODO: Should be structured props and intirialsFilesMap should be optional
     initialFilesMap: FilesMap | undefined,
     objectsDirectories: ObjectsDirectories
   ) {
-    this.initialFilesMap = initialFilesMap
+    this.filesMap = initialFilesMap || new FilesMap()
     // TODO: If directories changed, cleanup all files in directories changed here
     this.objectsDirectories = objectsDirectories
   }
 
   public async cleanOldFiles(newFilesMap: FilesMap): Promise<void> {
-    if (!this.initialFilesMap) {
+    if (!this.filesMap) {
       info("No files map found, skipping cleanup")
       return
     }
     info("Cleaning up old files")
 
-    const oldFiles = this.getFileRecords(this.initialFilesMap, "page")
+    const oldFiles = this.getFileRecords(this.filesMap, "page")
     const newFiles = this.getFileRecords(newFilesMap, "page")
-    const oldImages = this.getFileRecords(this.initialFilesMap, "image")
+    const oldImages = this.getFileRecords(this.filesMap, "image")
     const newImages = this.getFileRecords(newFilesMap, "image")
 
     const filesToRemove = this.getFilesToRemove(oldFiles, newFiles)
@@ -106,12 +107,12 @@ export class FilesManager {
   }
 
   public shouldProcessObject(notionObject: NotionObject): boolean {
-    if (!this.initialFilesMap) {
+    if (!this.filesMap) {
       return true // Process all pages if there's no initial files map
     }
 
     if (
-      !this.initialFilesMap.exists(
+      !this.filesMap.exists(
         // TODO: Make this FilesMa structure more generic when we want to store more than images
         notionObject.object == "block" ? "image" : notionObject.object,
         notionObject.id
@@ -119,7 +120,7 @@ export class FilesManager {
     ) {
       return true // Process new pages
     }
-    const existingRecord = this.initialFilesMap.get(
+    const existingRecord = this.filesMap.get(
       notionObject.object == "block" ? "image" : notionObject.object,
       notionObject.id
     )
@@ -139,16 +140,16 @@ export class FilesManager {
     type: FileType,
     id: string
   ): FileRecord {
-    if (!this.initialFilesMap) {
+    if (!this.filesMap) {
       throw new Error(
         "Trying to get file record from files map that does not exist"
       )
     }
 
-    const recordFromRoot = this.initialFilesMap.get(type, id)
+    const recordFromRoot = this.filesMap.get(type, id)
 
     if (relativeTo === "directory") {
-      return this.initialFilesMap.recordToDirectoriesRelativePath(
+      return this.filesMap.recordToDirectoriesRelativePath(
         recordFromRoot,
         this.objectsDirectories[type]
       )
