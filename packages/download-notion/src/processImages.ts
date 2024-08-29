@@ -53,7 +53,8 @@ async function processImage({
       path: pathFromImageDirectory,
       lastEditedTime: image.lastEditedTime,
     })
-    return imageMarkdownPathStrategy.getPath(imageFilename)
+    const markdownPath = imageMarkdownPathStrategy.getPath(imageFilename)
+    updateImageUrlToMarkdownImagePath(image.file, markdownPath)
   } else {
     const imageRecordFromDirectory = existingFilesManager.get(
       "directory",

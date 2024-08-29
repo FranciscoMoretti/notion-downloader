@@ -60,7 +60,7 @@ export const counts: OutputCounts = {
 }
 
 const CACHE_FOLDER = ".downloader"
-const FILES_MAP_FILE_PATH = "files_map.json"
+const FILES_MAP_FILE_PATH = CACHE_FOLDER + "/" + "files_map.json"
 
 export async function notionContinuosPull(options: NotionPullOptions) {
   // Wait forever
