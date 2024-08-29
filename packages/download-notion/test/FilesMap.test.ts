@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest"
 
-import { FileRecord, FilesMap, ObjectsDirectories } from "../src/FilesMap"
+import { FileRecord, FilesMap, ObjectPaths } from "../src/FilesMap"
 
 describe("FilesMap", () => {
   let filesMap: FilesMap
@@ -94,7 +94,7 @@ describe("FilesMap", () => {
   })
 
   test("allToRootRelativePath() adds correct prefixes", () => {
-    const objectsDirectories: ObjectsDirectories = {
+    const objectsDirectories: ObjectPaths = {
       page: "/notion/pages",
       database: "/notion/databases",
       image: "/notion/images",
@@ -115,7 +115,7 @@ describe("FilesMap", () => {
   })
 
   test("allToDirectoriesRelativePath() removes correct prefixes", () => {
-    const objectsDirectories: ObjectsDirectories = {
+    const objectsDirectories: ObjectPaths = {
       page: "/notion/pages",
       database: "/notion/databases",
       image: "/notion/images",

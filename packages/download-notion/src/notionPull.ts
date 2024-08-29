@@ -7,7 +7,7 @@ import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesCleaner, FilesManager } from "./FilesManager"
-import { FilesMap, ObjectsDirectories } from "./FilesMap"
+import { FilesMap, ObjectPaths } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
@@ -125,7 +125,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
 
-  const objectsDirectories: ObjectsDirectories = {
+  const objectsDirectories: ObjectPaths = {
     page: options.markdownOutputPath,
     database: options.markdownOutputPath,
     image: options.imgOutputPath,
@@ -138,13 +138,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const existingFilesManager = new FilesManager({
     initialFilesMap: previousFilesMap,
-    objectsDirectories,
+    outputDirectories: objectsDirectories,
   })
   const newFilesManager = new FilesManager({
-    objectsDirectories,
+    outputDirectories: objectsDirectories,
   })
 
-  // TODO: -> Path strategies should simply be handled by the FilesManager
+  // TODO: Path strategies should simply be handled by the FilesManager
   const imageMarkdownPathStrategy = new PathStrategy({
     pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
   })

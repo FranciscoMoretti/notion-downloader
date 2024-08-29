@@ -3,7 +3,7 @@ import {
   FileType,
   FilesMap,
   FilesMapData,
-  ObjectsDirectories,
+  ObjectPaths,
   recordMapWithPathPrefix,
 } from "./FilesMap"
 import { NotionObject } from "./NotionObject"
@@ -11,18 +11,18 @@ import { NotionObject } from "./NotionObject"
 export class FilesManager {
   // This class holds directories in which each file is located and relative paths to them
   public filesMap: FilesMap // Relative paths to files directories
-  protected objectsDirectories: ObjectsDirectories // Files directories
+  protected outputDirectories: ObjectPaths // Files directories
 
   public constructor({
-    objectsDirectories,
+    outputDirectories,
     initialFilesMap,
   }: {
-    objectsDirectories: ObjectsDirectories
+    outputDirectories: ObjectPaths
     initialFilesMap?: FilesMap
   }) {
     this.filesMap = initialFilesMap || new FilesMap()
     // TODO: If directories changed, cleanup all files in directories changed here
-    this.objectsDirectories = objectsDirectories
+    this.outputDirectories = outputDirectories
   }
 
   public isObjectNew(notionObject: NotionObject): boolean {
@@ -63,7 +63,7 @@ export class FilesManager {
     if (relativeTo === "root") {
       return this.filesMap.recordToRootRelativePath(
         recordFromDirectory,
-        this.objectsDirectories[type]
+        this.outputDirectories[type]
       )
     } else {
       return recordFromDirectory
@@ -80,7 +80,7 @@ export class FilesManager {
       relativeTo === "root"
         ? this.filesMap.recordToDirectoriesRelativePath(
             record,
-            this.objectsDirectories[type]
+            this.outputDirectories[type]
           )
         : record
     this.filesMap.set(type, id, recordToSet)
@@ -96,7 +96,7 @@ export class FilesManager {
   ): Record<string, FileRecord> {
     const records = this.filesMap.getAllOfType(type)
     if (relativeTo === "root") {
-      return recordMapWithPathPrefix(records, this.objectsDirectories[type])
+      return recordMapWithPathPrefix(records, this.outputDirectories[type])
     } else {
       return records
     }
@@ -109,15 +109,15 @@ export class FilesManager {
       return {
         page: recordMapWithPathPrefix(
           filesMapData.page,
-          this.objectsDirectories.page
+          this.outputDirectories.page
         ),
         database: recordMapWithPathPrefix(
           filesMapData.database,
-          this.objectsDirectories.database
+          this.outputDirectories.database
         ),
         image: recordMapWithPathPrefix(
           filesMapData.image,
-          this.objectsDirectories.image
+          this.outputDirectories.image
         ),
       }
     } else {
