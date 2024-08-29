@@ -140,8 +140,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     initialFilesMap: previousFilesMap,
     objectsDirectories,
   })
-  // TODO: This should be storing in the same format as the existingFilesManager "root" / "directory"
-  // TODO: Figure out in which format we store throughout the app. Use `set` and `get` methods in FilesManager to ensure it.
   const newFilesManager = new FilesManager({
     objectsDirectories,
   })
