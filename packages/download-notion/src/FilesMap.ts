@@ -7,7 +7,7 @@ export type FileRecord = {
 
 export type FileType = "page" | "database" | "image"
 
-type FilesMapData = Record<FileType, Record<string, FileRecord>>
+export type FilesMapData = Record<FileType, Record<string, FileRecord>>
 
 export type ObjectsDirectories = Record<FileType, string>
 
@@ -43,7 +43,7 @@ export class FilesMap {
     return this.map[type]
   }
 
-  getAll(): Record<FileType, Record<string, FileRecord>> {
+  getAll(): FilesMapData {
     return this.map
   }
 
@@ -69,6 +69,7 @@ export class FilesMap {
     return recordWithoutPathPrefix(fileRecord, prefix)
   }
 
+  // TODO: Move relative to root and to directories to FilesManager
   static allToRootRelativePath(
     filesMap: FilesMap,
     objectsDirectories: ObjectsDirectories
@@ -81,9 +82,9 @@ export class FilesMap {
     const { page, database, image } = filesMap.getAll()
 
     const fromRootFilesMapData: FilesMapData = {
-      page: recordMapwithPathPrefix(page, pagesDirectory),
-      database: recordMapwithPathPrefix(database, databasesDirectory),
-      image: recordMapwithPathPrefix(image, imagesDirectory),
+      page: recordMapWithPathPrefix(page, pagesDirectory),
+      database: recordMapWithPathPrefix(database, databasesDirectory),
+      image: recordMapWithPathPrefix(image, imagesDirectory),
     }
     const fromRootFilesMap = new FilesMap()
     fromRootFilesMap.map = fromRootFilesMapData
@@ -102,9 +103,9 @@ export class FilesMap {
     const { page, database, image } = filesMap.getAll()
 
     const toDirectoriesFilesMapData: FilesMapData = {
-      page: recordMapwithoutPathPrefix(page, pagesDirectory),
-      database: recordMapwithoutPathPrefix(database, databasesDirectory),
-      image: recordMapwithoutPathPrefix(image, imagesDirectory),
+      page: recordMapWithoutPathPrefix(page, pagesDirectory),
+      database: recordMapWithoutPathPrefix(database, databasesDirectory),
+      image: recordMapWithoutPathPrefix(image, imagesDirectory),
     }
     const toDirectoriesFilesMap = new FilesMap()
     toDirectoriesFilesMap.map = toDirectoriesFilesMapData
@@ -112,7 +113,7 @@ export class FilesMap {
   }
 }
 
-function recordMapwithPathPrefix(
+export function recordMapWithPathPrefix(
   recordMap: Record<string, FileRecord>,
   prefix: string
 ): Record<string, FileRecord> {
@@ -126,7 +127,7 @@ function recordMapwithPathPrefix(
   )
 }
 
-function recordMapwithoutPathPrefix(
+export function recordMapWithoutPathPrefix(
   recordMap: Record<string, FileRecord>,
   prefix: string
 ): Record<string, FileRecord> {

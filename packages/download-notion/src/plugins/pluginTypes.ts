@@ -1,6 +1,7 @@
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
+import { FilesManager } from "../FilesManager"
 import { FilesMap } from "../FilesMap"
 import { NotionPage } from "../NotionPage"
 import { NotionPullOptions } from "../config/schema"
@@ -75,7 +76,7 @@ export type IDocuNotionContext = {
   convertNotionLinkToLocalDocusaurusLink: (url: string) => string | undefined
   pages: NotionPage[]
   counts: ICounts
-  filesMap: FilesMap
+  filesManager: FilesManager
 
   // If the output is creating things like react elements, you can append their import definitions
   // to this array so they get added to the page.

@@ -6,7 +6,7 @@ import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { FilesManager } from "./FilesManager"
+import { FilesCleaner, FilesManager } from "./FilesManager"
 import { FilesMap, ObjectsDirectories } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
@@ -133,12 +133,18 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
+  // TODO: Implement a logic to reset the state if previous save directories vs current directories are different
   const previousFilesMap = loadFilesMapFile(filesMapFilePath)
-  const existingFilesManager = new FilesManager(
-    previousFilesMap,
-    objectsDirectories
-  )
-  const newFilesManager = new FilesManager(new FilesMap(), objectsDirectories)
+
+  const existingFilesManager = new FilesManager({
+    initialFilesMap: previousFilesMap,
+    objectsDirectories,
+  })
+  // TODO: This should be storing in the same format as the existingFilesManager "root" / "directory"
+  // TODO: Figure out in which format we store throughout the app. Use `set` and `get` methods in FilesManager to ensure it.
+  const newFilesManager = new FilesManager({
+    objectsDirectories,
+  })
 
   // TODO: Path strategies should simply be handled by the FilesManager
   const imageMarkdownPathStrategy = new PathStrategy({
@@ -193,7 +199,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.rootDbAsFolder,
     cachedNotionClient,
     layoutStrategy,
-    newFilesManager.filesMap,
+    newFilesManager,
     pageConfig
   )
 
@@ -210,11 +216,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>
-      getAncestorPageOrDatabaseFilepath(
-        image,
-        allObjectsMap,
-        newFilesManager.filesMap
-      )
+      getAncestorPageOrDatabaseFilepath(image, allObjectsMap, newFilesManager)
   )
 
   const allPages = Object.values(objects.page).map(
@@ -257,12 +259,14 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   // Filter from filesMap
-  Object.keys(newFilesManager.filesMap.getAllOfType("page")).forEach((id) => {
-    const page = pages.find((p) => p.id === id)
-    if (!page) {
-      newFilesManager.filesMap.delete("page", id)
+  Object.keys(newFilesManager.getAllOfType("directory", "page")).forEach(
+    (id) => {
+      const page = pages.find((p) => p.id === id)
+      if (!page) {
+        newFilesManager.delete("page", id)
+      }
     }
-  })
+  )
 
   // Only output pages that changed! The rest already exist.
   const pagesToOutput = pages.filter((page) => {
@@ -282,17 +286,17 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,
-    newFilesManager.filesMap
+    newFilesManager
   )
   endGroup()
   group("Stage 3: clean up old files & images...")
-  const fromRootFilesMap = newFilesManager.filesMap.allToRootRelativePath(
-    newFilesManager.filesMap,
-    objectsDirectories
-  )
 
-  await existingFilesManager.cleanOldFiles(fromRootFilesMap)
-  await saveDataToJson(fromRootFilesMap.getAll(), filesMapFilePath)
+  const filesCleaner = new FilesCleaner({
+    oldFilesManager: existingFilesManager,
+    newFilesManager,
+  })
+  await filesCleaner.cleanupOldFiles()
+  await saveDataToJson(newFilesManager.getAll("directory"), filesMapFilePath)
   // TODO: Ceanup images based on filesMap
   endGroup()
 }
@@ -338,7 +342,7 @@ async function outputPages(
   pages: Array<NotionPage>,
   client: Client,
   notionToMarkdown: NotionToMarkdown,
-  filesMap: FilesMap
+  filesManager: FilesManager
 ) {
   const context: IDocuNotionContext = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
@@ -350,7 +354,9 @@ async function outputPages(
     notionToMarkdown: notionToMarkdown,
     options: options,
     pages: pages,
-    filesMap: filesMap,
+
+    // TODO: This should be replaced with filesManager in the future to have a consistent way to access paths.
+    filesManager: filesManager,
     counts: counts, // review will this get copied or pointed to?
     imports: [],
     convertNotionLinkToLocalDocusaurusLink: (url: string) =>
@@ -358,7 +364,7 @@ async function outputPages(
   }
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
-    const mdPath = filesMap.get("page", page.id)?.path
+    const mdPath = filesManager.get("directory", "page", page.id)?.path
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
     const markdown = await getMarkdownForPage(config, context, page)

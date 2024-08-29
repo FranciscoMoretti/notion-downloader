@@ -2,7 +2,7 @@ import crypto from "crypto"
 import * as Path from "path"
 import fs from "fs-extra"
 
-import { FilesMap } from "./FilesMap"
+import { FilesManager } from "./FilesManager"
 import { NotionImage } from "./NotionImage"
 import { PlainObjectsMap, getPageAncestorId } from "./objects_utils"
 
@@ -49,12 +49,12 @@ export function filenameFromPath(path: string) {
 export function getAncestorPageOrDatabaseFilepath(
   image: NotionImage,
   objectsMap: PlainObjectsMap,
-  filesMap: FilesMap
+  filesManager: FilesManager
 ): string {
   if (image.object == "page") {
-    return filesMap.get("page", image.id).path
+    return filesManager.get("directory", "page", image.id).path
   } else if (image.object == "database") {
-    return filesMap.get("database", image.id).path
+    return filesManager.get("directory", "database", image.id).path
   }
 
   // It's a block. Ancestor is page
@@ -62,15 +62,16 @@ export function getAncestorPageOrDatabaseFilepath(
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
   }
-  return filesMap.get("page", ancestorPageId).path
+  return filesManager.get("directory", "page", ancestorPageId).path
 }
 
 export function getAncestorPageOrDatabaseFilename(
   image: NotionImage,
-  filesMap: FilesMap
+  objectsMap: PlainObjectsMap,
+  filesManager: FilesManager
 ): string {
   return filenameFromPath(
-    getAncestorPageOrDatabaseFilepath(image, objectsMap, filesMap)
+    getAncestorPageOrDatabaseFilepath(image, objectsMap, filesManager)
   )
 }
 

@@ -5,7 +5,6 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 
 import { FilesManager } from "./FilesManager"
-import { FilesMap } from "./FilesMap"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import {
@@ -41,6 +40,7 @@ async function processImage({
     await image.read()
     const imageFilename = imageNamingStrategy.getFileName(image)
 
+    // TODO: These paths strategies should be handled inside FilesManager getting the root path
     const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
 
     await image.save(imageFileOutputPath)
@@ -49,7 +49,7 @@ async function processImage({
       imageFileOutputPath,
       options.imgOutputPath
     )
-    newFilesManager.filesMap.set("image", image.id, {
+    newFilesManager.set("directory", "image", image.id, {
       path: pathFromImageDirectory,
       lastEditedTime: image.lastEditedTime,
     })
@@ -60,7 +60,12 @@ async function processImage({
       "image",
       image.id
     )
-    newFilesManager.filesMap.set("image", image.id, imageRecordFromDirectory)
+    newFilesManager.set(
+      "directory",
+      "image",
+      image.id,
+      imageRecordFromDirectory
+    )
     updateImageUrlToMarkdownImagePath(image.file, imageRecordFromDirectory.path)
   }
 }

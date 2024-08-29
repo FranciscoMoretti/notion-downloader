@@ -5,7 +5,7 @@ import {
   isFullPage,
 } from "@notionhq/client"
 
-import { FilesMap } from "./FilesMap"
+import { FilesManager } from "./FilesManager"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage, NotionPageConfig, getPageContentInfo } from "./NotionPage"
@@ -17,7 +17,7 @@ export async function getFileTreeMap(
   databaseIsRootLevel: boolean,
   client: Client,
   layoutStrategy: LayoutStrategy,
-  filesMap: FilesMap,
+  filesManager: FilesManager,
   pageConfig: NotionPageConfig
 ): Promise<void> {
   if (currentType === "database") {
@@ -25,7 +25,7 @@ export async function getFileTreeMap(
     const layoutContext = !databaseIsRootLevel
       ? layoutStrategy.newLevel(incomingContext, database)
       : incomingContext
-    filesMap.set("database", currentID, {
+    filesManager.set("directory", "database", currentID, {
       path: layoutContext,
       lastEditedTime: database.metadata.last_edited_time,
     })
@@ -46,13 +46,13 @@ export async function getFileTreeMap(
         false,
         client,
         layoutStrategy,
-        filesMap,
+        filesManager,
         pageConfig
       )
     }
   } else if (currentType === "page") {
     const page = await getNotionPage(client, currentID, pageConfig)
-    filesMap.set("page", currentID, {
+    filesManager.set("directory", "page", currentID, {
       path: layoutStrategy.getPathForPage2(page, incomingContext),
       lastEditedTime: page.metadata.last_edited_time,
     })
@@ -81,7 +81,7 @@ export async function getFileTreeMap(
           false,
           client,
           layoutStrategy,
-          filesMap,
+          filesManager,
           pageConfig
         )
       }
@@ -93,7 +93,7 @@ export async function getFileTreeMap(
           false,
           client,
           layoutStrategy,
-          filesMap,
+          filesManager,
           pageConfig
         )
       }
