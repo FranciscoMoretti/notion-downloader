@@ -3,26 +3,36 @@ import {
   FileType,
   FilesMap,
   FilesMapData,
-  ObjectPaths,
+  ObjectPrefixDict,
   recordMapWithPathPrefix,
 } from "./FilesMap"
 import { NotionObject } from "./NotionObject"
 
+type PathType = "base" | "output" | "markdown"
+
 export class FilesManager {
   // This class holds directories in which each file is located and relative paths to them
   public filesMap: FilesMap // Relative paths to files directories
-  protected outputDirectories: ObjectPaths // Files directories
+  protected outputDirectories: ObjectPrefixDict // Files directories
+  protected markdownPrefixes: ObjectPrefixDict // Markdown prefixes
 
   public constructor({
     outputDirectories,
     initialFilesMap,
+    markdownPrefixes,
   }: {
-    outputDirectories: ObjectPaths
+    outputDirectories: ObjectPrefixDict
+    markdownPrefixes?: ObjectPrefixDict
     initialFilesMap?: FilesMap
   }) {
     this.filesMap = initialFilesMap || new FilesMap()
     // TODO: If directories changed, cleanup all files in directories changed here
     this.outputDirectories = outputDirectories
+    this.markdownPrefixes = {
+      page: markdownPrefixes?.page || "",
+      database: markdownPrefixes?.database || "",
+      image: markdownPrefixes?.image || "",
+    }
   }
 
   public isObjectNew(notionObject: NotionObject): boolean {
@@ -53,14 +63,10 @@ export class FilesManager {
     return this.filesMap.exists(type, id)
   }
 
-  public get(
-    relativeTo: "directory" | "root",
-    type: FileType,
-    id: string
-  ): FileRecord {
+  public get(relativeTo: PathType, type: FileType, id: string): FileRecord {
     const recordFromDirectory = this.filesMap.get(type, id)
 
-    if (relativeTo === "root") {
+    if (relativeTo === "output") {
       return this.filesMap.recordToRootRelativePath(
         recordFromDirectory,
         this.outputDirectories[type]
@@ -71,13 +77,13 @@ export class FilesManager {
   }
 
   public set(
-    relativeTo: "directory" | "root",
+    relativeTo: PathType,
     type: FileType,
     id: string,
     record: FileRecord
   ): void {
     const recordToSet =
-      relativeTo === "root"
+      relativeTo === "output"
         ? this.filesMap.recordToDirectoriesRelativePath(
             record,
             this.outputDirectories[type]
@@ -91,21 +97,21 @@ export class FilesManager {
   }
 
   public getAllOfType(
-    relativeTo: "directory" | "root",
+    relativeTo: PathType,
     type: FileType
   ): Record<string, FileRecord> {
     const records = this.filesMap.getAllOfType(type)
-    if (relativeTo === "root") {
+    if (relativeTo === "output") {
       return recordMapWithPathPrefix(records, this.outputDirectories[type])
     } else {
       return records
     }
   }
 
-  public getAll(relativeTo: "directory" | "root"): FilesMapData {
+  public getAll(relativeTo: PathType): FilesMapData {
     const filesMapData = this.filesMap.getAll()
 
-    if (relativeTo === "root") {
+    if (relativeTo === "output") {
       return {
         page: recordMapWithPathPrefix(
           filesMapData.page,

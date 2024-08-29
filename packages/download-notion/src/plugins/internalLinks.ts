@@ -94,7 +94,7 @@ function convertLinkHref(
 ): string {
   // TODO: Instead of type directory this should be type `markdown`
   let convertedLink = context.filesManager.get(
-    "directory",
+    "base",
     "page",
     targetPage.id
   )?.path

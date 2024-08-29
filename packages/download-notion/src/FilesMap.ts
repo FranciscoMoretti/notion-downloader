@@ -9,7 +9,7 @@ export type FileType = "page" | "database" | "image"
 
 export type FilesMapData = Record<FileType, Record<string, FileRecord>>
 
-export type ObjectPaths = Record<FileType, string>
+export type ObjectPrefixDict = Record<FileType, string>
 
 export class FilesMap {
   private map: FilesMapData = {
@@ -72,7 +72,7 @@ export class FilesMap {
   // TODO: Move relative to root and to directories to FilesManager
   static allToRootRelativePath(
     filesMap: FilesMap,
-    objectsDirectories: ObjectPaths
+    objectsDirectories: ObjectPrefixDict
   ): FilesMap {
     const {
       page: pagesDirectory,
@@ -93,7 +93,7 @@ export class FilesMap {
 
   static allToDirectoriesRelativePath(
     filesMap: FilesMap,
-    objectsDirectories: ObjectPaths
+    objectsDirectories: ObjectPrefixDict
   ): FilesMap {
     const {
       page: pagesDirectory,

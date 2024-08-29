@@ -43,7 +43,7 @@ export class FilesCleaner {
     type: "page" | "image"
   ): ExtendedFileRecord[] {
     // Root path is needed so that fiels can be removed
-    return Object.entries(filesManager.getAllOfType("root", type)).map(
+    return Object.entries(filesManager.getAllOfType("output", type)).map(
       ([id, record]) => ({
         id,
         ...record,

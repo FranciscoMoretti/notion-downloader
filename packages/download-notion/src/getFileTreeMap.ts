@@ -25,7 +25,7 @@ export async function getFileTreeMap(
     const layoutContext = !databaseIsRootLevel
       ? layoutStrategy.newLevel(incomingContext, database)
       : incomingContext
-    filesManager.set("directory", "database", currentID, {
+    filesManager.set("base", "database", currentID, {
       path: layoutContext,
       lastEditedTime: database.metadata.last_edited_time,
     })
@@ -52,7 +52,7 @@ export async function getFileTreeMap(
     }
   } else if (currentType === "page") {
     const page = await getNotionPage(client, currentID, pageConfig)
-    filesManager.set("directory", "page", currentID, {
+    filesManager.set("base", "page", currentID, {
       path: layoutStrategy.getPathForPage2(page, incomingContext),
       lastEditedTime: page.metadata.last_edited_time,
     })

@@ -52,9 +52,9 @@ export function getAncestorPageOrDatabaseFilepath(
   filesManager: FilesManager
 ): string {
   if (image.object == "page") {
-    return filesManager.get("directory", "page", image.id).path
+    return filesManager.get("base", "page", image.id).path
   } else if (image.object == "database") {
-    return filesManager.get("directory", "database", image.id).path
+    return filesManager.get("base", "database", image.id).path
   }
 
   // It's a block. Ancestor is page
@@ -62,7 +62,7 @@ export function getAncestorPageOrDatabaseFilepath(
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
   }
-  return filesManager.get("directory", "page", ancestorPageId).path
+  return filesManager.get("base", "page", ancestorPageId).path
 }
 
 export function getAncestorPageOrDatabaseFilename(

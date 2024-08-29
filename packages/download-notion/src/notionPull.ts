@@ -6,8 +6,9 @@ import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { FilesCleaner, FilesManager } from "./FilesManager"
-import { FilesMap, ObjectPaths } from "./FilesMap"
+import { FilesCleaner } from "./FilesCleaner"
+import { FilesManager } from "./FilesManager"
+import { FilesMap, ObjectPrefixDict } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
@@ -125,7 +126,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
 
-  const objectsDirectories: ObjectPaths = {
+  const objectsDirectories: ObjectPrefixDict = {
     page: options.markdownOutputPath,
     database: options.markdownOutputPath,
     image: options.imgOutputPath,
@@ -257,18 +258,16 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   // Filter from filesMap
-  Object.keys(newFilesManager.getAllOfType("directory", "page")).forEach(
-    (id) => {
-      const page = pages.find((p) => p.id === id)
-      if (!page) {
-        newFilesManager.delete("page", id)
-      }
+  Object.keys(newFilesManager.getAllOfType("base", "page")).forEach((id) => {
+    const page = pages.find((p) => p.id === id)
+    if (!page) {
+      newFilesManager.delete("page", id)
     }
-  )
+  })
 
   // Only output pages that changed! The rest already exist.
   const pagesToOutput = pages.filter((page) => {
-    return existingFilesManager.shouldProcessObject(page)
+    return existingFilesManager.isObjectNew(page)
   })
 
   info(`Found ${allPages.length} pages`)
@@ -294,7 +293,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     newFilesManager,
   })
   await filesCleaner.cleanupOldFiles()
-  await saveDataToJson(newFilesManager.getAll("directory"), filesMapFilePath)
+  await saveDataToJson(newFilesManager.getAll("base"), filesMapFilePath)
   // TODO: Ceanup images based on filesMap
   endGroup()
 }
@@ -362,7 +361,7 @@ async function outputPages(
   }
   for (const page of pages) {
     // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
-    const mdPath = filesManager.get("directory", "page", page.id)?.path
+    const mdPath = filesManager.get("base", "page", page.id)?.path
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
     const markdown = await getMarkdownForPage(config, context, page)

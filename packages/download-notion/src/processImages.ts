@@ -36,7 +36,7 @@ async function processImage({
   imageMarkdownPathStrategy: PathStrategy
   options: NotionPullOptions
 }) {
-  if (existingFilesManager.shouldProcessObject(image)) {
+  if (existingFilesManager.isObjectNew(image)) {
     await image.read()
     const imageFilename = imageNamingStrategy.getFileName(image)
 
@@ -49,7 +49,7 @@ async function processImage({
       imageFileOutputPath,
       options.imgOutputPath
     )
-    newFilesManager.set("directory", "image", image.id, {
+    newFilesManager.set("base", "image", image.id, {
       path: pathFromImageDirectory,
       lastEditedTime: image.lastEditedTime,
     })
@@ -57,16 +57,11 @@ async function processImage({
     updateImageUrlToMarkdownImagePath(image.file, markdownPath)
   } else {
     const imageRecordFromDirectory = existingFilesManager.get(
-      "directory",
+      "base",
       "image",
       image.id
     )
-    newFilesManager.set(
-      "directory",
-      "image",
-      image.id,
-      imageRecordFromDirectory
-    )
+    newFilesManager.set("base", "image", image.id, imageRecordFromDirectory)
     updateImageUrlToMarkdownImagePath(image.file, imageRecordFromDirectory.path)
   }
 }
