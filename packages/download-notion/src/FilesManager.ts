@@ -25,22 +25,20 @@ export class FilesManager {
     this.objectsDirectories = objectsDirectories
   }
 
-  // TODO: Rethink if this method should be in this class. FilesManager shouldn't know about processing. Maybe name isNewObject.
-  public shouldProcessObject(notionObject: NotionObject): boolean {
+  public isObjectNew(notionObject: NotionObject): boolean {
     if (
       !this.filesMap.exists(
-        // TODO: Make this FilesMa structure more generic when we want to store more than images
+        // TODO: Make this FilesMap structure more generic when we want to store more than images
         notionObject.object == "block" ? "image" : notionObject.object,
         notionObject.id
       )
     ) {
-      return true // Process new pages
+      return true
     }
     const existingRecord = this.filesMap.get(
       notionObject.object == "block" ? "image" : notionObject.object,
       notionObject.id
     )
-    // If new file date is older than old file date, the state is inconcistent and we throw an error
     if (
       new Date(notionObject.lastEditedTime).getTime() >
       new Date(existingRecord.lastEditedTime).getTime()

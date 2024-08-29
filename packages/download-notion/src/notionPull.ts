@@ -144,7 +144,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectsDirectories,
   })
 
-  // TODO: Path strategies should simply be handled by the FilesManager
+  // TODO: -> Path strategies should simply be handled by the FilesManager
   const imageMarkdownPathStrategy = new PathStrategy({
     pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
   })
