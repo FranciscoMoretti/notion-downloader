@@ -105,7 +105,7 @@ describe("FilesMap", () => {
     }
     filesMap.set("page", "page-id", pageRecord)
 
-    const rootRelativeFilesMap = FilesMap.allToRootRelativePath(
+    const rootRelativeFilesMap = FilesMap.allToPathWithPrefix(
       filesMap,
       objectsDirectories
     )
@@ -126,7 +126,7 @@ describe("FilesMap", () => {
     }
     filesMap.set("page", "page-id", pageRecord)
 
-    const dirRelativeFilesMap = FilesMap.allToDirectoriesRelativePath(
+    const dirRelativeFilesMap = FilesMap.allToPathWithoutPrefix(
       filesMap,
       objectsDirectories
     )

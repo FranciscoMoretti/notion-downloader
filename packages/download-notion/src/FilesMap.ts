@@ -58,19 +58,8 @@ export class FilesMap {
     return JSON.stringify(this.map)
   }
 
-  recordToRootRelativePath(fileRecord: FileRecord, prefix: string): FileRecord {
-    return recordWithPathPrefix(fileRecord, prefix)
-  }
-
-  recordToDirectoriesRelativePath(
-    fileRecord: FileRecord,
-    prefix: string
-  ): FileRecord {
-    return recordWithoutPathPrefix(fileRecord, prefix)
-  }
-
-  // TODO: Move relative to root and to directories to FilesManager
-  static allToRootRelativePath(
+  // TODO: Move this functions to utilities outside of this class
+  static allToPathWithPrefix(
     filesMap: FilesMap,
     objectsDirectories: ObjectPrefixDict
   ): FilesMap {
@@ -82,16 +71,16 @@ export class FilesMap {
     const { page, database, image } = filesMap.getAll()
 
     const fromRootFilesMapData: FilesMapData = {
-      page: recordMapWithPathPrefix(page, pagesDirectory),
-      database: recordMapWithPathPrefix(database, databasesDirectory),
-      image: recordMapWithPathPrefix(image, imagesDirectory),
+      page: recordMapWithPrefix(page, pagesDirectory),
+      database: recordMapWithPrefix(database, databasesDirectory),
+      image: recordMapWithPrefix(image, imagesDirectory),
     }
     const fromRootFilesMap = new FilesMap()
     fromRootFilesMap.map = fromRootFilesMapData
     return fromRootFilesMap
   }
 
-  static allToDirectoriesRelativePath(
+  static allToPathWithoutPrefix(
     filesMap: FilesMap,
     objectsDirectories: ObjectPrefixDict
   ): FilesMap {
@@ -103,9 +92,9 @@ export class FilesMap {
     const { page, database, image } = filesMap.getAll()
 
     const toDirectoriesFilesMapData: FilesMapData = {
-      page: recordMapWithoutPathPrefix(page, pagesDirectory),
-      database: recordMapWithoutPathPrefix(database, databasesDirectory),
-      image: recordMapWithoutPathPrefix(image, imagesDirectory),
+      page: recordMapWithoutPrefix(page, pagesDirectory),
+      database: recordMapWithoutPrefix(database, databasesDirectory),
+      image: recordMapWithoutPrefix(image, imagesDirectory),
     }
     const toDirectoriesFilesMap = new FilesMap()
     toDirectoriesFilesMap.map = toDirectoriesFilesMapData
@@ -113,7 +102,7 @@ export class FilesMap {
   }
 }
 
-export function recordMapWithPathPrefix(
+export function recordMapWithPrefix(
   recordMap: Record<string, FileRecord>,
   prefix: string
 ): Record<string, FileRecord> {
@@ -121,13 +110,13 @@ export function recordMapWithPathPrefix(
     Object.entries(recordMap).map(
       ([id, record]: [string, FileRecord]): [string, FileRecord] => [
         id,
-        recordWithPathPrefix(record, prefix),
+        recordWithPrefix(record, prefix),
       ]
     )
   )
 }
 
-export function recordMapWithoutPathPrefix(
+export function recordMapWithoutPrefix(
   recordMap: Record<string, FileRecord>,
   prefix: string
 ): Record<string, FileRecord> {
@@ -135,13 +124,16 @@ export function recordMapWithoutPathPrefix(
     Object.entries(recordMap).map(
       ([id, record]: [string, FileRecord]): [string, FileRecord] => [
         id,
-        recordWithoutPathPrefix(record, prefix),
+        recordWithoutPrefix(record, prefix),
       ]
     )
   )
 }
 
-function recordWithPathPrefix(record: FileRecord, prefix: string): FileRecord {
+export function recordWithPrefix(
+  record: FileRecord,
+  prefix: string
+): FileRecord {
   const newPath = addPathPrefix(record.path, prefix)
 
   return {
@@ -150,7 +142,7 @@ function recordWithPathPrefix(record: FileRecord, prefix: string): FileRecord {
   }
 }
 
-function recordWithoutPathPrefix(
+export function recordWithoutPrefix(
   record: FileRecord,
   prefix: string
 ): FileRecord {

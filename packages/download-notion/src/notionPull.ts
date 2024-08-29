@@ -132,6 +132,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     image: options.imgOutputPath,
   }
 
+  const markdownPrefixes: ObjectPrefixDict = {
+    page: "",
+    database: "",
+    image: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
+  }
+
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
   // TODO: Implement a logic to reset the state if previous save directories vs current directories are different
@@ -140,9 +146,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const existingFilesManager = new FilesManager({
     initialFilesMap: previousFilesMap,
     outputDirectories: objectsDirectories,
+    markdownPrefixes: markdownPrefixes,
   })
   const newFilesManager = new FilesManager({
     outputDirectories: objectsDirectories,
+    markdownPrefixes: markdownPrefixes,
   })
 
   // TODO: Path strategies should simply be handled by the FilesManager
@@ -250,9 +258,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     existingFilesManager,
     newFilesManager,
     imageNamingStrategy,
-    imageFilePathStrategy,
-    options,
-    imageMarkdownPathStrategy,
     pages,
     databases,
   })

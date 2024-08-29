@@ -4,7 +4,8 @@ import {
   FilesMap,
   FilesMapData,
   ObjectPrefixDict,
-  recordMapWithPathPrefix,
+  recordMapWithPrefix,
+  recordWithPrefix,
 } from "./FilesMap"
 import { NotionObject } from "./NotionObject"
 
@@ -63,32 +64,38 @@ export class FilesManager {
     return this.filesMap.exists(type, id)
   }
 
-  public get(relativeTo: PathType, type: FileType, id: string): FileRecord {
+  public get(pathType: PathType, type: FileType, id: string): FileRecord {
     const recordFromDirectory = this.filesMap.get(type, id)
 
-    if (relativeTo === "output") {
-      return this.filesMap.recordToRootRelativePath(
-        recordFromDirectory,
-        this.outputDirectories[type]
-      )
-    } else {
+    if (pathType === "output") {
+      return recordWithPrefix(recordFromDirectory, this.outputDirectories[type])
+    } else if (pathType === "markdown") {
+      return recordWithPrefix(recordFromDirectory, this.markdownPrefixes[type])
+    } else if (pathType === "base") {
       return recordFromDirectory
+    } else {
+      // error out
+      throw new Error(`Invalid path type: ${pathType}`)
     }
   }
 
   public set(
-    relativeTo: PathType,
+    pathType: PathType,
     type: FileType,
     id: string,
     record: FileRecord
   ): void {
-    const recordToSet =
-      relativeTo === "output"
-        ? this.filesMap.recordToDirectoriesRelativePath(
-            record,
-            this.outputDirectories[type]
-          )
-        : record
+    let recordToSet: FileRecord
+    if (pathType === "output") {
+      recordToSet = recordWithPrefix(record, this.outputDirectories[type])
+    } else if (pathType === "markdown") {
+      recordToSet = recordWithPrefix(record, this.markdownPrefixes[type])
+    } else if (pathType === "base") {
+      recordToSet = record
+    } else {
+      // error out
+      throw new Error(`Invalid path type: ${pathType}`)
+    }
     this.filesMap.set(type, id, recordToSet)
   }
 
@@ -97,37 +104,38 @@ export class FilesManager {
   }
 
   public getAllOfType(
-    relativeTo: PathType,
+    pathType: PathType,
     type: FileType
   ): Record<string, FileRecord> {
     const records = this.filesMap.getAllOfType(type)
-    if (relativeTo === "output") {
-      return recordMapWithPathPrefix(records, this.outputDirectories[type])
-    } else {
+    if (pathType === "output") {
+      return recordMapWithPrefix(records, this.outputDirectories[type])
+    } else if (pathType === "markdown") {
+      return recordMapWithPrefix(records, this.markdownPrefixes[type])
+    } else if (pathType === "base") {
       return records
+    } else {
+      // error out
+      throw new Error(`Invalid path type: ${pathType}`)
     }
   }
 
-  public getAll(relativeTo: PathType): FilesMapData {
+  public getAll(pathType: PathType): FilesMapData {
     const filesMapData = this.filesMap.getAll()
 
-    if (relativeTo === "output") {
+    if (pathType === "output" || pathType === "markdown") {
+      const prefixes =
+        pathType === "output" ? this.outputDirectories : this.markdownPrefixes
       return {
-        page: recordMapWithPathPrefix(
-          filesMapData.page,
-          this.outputDirectories.page
-        ),
-        database: recordMapWithPathPrefix(
-          filesMapData.database,
-          this.outputDirectories.database
-        ),
-        image: recordMapWithPathPrefix(
-          filesMapData.image,
-          this.outputDirectories.image
-        ),
+        page: recordMapWithPrefix(filesMapData.page, prefixes.page),
+        database: recordMapWithPrefix(filesMapData.database, prefixes.database),
+        image: recordMapWithPrefix(filesMapData.image, prefixes.image),
       }
-    } else {
+    } else if (pathType === "base") {
       return filesMapData
+    } else {
+      // error out
+      throw new Error(`Invalid path type: ${pathType}`)
     }
   }
 }

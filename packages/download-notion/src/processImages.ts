@@ -23,37 +23,28 @@ async function processImage({
   existingFilesManager,
   newFilesManager,
   imageNamingStrategy,
-  imageFilePathStrategy,
-  imageMarkdownPathStrategy,
-  options,
 }: {
   image: NotionImage
   existingFilesManager: FilesManager
   newFilesManager: FilesManager
   imageNamingStrategy: ImageNamingStrategy
-  // TODO: The ones below should be replaced by filesmanager
-  imageFilePathStrategy: PathStrategy
-  imageMarkdownPathStrategy: PathStrategy
-  options: NotionPullOptions
 }) {
   if (existingFilesManager.isObjectNew(image)) {
     await image.read()
     const imageFilename = imageNamingStrategy.getFileName(image)
-
-    // TODO: These paths strategies should be handled inside FilesManager getting the root path
-    const imageFileOutputPath = imageFilePathStrategy.getPath(imageFilename)
-
-    await image.save(imageFileOutputPath)
-
-    const pathFromImageDirectory = removePathPrefix(
-      imageFileOutputPath,
-      options.imgOutputPath
-    )
     newFilesManager.set("base", "image", image.id, {
-      path: pathFromImageDirectory,
+      path: imageFilename,
       lastEditedTime: image.lastEditedTime,
     })
-    const markdownPath = imageMarkdownPathStrategy.getPath(imageFilename)
+
+    const imageFileOutputPath = newFilesManager.get(
+      "output",
+      "image",
+      image.id
+    ).path
+
+    await image.save(imageFileOutputPath)
+    const markdownPath = newFilesManager.get("markdown", "image", image.id).path
     updateImageUrlToMarkdownImagePath(image.file, markdownPath)
   } else {
     const imageRecordFromDirectory = existingFilesManager.get(
@@ -71,18 +62,12 @@ export async function processImages({
   existingFilesManager,
   newFilesManager,
   imageNamingStrategy,
-  imageFilePathStrategy,
-  options,
-  imageMarkdownPathStrategy,
   pages,
   databases,
 }: {
-  options: NotionPullOptions
   existingFilesManager: FilesManager
   newFilesManager: FilesManager
   imageNamingStrategy: ImageNamingStrategy
-  imageFilePathStrategy: PathStrategy
-  imageMarkdownPathStrategy: PathStrategy
   imageBlocks: (BlockObjectResponse & { type: "image" })[]
   pages: NotionPage[]
   databases: NotionDatabase[]
@@ -95,9 +80,6 @@ export async function processImages({
       existingFilesManager,
       newFilesManager,
       imageNamingStrategy,
-      imageFilePathStrategy,
-      imageMarkdownPathStrategy,
-      options,
     })
   }
 
@@ -111,9 +93,6 @@ export async function processImages({
       existingFilesManager,
       newFilesManager,
       imageNamingStrategy,
-      imageFilePathStrategy,
-      imageMarkdownPathStrategy,
-      options,
     })
   }
 
@@ -126,9 +105,6 @@ export async function processImages({
       existingFilesManager,
       newFilesManager,
       imageNamingStrategy,
-      imageFilePathStrategy,
-      imageMarkdownPathStrategy,
-      options,
     })
   }
 }
