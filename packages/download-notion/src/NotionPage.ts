@@ -77,31 +77,25 @@ export class NotionPage implements NotionObject {
     return this.metadata.parent.type === "database_id"
   }
 
-  // In Notion, pages from the Database have names and simple pages have titles.
-  public get nameOrTitle(): string {
-    return this.isDatabaseChild ? this.name : this.title
+  public get title(): string {
+    // Databases child pages can change the name for the title property
+    const titlePropertyKey = this.isDatabaseChild
+      ? this.getTitlePropertyKey()
+      : "title"
+    return this.getPlainTextProperty(titlePropertyKey, "title missing")
   }
 
-  // TODO: This responsibility of naming should go to an external class
-  public nameForFile(): string {
-    // In Notion, pages from the Database have names and simple pages have titles.
-    return !this.isDatabaseChild
-      ? this.title
-      : // if it's a Database page, then we'll use the slug unless there is none, then we'd rather have the
-        // page name than an ugly id for the file name
-        this.explicitSlug()?.replace(/^\//, "") || this.name
-  }
-
-  // TODO: let's go farther in hiding this separate title vs name stuff. This seems like an implementation detail on the Notion side.
-
-  // In Notion, pages from the Outline have "title"'s.
-  private get title(): string {
-    return this.getPlainTextProperty("title", "title missing")
-  }
-  // In Notion, pages from the Database have "Name"s.
-  private get name(): string {
-    // TODO: Notion has to specify which property represents the title somehow. Find how to do it automatically
-    return this.getPlainTextProperty(this.config.titleProperty, "name missing")
+  private getTitlePropertyKey(): string {
+    // It's ensured that there is only one property of type "title".
+    const titleProperty = Object.keys(this.metadata.properties).find(
+      (key) => this.metadata.properties[key].type === "title"
+    )
+    if (!titleProperty) {
+      throw new Error(
+        `No title property found in ${JSON.stringify(this.metadata, null, 2)}`
+      )
+    }
+    return titleProperty
   }
 
   public get status(): string | undefined {

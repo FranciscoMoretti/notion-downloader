@@ -14,7 +14,7 @@ export async function getMarkdownForPage(
   context: IDocuNotionContext,
   page: NotionPage
 ): Promise<string> {
-  info(`Reading & converting page ${page.id}/${page.nameOrTitle}`)
+  info(`Reading & converting page ${page.id}/${page.title}`)
 
   const blocks = await context.getBlockChildren(page.id)
 
@@ -257,7 +257,7 @@ function getFrontMatter(page: NotionPage): string {
   )
 
   const standardProperties = {
-    title: `${page.nameOrTitle.replaceAll(":", "-")}`,
+    title: `${page.title.replaceAll(":", "-")}`,
     // TODO: Consider clearing the props above which are non standard
     id: page.metadata.id,
     // TODO: Cover images have to be handled, downloaded and stored. Decide if only store files, or also external.

@@ -19,7 +19,7 @@ export abstract class SlugNamingStrategy extends NamingStrategy {
     // TODO This logic needs to be handled either here or in the page.
     const explicitSlug = page.getPlainTextProperty(this.slugProperty, "")
 
-    return explicitSlug || this._slugify(page.nameOrTitle)
+    return explicitSlug || this._slugify(page.title)
   }
   public nameForDatabase(database: NotionDatabase): string {
     return this._slugify(database.title)
@@ -67,7 +67,7 @@ export class GuidNamingStrategy extends NamingStrategy {
 
 export class TitleNamingStrategy extends NamingStrategy {
   public nameForPage(page: NotionPage): string {
-    return page.nameOrTitle
+    return page.title
   }
   public nameForDatabase(database: NotionDatabase): string {
     return database.title

@@ -85,7 +85,7 @@ function convertLinkLabel(targetPage: NotionPage, text: string): string {
   // link, it uses "link_to_page" as the text. So we have to look up the name of the page in
   // order to fix that.;
   if (text !== "link_to_page") return text
-  else return targetPage.nameOrTitle
+  else return targetPage.title
 }
 function convertLinkHref(
   context: IDocuNotionContext,

@@ -241,9 +241,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const pages = allPages.filter((page) => {
     const shouldSkip = shouldSkipPageFilter(page)
     if (shouldSkip) {
-      verbose(
-        `Skipping ${page.nameOrTitle} because it has status ${page.status}`
-      )
+      verbose(`Skipping ${page.title} because it has status ${page.status}`)
       ++counts.skipped_because_status
     }
     return !shouldSkip
