@@ -8,7 +8,7 @@ import {
 import { FilesManager } from "./FilesManager"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage, NotionPageConfig, getPageContentInfo } from "./NotionPage"
+import { NotionPage, getPageContentInfo } from "./NotionPage"
 
 export async function getFileTreeMap(
   incomingContext: string,
@@ -17,8 +17,7 @@ export async function getFileTreeMap(
   databaseIsRootLevel: boolean,
   client: Client,
   layoutStrategy: LayoutStrategy,
-  filesManager: FilesManager,
-  pageConfig: NotionPageConfig
+  filesManager: FilesManager
 ): Promise<void> {
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
@@ -46,12 +45,11 @@ export async function getFileTreeMap(
         false,
         client,
         layoutStrategy,
-        filesManager,
-        pageConfig
+        filesManager
       )
     }
   } else if (currentType === "page") {
-    const page = await getNotionPage(client, currentID, pageConfig)
+    const page = await getNotionPage(client, currentID)
     filesManager.set("base", "page", currentID, {
       path: layoutStrategy.getPathForPage2(page, incomingContext),
       lastEditedTime: page.metadata.last_edited_time,
@@ -81,8 +79,7 @@ export async function getFileTreeMap(
           false,
           client,
           layoutStrategy,
-          filesManager,
-          pageConfig
+          filesManager
         )
       }
       for (const database of pageContentInfo.childDatabaseIdsAndOrder) {
@@ -93,8 +90,7 @@ export async function getFileTreeMap(
           false,
           client,
           layoutStrategy,
-          filesManager,
-          pageConfig
+          filesManager
         )
       }
     }
@@ -102,17 +98,12 @@ export async function getFileTreeMap(
     throw new Error(`Unknown type ${currentType}`)
   }
 }
-export async function getNotionPage(
-  client: Client,
-  currentID: string,
-  pageConfig: NotionPageConfig
-) {
+export async function getNotionPage(client: Client, currentID: string) {
   const pageResponse = await client.pages.retrieve({ page_id: currentID })
   if (!isFullPage(pageResponse)) {
     throw Error("Notion page response is not full for " + currentID)
   }
-  const page = new NotionPage(pageResponse, pageConfig)
-  return page
+  return new NotionPage(pageResponse)
 }
 export async function getNotionDatabase(client: Client, currentID: string) {
   const databaseResponse = await client.databases.retrieve({

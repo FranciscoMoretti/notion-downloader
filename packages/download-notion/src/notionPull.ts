@@ -13,7 +13,7 @@ import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage, NotionPageConfig, notionPageFromId } from "./NotionPage"
+import { NotionPage } from "./NotionPage"
 import { PathStrategy } from "./PathStrategy"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
@@ -194,11 +194,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return
   }
 
-  const pageConfig: NotionPageConfig = {
-    titleProperty: options.titleProperty,
-    slugProperty: options.slugProperty,
-  }
-
   await getFileTreeMap(
     "", // Start context
     rootUUID,
@@ -206,8 +201,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.rootDbAsFolder,
     cachedNotionClient,
     layoutStrategy,
-    newFilesManager,
-    pageConfig
+    newFilesManager
   )
 
   const objects = await getAllObjectsInObjectsTree(
@@ -227,7 +221,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   const allPages = Object.values(objects.page).map(
-    (page) => new NotionPage(page, pageConfig)
+    (page) => new NotionPage(page)
   )
   // ----- Page filtering ----
   function shouldSkipPageFilter(page: NotionPage): boolean {

@@ -24,7 +24,6 @@ export const pullOptionsSchema = z
       .optional()
       .default("default"),
     overwrite: z.boolean().default(false),
-    titleProperty: z.string().optional(),
     slugProperty: z.string().optional(),
     rootDbAsFolder: z.boolean().default(false),
     layoutStrategy: z

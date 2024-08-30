@@ -9,27 +9,11 @@ import { NotionObject } from "./NotionObject"
 import { error } from "./log"
 import { parseLinkId } from "./plugins/internalLinks"
 
-type CustomPropertiesConfig = {
-  titleProperty: string
-  slugProperty: string
-}
-
-export type NotionPageConfig = {
-  titleProperty?: string
-  slugProperty?: string
-}
-
 export class NotionPage implements NotionObject {
   public metadata: PageObjectResponse
-  public config: CustomPropertiesConfig
 
-  public constructor(metadata: PageObjectResponse, config?: NotionPageConfig) {
+  public constructor(metadata: PageObjectResponse) {
     this.metadata = metadata
-    this.config = {
-      titleProperty: "Name",
-      slugProperty: "Slug", // TODO: Eliminate
-      ...config,
-    }
 
     // review: this is expensive to learn as it takes another api call... I
     // think? We can tell if it's a database because it has a "Name" instead of a

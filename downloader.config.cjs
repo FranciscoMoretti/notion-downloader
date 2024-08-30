@@ -1,6 +1,5 @@
 /** @type {import('notion-downloader-cli').Config} */
 module.exports = {
-  titleProperty: "title",
   slugProperty: "slug",
   rootDbAsFolder: true,
   rootObjectType: "database",
