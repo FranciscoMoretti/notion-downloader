@@ -92,44 +92,4 @@ describe("FilesMap", () => {
     const newFilesMap = FilesMap.fromJson(json)
     expect(newFilesMap.get("page", "test-id")).toEqual(record)
   })
-
-  test("allToRootRelativePath() adds correct prefixes", () => {
-    const objectsDirectories: ObjectPrefixDict = {
-      page: "/notion/pages",
-      database: "/notion/databases",
-      image: "/notion/images",
-    }
-    const pageRecord: FileRecord = {
-      path: "test.md",
-      lastEditedTime: "2023-04-01T12:00:00Z",
-    }
-    filesMap.set("page", "page-id", pageRecord)
-
-    const rootRelativeFilesMap = FilesMap.allToPathWithPrefix(
-      filesMap,
-      objectsDirectories
-    )
-    expect(rootRelativeFilesMap.get("page", "page-id").path).toBe(
-      "/notion/pages/test.md"
-    )
-  })
-
-  test("allToDirectoriesRelativePath() removes correct prefixes", () => {
-    const objectsDirectories: ObjectPrefixDict = {
-      page: "/notion/pages",
-      database: "/notion/databases",
-      image: "/notion/images",
-    }
-    const pageRecord: FileRecord = {
-      path: "/notion/pages/test.md",
-      lastEditedTime: "2023-04-01T12:00:00Z",
-    }
-    filesMap.set("page", "page-id", pageRecord)
-
-    const dirRelativeFilesMap = FilesMap.allToPathWithoutPrefix(
-      filesMap,
-      objectsDirectories
-    )
-    expect(dirRelativeFilesMap.get("page", "page-id").path).toBe("/test.md")
-  })
 })

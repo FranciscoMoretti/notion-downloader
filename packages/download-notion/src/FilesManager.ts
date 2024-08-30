@@ -4,10 +4,13 @@ import {
   FilesMap,
   FilesMapData,
   ObjectPrefixDict,
-  recordMapWithPrefix,
-  recordWithPrefix,
 } from "./FilesMap"
 import { NotionObject } from "./NotionObject"
+import {
+  recordMapWithPrefix,
+  recordWithPrefix,
+  toMapDataWithPrefix,
+} from "./recordPrefixUtils"
 
 type PathType = "base" | "output" | "markdown"
 
@@ -126,11 +129,7 @@ export class FilesManager {
     if (pathType === "output" || pathType === "markdown") {
       const prefixes =
         pathType === "output" ? this.outputDirectories : this.markdownPrefixes
-      return {
-        page: recordMapWithPrefix(filesMapData.page, prefixes.page),
-        database: recordMapWithPrefix(filesMapData.database, prefixes.database),
-        image: recordMapWithPrefix(filesMapData.image, prefixes.image),
-      }
+      return toMapDataWithPrefix(filesMapData, prefixes)
     } else if (pathType === "base") {
       return filesMapData
     } else {
