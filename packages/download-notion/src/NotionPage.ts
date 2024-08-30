@@ -320,20 +320,3 @@ export async function getPageContentInfo(
     ),
   }
 }
-
-export async function notionPageFromId(
-  pageId: string,
-  client: Client,
-  config?: NotionPageConfig
-): Promise<NotionPage> {
-  const metadata = await client.pages.retrieve({
-    page_id: pageId,
-  })
-
-  if (!isFullPage(metadata)) {
-    throw Error("Non full response for page: " + pageId)
-  }
-
-  //logDebug("notion metadata", JSON.stringify(metadata));
-  return new NotionPage(metadata, config)
-}
