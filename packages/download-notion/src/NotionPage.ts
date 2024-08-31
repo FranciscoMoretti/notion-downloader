@@ -14,11 +14,6 @@ export class NotionPage implements NotionObject {
 
   public constructor(metadata: PageObjectResponse) {
     this.metadata = metadata
-
-    // review: this is expensive to learn as it takes another api call... I
-    // think? We can tell if it's a database because it has a "Name" instead of a
-    // "tile" and "parent": "type": "database_id". But do we need to differentiate
-    //this.type = PageType.Unknown;
   }
 
   public get id(): string {
