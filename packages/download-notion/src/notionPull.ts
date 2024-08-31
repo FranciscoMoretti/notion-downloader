@@ -153,13 +153,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     markdownPrefixes: markdownPrefixes,
   })
 
-  // TODO: Path strategies should simply be handled by the FilesManager
-  const imageMarkdownPathStrategy = new PathStrategy({
-    pathPrefix: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
-  })
-  const imageFilePathStrategy = new PathStrategy({
-    pathPrefix: options.imgOutputPath,
-  })
   await fs.mkdir(options.markdownOutputPath, { recursive: true })
   await fs.mkdir(cacheDir, { recursive: true })
 
