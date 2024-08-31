@@ -4,7 +4,7 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
-import { FilesManager } from "./FilesManager"
+import { FilesManager, copyRecord } from "./FilesManager"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import {
@@ -13,10 +13,7 @@ import {
   PageObjectResponseWithCover,
 } from "./NotionImage"
 import { NotionPage } from "./NotionPage"
-import { PathStrategy } from "./PathStrategy"
-import { NotionPullOptions } from "./config/schema"
 import { updateImageUrlToMarkdownImagePath } from "./images"
-import { removePathPrefix } from "./pathUtils"
 
 async function processImage({
   image,
@@ -47,12 +44,12 @@ async function processImage({
     const markdownPath = newFilesManager.get("markdown", "image", image.id).path
     updateImageUrlToMarkdownImagePath(image.file, markdownPath)
   } else {
-    const imageRecordFromDirectory = existingFilesManager.get(
+    copyRecord(existingFilesManager, newFilesManager, "image", image.id)
+    const imageRecordFromDirectory = newFilesManager.get(
       "base",
       "image",
       image.id
     )
-    newFilesManager.set("base", "image", image.id, imageRecordFromDirectory)
     updateImageUrlToMarkdownImagePath(image.file, imageRecordFromDirectory.path)
   }
 }

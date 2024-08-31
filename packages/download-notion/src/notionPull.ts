@@ -203,9 +203,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   const allObjectsMap = objectsToObjectsMap(objects)
 
-  const imageBlocks = Object.values(objects.block).filter(
-    (block) => block.type === "image"
-  )
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
@@ -213,10 +210,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       getAncestorPageOrDatabaseFilepath(image, allObjectsMap, newFilesManager)
   )
 
+  // --------  FILES ---------
+  // ----- Pages ----
   const allPages = Object.values(objects.page).map(
     (page) => new NotionPage(page)
   )
-  // ----- Page filtering ----
   function shouldSkipPageFilter(page: NotionPage): boolean {
     return (
       options.statusTag !== "*" &&
@@ -234,11 +232,16 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return !shouldSkip
   })
 
-  // Processing of cover images of databases
+  // ----- Databases ----
   const databases: NotionDatabase[] = Object.values(objects.database).map(
     (db) => new NotionDatabase(db)
   )
+  // ----- Images ----
+  const imageBlocks = Object.values(objects.block).filter(
+    (block) => block.type === "image"
+  )
 
+  // Process images saves them to the filesMap and also updates the markdown files
   await processImages({
     imageBlocks,
     existingFilesManager,
@@ -246,14 +249,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     imageNamingStrategy,
     pages,
     databases,
-  })
-
-  // Filter from filesMap
-  Object.keys(newFilesManager.getAllOfType("base", "page")).forEach((id) => {
-    const page = pages.find((p) => p.id === id)
-    if (!page) {
-      newFilesManager.delete("page", id)
-    }
   })
 
   // Only output pages that changed! The rest already exist.

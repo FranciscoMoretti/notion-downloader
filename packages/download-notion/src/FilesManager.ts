@@ -138,3 +138,13 @@ export class FilesManager {
     }
   }
 }
+
+export function copyRecord(
+  fromManager: FilesManager,
+  toManager: FilesManager,
+  recordType: FileType,
+  recordId: string
+) {
+  const record = fromManager.get("base", recordType, recordId)
+  toManager.set("base", recordType, recordId, record)
+}
