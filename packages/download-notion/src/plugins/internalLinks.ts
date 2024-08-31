@@ -23,9 +23,7 @@ export function convertInternalUrl(
   const id = match[1]
   const pages = context.pages
   // find the page where pageId matches hrefFromNotion
-  const targetPage = pages.find((p) => {
-    return p.matchesLinkId(id)
-  })
+  const targetPage = pages.find((p) => matchesLinkId(p, id))
 
   if (!targetPage) {
     // About this situation. See https://github.com/sillsdev/docu-notion/issues/9
@@ -62,9 +60,7 @@ function convertInternalLink(
 
   const pages = context.pages
   // find the page where pageId matches hrefFromNotion
-  const targetPage = pages.find((p) => {
-    return p.matchesLinkId(hrefFromNotion)
-  })
+  const targetPage = pages.find((p) => matchesLinkId(p, hrefFromNotion))
 
   if (!targetPage) {
     // About this situation. See https://github.com/sillsdev/docu-notion/issues/9
@@ -128,6 +124,15 @@ export function parseLinkId(fullLinkId: string): {
     }
   }
   return { baseLinkId: fullLinkId, fragmentId: "" }
+}
+
+export function matchesLinkId(page: NotionPage, id: string): boolean {
+  const { baseLinkId } = parseLinkId(id)
+
+  return (
+    baseLinkId === page.id || // from a link_to_page.pageId, which still has the dashes
+    baseLinkId === page.id.replaceAll("-", "") // from inline links, which are lacking the dashes
+  )
 }
 
 export const standardInternalLinkConversion: IPlugin = {

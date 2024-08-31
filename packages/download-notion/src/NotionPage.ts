@@ -21,20 +21,6 @@ export class NotionPage implements NotionObject {
     //this.type = PageType.Unknown;
   }
 
-  public matchesLinkId(id: string): boolean {
-    const { baseLinkId } = parseLinkId(id)
-
-    const match =
-      baseLinkId === this.id || // from a link_to_page.pageId, which still has the dashes
-      baseLinkId === this.id.replaceAll("-", "") // from inline links, which are lacking the dashes
-
-    // logDebug(
-    //   `matchedLinkId`,
-    //   `comparing pageId:${this.pageId} to id ${id} --> ${match.toString()}`
-    // );
-    return match
-  }
-
   public get id(): string {
     return this.metadata.id
   }
