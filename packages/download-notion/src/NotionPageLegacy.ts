@@ -87,8 +87,6 @@ export class NotionPageLegacy {
         this.explicitSlug()?.replace(/^\//, "") || this.name
   }
 
-  // TODO: let's go farther in hiding this separate title vs name stuff. This seems like an implementation detail on the Notion side.
-
   // In Notion, pages from the Outline have "title"'s.
   private get title(): string {
     return this.getPlainTextProperty("Title", "title missing")

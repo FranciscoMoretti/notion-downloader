@@ -101,10 +101,6 @@ export class NotionImage implements NotionObject {
   get extension(): string {
     // TODO: Verify if failing if unknonwn mime type ever happens
     return this.getFileData().extension
-    // return getImageFileExtension(
-    //   this.imageSet.primaryUrl,
-    //   this.getFileData().extension
-    // )
   }
 
   get buffer(): Buffer {

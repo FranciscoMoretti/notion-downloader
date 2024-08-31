@@ -238,6 +238,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const databases: NotionDatabase[] = Object.values(objects.database).map(
     (db) => new NotionDatabase(db)
   )
+
   await processImages({
     imageBlocks,
     existingFilesManager,
@@ -284,7 +285,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
   await filesCleaner.cleanupOldFiles()
   await saveDataToJson(newFilesManager.getAll("base"), filesMapFilePath)
-  // TODO: Ceanup images based on filesMap
   endGroup()
 }
 
@@ -341,8 +341,6 @@ async function outputPages(
     notionToMarkdown: notionToMarkdown,
     options: options,
     pages: pages,
-
-    // TODO: This should be replaced with filesManager in the future to have a consistent way to access paths.
     filesManager: filesManager,
     counts: counts, // review will this get copied or pointed to?
     imports: [],
@@ -350,7 +348,6 @@ async function outputPages(
       convertInternalUrl(context, url),
   }
   for (const page of pages) {
-    // TODO: Marking as seen no longer needed, pagesTree can be compared with previous pageTree
     const mdPath = filesManager.get("base", "page", page.id)?.path
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
