@@ -17,8 +17,12 @@ export function convertToUUID(str: string): string {
 }
 export async function saveDataToJson(data: any, filename: string) {
   const json = JSON.stringify(data, null, 2)
+  await saveToFile(json, filename)
+}
+export async function saveToFile(json: string, filename: string) {
   await fs.writeFile(filename, json)
 }
+
 export function findLastUuid(url: string): string | null {
   // Regex for a UUID surrounded by slashes
   const uuidPattern =

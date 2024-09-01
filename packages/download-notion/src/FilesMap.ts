@@ -7,8 +7,6 @@ export type FileType = "page" | "database" | "image"
 
 export type FilesMapData = Record<FileType, Record<string, FileRecord>>
 
-export type ObjectPrefixDict = Record<FileType, string>
-
 export class FilesMap {
   private map: FilesMapData = {
     page: {},
@@ -45,14 +43,14 @@ export class FilesMap {
     return this.map
   }
 
-  static fromJson(json: string): FilesMap {
+  static fromJSON(json: string): FilesMap {
     const map = new FilesMap()
     const parsed = JSON.parse(json)
     map.map = parsed
     return map
   }
 
-  toJson(): string {
+  toJSON(): string {
     return JSON.stringify(this.map)
   }
 }

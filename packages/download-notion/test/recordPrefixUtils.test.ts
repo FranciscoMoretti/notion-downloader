@@ -1,6 +1,7 @@
+import { ObjectPrefixDict } from "@/src/FilesManager"
 import { describe, expect, test } from "vitest"
 
-import { FileRecord, FilesMapData, ObjectPrefixDict } from "../src/FilesMap"
+import { FileRecord, FilesMapData } from "../src/FilesMap"
 import {
   recordMapWithPrefix,
   recordMapWithoutPrefix,

@@ -1,4 +1,5 @@
-import { FileRecord, FilesMapData, ObjectPrefixDict } from "./FilesMap"
+import { ObjectPrefixDict } from "./FilesManager"
+import { FileRecord, FilesMapData } from "./FilesMap"
 import { addPathPrefix, removePathPrefix } from "./pathUtils"
 
 export function recordMapWithPrefix(

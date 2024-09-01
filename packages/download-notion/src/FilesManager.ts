@@ -1,10 +1,4 @@
-import {
-  FileRecord,
-  FileType,
-  FilesMap,
-  FilesMapData,
-  ObjectPrefixDict,
-} from "./FilesMap"
+import { FileRecord, FileType, FilesMap, FilesMapData } from "./FilesMap"
 import { NotionObject } from "./NotionObject"
 import {
   recordMapWithPrefix,
@@ -16,7 +10,7 @@ type PathType = "base" | "output" | "markdown"
 
 export class FilesManager {
   // This class holds directories in which each file is located and relative paths to them
-  public filesMap: FilesMap // Relative paths to files directories
+  protected baseFilesMap: FilesMap // Relative paths to files directories
   protected outputDirectories: ObjectPrefixDict // Files directories
   protected markdownPrefixes: ObjectPrefixDict // Markdown prefixes
 
@@ -29,7 +23,7 @@ export class FilesManager {
     markdownPrefixes?: ObjectPrefixDict
     initialFilesMap?: FilesMap
   }) {
-    this.filesMap = initialFilesMap || new FilesMap()
+    this.baseFilesMap = initialFilesMap || new FilesMap()
     // TODO: If directories changed, cleanup all files in directories changed here
     this.outputDirectories = outputDirectories
     this.markdownPrefixes = {
@@ -41,7 +35,7 @@ export class FilesManager {
 
   public isObjectNew(notionObject: NotionObject): boolean {
     if (
-      !this.filesMap.exists(
+      !this.baseFilesMap.exists(
         // TODO: Make this FilesMap structure more generic when we want to store more than images
         notionObject.object == "block" ? "image" : notionObject.object,
         notionObject.id
@@ -49,7 +43,7 @@ export class FilesManager {
     ) {
       return true
     }
-    const existingRecord = this.filesMap.get(
+    const existingRecord = this.baseFilesMap.get(
       notionObject.object == "block" ? "image" : notionObject.object,
       notionObject.id
     )
@@ -64,11 +58,11 @@ export class FilesManager {
   }
 
   public exists(type: FileType, id: string): boolean {
-    return this.filesMap.exists(type, id)
+    return this.baseFilesMap.exists(type, id)
   }
 
   public get(pathType: PathType, type: FileType, id: string): FileRecord {
-    const recordFromDirectory = this.filesMap.get(type, id)
+    const recordFromDirectory = this.baseFilesMap.get(type, id)
 
     if (pathType === "output") {
       return recordWithPrefix(recordFromDirectory, this.outputDirectories[type])
@@ -99,18 +93,18 @@ export class FilesManager {
       // error out
       throw new Error(`Invalid path type: ${pathType}`)
     }
-    this.filesMap.set(type, id, recordToSet)
+    this.baseFilesMap.set(type, id, recordToSet)
   }
 
   public delete(type: FileType, id: string): void {
-    this.filesMap.delete(type, id)
+    this.baseFilesMap.delete(type, id)
   }
 
   public getAllOfType(
     pathType: PathType,
     type: FileType
   ): Record<string, FileRecord> {
-    const records = this.filesMap.getAllOfType(type)
+    const records = this.baseFilesMap.getAllOfType(type)
     if (pathType === "output") {
       return recordMapWithPrefix(records, this.outputDirectories[type])
     } else if (pathType === "markdown") {
@@ -124,7 +118,7 @@ export class FilesManager {
   }
 
   public getAll(pathType: PathType): FilesMapData {
-    const filesMapData = this.filesMap.getAll()
+    const filesMapData = this.baseFilesMap.getAll()
 
     if (pathType === "output" || pathType === "markdown") {
       const prefixes =
@@ -137,6 +131,23 @@ export class FilesManager {
       throw new Error(`Invalid path type: ${pathType}`)
     }
   }
+
+  public toJSON(): string {
+    return JSON.stringify({
+      baseFilesMap: this.baseFilesMap.getAll(),
+      outputDirectories: this.outputDirectories,
+      markdownPrefixes: this.markdownPrefixes,
+    })
+  }
+
+  public static fromJSON(json: string): FilesManager {
+    const parsed = JSON.parse(json)
+    return new FilesManager({
+      outputDirectories: parsed.outputDirectories,
+      markdownPrefixes: parsed.markdownPrefixes,
+      initialFilesMap: FilesMap.fromJSON(JSON.stringify(parsed.baseFilesMap)),
+    })
+  }
 }
 
 export function copyRecord(
@@ -148,3 +159,4 @@ export function copyRecord(
   const record = fromManager.get("base", recordType, recordId)
   toManager.set("base", recordType, recordId, record)
 }
+export type ObjectPrefixDict = Record<FileType, string>

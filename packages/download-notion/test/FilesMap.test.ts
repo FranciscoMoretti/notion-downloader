@@ -1,6 +1,7 @@
+import { ObjectPrefixDict } from "@/src/FilesManager"
 import { beforeEach, describe, expect, test } from "vitest"
 
-import { FileRecord, FilesMap, ObjectPrefixDict } from "../src/FilesMap"
+import { FileRecord, FilesMap } from "../src/FilesMap"
 
 describe("FilesMap", () => {
   let filesMap: FilesMap
@@ -88,8 +89,8 @@ describe("FilesMap", () => {
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
     filesMap.set("page", "test-id", record)
-    const json = filesMap.toJson()
-    const newFilesMap = FilesMap.fromJson(json)
+    const json = filesMap.toJSON()
+    const newFilesMap = FilesMap.fromJSON(json)
     expect(newFilesMap.get("page", "test-id")).toEqual(record)
   })
 })

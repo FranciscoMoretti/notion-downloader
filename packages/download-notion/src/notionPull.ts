@@ -1,4 +1,3 @@
-import path from "path"
 import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
@@ -7,14 +6,12 @@ import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesCleaner } from "./FilesCleaner"
-import { FilesManager } from "./FilesManager"
-import { FilesMap, ObjectPrefixDict } from "./FilesMap"
+import { FilesManager, ObjectPrefixDict } from "./FilesManager"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
-import { PathStrategy } from "./PathStrategy"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { getBlockChildren } from "./getBlockChildren"
@@ -37,10 +34,10 @@ import { processImages } from "./processImages"
 import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
-  getAncestorPageOrDatabaseFilename,
   getAncestorPageOrDatabaseFilepath,
   sanitizeMarkdownOutputPath,
   saveDataToJson,
+  saveToFile,
 } from "./utils"
 import { writePage } from "./writePage"
 
@@ -78,10 +75,10 @@ export async function notionContinuosPull(options: NotionPullOptions) {
   }
 }
 
-function loadFilesMapFile(filePath: string): FilesMap | undefined {
+function loadFilesManagerFile(filePath: string): FilesManager | undefined {
   if (fs.existsSync(filePath)) {
     const jsonData = fs.readFileSync(filePath, "utf8")
-    return FilesMap.fromJson(jsonData)
+    return FilesManager.fromJSON(jsonData)
   }
   return undefined
 }
@@ -141,13 +138,14 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
   // TODO: Implement a logic to reset the state if previous save directories vs current directories are different
-  const previousFilesMap = loadFilesMapFile(filesMapFilePath)
+  const previousFilesManager = loadFilesManagerFile(filesMapFilePath)
 
-  const existingFilesManager = new FilesManager({
-    initialFilesMap: previousFilesMap,
-    outputDirectories: objectsDirectories,
-    markdownPrefixes: markdownPrefixes,
-  })
+  const existingFilesManager =
+    previousFilesManager ||
+    new FilesManager({
+      outputDirectories: objectsDirectories,
+      markdownPrefixes: markdownPrefixes,
+    })
   const newFilesManager = new FilesManager({
     outputDirectories: objectsDirectories,
     markdownPrefixes: markdownPrefixes,
@@ -279,7 +277,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     newFilesManager,
   })
   await filesCleaner.cleanupOldFiles()
-  await saveDataToJson(newFilesManager.getAll("base"), filesMapFilePath)
+  await saveToFile(newFilesManager.toJSON(), filesMapFilePath)
   endGroup()
 }
 
