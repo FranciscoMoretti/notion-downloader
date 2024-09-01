@@ -29,6 +29,7 @@ import {
   getAllObjectsInObjectsTree,
   objectsToObjectsMap,
 } from "./objects_utils"
+import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { processImages } from "./processImages"
@@ -228,7 +229,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>
-      getAncestorPageOrDatabaseFilepath(image, allObjectsMap, newFilesManager)
+      removePathExtension(
+        getAncestorPageOrDatabaseFilepath(image, allObjectsMap, newFilesManager)
+      )
   )
 
   // --------  FILES ---------

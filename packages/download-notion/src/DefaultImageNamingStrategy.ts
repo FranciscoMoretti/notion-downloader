@@ -2,16 +2,16 @@ import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionImage } from "./NotionImage"
 
 export class DefaultImageNamingStrategy implements ImageNamingStrategy {
-  private readonly getPageAncestorFilename: (image: NotionImage) => string
+  private readonly getPageAncestorName: (image: NotionImage) => string
 
-  constructor(getPageAncestorFilename: (image: NotionImage) => string) {
-    this.getPageAncestorFilename = getPageAncestorFilename
+  constructor(getPageAncestorName: (image: NotionImage) => string) {
+    this.getPageAncestorName = getPageAncestorName
   }
 
   getFileName(image: NotionImage): string {
     // Don't start with . for empty ancestor page name
-    const pageSlugPart = this.getPageAncestorFilename(image)
-      ? `${this.getPageAncestorFilename(image)}.`
+    const pageSlugPart = this.getPageAncestorName(image)
+      ? `${this.getPageAncestorName(image)}.`
       : ""
     return `${pageSlugPart}${image.id}.${image.extension}`
   }
