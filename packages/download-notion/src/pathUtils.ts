@@ -1,6 +1,9 @@
 import path from "path"
 
 export function addPathPrefix(basePath: string, prefix: string): string {
+  if (prefix === "") {
+    return basePath
+  }
   const normalizedPrefix = path.normalize(prefix)
   const normalizedPath = path.normalize(basePath)
 
@@ -12,6 +15,10 @@ export function addPathPrefix(basePath: string, prefix: string): string {
 }
 
 export function removePathPrefix(fullPath: string, prefix: string): string {
+  if (prefix === "") {
+    return fullPath
+  }
+
   const normalizedFullPath = path.normalize(fullPath)
   const normalizedPrefix = path.normalize(prefix)
 
@@ -32,4 +39,11 @@ export function removePathPrefix(fullPath: string, prefix: string): string {
   }
 
   return result
+}
+
+export function removePathExtension(convertedLink: string) {
+  // Returns a normalized path with the extension removed
+  const parsedPath = path.parse(convertedLink)
+  convertedLink = path.join(parsedPath.dir, parsedPath.name)
+  return convertedLink
 }

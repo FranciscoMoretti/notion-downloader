@@ -2,6 +2,7 @@ import path from "path"
 
 import { NotionPage } from "../NotionPage"
 import { error, warning } from "../log"
+import { removePathExtension } from "../pathUtils"
 import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 
 // converts a url to a local link, if it is a link to a page in the Notion site
@@ -88,14 +89,13 @@ function convertLinkHref(
   targetPage: NotionPage,
   url: string
 ): string {
-  // TODO: Instead of type directory this should be type `markdown`
   let convertedLink = context.filesManager.get(
-    "base",
+    "markdown",
     "page",
     targetPage.id
   )?.path
   if (!context.options.pageLinkHasExtension) {
-    convertedLink = path.basename(convertedLink, path.extname(convertedLink))
+    convertedLink = removePathExtension(convertedLink)
   }
 
   /*****************************
@@ -111,6 +111,7 @@ function convertLinkHref(
   //verbose(`Converting Link ${url} --> ${convertedLink}`);
   return convertedLink
 }
+
 // Parse the link ID to get the base (before the #) and the fragment (# and after).
 export function parseLinkId(fullLinkId: string): {
   baseLinkId: string // before the #

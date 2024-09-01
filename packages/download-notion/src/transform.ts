@@ -3,6 +3,7 @@ import chalk from "chalk"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig } from "./config/configuration"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
+import { getImageUrl } from "./notion_objects_utils"
 import {
   IDocuNotionContext,
   IRegexMarkdownModification,
@@ -258,13 +259,8 @@ function getFrontMatter(page: NotionPage): string {
 
   const standardProperties = {
     title: `${page.title.replaceAll(":", "-")}`,
-    // TODO: Consider clearing the props above which are non standard
     id: page.metadata.id,
-    // TODO: Cover images have to be handled, downloaded and stored. Decide if only store files, or also external.
-    cover:
-      page.metadata.cover?.external?.url ||
-      page.metadata.cover?.file?.url ||
-      "",
+    cover: page.metadata.cover ? getImageUrl(page.metadata.cover) : "",
     created_time: page.metadata.created_time,
     last_edited_time: page.metadata.last_edited_time,
   }
