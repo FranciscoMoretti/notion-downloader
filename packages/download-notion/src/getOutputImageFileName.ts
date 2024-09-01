@@ -5,7 +5,7 @@ import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
 import { NotionImage } from "./NotionImage"
 
 export function getStrategy(
-  format: "legacy" | "content-hash" | "default",
+  format: "legacy" | "content-hash" | "default" | "default-flat",
   getPageAncestorName: (image: NotionImage) => string
 ): ImageNamingStrategy {
   switch (format) {
@@ -14,6 +14,7 @@ export function getStrategy(
     case "content-hash":
       return new ContentHashImageNamingStrategy()
     case "default":
+    case "default-flat":
       return new DefaultImageNamingStrategy(getPageAncestorName)
     default:
       throw new Error(`Unknown image file name format: ${format}`)

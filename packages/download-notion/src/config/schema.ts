@@ -15,13 +15,14 @@ export const conversionSchema = z.object({
     images: z.string().default(""),
   }),
   layoutStrategy: z
-    .enum(["HierarchicalNamedLayoutStrategy", "FlatGuidLayoutStrategy"])
+    .enum(["HierarchicalNamedLayoutStrategy", "FlatLayoutStrategy"])
     .default("HierarchicalNamedLayoutStrategy"),
   namingStrategy: z
     .enum(["github-slug", "notion-slug", "guid", "title"])
     .default("github-slug"),
   imageNamingStrategy: z
-    .enum(["default", "content-hash", "legacy"])
+    // TODO: Make image naming strategies independent of their path building
+    .enum(["default", "content-hash", "legacy", "default-flat"])
     .optional()
     .default("default"),
 })

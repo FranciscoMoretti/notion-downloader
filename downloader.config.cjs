@@ -8,6 +8,7 @@ module.exports = {
     markdownPrefixes: {
       images: "/assets",
     },
+    imageNamingStrategy: "default-flat",
     pageLinkHasExtension: false,
     slugProperty: "slug",
   },

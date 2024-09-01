@@ -36,6 +36,7 @@ import { processImages } from "./processImages"
 import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
+  getAncestorPageOrDatabaseFilename,
   getAncestorPageOrDatabaseFilepath,
   sanitizeMarkdownOutputPath,
   saveDataToJson,
@@ -121,7 +122,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       ? new GuidNamingStrategy()
       : new TitleNamingStrategy()
   const layoutStrategy =
-    options.conversion.layoutStrategy === "FlatGuidLayoutStrategy"
+    options.conversion.layoutStrategy === "FlatLayoutStrategy"
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
 
@@ -229,9 +230,21 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>
-      removePathExtension(
-        getAncestorPageOrDatabaseFilepath(image, allObjectsMap, newFilesManager)
-      )
+      options.conversion.imageNamingStrategy == "default"
+        ? removePathExtension(
+            getAncestorPageOrDatabaseFilepath(
+              image,
+              allObjectsMap,
+              newFilesManager
+            )
+          )
+        : options.conversion.imageNamingStrategy == "default-flat"
+        ? getAncestorPageOrDatabaseFilename(
+            image,
+            allObjectsMap,
+            newFilesManager
+          )
+        : ""
   )
 
   // --------  FILES ---------

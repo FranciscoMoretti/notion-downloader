@@ -28,6 +28,7 @@ async function processImage({
 }) {
   if (existingFilesManager.isObjectNew(image)) {
     await image.read()
+    // TODO: Write here a layout naming strategy for images. Name is ok, but path is not.
     const imageFilename = imageNamingStrategy.getFileName(image)
     newFilesManager.set("base", "image", image.id, {
       path: imageFilename,
@@ -46,7 +47,7 @@ async function processImage({
   } else {
     copyRecord(existingFilesManager, newFilesManager, "image", image.id)
     const imageRecordFromDirectory = newFilesManager.get(
-      "base",
+      "markdown",
       "image",
       image.id
     )
