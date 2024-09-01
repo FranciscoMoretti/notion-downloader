@@ -287,7 +287,6 @@ export class NotionCacheClient extends Client {
     },
   }
 
-  // TODO: fix type annotations by only making get methods available or wrap the rest of the methods
   public readonly pages = {
     create: (args: CreatePageParameters): Promise<CreatePageResponse> => {
       return this.notionClient.pages.create(args)

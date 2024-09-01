@@ -24,7 +24,6 @@ export class FilesManager {
     initialFilesMap?: FilesMap
   }) {
     this.baseFilesMap = initialFilesMap || new FilesMap()
-    // TODO: If directories changed, cleanup all files in directories changed here
     this.outputDirectories = outputDirectories
     this.markdownPrefixes = {
       page: markdownPrefixes?.page || "",
