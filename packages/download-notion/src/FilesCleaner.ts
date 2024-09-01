@@ -1,48 +1,62 @@
+import path from "path"
 import fs from "fs-extra"
 
 import { FilesManager } from "./FilesManager"
-import { FileRecord } from "./FilesMap"
+import { FileRecord, FileType } from "./FilesMap"
 import { info, verbose } from "./log"
 
 export type ExtendedFileRecord = FileRecord & {
   id: string
 }
-export class FilesCleaner {
-  private oldFilesManager: FilesManager
-  private newFilesManager: FilesManager
 
-  constructor({
-    oldFilesManager,
-    newFilesManager,
-  }: {
-    oldFilesManager: FilesManager
+export class FilesCleaner {
+  public async cleanupOldFiles(
+    oldFilesManager: FilesManager,
     newFilesManager: FilesManager
-  }) {
-    this.oldFilesManager = oldFilesManager
-    this.newFilesManager = newFilesManager
+  ): Promise<void> {
+    info("Cleaning up old files")
+    const oldFiles = this.getFileRecords(oldFilesManager, "page")
+    const newFiles = this.getFileRecords(newFilesManager, "page")
+    const oldImages = this.getFileRecords(oldFilesManager, "image")
+    const newImages = this.getFileRecords(newFilesManager, "image")
+
+    const pagesToRemove = this.getRecordsToRemove(oldFiles, newFiles)
+    const imagesToRemove = this.getRecordsToRemove(oldImages, newImages)
+
+    await this.removeRecords([...pagesToRemove, ...imagesToRemove])
   }
 
-  public async cleanupOldFiles(): Promise<void> {
-    info("Cleaning up old files")
-    const oldFiles = this.getFileRecords(this.oldFilesManager, "page")
-    const newFiles = this.getFileRecords(this.newFilesManager, "page")
-    const oldImages = this.getFileRecords(this.oldFilesManager, "image")
-    const newImages = this.getFileRecords(this.newFilesManager, "image")
+  public async cleanupAllFiles(filesManager: FilesManager): Promise<void> {
+    info("Cleaning up all tracked files")
+    const allFiles = [
+      ...this.getFileRecords(filesManager, "page"),
+      ...this.getFileRecords(filesManager, "image"),
+      ...this.getFileRecords(filesManager, "database"),
+    ]
 
-    const filesToRemove = this.getFilesToRemove(oldFiles, newFiles)
-    const imagesToRemove = this.getFilesToRemove(oldImages, newImages)
+    await this.removeRecords(allFiles)
+  }
 
-    for (const p of [...filesToRemove, ...imagesToRemove]) {
-      verbose(`Removing file: ${p}`)
-      await fs.rm(p)
+  private async removeRecords(records: ExtendedFileRecord[]): Promise<void> {
+    info(`Removing ${records.length} files`)
+    for (const record of records) {
+      verbose(`Removing file: ${record.path} (ID: ${record.id})`)
+      await this.removeFile(record.path)
+    }
+  }
+
+  private async removeFile(filePath: string): Promise<void> {
+    try {
+      await fs.remove(filePath)
+    } catch (error) {
+      console.error(`Error removing file ${filePath}:`, error)
     }
   }
 
   private getFileRecords(
     filesManager: FilesManager,
-    type: "page" | "image"
+    type: FileType
   ): ExtendedFileRecord[] {
-    // Root path is needed so that fiels can be removed
     return Object.entries(filesManager.getAllOfType("output", type)).map(
       ([id, record]) => ({
         id,
@@ -51,26 +65,22 @@ export class FilesCleaner {
     )
   }
 
-  private getFilesToRemove(
+  private getRecordsToRemove(
     oldRecords: ExtendedFileRecord[],
     newRecords: ExtendedFileRecord[]
-  ): string[] {
+  ): ExtendedFileRecord[] {
     const newRecordsMap = new Map(newRecords.map((r) => [r.id, r]))
-    const filesToRemove: string[] = []
-
-    for (const oldRecord of oldRecords) {
+    return oldRecords.filter((oldRecord) => {
       const newRecord = newRecordsMap.get(oldRecord.id)
       const reason = this.getRemoveReason(oldRecord, newRecord)
-
       if (reason) {
-        filesToRemove.push(oldRecord.path)
         verbose(
           `Marking file for removal: ${oldRecord.path} id: ${oldRecord.id} (Reason: ${reason})`
         )
+        return true
       }
-    }
-
-    return filesToRemove
+      return false
+    })
   }
 
   private getRemoveReason(

@@ -148,6 +148,14 @@ export class FilesManager {
       initialFilesMap: FilesMap.fromJSON(JSON.stringify(parsed.baseFilesMap)),
     })
   }
+
+  public getOutputDirectories(): ObjectPrefixDict {
+    return { ...this.outputDirectories }
+  }
+
+  public reset(): void {
+    this.baseFilesMap = new FilesMap()
+  }
 }
 
 export function copyRecord(

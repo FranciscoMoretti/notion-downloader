@@ -7,6 +7,7 @@ import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesCleaner } from "./FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./FilesManager"
+import { FileType } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
@@ -137,8 +138,26 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  // TODO: Implement a logic to reset the state if previous save directories vs current directories are different
   const previousFilesManager = loadFilesManagerFile(filesMapFilePath)
+
+  if (previousFilesManager) {
+    const prevDirs = previousFilesManager.getOutputDirectories()
+    const currentDirs = objectsDirectories
+
+    const keys = Object.keys(prevDirs) as FileType[]
+    const dirsChanged = keys.some((key) => prevDirs[key] !== currentDirs[key])
+
+    if (dirsChanged) {
+      info("Output directories changed. Deleting all tracked files.")
+      const filesCleaner = new FilesCleaner()
+      await filesCleaner.cleanupAllFiles(previousFilesManager)
+      previousFilesManager.reset()
+      info("Output directories changed. Clearing the cache.")
+      // Reset the cache since assets URLs could have changed (cover images, block images)
+      cachedNotionClient.cache.clearCache()
+      // TODO: Consider moving the image/asset files instead of removing them and clearing the cache
+    }
+  }
 
   const existingFilesManager =
     previousFilesManager ||
@@ -272,11 +291,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
   group("Stage 3: clean up old files & images...")
 
-  const filesCleaner = new FilesCleaner({
-    oldFilesManager: existingFilesManager,
-    newFilesManager,
-  })
-  await filesCleaner.cleanupOldFiles()
+  const filesCleaner = new FilesCleaner()
+  await filesCleaner.cleanupOldFiles(existingFilesManager, newFilesManager)
   await saveToFile(newFilesManager.toJSON(), filesMapFilePath)
   endGroup()
 }

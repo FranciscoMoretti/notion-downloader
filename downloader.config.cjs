@@ -10,7 +10,7 @@ module.exports = {
   },
   imgOutputPath: "./public/assets/",
   imgPrefixInMarkdown: "/assets",
-  markdownOutputPath: "./content",
+  markdownOutputPath: "./content/",
   logLevel: "debug",
   pageLinkHasExtension: false,
   revalidatePeriod: -1,
