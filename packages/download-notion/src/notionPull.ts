@@ -112,28 +112,31 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   const namingStrategy =
-    options.namingStrategy === "github-slug"
-      ? new GithubSlugNamingStrategy(options.slugProperty || "")
-      : options.namingStrategy === "notion-slug"
-      ? new NotionSlugNamingStrategy(options.slugProperty || "")
-      : options.namingStrategy === "guid"
+    options.conversion.namingStrategy === "github-slug"
+      ? new GithubSlugNamingStrategy(options.conversion.slugProperty || "")
+      : options.conversion.namingStrategy === "notion-slug"
+      ? new NotionSlugNamingStrategy(options.conversion.slugProperty || "")
+      : options.conversion.namingStrategy === "guid"
       ? new GuidNamingStrategy()
       : new TitleNamingStrategy()
   const layoutStrategy =
-    options.layoutStrategy === "FlatGuidLayoutStrategy"
+    options.conversion.layoutStrategy === "FlatGuidLayoutStrategy"
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
 
   const objectsDirectories: ObjectPrefixDict = {
-    page: options.markdownOutputPath,
-    database: options.markdownOutputPath,
-    image: options.imgOutputPath,
+    page: options.conversion.outputPaths.markdown,
+    database: options.conversion.outputPaths.markdown,
+    image: options.conversion.outputPaths.images,
   }
 
   const markdownPrefixes: ObjectPrefixDict = {
     page: "",
     database: "",
-    image: options.imgPrefixInMarkdown || options.imgOutputPath || ".",
+    image:
+      options.conversion.markdownPrefixes.images ||
+      options.conversion.outputPaths.images ||
+      ".",
   }
 
   const filesMapFilePath =
@@ -170,7 +173,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     markdownPrefixes: markdownPrefixes,
   })
 
-  await fs.mkdir(options.markdownOutputPath, { recursive: true })
+  await fs.mkdir(options.conversion.outputPaths.markdown, { recursive: true })
   await fs.mkdir(cacheDir, { recursive: true })
 
   info("Connecting to Notion...")
@@ -191,6 +194,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       rootObjectType: rootObjectType,
     },
     dataOptions: {
+      // TODO: Consider exposing this as options or making it a default input arg
       downloadAllPages: true,
       downloadDatabases: true,
       followLinks: true,
@@ -200,7 +204,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
   info("PULL: Notion Download Completed")
-  if (options.skipConversion) {
+  if (options.conversion.skip) {
     return
   }
 
@@ -221,7 +225,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const allObjectsMap = objectsToObjectsMap(objects)
 
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
-    "default",
+    options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>
       getAncestorPageOrDatabaseFilepath(image, allObjectsMap, newFilesManager)
@@ -234,8 +238,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   function shouldSkipPageFilter(page: NotionPage): boolean {
     return (
-      options.statusTag !== "*" &&
-      page.status !== options.statusTag &&
+      options.conversion.statusTag !== "*" &&
+      page.status !== options.conversion.statusTag &&
       page.status !== ""
     )
   }
@@ -359,7 +363,8 @@ async function outputPages(
   for (const page of pages) {
     const mdPath = filesManager.get("base", "page", page.id)?.path
     const mdPathWithRoot =
-      sanitizeMarkdownOutputPath(options.markdownOutputPath) + mdPath
+      sanitizeMarkdownOutputPath(options.conversion.outputPaths.markdown) +
+      mdPath
     const markdown = await getMarkdownForPage(config, context, page)
     writePage(markdown, mdPathWithRoot)
   }

@@ -1,8 +1,5 @@
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionImage } from "./NotionImage"
-import { NotionPullOptions } from "./config/schema"
-import { getImageFileExtension } from "./getImageFileExtension"
-import { FileData, ImageSet } from "./images"
 import { findLastUuid, hashOfString } from "./utils"
 
 // Original behavior and comment:

@@ -94,7 +94,7 @@ function convertLinkHref(
     "page",
     targetPage.id
   )?.path
-  if (!context.options.pageLinkHasExtension) {
+  if (!context.options.conversion.pageLinkHasExtension) {
     convertedLink = removePathExtension(convertedLink)
   }
 

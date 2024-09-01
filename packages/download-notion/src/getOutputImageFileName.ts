@@ -3,9 +3,6 @@ import { DefaultImageNamingStrategy } from "./DefaultImageNamingStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
 import { NotionImage } from "./NotionImage"
-import { NotionPullOptions } from "./config/schema"
-import { FileData, ImageSet } from "./images"
-import { PlainObjectsMap } from "./objects_utils"
 
 export function getStrategy(
   format: "legacy" | "content-hash" | "default",

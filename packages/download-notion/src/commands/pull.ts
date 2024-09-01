@@ -37,16 +37,16 @@ export const pull = new Command()
       // TODO: These options default override the ones from the config file. Figure out how to integrate cosmiconfig and commander
       " Default: false"
   )
-  .option(
-    "-m, --markdown-output-path  <string>",
-    "Root of the hierarchy for md files. WARNING: docu-notion will delete files from this directory. Note also that if it finds localized images, it will create an i18n/ directory as a sibling." +
-      " Default: ./docs"
-  )
-  .option(
-    "-t, --status-tag  <string>",
-    "Database pages without a Notion page property 'status' matching this will be ignored. Use '*' to ignore status altogether." +
-      " Default: Publish"
-  )
+  // .option(
+  //   "-m, --markdown-output-path  <string>",
+  //   "Root of the hierarchy for md files. WARNING: docu-notion will delete files from this directory. Note also that if it finds localized images, it will create an i18n/ directory as a sibling." +
+  //     " Default: ./docs"
+  // )
+  // .option(
+  //   "-t, --status-tag  <string>",
+  //   "Database pages without a Notion page property 'status' matching this will be ignored. Use '*' to ignore status altogether." +
+  //     " Default: Publish"
+  // )
   // TODO: Move this option into a group, and then insert in the `cache` group in the schema.
   .option(
     "-c, --clean-cache",
@@ -60,21 +60,21 @@ export const pull = new Command()
       "debug",
     ])
   )
-  .option(
-    "-p, --img-prefix-in-markdown <string>",
-    "When referencing an image from markdown, prefix with this path instead of the full img-output-path. Should be used only in conjunction with --img-output-path."
-  )
-  .option(
-    "-i, --img-output-path  <string>",
-    "Path to directory where images will be stored. If this is not included, images will be placed in the same directory as the document that uses them, which then allows for localization of screenshots."
-  )
-  .addOption(
-    new Option(
-      "--image-file-name-format <format>",
-      "format:\n- default: {page slug (if any)}.{image block ID}\n- content-hash: Use a hash of the image content.\n- legacy: Use the legacy (before v0.16) method of determining file names. Set this to maintain backward compatibility.\nAll formats will use the original file extension. " +
-        "Default: default"
-    ).choices(["default", "content-hash", "legacy"])
-  )
+  // .option(
+  //   "-p, --img-prefix-in-markdown <string>",
+  //   "When referencing an image from markdown, prefix with this path instead of the full img-output-path. Should be used only in conjunction with --img-output-path."
+  // )
+  // .option(
+  //   "-i, --img-output-path  <string>",
+  //   "Path to directory where images will be stored. If this is not included, images will be placed in the same directory as the document that uses them, which then allows for localization of screenshots."
+  // )
+  // .addOption(
+  //   new Option(
+  //     "--image-file-name-format <format>",
+  //     "format:\n- default: {page slug (if any)}.{image block ID}\n- content-hash: Use a hash of the image content.\n- legacy: Use the legacy (before v0.16) method of determining file names. Set this to maintain backward compatibility.\nAll formats will use the original file extension. " +
+  //       "Default: default"
+  //   ).choices(["default", "content-hash", "legacy"])
+  // )
   .option("-o, --overwrite", "overwrite existing files. Default: false")
   .option(
     "-c, --cwd <cwd>",

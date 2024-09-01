@@ -1,8 +1,5 @@
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionImage } from "./NotionImage"
-import { NotionPullOptions } from "./config/schema"
-import { getImageFileExtension } from "./getImageFileExtension"
-import { PlainObjectsMap } from "./objects_utils"
 
 export class DefaultImageNamingStrategy implements ImageNamingStrategy {
   private readonly getPageAncestorFilename: (image: NotionImage) => string
