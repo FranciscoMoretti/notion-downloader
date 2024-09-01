@@ -1,5 +1,19 @@
 # download-notion
 
+## 0.0.6
+
+### Patch Changes
+
+- [`eab5e967ceb542d0d7500c2fc3a1a9e70d2294f8`](https://github.com/FranciscoMoretti/notion-downloader/commit/eab5e967ceb542d0d7500c2fc3a1a9e70d2294f8) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - New config schema
+
+- [`2aa49fe264081365fbc3dab0c888c1137c3a16ec`](https://github.com/FranciscoMoretti/notion-downloader/commit/2aa49fe264081365fbc3dab0c888c1137c3a16ec) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Files get tracked on their dir and only updated when needed
+
+- [`f544c4dd349bf9a373916bf063b776ebffaf738b`](https://github.com/FranciscoMoretti/notion-downloader/commit/f544c4dd349bf9a373916bf063b776ebffaf738b) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Hints for config and more config files
+
+- Updated dependencies [[`eab5e967ceb542d0d7500c2fc3a1a9e70d2294f8`](https://github.com/FranciscoMoretti/notion-downloader/commit/eab5e967ceb542d0d7500c2fc3a1a9e70d2294f8), [`2aa49fe264081365fbc3dab0c888c1137c3a16ec`](https://github.com/FranciscoMoretti/notion-downloader/commit/2aa49fe264081365fbc3dab0c888c1137c3a16ec)]:
+  - notion-cache-client@0.0.4
+  - notion-downloader@0.0.4
+
 ## 0.0.5
 
 ### Patch Changes
