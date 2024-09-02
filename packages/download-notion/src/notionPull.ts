@@ -265,6 +265,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     if (shouldSkip) {
       verbose(`Skipping ${page.title} because it has status ${page.status}`)
       ++counts.skipped_because_status
+      // TODO: Pages have been filtered here but already added to the filesManager by `getAllObjectsInObjectsTree`.
+      // TODO: This is a problem because by remaining in the filesmanager it doesn't get deleted when the filter changes
+      // TODO: Pages, images and dbs file paths should be processed after `getAllObjectsInObjectsTree`
+      if (newFilesManager.exists("page", page.id)) {
+        newFilesManager.delete("page", page.id)
+      }
     }
     return !shouldSkip
   })

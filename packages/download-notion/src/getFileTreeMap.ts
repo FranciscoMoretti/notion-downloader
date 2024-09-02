@@ -11,7 +11,7 @@ import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage, getPageContentInfo } from "./NotionPage"
 
 export async function getFileTreeMap(
-  incomingContext: string,
+  currentPath: string,
   currentID: string,
   currentType: "page" | "database",
   databaseIsRootLevel: boolean,
@@ -21,12 +21,12 @@ export async function getFileTreeMap(
 ): Promise<void> {
   if (currentType === "database") {
     const database = await getNotionDatabase(client, currentID)
-    const layoutContext = !databaseIsRootLevel
-      ? layoutStrategy.newLevel(incomingContext, database)
-      : incomingContext
+    const newLevelPath = !databaseIsRootLevel
+      ? layoutStrategy.newLevel(currentPath, database)
+      : currentPath
     filesManager.set("base", "database", currentID, {
-      path: layoutContext,
-      lastEditedTime: database.metadata.last_edited_time,
+      path: newLevelPath,
+      lastEditedTime: database.lastEditedTime,
     })
 
     // Recurse to children
@@ -39,7 +39,7 @@ export async function getFileTreeMap(
     for (const childObject of databaseChildrenResults) {
       // TODO: Consider using just id from objectTreeMap instead of the database query here
       await getFileTreeMap(
-        layoutContext,
+        newLevelPath,
         childObject.id,
         childObject.object,
         false,
@@ -51,8 +51,8 @@ export async function getFileTreeMap(
   } else if (currentType === "page") {
     const page = await getNotionPage(client, currentID)
     filesManager.set("base", "page", currentID, {
-      path: layoutStrategy.getPathForPage2(page, incomingContext),
-      lastEditedTime: page.metadata.last_edited_time,
+      path: layoutStrategy.getPathForPage(page, currentPath),
+      lastEditedTime: page.lastEditedTime,
     })
 
     // Recurse to children
@@ -69,11 +69,11 @@ export async function getFileTreeMap(
       pageContentInfo.childDatabaseIdsAndOrder ||
       pageContentInfo.childPageIdsAndOrder
     ) {
-      const layoutContext = layoutStrategy.newLevel(incomingContext, page)
+      const newLevelPath = layoutStrategy.newLevel(currentPath, page)
       // TODO: Consolidate these as generic object children, instead of using the `pageContentInfo`
       for (const page of pageContentInfo.childPageIdsAndOrder) {
         await getFileTreeMap(
-          layoutContext,
+          newLevelPath,
           page.id,
           "page",
           false,
@@ -84,7 +84,7 @@ export async function getFileTreeMap(
       }
       for (const database of pageContentInfo.childDatabaseIdsAndOrder) {
         await getFileTreeMap(
-          layoutContext,
+          newLevelPath,
           database.id,
           "database",
           false,

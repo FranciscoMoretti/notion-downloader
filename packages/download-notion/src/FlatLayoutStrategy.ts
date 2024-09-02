@@ -21,15 +21,15 @@ export class FlatLayoutStrategy extends LayoutStrategy {
   }
 
   public newLevel(
-    context: string,
-    pageOrDatabaseName: NotionPage | NotionDatabase
+    currentPath: string,
+    pageOrDatabase: NotionPage | NotionDatabase
   ): string {
     // In this strategy, we ignore context and don't create any directories to match the levels.
     // Just return the following for the benefit of logging.
-    return context
+    return currentPath
   }
 
-  public getPathForPage2(page: NotionPage, currentPath: string): string {
+  public getPathForPage(page: NotionPage, currentPath: string): string {
     // In this strategy, we don't care about the location or the title
     return "/" + this.namingStrategy.nameForPage(page) + ".md"
   }

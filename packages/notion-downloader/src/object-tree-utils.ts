@@ -1,4 +1,8 @@
-import { NotionObjectPlain, NotionObjectTreeNode } from "./notion-object-tree"
+import {
+  NotionObjectPlain,
+  NotionObjectPlainList,
+  NotionObjectTreeNode,
+} from "./notion-object-tree"
 
 export type IdWithType =
   | { page_id: string; type: "page_id" }
@@ -7,7 +11,7 @@ export type IdWithType =
 
 export function objectTreeToPlainObjects(
   objectTree: NotionObjectTreeNode
-): NotionObjectPlain[] {
+): NotionObjectPlainList {
   const nodes: Array<NotionObjectPlain> = []
   function recurse(node: NotionObjectTreeNode) {
     // Children should only be kept as ids

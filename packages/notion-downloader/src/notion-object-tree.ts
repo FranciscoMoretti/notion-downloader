@@ -25,3 +25,5 @@ export type NotionObjectPlain =
       has_children: boolean
       children: Array<string>
     }
+export type NotionObjectPlainList = NotionObjectPlain[]
+export type NotionObjectPlainMap = Record<string, NotionObjectPlain>

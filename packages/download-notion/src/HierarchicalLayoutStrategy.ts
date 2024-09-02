@@ -19,20 +19,18 @@ export class HierarchicalLayoutStrategy extends LayoutStrategy {
   }
 
   public newLevel(
-    context: string,
-    pageOrDatabaseName: NotionPage | NotionDatabase
+    currentPath: string,
+    pageOrDatabase: NotionPage | NotionDatabase
   ): string {
     const extendPath =
-      pageOrDatabaseName.metadata.object === "page"
-        ? this.namingStrategy.nameForPage(pageOrDatabaseName as NotionPage)
-        : this.namingStrategy.nameForDatabase(
-            pageOrDatabaseName as NotionDatabase
-          )
-    const path = ("/" + context + "/" + extendPath).replaceAll("//", "/")
+      pageOrDatabase.metadata.object === "page"
+        ? this.namingStrategy.nameForPage(pageOrDatabase as NotionPage)
+        : this.namingStrategy.nameForDatabase(pageOrDatabase as NotionDatabase)
+    const path = ("/" + currentPath + "/" + extendPath).replaceAll("//", "/")
     return path
   }
 
-  public getPathForPage2(page: NotionPage, currentPath: string): string {
+  public getPathForPage(page: NotionPage, currentPath: string): string {
     const sanitizedName = this.namingStrategy.nameForPage(page)
 
     const context = ("/" + currentPath + "/").replaceAll("//", "/")
