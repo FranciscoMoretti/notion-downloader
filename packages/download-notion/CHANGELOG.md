@@ -1,5 +1,15 @@
 # download-notion
 
+## 0.0.7
+
+### Patch Changes
+
+- [`361104e1bb304bd9c0e358fe570a36b8ecbb654e`](https://github.com/FranciscoMoretti/notion-downloader/commit/361104e1bb304bd9c0e358fe570a36b8ecbb654e) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Minor fixes image stragegy
+
+- Updated dependencies [[`361104e1bb304bd9c0e358fe570a36b8ecbb654e`](https://github.com/FranciscoMoretti/notion-downloader/commit/361104e1bb304bd9c0e358fe570a36b8ecbb654e)]:
+  - notion-cache-client@0.0.5
+  - notion-downloader@0.0.5
+
 ## 0.0.6
 
 ### Patch Changes
