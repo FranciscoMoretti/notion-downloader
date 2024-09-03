@@ -14,53 +14,56 @@ export async function getFileTreeMap(
   layoutStrategy: LayoutStrategy,
   filesManager: FilesManager
 ): Promise<void> {
-  const currentType = objectsTreeNode.object
-  const currentID = objectsTreeNode.id
-  if (currentType === "database") {
-    const database = getNotionDatabase(objectsData, currentID)
-    const newLevelPath = !databaseIsRootLevel
-      ? layoutStrategy.newLevel(currentPath, database)
-      : currentPath
-    filesManager.set("base", "database", currentID, {
-      path: newLevelPath,
-      lastEditedTime: database.lastEditedTime,
-    })
+  if (objectsTreeNode.object == "block") {
+    // TODO: Handle block objects and make notionObject never undefined
+    return
+  }
+  const notionObject = getNotionObject(
+    objectsData,
+    objectsTreeNode.id,
+    objectsTreeNode.object
+  )
 
-    // Recurse to children
-    for (const childObject of objectsTreeNode.children) {
-      await getFileTreeMap(
-        newLevelPath,
-        childObject,
-        objectsData,
-        false,
-        layoutStrategy,
-        filesManager
-      )
-    }
-  } else if (currentType === "page") {
-    const page = await getNotionPage(objectsData, currentID)
-    filesManager.set("base", "page", currentID, {
-      path: layoutStrategy.getPathForPage(page, currentPath),
-      lastEditedTime: page.lastEditedTime,
-    })
+  // Non-traversal logic start
+  const newLevelPath = !databaseIsRootLevel
+    ? layoutStrategy.newLevel(currentPath, notionObject)
+    : currentPath
+  const objectPath =
+    notionObject.object == "database"
+      ? newLevelPath
+      : layoutStrategy.getPathForPage(notionObject, currentPath)
+  filesManager.set("base", notionObject.object, objectsTreeNode.id, {
+    path: objectPath,
+    lastEditedTime: notionObject.lastEditedTime,
+  })
+  // Non-traversal logic end
 
-    // TODO: Also handle blocks that have block/page children (e.g. columns)
-    // Recurse to children
-    if (objectsTreeNode.children.length > 0) {
-      const newLevelPath = layoutStrategy.newLevel(currentPath, page)
-      for (const childObject of objectsTreeNode.children) {
-        await getFileTreeMap(
-          newLevelPath,
-          childObject,
-          objectsData,
-          false,
-          layoutStrategy,
-          filesManager
-        )
-      }
-    }
+  for (const childObject of objectsTreeNode.children) {
+    await getFileTreeMap(
+      newLevelPath,
+      childObject,
+      objectsData,
+      false,
+      layoutStrategy,
+      filesManager
+    )
   }
 }
+
+export function getNotionObject(
+  objectData: NotionObjectsData,
+  currentID: string,
+  type: "page" | "database"
+) {
+  if (type === "page") {
+    return getNotionPage(objectData, currentID)
+  } else if (type === "database") {
+    return getNotionDatabase(objectData, currentID)
+  } else {
+    throw new Error(`Unknown object type: ${type}`)
+  }
+}
+
 export function getNotionPage(
   objectsData: NotionObjectsData,
   currentID: string
