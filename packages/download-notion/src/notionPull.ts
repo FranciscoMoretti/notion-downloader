@@ -214,6 +214,15 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectsTree,
     cachedNotionClient
   )
+  endGroup()
+  group("Stage 2: Filtering pages...")
+
+  const allObjectsMap = objectsToObjectsMap(objectsData)
+  endGroup()
+
+  group("Stage 3: Building paths...")
+
+  // --------  FILES ---------
   await getFileTreeMap(
     "", // Start context
     objectsTree,
@@ -222,8 +231,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     layoutStrategy,
     newFilesManager
   )
+  endGroup()
 
-  const allObjectsMap = objectsToObjectsMap(objectsData)
+  group("Stage 4: Image download...")
 
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     options.conversion.imageNamingStrategy || "default",
@@ -245,8 +255,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
           )
         : ""
   )
-
-  // --------  FILES ---------
   // ----- Pages ----
   const allPages = Object.values(objectsData.page).map(
     (page) => new NotionPage(page)
@@ -294,17 +302,16 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     databases,
   })
 
+  endGroup()
+
+  endGroup()
   // Only output pages that changed! The rest already exist.
   const pagesToOutput = pages.filter((page) => {
     return existingFilesManager.isObjectNew(page)
   })
-
   info(`Found ${allPages.length} pages`)
   info(`Found ${pagesToOutput.length} new pages`)
-  endGroup()
-  group(
-    `Stage 2: convert ${pagesToOutput.length} Notion pages to markdown and convertNotionLinkToLocalDocusaurusLink locally...`
-  )
+  group(`Stage 5: convert ${pagesToOutput.length} Notion pages to markdown...`)
 
   await outputPages(
     options,
@@ -315,7 +322,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     newFilesManager
   )
   endGroup()
-  group("Stage 3: clean up old files & images...")
+  group("Stage 6: clean up old files & images...")
 
   const filesCleaner = new FilesCleaner()
   await filesCleaner.cleanupOldFiles(existingFilesManager, newFilesManager)
