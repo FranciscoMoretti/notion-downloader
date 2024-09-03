@@ -28,6 +28,30 @@ export function objectTreeToPlainObjects(
   return nodes
 }
 
+export function plainObjectsToObjectsTree(
+  plainObjects: NotionObjectPlainList
+): NotionObjectTreeNode {
+  const rootObject = plainObjects.find((obj) => obj.parent === null)
+  if (!rootObject) {
+    throw new Error("Root object not found")
+  }
+  const plainObjectsMap = new Map(plainObjects.map((obj) => [obj.id, obj]))
+  function plainObjectsToObjectsTreeRecurse(id: string): NotionObjectTreeNode {
+    const plainObject = plainObjectsMap.get(id)
+    if (!plainObject) {
+      throw new Error(`Plain object not found: ${id}`)
+    }
+    const children = plainObject.children.map((childId) =>
+      plainObjectsToObjectsTreeRecurse(childId)
+    )
+    return {
+      ...plainObject,
+      children,
+    }
+  }
+  return plainObjectsToObjectsTreeRecurse(rootObject.id)
+}
+
 export function objectTreeToObjectIds(
   objectTree: NotionObjectTreeNode
 ): IdWithType[] {

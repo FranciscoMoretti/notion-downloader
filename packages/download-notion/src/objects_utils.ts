@@ -49,16 +49,18 @@ export async function getObjectTypeFromClient(
   }
 }
 
+export type NotionObjectsData = {
+  page: Record<string, PageObjectResponse>
+  database: Record<string, DatabaseObjectResponse>
+  block: Record<string, BlockObjectResponse>
+}
 export async function getAllObjectsInObjectsTree(
   objectsTree: NotionObjectTreeNode,
   client: NotionCacheClient
 ) {
   const objectsIdsWithType: IdWithType[] = objectTreeToObjectIds(objectsTree)
-  const objects: {
-    page: Record<string, PageObjectResponse>
-    database: Record<string, DatabaseObjectResponse>
-    block: Record<string, BlockObjectResponse>
-  } = {
+
+  const objects: NotionObjectsData = {
     page: {},
     database: {},
     block: {},

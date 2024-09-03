@@ -1,4 +1,4 @@
-import { Client, collectPaginatedAPI, isFullBlock } from "@notionhq/client"
+import { collectPaginatedAPI, isFullBlock } from "@notionhq/client"
 import {
   ListBlockChildrenParameters,
   QueryDatabaseParameters,
@@ -6,7 +6,6 @@ import {
 import { NotionCacheClient, logOperation } from "notion-cache-client"
 import { z } from "zod"
 
-import { info } from "./log"
 import { NotionObjectTreeNode } from "./notion-object-tree"
 import { cacheOptionsSchema } from "./schema"
 
@@ -81,6 +80,7 @@ export async function fetchNotionObjectTree({
     id: startingNode.rootUUID,
     object: startingNode.rootObjectType,
     children: [],
+    parent: null,
   }
 
   await fetchTreeRecursively(objectsTree, 0, client, options)
@@ -134,6 +134,7 @@ async function fetchTreeRecursively(
         id: childObject.id,
         object: childObject.object,
         children: [],
+        parent: objectNode.id,
       }
 
       objectNode.children.push(newNode)
@@ -190,6 +191,7 @@ async function fetchTreeRecursively(
         children: [],
         has_children: childBlock.has_children,
         type: childBlock.type,
+        parent: objectNode.id,
       }
       objectNode.children.push(newNode)
       if (

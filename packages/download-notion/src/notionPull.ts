@@ -210,21 +210,20 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     return
   }
 
+  const objectsData = await getAllObjectsInObjectsTree(
+    objectsTree,
+    cachedNotionClient
+  )
   await getFileTreeMap(
     "", // Start context
-    rootUUID,
-    rootObjectType,
+    objectsTree,
+    objectsData,
     options.rootDbAsFolder,
-    cachedNotionClient,
     layoutStrategy,
     newFilesManager
   )
 
-  const objects = await getAllObjectsInObjectsTree(
-    objectsTree,
-    cachedNotionClient
-  )
-  const allObjectsMap = objectsToObjectsMap(objects)
+  const allObjectsMap = objectsToObjectsMap(objectsData)
 
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     options.conversion.imageNamingStrategy || "default",
@@ -249,7 +248,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   // --------  FILES ---------
   // ----- Pages ----
-  const allPages = Object.values(objects.page).map(
+  const allPages = Object.values(objectsData.page).map(
     (page) => new NotionPage(page)
   )
   function shouldSkipPageFilter(page: NotionPage): boolean {
@@ -276,11 +275,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   // ----- Databases ----
-  const databases: NotionDatabase[] = Object.values(objects.database).map(
+  const databases: NotionDatabase[] = Object.values(objectsData.database).map(
     (db) => new NotionDatabase(db)
   )
   // ----- Images ----
-  const imageBlocks = Object.values(objects.block).filter(
+  // TODO: If image belongs to a page that was filtered (E.g. because of status), this fails!
+  const imageBlocks = Object.values(objectsData.block).filter(
     (block) => block.type === "image"
   )
 
