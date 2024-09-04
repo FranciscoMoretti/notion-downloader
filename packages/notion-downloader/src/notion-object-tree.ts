@@ -70,6 +70,29 @@ export class NotionObjectTree {
     }
   }
 
+  // TODO: Consider doing the get operations starting from a specific node
+  getPages(): PageObjectResponse[] {
+    return Object.values(this.data.page)
+  }
+
+  getDatabases(): DatabaseObjectResponse[] {
+    return Object.values(this.data.database)
+  }
+
+  getBlocks(): BlockObjectResponse[]
+  getBlocks<T extends BlockObjectResponse["type"]>(
+    type: T
+  ): Extract<BlockObjectResponse, { type: T }>[]
+  getBlocks(type?: string): BlockObjectResponse[] {
+    if (type) {
+      return Object.values(this.data.block).filter(
+        (block): block is Extract<BlockObjectResponse, { type: typeof type }> =>
+          block.type === type
+      )
+    }
+    return Object.values(this.data.block)
+  }
+
   traverse<T>(
     nodeAction: (
       objectResponse: NotionObjectResponse,
@@ -80,6 +103,9 @@ export class NotionObjectTree {
     startNode: NotionObjectTreeNode = this.tree
   ) {
     const objectResponse = this.data[startNode.object][startNode.id]
+    if (!objectResponse) {
+      throw new Error(`Object response not found for id: ${startNode.id}`)
+    }
     const newContext = nodeAction(objectResponse, parentContext, this)
 
     for (const child of startNode.children) {
@@ -145,6 +171,10 @@ export class NotionObjectTree {
   removeObject(id: string) {
     const node = this.getNodeById(id)
     if (!node) return
+    // First let children remove themselves, and then remove up to the start node
+    for (const child of node.children) {
+      this.removeObject(child.id)
+    }
     // Delete from data
     delete this.data[node.object][id]
     // Delete from tree
@@ -158,9 +188,6 @@ export class NotionObjectTree {
     }
     // Delete from mapping
     this.idToNodeMap.delete(id)
-    for (const child of node.children) {
-      this.removeObject(child.id)
-    }
   }
 }
 

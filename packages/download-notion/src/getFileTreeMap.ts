@@ -1,25 +1,17 @@
-import {
-  NotionObjectResponse,
-  NotionObjectTree,
-  NotionObjectTreeNode,
-} from "notion-downloader"
+import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NotionDatabase } from "./NotionDatabase"
 import { NotionImage } from "./NotionImage"
 import { getNotionObject } from "./NotionObjectUtils"
-import { NotionPage } from "./NotionPage"
-import { NotionObjectsData } from "./objects_utils"
-import { traverseTree } from "./traverseTree"
 
-export async function getFileTreeMap(
+export function getFileTreeMap(
   currentPath: string,
   objectsTree: NotionObjectTree,
   databaseIsRootLevel: boolean,
   layoutStrategy: LayoutStrategy,
   filesManager: FilesManager
-): Promise<void> {
+) {
   const nodeAction = (
     objectResponse: NotionObjectResponse,
     parentContext: {

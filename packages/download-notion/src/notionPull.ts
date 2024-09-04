@@ -224,15 +224,17 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
   group("Stage 2: Filtering pages...")
 
-  // await filterTree(objectsTree, objectsData, options.conversion.statusTag)
-  const allObjectsMap = objectsToObjectsMap(objectsData)
+  filterTree(objectsTree, options.conversion.statusTag)
+  
+  // TODO: allObjectsMap should not be needed, instead, getting the ancestors should be handled by the objectsTree
+  const allObjectsMap = objectsToObjectsMap(objectsTree.data)
 
   endGroup()
 
   group("Stage 3: Building paths...")
 
   // --------  FILES ---------
-  await getFileTreeMap(
+  getFileTreeMap(
     "", // Start context
     objectsTree,
     options.rootDbAsFolder,
@@ -263,20 +265,14 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
           )
         : ""
   )
-  // ----- Pages ----
-  const pages = Object.values(objectsData.page).map(
-    (page) => new NotionPage(page)
-  )
+  const pages = objectsTree.getPages().map((page) => new NotionPage(page))
 
-  // ----- Databases ----
-  const databases: NotionDatabase[] = Object.values(objectsData.database).map(
-    (db) => new NotionDatabase(db)
-  )
+  const databases = objectsTree
+    .getDatabases()
+    .map((db) => new NotionDatabase(db))
   // ----- Images ----
   // TODO: If image belongs to a page that was filtered (E.g. because of status), this fails!
-  const imageBlocks = Object.values(objectsData.block).filter(
-    (block) => block.type === "image"
-  )
+  const imageBlocks = objectsTree.getBlocks("image")
 
   // Process images saves them to the filesMap and also updates the markdown files
   await processImages({

@@ -4,7 +4,12 @@ export {
   fetchNotionObjectTree,
 } from "./fetch-notion-object-tree"
 
-export { NotionObjectTreeNode, BlockObjectTreeNode } from "./notion-object-tree"
+export {
+  NotionObjectTreeNode,
+  BlockObjectTreeNode,
+  NotionObjectTree,
+  NotionObjectResponse,
+} from "./notion-object-tree"
 
 export { cacheOptionsSchema } from "./schema"
 export {
