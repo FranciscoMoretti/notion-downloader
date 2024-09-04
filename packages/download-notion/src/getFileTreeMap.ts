@@ -1,31 +1,43 @@
-import { NotionObjectTreeNode } from "notion-downloader"
+import {
+  NotionObjectResponse,
+  NotionObjectTree,
+  NotionObjectTreeNode,
+} from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
 import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionDatabase } from "./NotionDatabase"
+import { NotionImage } from "./NotionImage"
+import { getNotionObject } from "./NotionObjectUtils"
 import { NotionPage } from "./NotionPage"
 import { NotionObjectsData } from "./objects_utils"
 import { traverseTree } from "./traverseTree"
 
 export async function getFileTreeMap(
   currentPath: string,
-  objectsTreeNode: NotionObjectTreeNode,
-  objectsData: NotionObjectsData,
+  objectsTree: NotionObjectTree,
   databaseIsRootLevel: boolean,
   layoutStrategy: LayoutStrategy,
   filesManager: FilesManager
 ): Promise<void> {
-  if (objectsTreeNode.object == "block") {
-    // TODO: Handle block objects and make notionObject never undefined
-    return
-  }
   const nodeAction = (
-    notionObject: NotionDatabase | NotionPage,
+    objectResponse: NotionObjectResponse,
     parentContext: {
       path: string
       databaseIsRoot: boolean
     }
   ) => {
+    if (objectResponse.object == "block") {
+      // TODO: Handle block objects
+      return parentContext
+    }
+
+    const notionObject = getNotionObject(objectResponse)
+    // TODO: hanlde image paths here too
+    if (notionObject instanceof NotionImage) {
+      return parentContext
+    }
+
     const newLevelPath = !parentContext.databaseIsRoot
       ? layoutStrategy.newLevel(parentContext.path, notionObject)
       : parentContext.path
@@ -42,13 +54,8 @@ export async function getFileTreeMap(
       databaseIsRoot: false,
     }
   }
-  traverseTree(
-    {
-      path: currentPath,
-      databaseIsRoot: databaseIsRootLevel,
-    },
-    objectsTreeNode,
-    objectsData,
-    nodeAction
-  )
+  objectsTree.traverse(nodeAction, {
+    path: currentPath,
+    databaseIsRoot: databaseIsRootLevel,
+  })
 }

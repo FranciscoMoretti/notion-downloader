@@ -70,6 +70,23 @@ export class NotionObjectTree {
     }
   }
 
+  traverse<T>(
+    nodeAction: (
+      objectResponse: NotionObjectResponse,
+      parentContext: T,
+      tree: NotionObjectTree
+    ) => T,
+    parentContext: T,
+    startNode: NotionObjectTreeNode = this.tree
+  ) {
+    const objectResponse = this.data[startNode.object][startNode.id]
+    const newContext = nodeAction(objectResponse, parentContext, this)
+
+    for (const child of startNode.children) {
+      this.traverse(nodeAction, newContext, child)
+    }
+  }
+
   getNodeById(id: string): NotionObjectTreeNode | undefined {
     return this.idToNodeMap.get(id)
   }
