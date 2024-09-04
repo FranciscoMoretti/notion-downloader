@@ -9,6 +9,7 @@ export {
   BlockObjectTreeNode,
   NotionObjectTree,
   NotionObjectResponse,
+  NotionObjectsData,
 } from "./notion-object-tree"
 
 export { cacheOptionsSchema } from "./schema"

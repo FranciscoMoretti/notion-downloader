@@ -6,7 +6,9 @@ import {
 import { NotionCacheClient } from "notion-cache-client"
 import {
   IdWithType,
+  NotionObjectTree,
   NotionObjectTreeNode,
+  NotionObjectsData,
   objectTreeToObjectIds,
 } from "notion-downloader"
 
@@ -49,11 +51,7 @@ export async function getObjectTypeFromClient(
   }
 }
 
-export type NotionObjectsData = {
-  page: Record<string, PageObjectResponse>
-  database: Record<string, DatabaseObjectResponse>
-  block: Record<string, BlockObjectResponse>
-}
+// TODO: Consider a "build Object Tree" method with a generic `Client` interface
 export async function getAllObjectsInObjectsTree(
   objectsTree: NotionObjectTreeNode,
   client: NotionCacheClient
@@ -81,23 +79,23 @@ export async function getAllObjectsInObjectsTree(
   return objects
 }
 
-type ObjectsMap = Record<
-  string,
-  PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
->
-
-export function getPageAncestorId(id: string, flatObjectsMap: ObjectsMap) {
-  const parent = flatObjectsMap[id]?.parent
-  if (!parent || parent.type === "workspace") {
+export function getPageAncestorId(id: string, objectTree: NotionObjectTree) {
+  const parentId = objectTree.getParentId(id)
+  if (!parentId) {
     return null
   }
-  if (parent.type === "page_id") {
-    return parent.page_id
+  const parent = objectTree.getObject(parentId)
+  if (!parent) {
+    return null
   }
-  if (parent.type === "database_id") {
-    return getPageAncestorId(parent.database_id, flatObjectsMap)
+
+  if (parent.object === "page") {
+    return parent.id
   }
-  if (parent.type === "block_id") {
-    return getPageAncestorId(parent.block_id, flatObjectsMap)
+  if (parent.object === "database") {
+    return getPageAncestorId(parent.id, objectTree)
+  }
+  if (parent.object === "block") {
+    return getPageAncestorId(parent.id, objectTree)
   }
 }

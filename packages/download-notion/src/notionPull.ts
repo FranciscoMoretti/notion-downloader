@@ -225,9 +225,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   group("Stage 2: Filtering pages...")
 
   filterTree(objectsTree, options.conversion.statusTag)
-  
-  // TODO: allObjectsMap should not be needed, instead, getting the ancestors should be handled by the objectsTree
-  const allObjectsMap = objectsToObjectsMap(objectsTree.data)
 
   endGroup()
 
@@ -253,16 +250,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
         ? removePathExtension(
             getAncestorPageOrDatabaseFilepath(
               image,
-              allObjectsMap,
+              objectsTree,
               newFilesManager
             )
           )
         : options.conversion.imageNamingStrategy == "default-flat"
-        ? getAncestorPageOrDatabaseFilename(
-            image,
-            allObjectsMap,
-            newFilesManager
-          )
+        ? getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
         : ""
   )
   const pages = objectsTree.getPages().map((page) => new NotionPage(page))

@@ -156,6 +156,12 @@ export class NotionObjectTree {
     this.idToNodeMap.set(id, newNode)
   }
 
+  getParentId(id: string): string | null {
+    const node = this.getNodeById(id)
+    if (!node) return null
+    return node.parent
+  }
+
   getObject(
     id: string
   ):
