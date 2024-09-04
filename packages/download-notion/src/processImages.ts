@@ -13,7 +13,7 @@ import {
   PageObjectResponseWithCover,
 } from "./NotionImage"
 import { NotionPage } from "./NotionPage"
-import { updateImageUrlToMarkdownImagePath } from "./images"
+import { updateImageUrlToMarkdownImagePath } from "./imagesUtils"
 
 async function processImage({
   image,

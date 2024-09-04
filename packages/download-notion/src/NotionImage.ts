@@ -7,7 +7,7 @@ import {
 import fs from "fs-extra"
 
 import { NotionObject } from "./NotionObject"
-import { FileData, ImageSet, readPrimaryImage } from "./images"
+import { FileData, ImageSet, readPrimaryImage } from "./imagesUtils"
 import { getImageUrl } from "./notion_objects_utils"
 
 export type PageObjectResponseWithCover = PageObjectResponse & {
