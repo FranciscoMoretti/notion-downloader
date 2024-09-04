@@ -6,6 +6,9 @@ export const conversionSchema = z.object({
   statusTag: z.string().default("Publish"),
   overwrite: z.boolean().default(false),
   slugProperty: z.string().optional(),
+  // TODO: filtering should be a list of configurable filters
+  statusPropertyName: z.string().default("Status"),
+  statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
   outputPaths: z.object({
     markdown: z.string().default("./docs"),

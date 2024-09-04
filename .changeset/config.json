@@ -1,6 +1,9 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "FranciscoMoretti/notion-downloader" }],
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "FranciscoMoretti/notion-downloader" }
+  ],
   "commit": false,
   "fixed": [],
   "linked": [],

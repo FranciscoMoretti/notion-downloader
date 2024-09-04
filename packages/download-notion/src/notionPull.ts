@@ -224,7 +224,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
   group("Stage 2: Filtering pages...")
 
-  filterTree(objectsTree, options.conversion.statusTag)
+  filterTree(
+    objectsTree,
+    options.conversion.statusPropertyName,
+    options.conversion.statusPropertyValue
+  )
 
   endGroup()
 

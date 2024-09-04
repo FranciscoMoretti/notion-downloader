@@ -133,10 +133,6 @@ export class NotionPageLegacy {
     return this.explicitSlug() !== undefined
   }
 
-  public get status(): string | undefined {
-    return this.getGenericProperty("Status")
-  }
-
   public getGenericProperty(property: string): string | undefined {
     const type = (this.metadata as any).properties?.[property].type
     if (!type) return undefined

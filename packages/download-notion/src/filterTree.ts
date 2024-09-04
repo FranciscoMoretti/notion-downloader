@@ -7,16 +7,20 @@ import { verbose } from "./log"
 
 export function filterTree(
   objectsTree: NotionObjectTree,
-  expectedStatusTag: string
+  statusPropertyName: string,
+  statusPropertyValue: string
 ) {
   function shouldFilterPageStatus(
     notionObject: NotionDatabase | NotionPage
   ): boolean {
+    if (notionObject.object !== "page") {
+      return false
+    }
+    const pageStatus = notionObject.getGenericProperty(statusPropertyName)
     return (
-      expectedStatusTag !== "" &&
-      notionObject.object == "page" &&
-      expectedStatusTag !== "*" &&
-      notionObject.status !== expectedStatusTag
+      statusPropertyValue !== "" &&
+      statusPropertyValue !== "*" &&
+      pageStatus !== statusPropertyValue
     )
   }
 
