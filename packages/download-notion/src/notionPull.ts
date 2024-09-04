@@ -2,7 +2,11 @@ import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
-import { NotionObjectTreeNode, downloadObjectTree } from "notion-downloader"
+import {
+  NotionObjectTree,
+  NotionObjectTreeNode,
+  downloadObjectTree,
+} from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesCleaner } from "./FilesCleaner"
@@ -15,6 +19,7 @@ import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
+import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { getStrategy } from "./getOutputImageFileName"
@@ -189,7 +194,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   group("Stage 1: walk children of the root page, looking for pages...")
 
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTree: NotionObjectTreeNode = await downloadObjectTree({
+  const objectsTreeRootNode: NotionObjectTreeNode = await downloadObjectTree({
     client: cachedNotionClient,
     startingNode: {
       rootUUID: rootUUID,
@@ -204,20 +209,24 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     cachingOptions: options.cache,
   })
 
-  await saveDataToJson(objectsTree, cacheDir + "object_tree.json")
+  await saveDataToJson(objectsTreeRootNode, cacheDir + "object_tree.json")
   info("PULL: Notion Download Completed")
   if (options.conversion.skip) {
     return
   }
 
   const objectsData = await getAllObjectsInObjectsTree(
-    objectsTree,
+    objectsTreeRootNode,
     cachedNotionClient
   )
+  const objectsTree = new NotionObjectTree(objectsTreeRootNode, objectsData)
+
   endGroup()
   group("Stage 2: Filtering pages...")
 
+  // await filterTree(objectsTree, objectsData, options.conversion.statusTag)
   const allObjectsMap = objectsToObjectsMap(objectsData)
+
   endGroup()
 
   group("Stage 3: Building paths...")
@@ -226,7 +235,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   await getFileTreeMap(
     "", // Start context
     objectsTree,
-    objectsData,
     options.rootDbAsFolder,
     layoutStrategy,
     newFilesManager
@@ -256,31 +264,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
         : ""
   )
   // ----- Pages ----
-  const allPages = Object.values(objectsData.page).map(
+  const pages = Object.values(objectsData.page).map(
     (page) => new NotionPage(page)
   )
-  function shouldSkipPageFilter(page: NotionPage): boolean {
-    return (
-      options.conversion.statusTag !== "*" &&
-      page.status !== options.conversion.statusTag &&
-      page.status !== ""
-    )
-  }
-  // Filter pages that have an incorrect status
-  const pages = allPages.filter((page) => {
-    const shouldSkip = shouldSkipPageFilter(page)
-    if (shouldSkip) {
-      verbose(`Skipping ${page.title} because it has status ${page.status}`)
-      ++counts.skipped_because_status
-      // TODO: Pages have been filtered here but already added to the filesManager by `getAllObjectsInObjectsTree`.
-      // TODO: This is a problem because by remaining in the filesmanager it doesn't get deleted when the filter changes
-      // TODO: Pages, images and dbs file paths should be processed after `getAllObjectsInObjectsTree`
-      if (newFilesManager.exists("page", page.id)) {
-        newFilesManager.delete("page", page.id)
-      }
-    }
-    return !shouldSkip
-  })
 
   // ----- Databases ----
   const databases: NotionDatabase[] = Object.values(objectsData.database).map(
@@ -309,7 +295,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const pagesToOutput = pages.filter((page) => {
     return existingFilesManager.isObjectNew(page)
   })
-  info(`Found ${allPages.length} pages`)
+  info(`Found ${pages.length} pages`)
   info(`Found ${pagesToOutput.length} new pages`)
   group(`Stage 5: convert ${pagesToOutput.length} Notion pages to markdown...`)
 
