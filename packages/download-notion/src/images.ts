@@ -1,9 +1,5 @@
 import https from "https"
 import * as Path from "path"
-import {
-  ImageBlockObjectResponse,
-  PageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints"
 import axios from "axios"
 import FileType from "file-type"
 import fs from "fs-extra"

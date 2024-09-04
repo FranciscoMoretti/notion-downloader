@@ -1,5 +1,4 @@
 import * as Path from "path"
-import { isFullBlock, isFullPage } from "@notionhq/client"
 import {
   DatabaseObjectResponse,
   ImageBlockObjectResponse,
@@ -8,7 +7,6 @@ import {
 import fs from "fs-extra"
 
 import { NotionObject } from "./NotionObject"
-import { getImageFileExtension } from "./getImageFileExtension"
 import { FileData, ImageSet, readPrimaryImage } from "./images"
 import { getImageUrl } from "./notion_objects_utils"
 
