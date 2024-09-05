@@ -70,6 +70,7 @@ export class NotionImage implements NotionObject {
       mime: fileType.mime,
       buffer: primaryBuffer,
     }
+    return this.fileData
   }
 
   async save(path: string) {

@@ -19,6 +19,7 @@ import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
+import { fetchImages } from "./fetchImages"
 import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
@@ -37,7 +38,7 @@ import {
 import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
-import { processImages } from "./processImages"
+import { applyToAllImages, downloadAndUpdateMetadata } from "./processImages"
 import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
@@ -210,16 +211,22 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   await saveDataToJson(objectsTreeRootNode, cacheDir + "object_tree.json")
-  info("PULL: Notion Download Completed")
-  if (options.conversion.skip) {
-    return
-  }
 
   const objectsData = await getAllObjectsInObjectsTree(
     objectsTreeRootNode,
     cachedNotionClient
   )
+
   const objectsTree = new NotionObjectTree(objectsTreeRootNode, objectsData)
+
+  const imagesCacheDir = cacheDir + "images/"
+  const imagesCacheFilesMap = await fetchImages(objectsTree, imagesCacheDir)
+
+  console.log(imagesCacheFilesMap)
+  info("PULL: Notion Download Completed")
+  if (options.conversion.skip) {
+    return
+  }
 
   endGroup()
   group("Stage 2: Filtering pages...")
@@ -262,29 +269,25 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
         ? getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
         : ""
   )
-  const pages = objectsTree.getPages().map((page) => new NotionPage(page))
-
-  const databases = objectsTree
-    .getDatabases()
-    .map((db) => new NotionDatabase(db))
-  // ----- Images ----
-  // TODO: If image belongs to a page that was filtered (E.g. because of status), this fails!
-  const imageBlocks = objectsTree.getBlocks("image")
 
   // Process images saves them to the filesMap and also updates the markdown files
-  await processImages({
-    imageBlocks,
-    existingFilesManager,
-    newFilesManager,
-    imageNamingStrategy,
-    pages,
-    databases,
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      await downloadAndUpdateMetadata({
+        image,
+        existingFilesManager,
+        newFilesManager,
+        imageNamingStrategy,
+      })
+    },
   })
 
   endGroup()
 
   endGroup()
   // Only output pages that changed! The rest already exist.
+  const pages = objectsTree.getPages().map((page) => new NotionPage(page))
   const pagesToOutput = pages.filter((page) => {
     return existingFilesManager.isObjectNew(page)
   })

@@ -39,23 +39,28 @@ export function updateImageUrlToMarkdownImagePath(
 }
 
 export async function readPrimaryImage(url: string) {
-  // Keep alive with a long timeout solved some image retrieval issues. Maybe we should consider retries with exponential
-  // back-offs if this becomes an issue again.
-  const response = await axios.get(url, {
-    responseType: "arraybuffer",
-    httpsAgent: new https.Agent({ keepAlive: true }),
-    timeout: 10000,
-  })
-  const primaryBuffer = Buffer.from(response.data, "utf-8")
-  const fileType = await FileType.fromBuffer(primaryBuffer)
+  try {
+    // Keep alive with a long timeout solved some image retrieval issues. Maybe we should consider retries with exponential
+    // back-offs if this becomes an issue again.
+    const response = await axios.get(url, {
+      responseType: "arraybuffer",
+      httpsAgent: new https.Agent({ keepAlive: true }),
+      timeout: 10000,
+    })
+    const primaryBuffer = Buffer.from(response.data, "utf-8")
+    const fileType = await FileType.fromBuffer(primaryBuffer)
 
-  if (!fileType) {
-    throw new Error(`Failed to determine file type for image at ${url}`)
-  }
+    if (!fileType) {
+      throw new Error(`Failed to determine file type for image at ${url}`)
+    }
 
-  return {
-    primaryBuffer,
-    fileType,
+    return {
+      primaryBuffer,
+      fileType,
+    }
+  } catch (error) {
+    console.error(`Error fetching image from ${url}:`, error)
+    throw error // Re-throw the error if you want calling functions to handle it
   }
 }
 

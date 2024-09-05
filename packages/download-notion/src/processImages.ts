@@ -3,6 +3,7 @@ import {
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./FilesManager"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
@@ -15,7 +16,7 @@ import {
 import { NotionPage } from "./NotionPage"
 import { updateImageUrlToMarkdownImagePath } from "./imagesUtils"
 
-async function processImage({
+export async function downloadAndUpdateMetadata({
   image,
   existingFilesManager,
   newFilesManager,
@@ -55,55 +56,31 @@ async function processImage({
   }
 }
 
-export async function processImages({
-  imageBlocks,
-  existingFilesManager,
-  newFilesManager,
-  imageNamingStrategy,
-  pages,
-  databases,
+export async function applyToAllImages({
+  objectsTree,
+  applyToImage,
 }: {
-  existingFilesManager: FilesManager
-  newFilesManager: FilesManager
-  imageNamingStrategy: ImageNamingStrategy
-  imageBlocks: (BlockObjectResponse & { type: "image" })[]
-  pages: NotionPage[]
-  databases: NotionDatabase[]
+  objectsTree: NotionObjectTree
+  applyToImage: (image: NotionImage) => Promise<void>
 }) {
   // Process image blocks
-  for (const block of imageBlocks) {
+  for (const block of objectsTree.getBlocks("image")) {
     const image = new NotionImage(block)
-    await processImage({
-      image,
-      existingFilesManager,
-      newFilesManager,
-      imageNamingStrategy,
-    })
+    await applyToImage(image)
   }
 
-  const pagesResponsesWithCover: PageObjectResponseWithCover[] = pages
-    .map((page) => page.metadata)
-    .filter(pageHasCover)
+  const pagesResponsesWithCover = objectsTree.getPages().filter(pageHasCover)
   for (const pageResponse of pagesResponsesWithCover) {
     const image = new NotionImage(pageResponse)
-    await processImage({
-      image,
-      existingFilesManager,
-      newFilesManager,
-      imageNamingStrategy,
-    })
+    await applyToImage(image)
   }
 
-  const databasesResponsesWithCover: DatabaseObjectResponseWithCover[] =
-    databases.map((database) => database.metadata).filter(databaseHasCover)
+  const databasesResponsesWithCover = objectsTree
+    .getDatabases()
+    .filter(databaseHasCover)
   for (const databaseResponse of databasesResponsesWithCover) {
     const image = new NotionImage(databaseResponse)
-    await processImage({
-      image,
-      existingFilesManager,
-      newFilesManager,
-      imageNamingStrategy,
-    })
+    await applyToImage(image)
   }
 }
 
