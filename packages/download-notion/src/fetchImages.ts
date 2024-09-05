@@ -7,18 +7,21 @@ import { applyToAllImages } from "./processImages"
 
 export async function fetchImages(
   objectsTree: NotionObjectTree,
-  outputDir: string
+  outputDir: string,
+  imagesCacheFilesMap: FilesMap
 ) {
-  const imagesCacheFilesMap = new FilesMap()
-
   await applyToAllImages({
     objectsTree,
     applyToImage: async (image) => {
+      if (imagesCacheFilesMap.exists("image", image.id)) {
+        const imageRecord = imagesCacheFilesMap.get("image", image.id)
+        if (imageRecord.lastEditedTime === image.lastEditedTime) {
+          return
+        }
+      }
       await fetchImageAndSaveToCache(image, outputDir, imagesCacheFilesMap)
     },
   })
-
-  return imagesCacheFilesMap
 }
 async function fetchImageAndSaveToCache(
   image: NotionImage,

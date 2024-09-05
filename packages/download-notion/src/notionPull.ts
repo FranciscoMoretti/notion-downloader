@@ -92,6 +92,14 @@ function loadFilesManagerFile(filePath: string): FilesManager | undefined {
   return undefined
 }
 
+function loadImagesCacheFilesMap(filePath: string): FilesMap | undefined {
+  if (fs.existsSync(filePath)) {
+    const jsonData = fs.readFileSync(filePath, "utf8")
+    return FilesMap.fromJSON(jsonData)
+  }
+  return undefined
+}
+
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
 
@@ -221,8 +229,18 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   let imagesCacheFilesMap: FilesMap | undefined = undefined
   if (options.cache.cacheImages) {
+    // TODO Read from previous filesmap file if available
     const imagesCacheDir = cacheDir + "images/"
-    imagesCacheFilesMap = await fetchImages(objectsTree, imagesCacheDir)
+    imagesCacheFilesMap =
+      loadImagesCacheFilesMap(imagesCacheDir + "images_filesmap.json") ||
+      new FilesMap()
+
+    await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
+    // Save to filesmap file
+    await saveToFile(
+      imagesCacheFilesMap.toJSON(),
+      imagesCacheDir + "images_filesmap.json"
+    )
   }
 
   info("PULL: Notion Download Completed")
