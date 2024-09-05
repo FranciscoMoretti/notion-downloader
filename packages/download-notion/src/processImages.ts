@@ -71,25 +71,40 @@ export async function applyToAllImages({
   objectsTree: NotionObjectTree
   applyToImage: (image: NotionImage) => Promise<void>
 }) {
+  const promises: Promise<void>[] = []
+
   // Process image blocks
-  for (const block of objectsTree.getBlocks("image")) {
-    const image = new NotionImage(block)
-    await applyToImage(image)
-  }
+  promises.push(
+    ...objectsTree.getBlocks("image").map((block) => {
+      const image = new NotionImage(block)
+      return applyToImage(image)
+    })
+  )
 
-  const pagesResponsesWithCover = objectsTree.getPages().filter(pageHasCover)
-  for (const pageResponse of pagesResponsesWithCover) {
-    const image = new NotionImage(pageResponse)
-    await applyToImage(image)
-  }
+  // Process pages with covers
+  promises.push(
+    ...objectsTree
+      .getPages()
+      .filter(pageHasCover)
+      .map((pageResponse) => {
+        const image = new NotionImage(pageResponse)
+        return applyToImage(image)
+      })
+  )
 
-  const databasesResponsesWithCover = objectsTree
-    .getDatabases()
-    .filter(databaseHasCover)
-  for (const databaseResponse of databasesResponsesWithCover) {
-    const image = new NotionImage(databaseResponse)
-    await applyToImage(image)
-  }
+  // Process databases with covers
+  promises.push(
+    ...objectsTree
+      .getDatabases()
+      .filter(databaseHasCover)
+      .map((databaseResponse) => {
+        const image = new NotionImage(databaseResponse)
+        return applyToImage(image)
+      })
+  )
+
+  // Wait for all promises to resolve
+  await Promise.all(promises)
 }
 
 function pageHasCover(
