@@ -20,7 +20,7 @@ export type OutputPaths = {
 }
 
 export type ImageSet = {
-  primaryUrl: string
+  url: string
   caption?: string
 }
 
@@ -38,29 +38,34 @@ export function updateImageUrlToMarkdownImagePath(
   }
 }
 
-export async function readPrimaryImage(url: string) {
+export async function readImage(source: string, type: "file" | "url") {
   try {
-    // Keep alive with a long timeout solved some image retrieval issues. Maybe we should consider retries with exponential
-    // back-offs if this becomes an issue again.
-    const response = await axios.get(url, {
+    const buffer = await readBuffer(source, type)
+    const fileType = await FileType.fromBuffer(buffer)
+
+    if (!fileType) {
+      throw new Error(`Failed to determine file type for image at ${source}`)
+    }
+
+    return { buffer, fileType }
+  } catch (error) {
+    console.error(`Error reading image from ${source}:`, error)
+    throw error
+  }
+}
+
+async function readBuffer(source: string, type: "file" | "url") {
+  if (type === "url") {
+    const response = await axios.get(source, {
       responseType: "arraybuffer",
       httpsAgent: new https.Agent({ keepAlive: true }),
       timeout: 10000,
     })
-    const primaryBuffer = Buffer.from(response.data, "utf-8")
-    const fileType = await FileType.fromBuffer(primaryBuffer)
-
-    if (!fileType) {
-      throw new Error(`Failed to determine file type for image at ${url}`)
-    }
-
-    return {
-      primaryBuffer,
-      fileType,
-    }
-  } catch (error) {
-    console.error(`Error fetching image from ${url}:`, error)
-    throw error // Re-throw the error if you want calling functions to handle it
+    return Buffer.from(response.data)
+  } else if (type === "file") {
+    return await fs.readFile(source)
+  } else {
+    throw new Error(`Invalid type ${type}`)
   }
 }
 

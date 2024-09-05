@@ -6,6 +6,7 @@ import {
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./FilesManager"
+import { FilesMap } from "./FilesMap"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import {
@@ -16,19 +17,26 @@ import {
 import { NotionPage } from "./NotionPage"
 import { updateImageUrlToMarkdownImagePath } from "./imagesUtils"
 
-export async function downloadAndUpdateMetadata({
+export async function readAndUpdateMetadata({
   image,
   existingFilesManager,
   newFilesManager,
   imageNamingStrategy,
+  imagesCacheFilesMap,
 }: {
   image: NotionImage
   existingFilesManager: FilesManager
   newFilesManager: FilesManager
   imageNamingStrategy: ImageNamingStrategy
+  imagesCacheFilesMap: FilesMap | undefined
 }) {
   if (existingFilesManager.isObjectNew(image)) {
-    await image.read()
+    if (imagesCacheFilesMap) {
+      const cachedImage = imagesCacheFilesMap.get("image", image.id)
+      await image.readFromFile(cachedImage.path)
+    } else {
+      await image.download()
+    }
     // TODO: Write here a layout naming strategy for images. Name is ok, but path is not.
     const imageFilename = imageNamingStrategy.getFileName(image)
     newFilesManager.set("base", "image", image.id, {

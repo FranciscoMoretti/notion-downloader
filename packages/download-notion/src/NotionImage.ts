@@ -7,7 +7,7 @@ import {
 import fs from "fs-extra"
 
 import { NotionObject } from "./NotionObject"
-import { FileData, ImageSet, readPrimaryImage } from "./imagesUtils"
+import { FileData, ImageSet, readImage } from "./imagesUtils"
 import { getImageUrl } from "./notion_objects_utils"
 
 export type PageObjectResponseWithCover = PageObjectResponse & {
@@ -45,7 +45,7 @@ export class NotionImage implements NotionObject {
   private parseImageBlock(imageBlock: ImageBlockObjectResponse): ImageSet {
     const imageObject = imageBlock.image
     return {
-      primaryUrl: getImageUrl(imageObject),
+      url: getImageUrl(imageObject),
       caption:
         imageBlock.image.caption?.map((c) => c.plain_text).join("") || "",
     }
@@ -54,21 +54,26 @@ export class NotionImage implements NotionObject {
     page: PageObjectResponseWithCover | DatabaseObjectResponseWithCover
   ): ImageSet {
     const primaryUrl = getImageUrl(page.cover)
-    return { primaryUrl, caption: "" }
+    return { url: primaryUrl, caption: "" }
   }
 
-  async read() {
+  async download() {
     if (this.fileData) {
       return this.fileData
     }
+    return await this.readAndSetFileData(this.imageSet.url, "url")
+  }
+  async readFromFile(path: string) {
+    return await this.readAndSetFileData(path, "file")
+  }
 
-    const { primaryBuffer, fileType } = await readPrimaryImage(
-      this.imageSet.primaryUrl
-    )
+  // TODO: Consider extracting to util
+  private async readAndSetFileData(source: string, type: "file" | "url") {
+    const { buffer, fileType } = await readImage(source, type)
     this.fileData = {
       extension: fileType.ext,
       mime: fileType.mime,
-      buffer: primaryBuffer,
+      buffer,
     }
     return this.fileData
   }
@@ -85,7 +90,7 @@ export class NotionImage implements NotionObject {
   }
 
   get url(): string {
-    return this.imageSet.primaryUrl
+    return this.imageSet.url
   }
 
   get caption(): string | undefined {

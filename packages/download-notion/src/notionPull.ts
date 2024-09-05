@@ -11,7 +11,7 @@ import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesCleaner } from "./FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./FilesManager"
-import { FileType } from "./FilesMap"
+import { FileType, FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
@@ -38,7 +38,7 @@ import {
 import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
-import { applyToAllImages, downloadAndUpdateMetadata } from "./processImages"
+import { applyToAllImages, readAndUpdateMetadata } from "./processImages"
 import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
@@ -219,10 +219,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const objectsTree = new NotionObjectTree(objectsTreeRootNode, objectsData)
 
-  const imagesCacheDir = cacheDir + "images/"
-  const imagesCacheFilesMap = await fetchImages(objectsTree, imagesCacheDir)
+  let imagesCacheFilesMap: FilesMap | undefined = undefined
+  if (options.cache.cacheImages) {
+    const imagesCacheDir = cacheDir + "images/"
+    imagesCacheFilesMap = await fetchImages(objectsTree, imagesCacheDir)
+  }
 
-  console.log(imagesCacheFilesMap)
   info("PULL: Notion Download Completed")
   if (options.conversion.skip) {
     return
@@ -274,11 +276,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   await applyToAllImages({
     objectsTree,
     applyToImage: async (image) => {
-      await downloadAndUpdateMetadata({
+      await readAndUpdateMetadata({
         image,
         existingFilesManager,
         newFilesManager,
         imageNamingStrategy,
+        imagesCacheFilesMap,
       })
     },
   })

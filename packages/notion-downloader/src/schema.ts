@@ -7,5 +7,6 @@ export const cacheOptionsSchema = z
     cacheStrategy: z
       .enum(["cache", "no-cache", "force-cache"])
       .default("cache"),
+    cacheImages: z.boolean().default(true),
   })
   .default({})

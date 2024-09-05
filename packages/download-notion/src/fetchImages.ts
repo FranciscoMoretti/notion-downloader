@@ -25,7 +25,7 @@ async function fetchImageAndSaveToCache(
   outputDir: string,
   imagesCacheFilesMap: FilesMap
 ) {
-  const imageData = await image.read()
+  const imageData = await image.download()
   const imagePath = path.join(outputDir, `${image.id}.${imageData.extension}`)
   await image.save(imagePath)
   imagesCacheFilesMap.set("image", image.id, {
