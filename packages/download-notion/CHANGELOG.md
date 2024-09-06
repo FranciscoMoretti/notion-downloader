@@ -1,5 +1,15 @@
 # download-notion
 
+## 0.0.8
+
+### Patch Changes
+
+- [`4aeb2115b8bae69c601f0166b5469608e42f4667`](https://github.com/FranciscoMoretti/notion-downloader/commit/4aeb2115b8bae69c601f0166b5469608e42f4667) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Images cache and download images in parallel
+
+- Updated dependencies [[`4aeb2115b8bae69c601f0166b5469608e42f4667`](https://github.com/FranciscoMoretti/notion-downloader/commit/4aeb2115b8bae69c601f0166b5469608e42f4667)]:
+  - notion-cache-client@0.0.6
+  - notion-downloader@0.0.6
+
 ## 0.0.7
 
 ### Patch Changes
