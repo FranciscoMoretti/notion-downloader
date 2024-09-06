@@ -51,6 +51,6 @@ export class FilesMap {
   }
 
   toJSON(): string {
-    return JSON.stringify(this.map)
+    return JSON.stringify(this.map, null, 2)
   }
 }

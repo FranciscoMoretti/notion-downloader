@@ -132,11 +132,15 @@ export class FilesManager {
   }
 
   public toJSON(): string {
-    return JSON.stringify({
-      baseFilesMap: this.baseFilesMap.getAll(),
-      outputDirectories: this.outputDirectories,
-      markdownPrefixes: this.markdownPrefixes,
-    })
+    return JSON.stringify(
+      {
+        baseFilesMap: this.baseFilesMap.getAll(),
+        outputDirectories: this.outputDirectories,
+        markdownPrefixes: this.markdownPrefixes,
+      },
+      null,
+      2
+    )
   }
 
   public static fromJSON(json: string): FilesManager {
@@ -144,7 +148,9 @@ export class FilesManager {
     return new FilesManager({
       outputDirectories: parsed.outputDirectories,
       markdownPrefixes: parsed.markdownPrefixes,
-      initialFilesMap: FilesMap.fromJSON(JSON.stringify(parsed.baseFilesMap)),
+      initialFilesMap: FilesMap.fromJSON(
+        JSON.stringify(parsed.baseFilesMap, null, 2)
+      ),
     })
   }
 

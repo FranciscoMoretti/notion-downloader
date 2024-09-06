@@ -229,14 +229,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   let imagesCacheFilesMap: FilesMap | undefined = undefined
   if (options.cache.cacheImages) {
-    // TODO Read from previous filesmap file if available
     const imagesCacheDir = cacheDir + "images/"
     imagesCacheFilesMap =
       loadImagesCacheFilesMap(imagesCacheDir + "images_filesmap.json") ||
       new FilesMap()
 
     await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
-    // Save to filesmap file
     await saveToFile(
       imagesCacheFilesMap.toJSON(),
       imagesCacheDir + "images_filesmap.json"
