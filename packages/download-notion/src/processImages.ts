@@ -73,7 +73,6 @@ export async function applyToAllImages({
 }) {
   const promises: Promise<void>[] = []
 
-  // Process image blocks
   promises.push(
     ...objectsTree.getBlocks("image").map((block) => {
       const image = new NotionImage(block)
@@ -81,7 +80,6 @@ export async function applyToAllImages({
     })
   )
 
-  // Process pages with covers
   promises.push(
     ...objectsTree
       .getPages()
@@ -92,7 +90,6 @@ export async function applyToAllImages({
       })
   )
 
-  // Process databases with covers
   promises.push(
     ...objectsTree
       .getDatabases()
@@ -103,7 +100,6 @@ export async function applyToAllImages({
       })
   )
 
-  // Wait for all promises to resolve
   await Promise.all(promises)
 }
 
