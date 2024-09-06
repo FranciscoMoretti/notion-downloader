@@ -251,6 +251,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   filterTree(
     objectsTree,
+    // TODO: Include more filters here
     options.conversion.statusPropertyName,
     options.conversion.statusPropertyValue
   )
@@ -304,7 +305,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   endGroup()
 
-  endGroup()
   // Only output pages that changed! The rest already exist.
   const pages = objectsTree.getPages().map((page) => new NotionPage(page))
   const pagesToOutput = pages.filter((page) => {
