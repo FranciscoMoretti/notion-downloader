@@ -102,31 +102,135 @@ function loadImagesCacheFilesMap(filePath: string): FilesMap | undefined {
 
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
-
-  const optionsForLogging = { ...options }
-  // Just show the first few letters of the notion token, which start with "secret" anyhow.
-  optionsForLogging.notionToken =
-    optionsForLogging.notionToken.substring(0, 10) + "..."
-
+  const optionsForLogging = getOptionsForLogging(options)
+  info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
   // TODO: This should be moved up to the pull command that already loads configs
   const pluginsConfig = await loadConfigAsync()
   const rootUUID = convertToUUID(options.rootId)
 
-  info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
-  // TODO: HACK: until we can add the notion token to the config
-  const cacheDir = options.cwd.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
-
-  const cachedNotionClient = new NotionCacheClient({
-    auth: options.notionToken,
-    cacheOptions: {
-      cacheDirectory: cacheDir,
-    },
-  })
-
+  const cacheDir = getCacheDir(options)
+  const cachedNotionClient = createCachedNotionClient(
+    options.notionToken,
+    cacheDir
+  )
   const notionToMarkdown = new NotionToMarkdown({
     notionClient: cachedNotionClient,
   })
 
+  const { namingStrategy, layoutStrategy } = createStrategies(options)
+
+  const { objectsDirectories, markdownPrefixes } =
+    createDirectoriesAndPrefixes(options)
+
+  const { existingFilesManager, newFilesManager } = await setupFilesManagers(
+    options,
+    objectsDirectories,
+    markdownPrefixes,
+    cachedNotionClient
+  )
+
+  // TODO: Consider if this is necesary. All the paths seem to create their own directories.
+  await createDirectories(options, cacheDir)
+
+  info("Testing connection to Notion...")
+  // Do a quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
+  const rootObjectType = await getRootObjectType({
+    cachedNotionClient,
+    rootUUID,
+    rootObjectType: options.rootObjectType,
+  })
+
+  group("Stage 1: walk children of the root page, looking for pages...")
+  const objectsTree = await downloadAndProcessObjectTree(
+    cachedNotionClient,
+    rootUUID,
+    rootObjectType,
+    options,
+    cacheDir
+  )
+
+  const imagesCacheFilesMap = await handleImageCaching(
+    options,
+    cacheDir,
+    objectsTree
+  )
+
+  info("PULL: Notion Download Completed")
+  if (options.conversion.skip) return
+
+  endGroup()
+  group("Stage 2: Filtering pages...")
+  filterTree(
+    objectsTree,
+    options.conversion.statusPropertyName,
+    options.conversion.statusPropertyValue
+  )
+  endGroup()
+
+  group("Stage 3: Building paths...")
+  // --------  FILES ---------
+  getFileTreeMap(
+    "",
+    objectsTree,
+    options.rootDbAsFolder,
+    layoutStrategy,
+    newFilesManager
+  )
+  endGroup()
+
+  group("Stage 4: Image download...")
+  await processImages(
+    options,
+    objectsTree,
+    existingFilesManager,
+    newFilesManager,
+    imagesCacheFilesMap
+  )
+  endGroup()
+
+  // Only output pages that changed! The rest already exist.
+  const pagesToOutput = getPagesToOutput(objectsTree, existingFilesManager)
+  info(`Found ${objectsTree.getPages().length} pages`)
+  info(`Found ${pagesToOutput.length} new pages`)
+
+  group(`Stage 5: convert ${pagesToOutput.length} Notion pages to markdown...`)
+  await outputPages(
+    options,
+    pluginsConfig,
+    pagesToOutput,
+    cachedNotionClient,
+    notionToMarkdown,
+    newFilesManager
+  )
+  endGroup()
+
+  group("Stage 6: clean up old files & images...")
+  await cleanupAndSaveFiles(existingFilesManager, newFilesManager, options)
+  endGroup()
+}
+
+function getOptionsForLogging(options: NotionPullOptions) {
+  const optionsForLogging = { ...options }
+  optionsForLogging.notionToken =
+    optionsForLogging.notionToken.substring(0, 10) + "..."
+  return optionsForLogging
+}
+
+function getCacheDir(options: NotionPullOptions): string {
+  return options.cwd.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
+}
+
+function createCachedNotionClient(
+  notionToken: string,
+  cacheDir: string
+): NotionCacheClient {
+  return new NotionCacheClient({
+    auth: notionToken,
+    cacheOptions: { cacheDirectory: cacheDir },
+  })
+}
+
+function createStrategies(options: NotionPullOptions) {
   const namingStrategy =
     options.conversion.namingStrategy === "github-slug"
       ? new GithubSlugNamingStrategy(options.conversion.slugProperty || "")
@@ -139,7 +243,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.conversion.layoutStrategy === "FlatLayoutStrategy"
       ? new FlatLayoutStrategy(namingStrategy)
       : new HierarchicalLayoutStrategy(namingStrategy)
+  return { namingStrategy, layoutStrategy }
+}
 
+function createDirectoriesAndPrefixes(options: NotionPullOptions) {
   const objectsDirectories: ObjectPrefixDict = {
     page: options.conversion.outputPaths.markdown,
     database: options.conversion.outputPaths.markdown,
@@ -155,17 +262,26 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       ".",
   }
 
+  return { objectsDirectories, markdownPrefixes }
+}
+
+async function setupFilesManagers(
+  options: NotionPullOptions,
+  objectsDirectories: ObjectPrefixDict,
+  markdownPrefixes: ObjectPrefixDict,
+  cachedNotionClient: NotionCacheClient
+) {
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
   const previousFilesManager = loadFilesManagerFile(filesMapFilePath)
 
   if (previousFilesManager) {
+    // TODO Create a directories change function
     const prevDirs = previousFilesManager.getOutputDirectories()
     const currentDirs = objectsDirectories
 
     const keys = Object.keys(prevDirs) as FileType[]
     const dirsChanged = keys.some((key) => prevDirs[key] !== currentDirs[key])
-
     if (dirsChanged) {
       info("Output directories changed. Deleting all tracked files.")
       const filesCleaner = new FilesCleaner()
@@ -173,8 +289,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
       previousFilesManager.reset()
       info("Output directories changed. Clearing the cache.")
       // Reset the cache since assets URLs could have changed (cover images, block images)
-      cachedNotionClient.cache.clearCache()
       // TODO: Consider moving the image/asset files instead of removing them and clearing the cache
+      if (!options.cache.cacheImages) {
+        cachedNotionClient.cache.clearCache()
+      }
     }
   }
 
@@ -182,33 +300,32 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     previousFilesManager ||
     new FilesManager({
       outputDirectories: objectsDirectories,
-      markdownPrefixes: markdownPrefixes,
+      markdownPrefixes,
     })
   const newFilesManager = new FilesManager({
     outputDirectories: objectsDirectories,
-    markdownPrefixes: markdownPrefixes,
+    markdownPrefixes,
   })
 
+  return { existingFilesManager, newFilesManager }
+}
+
+async function createDirectories(options: NotionPullOptions, cacheDir: string) {
   await fs.mkdir(options.conversion.outputPaths.markdown, { recursive: true })
   await fs.mkdir(cacheDir, { recursive: true })
+}
 
-  info("Connecting to Notion...")
-  // Do a  quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
-  const rootObjectType = await getRootObjectType({
-    cachedNotionClient,
-    rootUUID,
-    rootObjectType: options.rootObjectType,
-  })
-
-  group("Stage 1: walk children of the root page, looking for pages...")
-
+async function downloadAndProcessObjectTree(
+  cachedNotionClient: NotionCacheClient,
+  rootUUID: string,
+  rootObjectType: "page" | "database",
+  options: NotionPullOptions,
+  cacheDir: string
+) {
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTreeRootNode: NotionObjectTreeNode = await downloadObjectTree({
+  const objectsTreeRootNode = await downloadObjectTree({
     client: cachedNotionClient,
-    startingNode: {
-      rootUUID: rootUUID,
-      rootObjectType: rootObjectType,
-    },
+    startingNode: { rootUUID, rootObjectType },
     dataOptions: {
       // TODO: Consider exposing this as options or making it a default input arg
       downloadAllPages: true,
@@ -224,54 +341,62 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectsTreeRootNode,
     cachedNotionClient
   )
+  return new NotionObjectTree(objectsTreeRootNode, objectsData)
+}
 
-  const objectsTree = new NotionObjectTree(objectsTreeRootNode, objectsData)
+async function handleImageCaching(
+  options: NotionPullOptions,
+  cacheDir: string,
+  objectsTree: NotionObjectTree
+) {
+  if (!options.cache.cacheImages) return undefined
 
-  let imagesCacheFilesMap: FilesMap | undefined = undefined
-  if (options.cache.cacheImages) {
-    const imagesCacheDir = cacheDir + "images/"
-    imagesCacheFilesMap =
-      loadImagesCacheFilesMap(imagesCacheDir + "images_filesmap.json") ||
-      new FilesMap()
+  const imagesCacheDir = cacheDir + "images/"
+  const imagesCacheFilesMap =
+    loadImagesCacheFilesMap(imagesCacheDir + "images_filesmap.json") ||
+    new FilesMap()
 
-    await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
-    await saveToFile(
-      imagesCacheFilesMap.toJSON(),
-      imagesCacheDir + "images_filesmap.json"
-    )
-  }
-
-  info("PULL: Notion Download Completed")
-  if (options.conversion.skip) {
-    return
-  }
-
-  endGroup()
-  group("Stage 2: Filtering pages...")
-
-  filterTree(
-    objectsTree,
-    // TODO: Include more filters here
-    options.conversion.statusPropertyName,
-    options.conversion.statusPropertyValue
+  await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
+  await saveToFile(
+    imagesCacheFilesMap.toJSON(),
+    imagesCacheDir + "images_filesmap.json"
   )
 
-  endGroup()
+  return imagesCacheFilesMap
+}
 
-  group("Stage 3: Building paths...")
-
-  // --------  FILES ---------
-  getFileTreeMap(
-    "", // Start context
+async function processImages(
+  options: NotionPullOptions,
+  objectsTree: NotionObjectTree,
+  existingFilesManager: FilesManager,
+  newFilesManager: FilesManager,
+  imagesCacheFilesMap: FilesMap | undefined
+) {
+  const imageNamingStrategy = createImageNamingStrategy(
+    options,
     objectsTree,
-    options.rootDbAsFolder,
-    layoutStrategy,
     newFilesManager
   )
-  endGroup()
 
-  group("Stage 4: Image download...")
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      await readAndUpdateMetadata({
+        image,
+        existingFilesManager,
+        newFilesManager,
+        imageNamingStrategy,
+        imagesCacheFilesMap,
+      })
+    },
+  })
+}
 
+function createImageNamingStrategy(
+  options: NotionPullOptions,
+  objectsTree: NotionObjectTree,
+  newFilesManager: FilesManager
+) {
   const imageNamingStrategy: ImageNamingStrategy = getStrategy(
     options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
@@ -288,47 +413,83 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
         ? getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
         : ""
   )
+  return imageNamingStrategy
+}
 
-  // Process images saves them to the filesMap and also updates the markdown files
-  await applyToAllImages({
-    objectsTree,
-    applyToImage: async (image) => {
-      await readAndUpdateMetadata({
-        image,
-        existingFilesManager,
-        newFilesManager,
-        imageNamingStrategy,
-        imagesCacheFilesMap,
-      })
-    },
-  })
-
-  endGroup()
-
-  // Only output pages that changed! The rest already exist.
+function getPagesToOutput(
+  objectsTree: NotionObjectTree,
+  existingFilesManager: FilesManager
+) {
   const pages = objectsTree.getPages().map((page) => new NotionPage(page))
-  const pagesToOutput = pages.filter((page) => {
-    return existingFilesManager.isObjectNew(page)
-  })
-  info(`Found ${pages.length} pages`)
-  info(`Found ${pagesToOutput.length} new pages`)
-  group(`Stage 5: convert ${pagesToOutput.length} Notion pages to markdown...`)
+  return pages.filter((page) => existingFilesManager.isObjectNew(page))
+}
 
-  await outputPages(
-    options,
-    pluginsConfig,
-    pagesToOutput,
-    cachedNotionClient,
-    notionToMarkdown,
-    newFilesManager
-  )
-  endGroup()
-  group("Stage 6: clean up old files & images...")
-
+async function cleanupAndSaveFiles(
+  existingFilesManager: FilesManager,
+  newFilesManager: FilesManager,
+  options: NotionPullOptions
+) {
   const filesCleaner = new FilesCleaner()
   await filesCleaner.cleanupOldFiles(existingFilesManager, newFilesManager)
+
+  const filesMapFilePath =
+    options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
   await saveToFile(newFilesManager.toJSON(), filesMapFilePath)
-  endGroup()
+}
+
+async function outputPages(
+  options: NotionPullOptions,
+  config: IDocuNotionConfig,
+  pages: Array<NotionPage>,
+  client: Client,
+  notionToMarkdown: NotionToMarkdown,
+  filesManager: FilesManager
+) {
+  const context: IDocuNotionContext = createContext(
+    options,
+    pages,
+    client,
+    notionToMarkdown,
+    filesManager
+  )
+
+  for (const page of pages) {
+    const mdPath = filesManager.get("base", "page", page.id)?.path
+    const mdPathWithRoot =
+      sanitizeMarkdownOutputPath(options.conversion.outputPaths.markdown) +
+      mdPath
+    const markdown = await getMarkdownForPage(config, context, page)
+    writePage(markdown, mdPathWithRoot)
+  }
+
+  info(`Finished processing ${pages.length} pages`)
+  info(JSON.stringify(counts))
+}
+
+function createContext(
+  options: NotionPullOptions,
+  pages: Array<NotionPage>,
+  client: Client,
+  notionToMarkdown: NotionToMarkdown,
+  filesManager: FilesManager
+): IDocuNotionContext {
+  const context = {
+    getBlockChildren: (id: string) => getBlockChildren(id, client),
+    // this changes with each page
+    pageInfo: {
+      directoryContainingMarkdown: "",
+      slug: "",
+    },
+    notionToMarkdown: notionToMarkdown,
+    options: options,
+    pages: pages,
+    filesManager: filesManager,
+    counts: counts, // review will this get copied or pointed to?
+    imports: [],
+    convertNotionLinkToLocalDocusaurusLink: (url: string) =>
+      convertInternalUrl(context, url),
+  }
+  return context
 }
 
 async function tryGetFirstPageWithType({
@@ -366,42 +527,6 @@ async function tryGetFirstPageWithType({
   return Promise.reject("Error found: Unexpected code path")
 }
 
-async function outputPages(
-  options: NotionPullOptions,
-  config: IDocuNotionConfig,
-  pages: Array<NotionPage>,
-  client: Client,
-  notionToMarkdown: NotionToMarkdown,
-  filesManager: FilesManager
-) {
-  const context: IDocuNotionContext = {
-    getBlockChildren: (id: string) => getBlockChildren(id, client),
-    // this changes with each page
-    pageInfo: {
-      directoryContainingMarkdown: "",
-      slug: "",
-    },
-    notionToMarkdown: notionToMarkdown,
-    options: options,
-    pages: pages,
-    filesManager: filesManager,
-    counts: counts, // review will this get copied or pointed to?
-    imports: [],
-    convertNotionLinkToLocalDocusaurusLink: (url: string) =>
-      convertInternalUrl(context, url),
-  }
-  for (const page of pages) {
-    const mdPath = filesManager.get("base", "page", page.id)?.path
-    const mdPathWithRoot =
-      sanitizeMarkdownOutputPath(options.conversion.outputPaths.markdown) +
-      mdPath
-    const markdown = await getMarkdownForPage(config, context, page)
-    writePage(markdown, mdPathWithRoot)
-  }
-
-  info(`Finished processing ${pages.length} pages`)
-  info(JSON.stringify(counts))
-}
 async function getRootObjectType(
   params: Parameters<typeof tryGetFirstPageWithType>[0]
 ) {
