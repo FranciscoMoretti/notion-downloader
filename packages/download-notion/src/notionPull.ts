@@ -167,7 +167,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   group("Stage 4: Image download...")
-  await processImages(
+  await buildImagePathsAndSave(
     options,
     objectsTree,
     existingFilesManager,
@@ -357,7 +357,7 @@ async function handleImageCaching(
   return imagesCacheFilesMap
 }
 
-async function processImages(
+async function buildImagePathsAndSave(
   options: NotionPullOptions,
   objectsTree: NotionObjectTree,
   existingFilesManager: FilesManager,

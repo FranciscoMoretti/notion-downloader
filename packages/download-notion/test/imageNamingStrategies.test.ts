@@ -1,7 +1,6 @@
 import { hashOfBufferContent, hashOfString } from "@/src/utils"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { ContentHashImageNamingStrategy } from "../src/ContentHashImageNamingStrategy"
 import { DefaultImageNamingStrategy } from "../src/DefaultImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "../src/LegacyImageNamingStrategy"
 import { NotionImage } from "../src/NotionImage"
@@ -27,16 +26,6 @@ describe("Image Naming Strategies", () => {
       const strategyWithoutAncestor = new DefaultImageNamingStrategy(() => "")
       const result = strategyWithoutAncestor.getFileName(mockNotionImage)
       expect(result).toBe("mock-block-id.png")
-    })
-  })
-
-  describe("ContentHashImageNamingStrategy", () => {
-    const strategy = new ContentHashImageNamingStrategy()
-
-    it("should generate filename based on content hash", () => {
-      const result = strategy.getFileName(mockNotionImage)
-      expect(result).toBe("15208f4337a8e92d4785.png")
-      expect(result).toBe(`${hashOfBufferContent(mockNotionImage.buffer)}.png`)
     })
   })
 

@@ -25,7 +25,7 @@ export const conversionSchema = z.object({
     .default("github-slug"),
   imageNamingStrategy: z
     // TODO: Make image naming strategies independent of their path building
-    .enum(["default", "content-hash", "legacy", "default-flat"])
+    .enum(["default", "legacy", "default-flat"])
     .optional()
     .default("default"),
 })

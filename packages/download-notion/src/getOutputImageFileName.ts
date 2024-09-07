@@ -1,4 +1,3 @@
-import { ContentHashImageNamingStrategy } from "./ContentHashImageNamingStrategy"
 import { DefaultImageNamingStrategy } from "./DefaultImageNamingStrategy"
 import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
@@ -11,8 +10,6 @@ export function getStrategy(
   switch (format) {
     case "legacy":
       return new LegacyImageNamingStrategy()
-    case "content-hash":
-      return new ContentHashImageNamingStrategy()
     case "default":
     case "default-flat":
       return new DefaultImageNamingStrategy(getPageAncestorName)
