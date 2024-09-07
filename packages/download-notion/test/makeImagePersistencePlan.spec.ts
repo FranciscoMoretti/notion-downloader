@@ -128,31 +128,6 @@ test("handles encoded characters", () => {
   )
 })
 
-const optionsUsingHashNaming: NotionPullOptions = {
-  ...optionsUsingDefaultNaming,
-  imageFileNameFormat: "content-hash",
-}
-test("hash naming", () => {
-  const directoryConrtainingMardown = "/pathToParentSomewhere/"
-  const pageSlug = "my-page%281%29"
-  const outputPaths = makeImagePersistencePlan(
-    optionsUsingHashNaming,
-    testImageSet,
-    testFileData,
-    "ABC-123",
-    "",
-    "",
-    directoryConrtainingMardown,
-    pageSlug
-  )
-  expect(outputPaths?.primaryFileOutputPath).toBe(
-    `/pathToParentSomewhere/fe3f26fd515b3cf299ac.png`
-  )
-  expect(outputPaths?.filePathToUseInMarkdown).toBe(
-    `./fe3f26fd515b3cf299ac.png`
-  )
-})
-
 const optionsUsingLegacyNaming: NotionPullOptions = {
   ...optionsUsingDefaultNaming,
   imageFileNameFormat: "legacy",

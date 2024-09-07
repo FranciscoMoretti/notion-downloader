@@ -23,7 +23,7 @@ import { fetchImages } from "./fetchImages"
 import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
-import { getStrategy } from "./getOutputImageFileName"
+import { getImageNamingStrategy } from "./getOutputImageFileName"
 import { endGroup, error, group, info, verbose } from "./log"
 import {
   GithubSlugNamingStrategy,
@@ -389,7 +389,7 @@ function createImageNamingStrategy(
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
 ) {
-  const imageNamingStrategy: ImageNamingStrategy = getStrategy(
+  const imageNamingStrategy: ImageNamingStrategy = getImageNamingStrategy(
     options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>

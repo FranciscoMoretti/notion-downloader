@@ -60,21 +60,6 @@ export const pull = new Command()
       "debug",
     ])
   )
-  // .option(
-  //   "-p, --img-prefix-in-markdown <string>",
-  //   "When referencing an image from markdown, prefix with this path instead of the full img-output-path. Should be used only in conjunction with --img-output-path."
-  // )
-  // .option(
-  //   "-i, --img-output-path  <string>",
-  //   "Path to directory where images will be stored. If this is not included, images will be placed in the same directory as the document that uses them, which then allows for localization of screenshots."
-  // )
-  // .addOption(
-  //   new Option(
-  //     "--image-file-name-format <format>",
-  //     "format:\n- default: {page slug (if any)}.{image block ID}\n- content-hash: Use a hash of the image content.\n- legacy: Use the legacy (before v0.16) method of determining file names. Set this to maintain backward compatibility.\nAll formats will use the original file extension. " +
-  //       "Default: default"
-  //   ).choices(["default", "content-hash", "legacy"])
-  // )
   .option("-o, --overwrite", "overwrite existing files. Default: false")
   .option(
     "-c, --cwd <cwd>",

@@ -3,8 +3,8 @@ import { ImageNamingStrategy } from "./ImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
 import { NotionImage } from "./NotionImage"
 
-export function getStrategy(
-  format: "legacy" | "content-hash" | "default" | "default-flat",
+export function getImageNamingStrategy(
+  format: "legacy" | "default" | "default-flat",
   getPageAncestorName: (image: NotionImage) => string
 ): ImageNamingStrategy {
   switch (format) {
