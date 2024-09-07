@@ -39,14 +39,18 @@ import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import { applyToAllImages, readAndUpdateMetadata } from "./processImages"
+import {
+  loadFilesManagerFile,
+  loadImagesCacheFilesMap,
+  saveDataToJson,
+  saveToFile,
+} from "./saveLoadUtils"
 import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
   getAncestorPageOrDatabaseFilename,
   getAncestorPageOrDatabaseFilepath,
   sanitizeMarkdownOutputPath,
-  saveDataToJson,
-  saveToFile,
 } from "./utils"
 import { writePage } from "./writePage"
 
@@ -82,22 +86,6 @@ export async function notionContinuosPull(options: NotionPullOptions) {
       setTimeout(resolve, options.revalidatePeriod * 1000)
     )
   }
-}
-
-function loadFilesManagerFile(filePath: string): FilesManager | undefined {
-  if (fs.existsSync(filePath)) {
-    const jsonData = fs.readFileSync(filePath, "utf8")
-    return FilesManager.fromJSON(jsonData)
-  }
-  return undefined
-}
-
-function loadImagesCacheFilesMap(filePath: string): FilesMap | undefined {
-  if (fs.existsSync(filePath)) {
-    const jsonData = fs.readFileSync(filePath, "utf8")
-    return FilesMap.fromJSON(jsonData)
-  }
-  return undefined
 }
 
 export async function notionPull(options: NotionPullOptions): Promise<void> {
@@ -205,7 +193,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   group("Stage 6: clean up old files & images...")
-  await cleanupAndSaveFiles(existingFilesManager, newFilesManager, options)
+  await cleanup(existingFilesManager, newFilesManager)
+
+  const filesMapFilePath =
+    options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
+  await saveToFile(newFilesManager.toJSON(), filesMapFilePath)
   endGroup()
 }
 
@@ -424,17 +416,12 @@ function getPagesToOutput(
   return pages.filter((page) => existingFilesManager.isObjectNew(page))
 }
 
-async function cleanupAndSaveFiles(
+async function cleanup(
   existingFilesManager: FilesManager,
-  newFilesManager: FilesManager,
-  options: NotionPullOptions
+  newFilesManager: FilesManager
 ) {
   const filesCleaner = new FilesCleaner()
   await filesCleaner.cleanupOldFiles(existingFilesManager, newFilesManager)
-
-  const filesMapFilePath =
-    options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  await saveToFile(newFilesManager.toJSON(), filesMapFilePath)
 }
 
 async function outputPages(
