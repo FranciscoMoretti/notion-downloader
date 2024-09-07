@@ -31,7 +31,7 @@ export class HierarchicalLayoutStrategy extends LayoutStrategy {
     currentPath: string,
     notionObject: NotionFileLikeObjects
   ): string {
-    const sanitizedName = this.namingStrategy.getNameWithExtension(notionObject)
+    const sanitizedName = this.namingStrategy.getFilename(notionObject)
 
     const context = ("/" + currentPath + "/").replaceAll("//", "/")
     const path = context + sanitizedName

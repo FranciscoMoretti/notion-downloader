@@ -33,6 +33,6 @@ export class FlatLayoutStrategy extends LayoutStrategy {
     currentPath: string,
     notionObject: NotionFileLikeObjects
   ): string {
-    return "/" + this.namingStrategy.getNameWithExtension(notionObject)
+    return "/" + this.namingStrategy.getFilename(notionObject)
   }
 }

@@ -7,7 +7,7 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
-import { ImageNamingStrategy } from "./ImageNamingStrategy"
+import { NamingStrategy } from "./NamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
 import {
   DatabaseObjectResponseWithCover,
@@ -27,7 +27,7 @@ export async function readAndUpdateMetadata({
   image: NotionImage
   existingFilesManager: FilesManager
   newFilesManager: FilesManager
-  imageNamingStrategy: ImageNamingStrategy
+  imageNamingStrategy: NamingStrategy
   imagesCacheFilesMap: FilesMap | undefined
 }) {
   if (existingFilesManager.isObjectNew(image)) {
@@ -38,7 +38,7 @@ export async function readAndUpdateMetadata({
       await image.download()
     }
     // TODO: Write here a layout naming strategy for images. Name is ok, but path is not.
-    const imageFilename = imageNamingStrategy.getFileName(image)
+    const imageFilename = imageNamingStrategy.getFilename(image)
     newFilesManager.set("base", "image", image.id, {
       path: imageFilename,
       lastEditedTime: image.lastEditedTime,

@@ -18,17 +18,17 @@ export abstract class NamingStrategy {
     return this._nameForObject(notionObject)
   }
 
-  public getNameWithExtension(notionObject: NotionFileLikeObjects) {
+  public getFilename(notionObject: NotionFileLikeObjects) {
     const name = this.getName(notionObject)
     const extension = this.getFileExtension(notionObject)
-    return name + extension
+    return name + "." + extension
   }
 
   protected abstract _nameForObject(notionObject: NotionObject): string
 
   private getFileExtension(notionObject: NotionFileLikeObjects) {
     if (notionObject.object == "page") {
-      return ".md"
+      return "md"
     } else if (notionObject.object == "block" && notionObject.type == "image") {
       // TODO: Might need to read the file to get the extension!
       return notionObject.extension

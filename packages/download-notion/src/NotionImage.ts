@@ -23,6 +23,9 @@ type NotionImageResponses =
   | PageObjectResponseWithCover
   | DatabaseObjectResponseWithCover
 
+// TODO: Rethink how image data is stored.
+// TODO: Needed download for extension breaks path building.
+// TODO: We might want to have them in memory while we build paths and  then save later
 export class NotionImage implements NotionObject {
   private imageSet: ImageSet
   private fileData: FileData | null = null

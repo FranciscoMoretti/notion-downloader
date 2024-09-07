@@ -1,7 +1,7 @@
 import { hashOfBufferContent, hashOfString } from "@/src/utils"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { DefaultImageNamingStrategy } from "../src/DefaultImageNamingStrategy"
+import { DefaultBlockNamingStrategy } from "../src/DefaultImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "../src/LegacyImageNamingStrategy"
 import { NotionImage } from "../src/NotionImage"
 
@@ -15,7 +15,7 @@ describe("Image Naming Strategies", () => {
 
   describe("DefaultImageNamingStrategy", () => {
     const getPageAncestorFilename = (image: NotionImage) => "mock-page"
-    const strategy = new DefaultImageNamingStrategy(getPageAncestorFilename)
+    const strategy = new DefaultBlockNamingStrategy(getPageAncestorFilename)
 
     it("should generate filename with ancestor page name", () => {
       const result = strategy.getFileName(mockNotionImage)
@@ -23,7 +23,7 @@ describe("Image Naming Strategies", () => {
     })
 
     it("should generate filename without ancestor page name", () => {
-      const strategyWithoutAncestor = new DefaultImageNamingStrategy(() => "")
+      const strategyWithoutAncestor = new DefaultBlockNamingStrategy(() => "")
       const result = strategyWithoutAncestor.getFileName(mockNotionImage)
       expect(result).toBe("mock-block-id.png")
     })

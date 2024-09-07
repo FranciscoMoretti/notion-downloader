@@ -2,11 +2,7 @@ import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
 import { NotionCacheClient } from "notion-cache-client"
-import {
-  NotionObjectTree,
-  NotionObjectTreeNode,
-  downloadObjectTree,
-} from "notion-downloader"
+import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { FilesCleaner } from "./FilesCleaner"
@@ -14,8 +10,6 @@ import { FilesManager, ObjectPrefixDict } from "./FilesManager"
 import { FileType, FilesMap } from "./FilesMap"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
-import { ImageNamingStrategy } from "./ImageNamingStrategy"
-import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
@@ -24,17 +18,14 @@ import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { getImageNamingStrategy } from "./getOutputImageFileName"
-import { endGroup, error, group, info, verbose } from "./log"
+import { endGroup, error, group, info } from "./log"
 import {
   GithubSlugNamingStrategy,
   GuidNamingStrategy,
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
 } from "./namingStrategies"
-import {
-  getAllObjectsInObjectsTree,
-  objectsToObjectsMap,
-} from "./objects_utils"
+import { getAllObjectsInObjectsTree } from "./objects_utils"
 import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
@@ -390,7 +381,7 @@ function createImageNamingStrategy(
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
 ) {
-  const imageNamingStrategy: ImageNamingStrategy = getImageNamingStrategy(
+  const imageNamingStrategy = getImageNamingStrategy(
     options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>
