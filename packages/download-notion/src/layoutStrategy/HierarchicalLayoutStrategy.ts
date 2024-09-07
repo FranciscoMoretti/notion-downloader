@@ -1,10 +1,10 @@
-import { LayoutStrategy } from "./LayoutStrategy"
+import { NotionPage } from "../NotionPage"
 import {
   NamingStrategy,
   NotionFileLikeObjects,
   NotionFolderLikeObjects,
-} from "./NamingStrategy"
-import { NotionPage } from "./NotionPage"
+} from "../namingStrategy/NamingStrategy"
+import { LayoutStrategy } from "./LayoutStrategy"
 
 // This strategy gives us a file tree that mirrors that of notion.
 // Each level in the outline becomes a directory, and each file bears the name of the Notion document.

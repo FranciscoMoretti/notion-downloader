@@ -1,9 +1,9 @@
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
-import { LayoutStrategy } from "./LayoutStrategy"
 import { NotionImage } from "./NotionImage"
 import { getNotionObject } from "./NotionObjectUtils"
+import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 
 export function getFileTreeMap(
   currentPath: string,

@@ -8,8 +8,6 @@ import { NotionToMarkdown } from "notion-to-md"
 import { FilesCleaner } from "./FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./FilesManager"
 import { FileType, FilesMap } from "./FilesMap"
-import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
-import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
@@ -17,14 +15,16 @@ import { fetchImages } from "./fetchImages"
 import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
-import { getImageNamingStrategy } from "./getOutputImageFileName"
+import { FlatLayoutStrategy } from "./layoutStrategy/FlatLayoutStrategy"
+import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
 import { endGroup, error, group, info } from "./log"
+import { getImageNamingStrategy } from "./namingStrategy/getImageNamingStrategy"
 import {
   GithubSlugNamingStrategy,
   GuidNamingStrategy,
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
-} from "./namingStrategies"
+} from "./namingStrategy/namingStrategies"
 import { getAllObjectsInObjectsTree } from "./objects_utils"
 import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"

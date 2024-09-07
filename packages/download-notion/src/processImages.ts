@@ -1,5 +1,4 @@
 import {
-  BlockObjectResponse,
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
@@ -7,15 +6,13 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
-import { NamingStrategy } from "./NamingStrategy"
-import { NotionDatabase } from "./NotionDatabase"
 import {
   DatabaseObjectResponseWithCover,
   NotionImage,
   PageObjectResponseWithCover,
 } from "./NotionImage"
-import { NotionPage } from "./NotionPage"
 import { updateImageUrlToMarkdownImagePath } from "./imagesUtils"
+import { NamingStrategy } from "./namingStrategy/NamingStrategy"
 
 export async function readAndUpdateMetadata({
   image,

@@ -3,10 +3,10 @@
 import { slug } from "github-slugger"
 import sanitize from "sanitize-filename"
 
+import { NotionDatabase } from "./../NotionDatabase"
+import { NotionObject } from "./../NotionObject"
+import { NotionPage } from "./../NotionPage"
 import { NamingStrategy } from "./NamingStrategy"
-import { NotionDatabase } from "./NotionDatabase"
-import { NotionObject } from "./NotionObject"
-import { NotionPage } from "./NotionPage"
 
 export abstract class SlugNamingStrategy extends NamingStrategy {
   public slugProperty: string

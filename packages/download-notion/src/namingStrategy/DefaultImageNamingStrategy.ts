@@ -1,5 +1,5 @@
+import { NotionImage } from "../NotionImage"
 import { NamingStrategy, NotionFileLikeObjects } from "./NamingStrategy"
-import { NotionImage } from "./NotionImage"
 
 export class DefaultBlockNamingStrategy extends NamingStrategy {
   private readonly getPageAncestorName: (image: NotionImage) => string

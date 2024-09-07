@@ -1,9 +1,9 @@
-import { LayoutStrategy } from "./LayoutStrategy"
 import {
   NamingStrategy,
   NotionFileLikeObjects,
   NotionFolderLikeObjects,
-} from "./NamingStrategy"
+} from "../namingStrategy/NamingStrategy"
+import { LayoutStrategy } from "./LayoutStrategy"
 
 // This strategy creates a flat list of files that have notion-id for file names.
 // Pros: the urls will never change so long as the notion pages are not delete and re-recreated.

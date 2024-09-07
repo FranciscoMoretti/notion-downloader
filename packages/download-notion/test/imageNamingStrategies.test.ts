@@ -1,9 +1,9 @@
 import { hashOfBufferContent, hashOfString } from "@/src/utils"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { DefaultBlockNamingStrategy } from "../src/DefaultImageNamingStrategy"
-import { LegacyImageNamingStrategy } from "../src/LegacyImageNamingStrategy"
 import { NotionImage } from "../src/NotionImage"
+import { DefaultBlockNamingStrategy } from "../src/namingStrategy/DefaultImageNamingStrategy"
+import { LegacyImageNamingStrategy } from "../src/namingStrategy/LegacyImageNamingStrategy"
 
 describe("Image Naming Strategies", () => {
   const mockNotionImage = {

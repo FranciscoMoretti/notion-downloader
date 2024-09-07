@@ -1,7 +1,7 @@
-import { NotionDatabase } from "./NotionDatabase"
-import { NotionImage } from "./NotionImage"
-import { NotionObject } from "./NotionObject"
-import { NotionPage } from "./NotionPage"
+import { NotionDatabase } from "./../NotionDatabase"
+import { NotionImage } from "./../NotionImage"
+import { NotionObject } from "./../NotionObject"
+import { NotionPage } from "./../NotionPage"
 
 export type NotionFileLikeObjects = NotionPage | NotionImage
 export type NotionFolderLikeObjects = NotionPage | NotionDatabase
