@@ -225,7 +225,8 @@ function createCachedNotionClient(
 function createStrategies(options: NotionPullOptions) {
   const namingStrategy =
     options.conversion.namingStrategy === "github-slug"
-      ? new GithubSlugNamingStrategy(options.conversion.slugProperty || "")
+      ? // TODO: SLug naming strategies shouldn't have a blank value or undefined. Default should be in option parsing
+        new GithubSlugNamingStrategy(options.conversion.slugProperty || "")
       : options.conversion.namingStrategy === "notion-slug"
       ? new NotionSlugNamingStrategy(options.conversion.slugProperty || "")
       : options.conversion.namingStrategy === "guid"

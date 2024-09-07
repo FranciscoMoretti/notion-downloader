@@ -31,6 +31,7 @@ export class FlatLayoutStrategy extends LayoutStrategy {
 
   public getPathForPage(page: NotionPage, currentPath: string): string {
     // In this strategy, we don't care about the location or the title
-    return "/" + this.namingStrategy.nameForPage(page) + ".md"
+    // TODO: Extend  this as name for object and get the extension from the object type
+    return "/" + this.namingStrategy.getName(page) + ".md"
   }
 }

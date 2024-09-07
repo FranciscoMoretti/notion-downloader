@@ -5,23 +5,33 @@ import sanitize from "sanitize-filename"
 
 import { NamingStrategy } from "./NamingStrategy"
 import { NotionDatabase } from "./NotionDatabase"
+import { NotionObject } from "./NotionObject"
 import { NotionPage } from "./NotionPage"
 
 export abstract class SlugNamingStrategy extends NamingStrategy {
   public slugProperty: string
 
   constructor(slugProperty: string) {
-    super()
+    super(["page", "database"])
     this.slugProperty = slugProperty || "Slug"
   }
 
-  public nameForPage(page: NotionPage): string {
-    // TODO This logic needs to be handled either here or in the page.
+  protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {
+    if (notionObject.object == "page") {
+      return this._nameForPage(notionObject as NotionPage)
+    } else if (notionObject.object == "database") {
+      return this._nameForDatabase(notionObject as NotionDatabase)
+    } else {
+      throw new Error(`Unknown object type: ${typeof notionObject}`)
+    }
+  }
+
+  private _nameForPage(page: NotionPage): string {
     const explicitSlug = page.getPlainTextProperty(this.slugProperty, "")
 
     return explicitSlug || this._slugify(page.title)
   }
-  public nameForDatabase(database: NotionDatabase): string {
+  private _nameForDatabase(database: NotionDatabase): string {
     return this._slugify(database.title)
   }
 
@@ -57,21 +67,21 @@ export class NotionSlugNamingStrategy extends SlugNamingStrategy {
 }
 
 export class GuidNamingStrategy extends NamingStrategy {
-  public nameForPage(page: NotionPage): string {
-    return page.id
+  constructor() {
+    super(["page", "database", "block"])
   }
-  public nameForDatabase(database: NotionDatabase): string {
-    return database.id
+
+  protected _nameForObject(notionObject: NotionObject): string {
+    return notionObject.id
   }
 }
 
 export class TitleNamingStrategy extends NamingStrategy {
-  public nameForPage(page: NotionPage): string {
-    return page.title
+  constructor() {
+    super(["page", "database"])
   }
-  public nameForDatabase(database: NotionDatabase): string {
-    return database.title
+
+  protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {
+    return notionObject.title
   }
 }
-
-// TODO: Do we need a strategy for Notion Slugs ?

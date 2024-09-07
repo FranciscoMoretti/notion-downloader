@@ -22,16 +22,13 @@ export class HierarchicalLayoutStrategy extends LayoutStrategy {
     currentPath: string,
     pageOrDatabase: NotionPage | NotionDatabase
   ): string {
-    const extendPath =
-      pageOrDatabase.metadata.object === "page"
-        ? this.namingStrategy.nameForPage(pageOrDatabase as NotionPage)
-        : this.namingStrategy.nameForDatabase(pageOrDatabase as NotionDatabase)
+    const extendPath = this.namingStrategy.getName(pageOrDatabase as NotionPage)
     const path = ("/" + currentPath + "/" + extendPath).replaceAll("//", "/")
     return path
   }
 
   public getPathForPage(page: NotionPage, currentPath: string): string {
-    const sanitizedName = this.namingStrategy.nameForPage(page)
+    const sanitizedName = this.namingStrategy.getName(page)
 
     const context = ("/" + currentPath + "/").replaceAll("//", "/")
     const path = context + sanitizedName + ".md"
