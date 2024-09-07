@@ -1,13 +1,18 @@
-import { NotionDatabase } from "./NotionDatabase"
-import { NotionPage } from "./NotionPage"
+import {
+  NotionFileLikeObjects,
+  NotionFolderLikeObjects,
+} from "./NamingStrategy"
 
 // Here a fuller name would be File Tree Layout Strategy. That is,
 // as we walk the Notion outline and create files, where do we create them, what do we name them, etc.
 export abstract class LayoutStrategy {
-  public abstract newLevel(
+  public abstract newPathLevel(
     currentPath: string,
-    pageOrDatabase: NotionPage | NotionDatabase
+    notionObject: NotionFolderLikeObjects
   ): string
 
-  public abstract getPathForPage(page: NotionPage, currentPath: string): string
+  public abstract getPathForObject(
+    currentPath: string,
+    notionObject: NotionFileLikeObjects
+  ): string
 }

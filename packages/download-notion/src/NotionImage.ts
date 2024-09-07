@@ -111,8 +111,12 @@ export class NotionImage implements NotionObject {
     return this.getFileData().buffer
   }
 
-  get object(): "page" | "block" | "database" {
+  get object() {
     return this.metadata.object
+  }
+
+  get type(): "image" {
+    return "image"
   }
 
   get lastEditedTime(): string {

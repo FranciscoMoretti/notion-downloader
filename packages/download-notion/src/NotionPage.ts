@@ -11,6 +11,7 @@ import { error } from "./log"
 import { parseLinkId } from "./plugins/internalLinks"
 
 export class NotionPage implements NotionObject {
+  // TODO: Can this, Database and Image Extend the PageObjectResponse instead of using as metadata?
   public metadata: PageObjectResponse
 
   public constructor(metadata: PageObjectResponse) {

@@ -1,9 +1,9 @@
-import fs from "fs-extra"
-import sanitize from "sanitize-filename"
-
 import { LayoutStrategy } from "./LayoutStrategy"
-import { NamingStrategy } from "./NamingStrategy"
-import { NotionDatabase } from "./NotionDatabase"
+import {
+  NamingStrategy,
+  NotionFileLikeObjects,
+  NotionFolderLikeObjects,
+} from "./NamingStrategy"
 import { NotionPage } from "./NotionPage"
 
 // This strategy gives us a file tree that mirrors that of notion.
@@ -18,20 +18,23 @@ export class HierarchicalLayoutStrategy extends LayoutStrategy {
     this.namingStrategy = namingStrategy
   }
 
-  public newLevel(
+  public newPathLevel(
     currentPath: string,
-    pageOrDatabase: NotionPage | NotionDatabase
+    notionObject: NotionFolderLikeObjects
   ): string {
-    const extendPath = this.namingStrategy.getName(pageOrDatabase as NotionPage)
+    const extendPath = this.namingStrategy.getName(notionObject as NotionPage)
     const path = ("/" + currentPath + "/" + extendPath).replaceAll("//", "/")
     return path
   }
 
-  public getPathForPage(page: NotionPage, currentPath: string): string {
-    const sanitizedName = this.namingStrategy.getName(page)
+  public getPathForObject(
+    currentPath: string,
+    notionObject: NotionFileLikeObjects
+  ): string {
+    const sanitizedName = this.namingStrategy.getNameWithExtension(notionObject)
 
     const context = ("/" + currentPath + "/").replaceAll("//", "/")
-    const path = context + sanitizedName + ".md"
+    const path = context + sanitizedName
 
     return path
   }

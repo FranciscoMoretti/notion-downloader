@@ -31,12 +31,12 @@ export function getFileTreeMap(
     }
 
     const newLevelPath = !parentContext.databaseIsRoot
-      ? layoutStrategy.newLevel(parentContext.path, notionObject)
+      ? layoutStrategy.newPathLevel(parentContext.path, notionObject)
       : parentContext.path
     const objectPath =
       notionObject.object == "database"
         ? newLevelPath
-        : layoutStrategy.getPathForPage(notionObject, parentContext.path)
+        : layoutStrategy.getPathForObject(parentContext.path, notionObject)
     filesManager.set("base", notionObject.object, notionObject.id, {
       path: objectPath,
       lastEditedTime: notionObject.lastEditedTime,
