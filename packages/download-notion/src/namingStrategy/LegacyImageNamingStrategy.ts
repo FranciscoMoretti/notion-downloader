@@ -1,4 +1,4 @@
-import { NotionImageLike } from "../objectTypes"
+import { NotionImageLike } from "../notionObjects/objectTypes"
 import { findLastUuid, hashOfString } from "./../utils"
 import { NamingStrategy } from "./NamingStrategy"
 

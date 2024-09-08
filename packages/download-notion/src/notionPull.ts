@@ -26,7 +26,7 @@ import {
   TitleNamingStrategy,
 } from "./namingStrategy/namingStrategies"
 import { NotionPage } from "./notionObjects/NotionPage"
-import { getAllObjectsInObjectsTree } from "./objects_utils"
+import { getAllObjectsInObjectsTree } from "./objectTreeUtills"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {

@@ -1,6 +1,9 @@
 import { NamingStrategy } from "../namingStrategy/NamingStrategy"
 import { NotionPage } from "../notionObjects/NotionPage"
-import { NotionFileLikeObjects, NotionFolderLikeObjects } from "../objectTypes"
+import {
+  NotionFileLikeObjects,
+  NotionFolderLikeObjects,
+} from "../notionObjects/objectTypes"
 import { LayoutStrategy } from "./LayoutStrategy"
 
 // This strategy gives us a file tree that mirrors that of notion.

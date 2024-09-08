@@ -1,4 +1,7 @@
-import { NotionFileLikeObjects, NotionImageLike } from "../objectTypes"
+import {
+  NotionFileLikeObjects,
+  NotionImageLike,
+} from "../notionObjects/objectTypes"
 import { NamingStrategy } from "./NamingStrategy"
 
 export class DefaultBlockNamingStrategy extends NamingStrategy {

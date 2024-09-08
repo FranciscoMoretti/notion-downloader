@@ -4,8 +4,8 @@ import fs from "fs-extra"
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
-import { NotionImageLike } from "./objectTypes"
-import { PlainObjectsMap, getPageAncestorId } from "./objects_utils"
+import { NotionImageLike } from "./notionObjects/objectTypes"
+import { getPageAncestorId } from "./objectTreeUtills"
 
 export function convertToUUID(str: string): string {
   if (str.length !== 32) {

@@ -1,4 +1,4 @@
-import { NotionImageLike } from "../objectTypes"
+import { NotionImageLike } from "../notionObjects/objectTypes"
 import { DefaultBlockNamingStrategy } from "./DefaultImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
 import { NamingStrategy } from "./NamingStrategy"

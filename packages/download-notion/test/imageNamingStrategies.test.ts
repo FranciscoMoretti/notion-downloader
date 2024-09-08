@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 
 import { DefaultBlockNamingStrategy } from "../src/namingStrategy/DefaultImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "../src/namingStrategy/LegacyImageNamingStrategy"
-import { NotionImageLike } from "../src/objectTypes"
+import { NotionImageLike } from "../src/notionObjects/objectTypes"
 
 describe("Image Naming Strategies", () => {
   const mockNotionImage = {

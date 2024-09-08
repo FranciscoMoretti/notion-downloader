@@ -1,19 +1,12 @@
-import {
-  DatabaseObjectResponse,
-  PageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints"
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
 import { readFile, saveFileBuffer } from "./imagesUtils"
 import { NotionBlockImage } from "./notionObjects/NotionBlockImage"
-import {
-  DatabaseObjectResponseWithCover,
-  NotionCoverImage,
-  PageObjectResponseWithCover,
-} from "./notionObjects/NotionCoverImage"
-import { NotionImageLike } from "./objectTypes"
+import { NotionCoverImage } from "./notionObjects/NotionCoverImage"
+import { NotionImageLike } from "./notionObjects/objectTypes"
+import { databaseHasCover, pageHasCover } from "./notionObjects/objectutils"
 import { FileBuffersMemory } from "./types"
 
 export async function readOrDownloadImage(
@@ -93,15 +86,4 @@ export async function applyToAllImages({
   )
 
   await Promise.all(promises)
-}
-
-export function pageHasCover(
-  metadata: PageObjectResponse
-): metadata is PageObjectResponseWithCover {
-  return Boolean(metadata.cover)
-}
-export function databaseHasCover(
-  metadata: DatabaseObjectResponse
-): metadata is DatabaseObjectResponseWithCover {
-  return Boolean(metadata.cover)
 }

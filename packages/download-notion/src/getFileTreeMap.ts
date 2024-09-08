@@ -3,8 +3,11 @@ import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 import { FilesManager, copyRecord } from "./FilesManager"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { getNotionObject } from "./notionObjects/NotionObjectUtils"
-import { NotionImageLike } from "./objectTypes"
-import { getImageLikeObject, hasImageLikeObject } from "./objects_utils"
+import { NotionImageLike } from "./notionObjects/objectTypes"
+import {
+  getImageLikeObject,
+  hasImageLikeObject,
+} from "./notionObjects/objectutils"
 import { FileBuffersMemory } from "./types"
 
 export function getFileTreeMap(

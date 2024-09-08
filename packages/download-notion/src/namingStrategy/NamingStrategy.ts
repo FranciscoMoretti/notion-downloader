@@ -1,5 +1,5 @@
 import { NotionObject } from "../notionObjects/NotionObject"
-import { NotionFileLikeObjects } from "../objectTypes"
+import { NotionFileLikeObjects } from "../notionObjects/objectTypes"
 
 export abstract class NamingStrategy {
   private accepts: Set<"page" | "database" | "block">

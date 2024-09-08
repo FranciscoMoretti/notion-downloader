@@ -13,28 +13,10 @@ import {
   objectTreeToObjectIds,
 } from "notion-downloader"
 
-import { NotionBlockImage } from "./notionObjects/NotionBlockImage"
-import { NotionCoverImage } from "./notionObjects/NotionCoverImage"
-import { NotionImageLike } from "./objectTypes"
-import { databaseHasCover, pageHasCover } from "./processImages"
-
 export type PlainObjectsMap = Record<
   string,
   PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
 >
-
-export function objectsToObjectsMap(objects: {
-  page: Record<string, PageObjectResponse>
-  database: Record<string, DatabaseObjectResponse>
-  block: Record<string, BlockObjectResponse>
-}): PlainObjectsMap {
-  return Object.values(objects).reduce((acc, object) => {
-    Object.entries(object).forEach(([id, object]) => {
-      acc[id] = object
-    })
-    return acc
-  }, {})
-}
 
 export async function getObjectTypeFromClient(
   client: NotionCacheClient,
@@ -104,38 +86,4 @@ export function getPageAncestorId(id: string, objectTree: NotionObjectTree) {
   if (parent.object === "block") {
     return getPageAncestorId(parent.id, objectTree)
   }
-}
-
-export function hasImageLikeObject(notionObject: NotionObjectResponse) {
-  if (notionObject.object === "block" && notionObject.type === "image") {
-    return true
-  }
-  if (notionObject.object === "page" && notionObject.cover) {
-    return true
-  }
-  if (notionObject.object === "database" && notionObject.cover) {
-    return true
-  }
-
-  return false
-}
-
-export function getImageLikeObject(
-  notionObject: NotionObjectResponse
-): NotionImageLike {
-  if (notionObject.object === "block" && notionObject.type === "image") {
-    return new NotionBlockImage(notionObject)
-  }
-  if (notionObject.object === "page") {
-    if (pageHasCover(notionObject)) {
-      return new NotionCoverImage(notionObject)
-    }
-  }
-  if (notionObject.object === "database") {
-    if (databaseHasCover(notionObject)) {
-      return new NotionCoverImage(notionObject)
-    }
-  }
-
-  throw new Error(`No image like object found for ${notionObject.object}`)
 }
