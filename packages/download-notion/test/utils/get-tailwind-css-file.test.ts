@@ -1,7 +1,7 @@
 import path from "path"
 import { describe, expect, test } from "vitest"
 
-import { getTailwindCssFile } from "../../src/utils/get-project-info"
+import { getTailwindCssFile } from "../../src/utils_old/get-project-info"
 
 describe("get tailwind css file", async () => {
   test.each([

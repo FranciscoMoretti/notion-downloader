@@ -1,4 +1,4 @@
-import { Transformer } from "@/src/utils/transformers"
+import { Transformer } from "@/src/utils_old/transformers"
 import { SyntaxKind } from "ts-morph"
 
 export const transformRsc: Transformer = async ({ sourceFile, config }) => {

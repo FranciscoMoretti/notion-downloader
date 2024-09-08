@@ -9,12 +9,12 @@ import {
   rawConfigSchema,
   resolveConfigPaths,
   type Config,
-} from "@/src/utils/get-config"
-import { getPackageManager } from "@/src/utils/get-package-manager"
-import { getProjectConfig, preFlight } from "@/src/utils/get-project-info"
-import { handleError } from "@/src/utils/handle-error"
-import { logger } from "@/src/utils/logger"
-import * as templates from "@/src/utils/templates"
+} from "@/src/utils_old/get-config"
+import { getPackageManager } from "@/src/utils_old/get-package-manager"
+import { getProjectConfig, preFlight } from "@/src/utils_old/get-project-info"
+import { handleError } from "@/src/utils_old/handle-error"
+import { logger } from "@/src/utils_old/logger"
+import * as templates from "@/src/utils_old/templates"
 import chalk from "chalk"
 import { Command } from "commander"
 import { execa } from "execa"

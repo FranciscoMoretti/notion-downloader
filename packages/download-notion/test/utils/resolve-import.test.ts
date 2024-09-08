@@ -2,7 +2,7 @@ import path from "path"
 import { loadConfig, type ConfigLoaderSuccessResult } from "tsconfig-paths"
 import { expect, test } from "vitest"
 
-import { resolveImport } from "../../src/utils/resolve-import"
+import { resolveImport } from "../../src/utils_old/resolve-import"
 
 test("resolve import", async () => {
   expect(

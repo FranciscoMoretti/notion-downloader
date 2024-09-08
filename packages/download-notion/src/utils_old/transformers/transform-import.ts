@@ -1,4 +1,4 @@
-import { Transformer } from "@/src/utils/transformers"
+import { Transformer } from "@/src/utils_old/transformers"
 
 export const transformImport: Transformer = async ({ sourceFile, config }) => {
   const importDeclarations = sourceFile.getImportDeclarations()

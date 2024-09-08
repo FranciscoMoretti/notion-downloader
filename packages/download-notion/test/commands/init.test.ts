@@ -4,8 +4,8 @@ import { execa } from "execa"
 import { afterEach, expect, test, vi } from "vitest"
 
 import { runInit } from "../../src/commands/init"
-import { getConfig } from "../../src/utils/get-config"
-import * as getPackageManger from "../../src/utils/get-package-manager"
+import { getConfig } from "../../src/utils_old/get-config"
+import * as getPackageManger from "../../src/utils_old/get-package-manager"
 
 vi.mock("execa")
 vi.mock("fs/promises", () => ({

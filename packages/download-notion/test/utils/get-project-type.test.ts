@@ -1,7 +1,7 @@
 import path from "path"
 import { describe, expect, test } from "vitest"
 
-import { getProjectType } from "../../src/utils/get-project-info"
+import { getProjectType } from "../../src/utils_old/get-project-info"
 
 describe("get project type", async () => {
   test.each([

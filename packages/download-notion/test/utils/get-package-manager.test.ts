@@ -1,7 +1,7 @@
 import path from "path"
 import { expect, test } from "vitest"
 
-import { getPackageManager } from "../../src/utils/get-package-manager"
+import { getPackageManager } from "../../src/utils_old/get-package-manager"
 
 test("get package manager", async () => {
   expect(

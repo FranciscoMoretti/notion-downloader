@@ -1,7 +1,7 @@
 import path from "path"
 import { describe, expect, test } from "vitest"
 
-import { getTsConfigAliasPrefix } from "../../src/utils/get-project-info"
+import { getTsConfigAliasPrefix } from "../../src/utils_old/get-project-info"
 
 describe("get ts config alias prefix", async () => {
   test.each([
