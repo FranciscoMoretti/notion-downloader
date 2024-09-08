@@ -51,7 +51,7 @@ export function filenameFromPath(path: string) {
   const filenameWithoutExtension = Path.basename(path, Path.extname(path))
   return filenameWithoutExtension
 }
-export function getAncestorPageOrDatabaseFilepath(
+function getAncestorPageOrDatabaseFilepath(
   image: NotionImageLike,
   objectsTree: NotionObjectTree,
   filesManager: FilesManager

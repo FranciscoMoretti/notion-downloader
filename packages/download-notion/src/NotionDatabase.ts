@@ -4,7 +4,6 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 
 import { NotionObject } from "./NotionObject"
-import { parseLinkId } from "./plugins/internalLinks"
 
 // Response wrapper access class
 export class NotionDatabase implements NotionObject {
@@ -23,11 +22,6 @@ export class NotionDatabase implements NotionObject {
   }
 
   public get object() {
-    return this.metadata.object
-  }
-
-  // Deprecated
-  public get type() {
     return this.metadata.object
   }
 

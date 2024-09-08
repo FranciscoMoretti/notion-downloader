@@ -27,14 +27,11 @@ import {
   TitleNamingStrategy,
 } from "./namingStrategy/namingStrategies"
 import { getAllObjectsInObjectsTree } from "./objects_utils"
-import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {
   FileBuffersMemory,
   applyToAllImages,
-  buildPathAndUpdateMarkdown,
-  readAndUpdateMetadata,
   readOrDownloadImage,
   saveImage,
   updateImageForMarkdown,
@@ -49,7 +46,6 @@ import { getMarkdownForPage } from "./transform"
 import {
   convertToUUID,
   getAncestorPageOrDatabaseFilename,
-  getAncestorPageOrDatabaseFilepath,
   sanitizeMarkdownOutputPath,
 } from "./utils"
 import { writePage } from "./writePage"
@@ -188,15 +184,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   await updateImageFilePathsForMarkdown(options, objectsTree, newFilesManager)
-
-  // TODO: Deprecate this. It's not needed anymore with the new strategy
-  // await buildImageFilePaths(
-  //   options,
-  //   objectsTree,
-  //   existingFilesManager,
-  //   newFilesManager,
-  //   filesInMemory
-  // )
 
   endGroup()
 
@@ -449,33 +436,6 @@ async function updateImageFilePathsForMarkdown(
     objectsTree,
     applyToImage: async (image) => {
       await updateImageForMarkdown(image, newFilesManager)
-    },
-  })
-}
-
-async function buildImageFilePaths(
-  options: NotionPullOptions,
-  objectsTree: NotionObjectTree,
-  existingFilesManager: FilesManager,
-  newFilesManager: FilesManager,
-  filesInMemory: FileBuffersMemory
-) {
-  const imageNamingStrategy = createImageNamingStrategy(
-    options,
-    objectsTree,
-    newFilesManager
-  )
-
-  await applyToAllImages({
-    objectsTree,
-    applyToImage: async (image) => {
-      await buildPathAndUpdateMarkdown(
-        image,
-        existingFilesManager,
-        newFilesManager,
-        imageNamingStrategy,
-        filesInMemory
-      )
     },
   })
 }

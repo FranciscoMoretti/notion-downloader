@@ -21,36 +21,6 @@ import {
 import { NamingStrategy } from "./namingStrategy/NamingStrategy"
 import { NotionImageLike } from "./objectTypes"
 
-export async function readAndUpdateMetadata({
-  image,
-  existingFilesManager,
-  newFilesManager,
-  imageNamingStrategy,
-  imagesCacheFilesMap,
-  filesInMemory,
-}: {
-  image: NotionImageLike
-  existingFilesManager: FilesManager
-  newFilesManager: FilesManager
-  imageNamingStrategy: NamingStrategy
-  imagesCacheFilesMap: FilesMap | undefined
-  filesInMemory: FileBuffersMemory
-}) {
-  if (existingFilesManager.isObjectNew(image)) {
-    await readOrDownloadImage(image, imagesCacheFilesMap, filesInMemory)
-  }
-  await buildPathAndUpdateMarkdown(
-    image,
-    existingFilesManager,
-    newFilesManager,
-    imageNamingStrategy,
-    filesInMemory
-  )
-  if (existingFilesManager.isObjectNew(image)) {
-    await saveImage(image, newFilesManager, filesInMemory)
-  }
-}
-
 export type FileBuffersMemory = Record<string, FileBuffer>
 
 export async function readOrDownloadImage(
@@ -64,33 +34,6 @@ export async function readOrDownloadImage(
   } else {
     filesInMemory[image.id] = await readFile(image.url, "url")
   }
-}
-
-// TODO: Deprecate this function
-export async function buildPathAndUpdateMarkdown(
-  image: NotionImageLike,
-  existingFilesManager: FilesManager,
-  newFilesManager: FilesManager,
-  imageNamingStrategy: NamingStrategy,
-  filesInMemory: FileBuffersMemory
-) {
-  if (existingFilesManager.isObjectNew(image)) {
-    const fileBuffer = filesInMemory[image.id]
-    if (!fileBuffer) {
-      throw new Error(`File buffer not found for asset ${image.id}`)
-    }
-    image.setFileBuffer(fileBuffer)
-
-    const imageFilename = imageNamingStrategy.getFilename(image)
-    newFilesManager.set("base", "image", image.id, {
-      path: imageFilename,
-      lastEditedTime: image.lastEditedTime,
-    })
-  } else {
-    copyRecord(existingFilesManager, newFilesManager, "image", image.id)
-  }
-  const markdownPath = newFilesManager.get("markdown", "image", image.id).path
-  updateImageUrlToMarkdownImagePath(image, markdownPath)
 }
 
 export async function updateImageForMarkdown(

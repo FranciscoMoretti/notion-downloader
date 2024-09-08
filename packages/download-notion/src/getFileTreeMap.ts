@@ -1,10 +1,9 @@
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./FilesManager"
-import { NotionBlockImage } from "./NotionBlockImage"
-import { NotionFile } from "./NotionFile"
 import { getNotionObject } from "./NotionObjectUtils"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
+import { NotionImageLike } from "./objectTypes"
 import { getImageLikeObject, hasImageLikeObject } from "./objects_utils"
 import { FileBuffersMemory } from "./processImages"
 
@@ -28,6 +27,7 @@ export function getFileTreeMap(
   ) => {
     const notionObject = getNotionObject(objectResponse)
 
+    // New level path is created by objects that can contain files as children
     const newLevelPath =
       !parentContext.databaseIsRoot &&
       (notionObject.object === "page" || notionObject.object === "database")
@@ -67,13 +67,7 @@ export function getFileTreeMap(
         )
       } else {
         const image = getImageLikeObject(objectResponse)
-        const fileBuffer = filesInMemory[objectResponse.id]
-        if (!fileBuffer) {
-          throw new Error(
-            `File buffer not found for asset ${objectResponse.id}`
-          )
-        }
-        image.setFileBuffer(fileBuffer)
+        setFilebufferInImage(filesInMemory, image)
         const imageFilename = imageLayoutStrategy.getPathForObject(
           parentContext.path,
           image
@@ -94,4 +88,15 @@ export function getFileTreeMap(
     path: starterPath,
     databaseIsRoot: databaseIsRootLevel,
   })
+}
+
+function setFilebufferInImage(
+  filesInMemory: FileBuffersMemory,
+  image: NotionImageLike
+) {
+  const fileBuffer = filesInMemory[image.id]
+  if (!fileBuffer) {
+    throw new Error(`File buffer not found for asset ${image.id}`)
+  }
+  image.setFileBuffer(fileBuffer)
 }
