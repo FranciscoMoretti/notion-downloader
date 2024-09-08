@@ -1,4 +1,4 @@
-import { NotionImage } from "./../NotionImage"
+import { NotionImageLike } from "../objectTypes"
 import { findLastUuid, hashOfString } from "./../utils"
 import { NamingStrategy } from "./NamingStrategy"
 
@@ -15,14 +15,14 @@ export class LegacyImageNamingStrategy extends NamingStrategy {
     super(["block", "page", "database"])
   }
 
-  protected _nameForObject(notionObject: NotionImage): string {
+  protected _nameForObject(notionObject: NotionImageLike): string {
     const urlBeforeQuery = notionObject.url.split("?")[0]
     const thingToHash = findLastUuid(urlBeforeQuery) ?? urlBeforeQuery
     const hash = hashOfString(thingToHash)
     return `${hash}`
   }
 
-  public getFilename(notionObject: NotionImage): string {
+  public getFilename(notionObject: NotionImageLike): string {
     const name = this.getName(notionObject)
     return name + "." + notionObject.extension
   }

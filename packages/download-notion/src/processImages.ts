@@ -6,13 +6,20 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
+import { NotionBlockImage } from "./NotionBlockImage"
 import {
   DatabaseObjectResponseWithCover,
-  NotionImage,
+  NotionCoverImage,
   PageObjectResponseWithCover,
-} from "./NotionImage"
-import { updateImageUrlToMarkdownImagePath } from "./imagesUtils"
+} from "./NotionCoverImage"
+import {
+  FileBuffer,
+  readFile,
+  saveFileBuffer,
+  updateImageUrlToMarkdownImagePath,
+} from "./imagesUtils"
 import { NamingStrategy } from "./namingStrategy/NamingStrategy"
+import { NotionImageLike } from "./objectTypes"
 
 export async function readAndUpdateMetadata({
   image,
@@ -20,36 +27,67 @@ export async function readAndUpdateMetadata({
   newFilesManager,
   imageNamingStrategy,
   imagesCacheFilesMap,
+  filesInMemory,
 }: {
-  image: NotionImage
+  image: NotionImageLike
   existingFilesManager: FilesManager
   newFilesManager: FilesManager
   imageNamingStrategy: NamingStrategy
   imagesCacheFilesMap: FilesMap | undefined
+  filesInMemory: FileBuffersMemory
 }) {
   if (existingFilesManager.isObjectNew(image)) {
-    if (imagesCacheFilesMap) {
-      const cachedImage = imagesCacheFilesMap.get("image", image.id)
-      await image.readFromFile(cachedImage.path)
-    } else {
-      await image.download()
+    await readOrDownloadImage(image, imagesCacheFilesMap, filesInMemory)
+  }
+  await buildPathAndUpdateMarkdown(
+    image,
+    existingFilesManager,
+    newFilesManager,
+    imageNamingStrategy,
+    filesInMemory
+  )
+  if (existingFilesManager.isObjectNew(image)) {
+    await saveImage(image, newFilesManager, filesInMemory)
+  }
+}
+
+export type FileBuffersMemory = Record<string, FileBuffer>
+
+export async function readOrDownloadImage(
+  image: NotionImageLike,
+  imagesCacheFilesMap: FilesMap | undefined,
+  filesInMemory: FileBuffersMemory
+) {
+  if (imagesCacheFilesMap) {
+    const cachedImage = imagesCacheFilesMap.get("image", image.id)
+    filesInMemory[image.id] = await readFile(cachedImage.path, "file")
+  } else {
+    filesInMemory[image.id] = await readFile(image.url, "url")
+  }
+}
+
+export async function buildPathAndUpdateMarkdown(
+  image: NotionImageLike,
+  existingFilesManager: FilesManager,
+  newFilesManager: FilesManager,
+  imageNamingStrategy: NamingStrategy,
+  filesInMemory: FileBuffersMemory
+) {
+  if (existingFilesManager.isObjectNew(image)) {
+    const fileBuffer = filesInMemory[image.id]
+    if (!fileBuffer) {
+      throw new Error(`File buffer not found for asset ${image.id}`)
     }
-    // TODO: Write here a layout naming strategy for images. Name is ok, but path is not.
+    image.setFileBuffer(fileBuffer)
+
     const imageFilename = imageNamingStrategy.getFilename(image)
     newFilesManager.set("base", "image", image.id, {
       path: imageFilename,
       lastEditedTime: image.lastEditedTime,
     })
 
-    const imageFileOutputPath = newFilesManager.get(
-      "output",
-      "image",
-      image.id
-    ).path
-
-    await image.save(imageFileOutputPath)
     const markdownPath = newFilesManager.get("markdown", "image", image.id).path
-    updateImageUrlToMarkdownImagePath(image.file, markdownPath)
+    updateImageUrlToMarkdownImagePath(image, markdownPath)
   } else {
     copyRecord(existingFilesManager, newFilesManager, "image", image.id)
     const imageRecordFromDirectory = newFilesManager.get(
@@ -57,8 +95,27 @@ export async function readAndUpdateMetadata({
       "image",
       image.id
     )
-    updateImageUrlToMarkdownImagePath(image.file, imageRecordFromDirectory.path)
+    updateImageUrlToMarkdownImagePath(image, imageRecordFromDirectory.path)
   }
+}
+
+export async function saveImage(
+  image: NotionImageLike,
+  newFilesManager: FilesManager,
+  filesInMemory: FileBuffersMemory
+) {
+  const imageFileOutputPath = newFilesManager.get(
+    "output",
+    "image",
+    image.id
+  ).path
+
+  // TODO: This should be handled by a NotionFile class
+  const fileBuffer = filesInMemory[image.id]
+  if (!fileBuffer) {
+    throw new Error(`File buffer not found for ${image.id}`)
+  }
+  await saveFileBuffer(fileBuffer, imageFileOutputPath)
 }
 
 export async function applyToAllImages({
@@ -66,13 +123,13 @@ export async function applyToAllImages({
   applyToImage,
 }: {
   objectsTree: NotionObjectTree
-  applyToImage: (image: NotionImage) => Promise<void>
+  applyToImage: (image: NotionImageLike) => Promise<void>
 }) {
   const promises: Promise<void>[] = []
 
   promises.push(
     ...objectsTree.getBlocks("image").map((block) => {
-      const image = new NotionImage(block)
+      const image = new NotionBlockImage(block)
       return applyToImage(image)
     })
   )
@@ -82,7 +139,7 @@ export async function applyToAllImages({
       .getPages()
       .filter(pageHasCover)
       .map((pageResponse) => {
-        const image = new NotionImage(pageResponse)
+        const image = new NotionCoverImage(pageResponse)
         return applyToImage(image)
       })
   )
@@ -92,7 +149,7 @@ export async function applyToAllImages({
       .getDatabases()
       .filter(databaseHasCover)
       .map((databaseResponse) => {
-        const image = new NotionImage(databaseResponse)
+        const image = new NotionCoverImage(databaseResponse)
         return applyToImage(image)
       })
   )

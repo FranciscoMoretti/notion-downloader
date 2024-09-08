@@ -4,7 +4,7 @@ import fs from "fs-extra"
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
-import { NotionImage } from "./NotionImage"
+import { NotionImageLike } from "./objectTypes"
 import { PlainObjectsMap, getPageAncestorId } from "./objects_utils"
 
 export function convertToUUID(str: string): string {
@@ -52,7 +52,7 @@ export function filenameFromPath(path: string) {
   return filenameWithoutExtension
 }
 export function getAncestorPageOrDatabaseFilepath(
-  image: NotionImage,
+  image: NotionImageLike,
   objectsTree: NotionObjectTree,
   filesManager: FilesManager
 ): string {
@@ -71,7 +71,7 @@ export function getAncestorPageOrDatabaseFilepath(
 }
 
 export function getAncestorPageOrDatabaseFilename(
-  image: NotionImage,
+  image: NotionImageLike,
   objectsTree: NotionObjectTree,
   filesManager: FilesManager
 ): string {

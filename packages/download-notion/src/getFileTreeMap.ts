@@ -1,7 +1,7 @@
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
-import { NotionImage } from "./NotionImage"
+import { NotionBlockImage } from "./NotionBlockImage"
 import { getNotionObject } from "./NotionObjectUtils"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 
@@ -26,7 +26,7 @@ export function getFileTreeMap(
 
     const notionObject = getNotionObject(objectResponse)
     // TODO: hanlde image paths here too
-    if (notionObject instanceof NotionImage) {
+    if (notionObject instanceof NotionBlockImage) {
       return parentContext
     }
 

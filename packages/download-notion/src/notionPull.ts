@@ -29,7 +29,14 @@ import { getAllObjectsInObjectsTree } from "./objects_utils"
 import { removePathExtension } from "./pathUtils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
-import { applyToAllImages, readAndUpdateMetadata } from "./processImages"
+import {
+  FileBuffersMemory,
+  applyToAllImages,
+  buildPathAndUpdateMarkdown,
+  readAndUpdateMetadata,
+  readOrDownloadImage,
+  saveImage,
+} from "./processImages"
 import {
   loadFilesManagerFile,
   loadImagesCacheFilesMap,
@@ -142,16 +149,21 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.conversion.statusPropertyValue
   )
   endGroup()
-  // 3. Download assets from filtered pages
 
+  group("Stage 3: Reading new assets...")
+  const filesInMemory: FileBuffersMemory = {}
+  await readOrDownloadNewImages(
+    objectsTree,
+    imagesCacheFilesMap,
+    existingFilesManager,
+    filesInMemory
+  )
+  endGroup()
+
+  group("Stage 4: Building paths...")
   // 4. Path building
-
-  // 5. Save assets
-
-  // 6. Convert to MD
-
-  group("Stage 3: Building paths...")
   const { namingStrategy, layoutStrategy } = createStrategies(options)
+
   getFileTreeMap(
     "",
     objectsTree,
@@ -159,17 +171,29 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     layoutStrategy,
     newFilesManager
   )
-  endGroup()
 
-  group("Stage 4: Image download...")
-
-  await buildImagePathsAndSave(
+  // TODO: Because of the ancestor page or db strategy, this needs to go after db or page
+  await buildImageFilePaths(
     options,
     objectsTree,
     existingFilesManager,
     newFilesManager,
-    imagesCacheFilesMap
+    filesInMemory
   )
+
+  endGroup()
+
+  group("Stage 4: Saving new assets...")
+
+  await saveNewAssets(
+    objectsTree,
+    existingFilesManager,
+    newFilesManager,
+    filesInMemory
+  )
+
+  // 5. Save assets
+
   endGroup()
 
   // Only output pages that changed! The rest already exist.
@@ -358,12 +382,44 @@ async function handleImageCaching(
   return imagesCacheFilesMap
 }
 
-async function buildImagePathsAndSave(
+async function saveNewAssets(
+  objectsTree: NotionObjectTree,
+  existingFilesManager: FilesManager,
+  newFilesManager: FilesManager,
+  filesInMemory: FileBuffersMemory
+) {
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      if (existingFilesManager.isObjectNew(image)) {
+        await saveImage(image, newFilesManager, filesInMemory)
+      }
+    },
+  })
+}
+
+async function readOrDownloadNewImages(
+  objectsTree: NotionObjectTree,
+  imagesCacheFilesMap: FilesMap | undefined,
+  existingFilesManager: FilesManager,
+  filesInMemory: FileBuffersMemory
+) {
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      if (existingFilesManager.isObjectNew(image)) {
+        await readOrDownloadImage(image, imagesCacheFilesMap, filesInMemory)
+      }
+    },
+  })
+}
+
+async function buildImageFilePaths(
   options: NotionPullOptions,
   objectsTree: NotionObjectTree,
   existingFilesManager: FilesManager,
   newFilesManager: FilesManager,
-  imagesCacheFilesMap: FilesMap | undefined
+  filesInMemory: FileBuffersMemory
 ) {
   const imageNamingStrategy = createImageNamingStrategy(
     options,
@@ -374,13 +430,13 @@ async function buildImagePathsAndSave(
   await applyToAllImages({
     objectsTree,
     applyToImage: async (image) => {
-      await readAndUpdateMetadata({
+      await buildPathAndUpdateMarkdown(
         image,
         existingFilesManager,
         newFilesManager,
         imageNamingStrategy,
-        imagesCacheFilesMap,
-      })
+        filesInMemory
+      )
     },
   })
 }

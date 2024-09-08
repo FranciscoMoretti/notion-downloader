@@ -5,7 +5,7 @@ import FileType from "file-type"
 import core from "file-type/core"
 import fs from "fs-extra"
 
-import { FileObject } from "./NotionImage"
+import { NotionFile } from "./NotionFile"
 import { verbose } from "./log"
 
 export type OutputPaths = {
@@ -19,17 +19,10 @@ export type ImageSet = {
 }
 
 export function updateImageUrlToMarkdownImagePath(
-  imageOrCover: FileObject,
+  imageOrCover: NotionFile,
   filePathToUseInMarkdown: string
 ) {
-  if (!imageOrCover) {
-    throw Error("Image block not found")
-  }
-  if ("file" in imageOrCover) {
-    imageOrCover.file.url = filePathToUseInMarkdown
-  } else {
-    imageOrCover.external.url = filePathToUseInMarkdown
-  }
+  imageOrCover.setUrl(filePathToUseInMarkdown)
 }
 
 export type FileBuffer = {
@@ -88,4 +81,15 @@ function writeImageIfNew(path: string, buffer: Buffer) {
     fs.mkdirsSync(Path.dirname(path))
   }
   // Save image with image here
+}
+
+export async function saveFileBuffer(fileBuffer: FileBuffer, path: string) {
+  // Create the directory recursively if it doesn't exist
+  fs.ensureDirSync(Path.dirname(path))
+  // Save with fs
+  fs.writeFileSync(path, fileBuffer.buffer)
+
+  // const writeStream = fs.createWriteStream(path)
+  // writeStream.write(this.buffer) // async but we're not waiting
+  // writeStream.end()
 }

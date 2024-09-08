@@ -2,7 +2,8 @@ import path from "path"
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesMap } from "./FilesMap"
-import { NotionImage } from "./NotionImage"
+import { readFile, saveFileBuffer } from "./imagesUtils"
+import { NotionImageLike } from "./objectTypes"
 import { applyToAllImages } from "./processImages"
 
 export async function fetchImages(
@@ -24,13 +25,16 @@ export async function fetchImages(
   })
 }
 async function fetchImageAndSaveToCache(
-  image: NotionImage,
+  image: NotionImageLike,
   outputDir: string,
   imagesCacheFilesMap: FilesMap
 ) {
-  const imageData = await image.download()
-  const imagePath = path.join(outputDir, `${image.id}.${imageData.extension}`)
-  await image.save(imagePath)
+  const imageData = await readFile(image.url, "url")
+  const imagePath = path.join(
+    outputDir,
+    `${image.id}.${imageData.fileType.ext}`
+  )
+  await saveFileBuffer(imageData, imagePath)
   imagesCacheFilesMap.set("image", image.id, {
     path: imagePath,
     lastEditedTime: image.lastEditedTime,

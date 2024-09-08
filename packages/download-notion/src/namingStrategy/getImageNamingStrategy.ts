@@ -1,11 +1,11 @@
-import { NotionImage } from "../NotionImage"
+import { NotionImageLike } from "../objectTypes"
 import { DefaultBlockNamingStrategy } from "./DefaultImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
 import { NamingStrategy } from "./NamingStrategy"
 
 export function getImageNamingStrategy(
   format: "legacy" | "default" | "default-flat",
-  getPageAncestorName: (image: NotionImage) => string
+  getPageAncestorName: (image: NotionImageLike) => string
 ): NamingStrategy {
   switch (format) {
     case "legacy":

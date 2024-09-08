@@ -1,8 +1,5 @@
-import {
-  NamingStrategy,
-  NotionFileLikeObjects,
-  NotionFolderLikeObjects,
-} from "../namingStrategy/NamingStrategy"
+import { NamingStrategy } from "../namingStrategy/NamingStrategy"
+import { NotionFileLikeObjects, NotionFolderLikeObjects } from "../objectTypes"
 import { LayoutStrategy } from "./LayoutStrategy"
 
 // This strategy creates a flat list of files that have notion-id for file names.

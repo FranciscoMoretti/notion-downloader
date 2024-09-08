@@ -1,7 +1,7 @@
 import { NotionObjectResponse } from "notion-downloader"
 
+import { NotionBlockImage } from "./NotionBlockImage"
 import { NotionDatabase } from "./NotionDatabase"
-import { NotionImage } from "./NotionImage"
 import { NotionPage } from "./NotionPage"
 
 export function getNotionObject(response: NotionObjectResponse) {
@@ -11,7 +11,7 @@ export function getNotionObject(response: NotionObjectResponse) {
     return new NotionDatabase(response)
   } else if (response.object == "block") {
     if (response.type == "image") {
-      return new NotionImage(response)
+      return new NotionBlockImage(response)
     } else {
       throw new Error(`Unsupported block type: ${response.type}`)
     }
