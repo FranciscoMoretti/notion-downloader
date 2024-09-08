@@ -5,7 +5,7 @@ import {
   addPathPrefix,
   removePathExtension,
   removePathPrefix,
-} from "../src/pathUtils"
+} from "../src/files/pathUtils"
 
 describe("addPathPrefix", () => {
   test("adds prefix to relative path", () => {

@@ -1,10 +1,10 @@
 import { NotionObjectTree } from "notion-downloader"
 
-import { FilesManager } from "./FilesManager"
-import { FilesMap } from "./FilesMap"
-import { readFile, saveFileBuffer } from "./imagesUtils"
+import { FilesManager } from "./files/FilesManager"
+import { FilesMap } from "./files/FilesMap"
 import { NotionBlockImage } from "./notionObjects/NotionBlockImage"
 import { NotionCoverImage } from "./notionObjects/NotionCoverImage"
+import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import { NotionImageLike } from "./notionObjects/objectTypes"
 import { databaseHasCover, pageHasCover } from "./notionObjects/objectutils"
 import { FileBuffersMemory } from "./types"

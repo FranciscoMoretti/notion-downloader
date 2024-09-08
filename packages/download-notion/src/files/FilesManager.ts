@@ -1,5 +1,5 @@
-import { FileRecord, FileType, FilesMap, FilesMapData } from "./FilesMap"
-import { NotionObject } from "./notionObjects/NotionObject"
+import { NotionObject } from "../notionObjects/NotionObject"
+import { FileRecord, FileRecordType, FilesMap, FilesMapData } from "./FilesMap"
 import {
   recordMapWithPrefix,
   recordWithPrefix,
@@ -56,11 +56,11 @@ export class FilesManager {
     return false
   }
 
-  public exists(type: FileType, id: string): boolean {
+  public exists(type: FileRecordType, id: string): boolean {
     return this.baseFilesMap.exists(type, id)
   }
 
-  public get(pathType: PathType, type: FileType, id: string): FileRecord {
+  public get(pathType: PathType, type: FileRecordType, id: string): FileRecord {
     const recordFromDirectory = this.baseFilesMap.get(type, id)
 
     if (pathType === "output") {
@@ -77,7 +77,7 @@ export class FilesManager {
 
   public set(
     pathType: PathType,
-    type: FileType,
+    type: FileRecordType,
     id: string,
     record: FileRecord
   ): void {
@@ -95,13 +95,13 @@ export class FilesManager {
     this.baseFilesMap.set(type, id, recordToSet)
   }
 
-  public delete(type: FileType, id: string): void {
+  public delete(type: FileRecordType, id: string): void {
     this.baseFilesMap.delete(type, id)
   }
 
   public getAllOfType(
     pathType: PathType,
-    type: FileType
+    type: FileRecordType
   ): Record<string, FileRecord> {
     const records = this.baseFilesMap.getAllOfType(type)
     if (pathType === "output") {
@@ -166,10 +166,10 @@ export class FilesManager {
 export function copyRecord(
   fromManager: FilesManager,
   toManager: FilesManager,
-  recordType: FileType,
+  recordType: FileRecordType,
   recordId: string
 ) {
   const record = fromManager.get("base", recordType, recordId)
   toManager.set("base", recordType, recordId, record)
 }
-export type ObjectPrefixDict = Record<FileType, string>
+export type ObjectPrefixDict = Record<FileRecordType, string>

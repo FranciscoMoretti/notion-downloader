@@ -4,7 +4,7 @@ import axios from "axios"
 import FileType from "file-type"
 import fs from "fs-extra"
 
-import { FileBuffer } from "./types"
+import { FileBuffer } from "../types"
 
 export async function readFile(
   source: string,

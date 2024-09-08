@@ -3,9 +3,9 @@ export type FileRecord = {
   lastEditedTime: string
 }
 
-export type FileType = "page" | "database" | "image"
+export type FileRecordType = "page" | "database" | "image"
 
-export type FilesMapData = Record<FileType, Record<string, FileRecord>>
+export type FilesMapData = Record<FileRecordType, Record<string, FileRecord>>
 
 export class FilesMap {
   private map: FilesMapData = {
@@ -14,11 +14,11 @@ export class FilesMap {
     image: {},
   }
 
-  exists(type: FileType, id: string): boolean {
+  exists(type: FileRecordType, id: string): boolean {
     return !!this.map[type][id]
   }
 
-  get(type: FileType, id: string): FileRecord {
+  get(type: FileRecordType, id: string): FileRecord {
     // If the record is not found, throw an error
     const record = this.map[type][id]
     if (!record) {
@@ -27,15 +27,15 @@ export class FilesMap {
     return record
   }
 
-  set(type: FileType, id: string, record: FileRecord): void {
+  set(type: FileRecordType, id: string, record: FileRecord): void {
     this.map[type][id] = record
   }
 
-  delete(type: FileType, id: string): void {
+  delete(type: FileRecordType, id: string): void {
     delete this.map[type][id]
   }
 
-  getAllOfType(type: FileType): Record<string, FileRecord> {
+  getAllOfType(type: FileRecordType): Record<string, FileRecord> {
     return this.map[type]
   }
 

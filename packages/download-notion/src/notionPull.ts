@@ -5,12 +5,17 @@ import { NotionCacheClient } from "notion-cache-client"
 import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { FilesCleaner } from "./FilesCleaner"
-import { FilesManager, ObjectPrefixDict } from "./FilesManager"
-import { FileType, FilesMap } from "./FilesMap"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { fetchImages } from "./fetchImages"
+import { FilesCleaner } from "./files/FilesCleaner"
+import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
+import { FileRecordType, FilesMap } from "./files/FilesMap"
+import {
+  loadFilesManagerFile,
+  loadImagesCacheFilesMap,
+  saveDataToJson,
+} from "./files/saveLoadUtils"
 import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
@@ -35,12 +40,6 @@ import {
   saveImage,
   updateImageForMarkdown,
 } from "./processImages"
-import {
-  loadFilesManagerFile,
-  loadImagesCacheFilesMap,
-  saveDataToJson,
-  saveToFile,
-} from "./saveLoadUtils"
 import { getMarkdownForPage } from "./transform"
 import { FileBuffersMemory } from "./types"
 import {
@@ -225,7 +224,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  await saveToFile(newFilesManager.toJSON(), filesMapFilePath)
+  await saveDataToJson(newFilesManager.toJSON(), filesMapFilePath)
   endGroup()
 }
 
@@ -310,7 +309,7 @@ async function setupFilesManagers(
     const prevDirs = previousFilesManager.getOutputDirectories()
     const currentDirs = objectsDirectories
 
-    const keys = Object.keys(prevDirs) as FileType[]
+    const keys = Object.keys(prevDirs) as FileRecordType[]
     const dirsChanged = keys.some((key) => prevDirs[key] !== currentDirs[key])
     if (dirsChanged) {
       info("Output directories changed. Deleting all tracked files.")
@@ -387,7 +386,7 @@ async function handleImageCaching(
     new FilesMap()
 
   await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
-  await saveToFile(
+  await saveDataToJson(
     imagesCacheFilesMap.toJSON(),
     imagesCacheDir + "images_filesmap.json"
   )

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 
-import { parseImageBlock } from "./imagesUtils"
+import { parseImageBlock } from "./notionObjects/fileBufferUtils"
 
 const kPrimaryImageUrl =
   "https://s3.us-west-2.amazonaws.com/primaryImage.png?Blah=foo"

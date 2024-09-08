@@ -27,7 +27,7 @@ export async function saveDataToJson(
   data: any,
   filePath: string
 ): Promise<void> {
-  await fs.writeJson(filePath, data, { spaces: 2 })
+  await fs.writeJson(filePath, data, "utf8")
 }
 
 export async function saveToFile(

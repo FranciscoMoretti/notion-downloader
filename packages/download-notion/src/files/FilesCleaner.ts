@@ -1,9 +1,9 @@
 import path from "path"
 import fs from "fs-extra"
 
+import { info, verbose } from "../log"
 import { FilesManager } from "./FilesManager"
-import { FileRecord, FileType } from "./FilesMap"
-import { info, verbose } from "./log"
+import { FileRecord, FileRecordType } from "./FilesMap"
 
 export type ExtendedFileRecord = FileRecord & {
   id: string
@@ -55,7 +55,7 @@ export class FilesCleaner {
 
   private getFileRecords(
     filesManager: FilesManager,
-    type: FileType
+    type: FileRecordType
   ): ExtendedFileRecord[] {
     return Object.entries(filesManager.getAllOfType("output", type)).map(
       ([id, record]) => ({

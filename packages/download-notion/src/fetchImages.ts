@@ -1,8 +1,8 @@
 import path from "path"
 import { NotionObjectTree } from "notion-downloader"
 
-import { FilesMap } from "./FilesMap"
-import { readFile, saveFileBuffer } from "./imagesUtils"
+import { FilesMap } from "./files/FilesMap"
+import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import { NotionImageLike } from "./notionObjects/objectTypes"
 import { applyToAllImages } from "./processImages"
 

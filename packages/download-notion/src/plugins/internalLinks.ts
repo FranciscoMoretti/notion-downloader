@@ -1,8 +1,8 @@
 import path from "path"
 
+import { removePathExtension } from "../files/pathUtils"
 import { error, warning } from "../log"
 import { NotionPage } from "../notionObjects/NotionPage"
-import { removePathExtension } from "../pathUtils"
 import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 
 // converts a url to a local link, if it is a link to a page in the Notion site

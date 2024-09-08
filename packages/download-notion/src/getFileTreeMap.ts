@@ -1,6 +1,6 @@
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
-import { FilesManager, copyRecord } from "./FilesManager"
+import { FilesManager, copyRecord } from "./files/FilesManager"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { getNotionObject } from "./notionObjects/NotionObjectUtils"
 import { NotionImageLike } from "./notionObjects/objectTypes"

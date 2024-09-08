@@ -1,7 +1,7 @@
 import { ObjectPrefixDict } from "@/src/FilesManager"
 import { describe, expect, test } from "vitest"
 
-import { FileRecord, FilesMapData } from "../src/FilesMap"
+import { FileRecord, FilesMapData } from "../src/files/FilesMap"
 import {
   recordMapWithPrefix,
   recordMapWithoutPrefix,
@@ -9,7 +9,7 @@ import {
   recordWithoutPrefix,
   toMapDataWithPrefix,
   toMapDataWithoutPrefix,
-} from "../src/recordPrefixUtils"
+} from "../src/files/recordPrefixUtils"
 
 describe("recordPrefixUtils", () => {
   const sampleFileRecord: FileRecord = {

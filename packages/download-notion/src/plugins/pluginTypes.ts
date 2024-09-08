@@ -1,9 +1,9 @@
 import { NotionToMarkdown } from "notion-to-md"
 import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
-import { FilesManager } from "../FilesManager"
-import { FilesMap } from "../FilesMap"
 import { NotionPullOptions } from "../config/schema"
+import { FilesManager } from "../files/FilesManager"
+import { FilesMap } from "../files/FilesMap"
 import { ICounts, NotionBlock } from "../index"
 import { NotionPage } from "../notionObjects/NotionPage"
 
