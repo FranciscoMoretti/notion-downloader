@@ -38,7 +38,7 @@ export function updateImageUrlToMarkdownImagePath(
   }
 }
 
-export async function readImage(source: string, type: "file" | "url") {
+export async function readFile(source: string, type: "file" | "url") {
   try {
     const buffer = await readBuffer(source, type)
     const fileType = await FileType.fromBuffer(buffer)

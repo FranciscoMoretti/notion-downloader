@@ -7,7 +7,7 @@ import {
 import fs from "fs-extra"
 
 import { NotionObject } from "./NotionObject"
-import { FileData, ImageSet, readImage } from "./imagesUtils"
+import { FileData, ImageSet, readFile } from "./imagesUtils"
 import { getImageUrl } from "./notion_objects_utils"
 
 export type PageObjectResponseWithCover = PageObjectResponse & {
@@ -72,7 +72,7 @@ export class NotionImage implements NotionObject {
 
   // TODO: Consider extracting to util
   private async readAndSetFileData(source: string, type: "file" | "url") {
-    const { buffer, fileType } = await readImage(source, type)
+    const { buffer, fileType } = await readFile(source, type)
     this.fileData = {
       extension: fileType.ext,
       mime: fileType.mime,

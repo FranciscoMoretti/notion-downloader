@@ -142,6 +142,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.conversion.statusPropertyValue
   )
   endGroup()
+  // 3. Download assets from filtered pages
+
+  // 4. Path building
+
+  // 5. Save assets
+
+  // 6. Convert to MD
 
   group("Stage 3: Building paths...")
   const { namingStrategy, layoutStrategy } = createStrategies(options)
@@ -155,6 +162,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   group("Stage 4: Image download...")
+
   await buildImagePathsAndSave(
     options,
     objectsTree,
