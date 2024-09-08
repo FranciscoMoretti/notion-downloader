@@ -8,7 +8,7 @@ import defaultConfig from "./config/default.docunotion.config"
 import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
-import { getMarkdownFromNotionBlocks } from "./transform"
+import { getMarkdownFromNotionBlocks } from "./transformMarkdown"
 import { NotionBlock } from "./types"
 
 test("Latex Rendering", async () => {

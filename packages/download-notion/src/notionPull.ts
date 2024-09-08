@@ -36,11 +36,11 @@ import { getAllObjectsInObjectsTree } from "./objectTree/objectTreeUtills"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {
-  readOrDownloadImage,
-  saveImage,
-  updateImageForMarkdown,
+  readOrDownloadNewImages,
+  saveNewAssets,
+  updateImageFilePathsForMarkdown,
 } from "./processImages"
-import { getMarkdownForPage } from "./transform"
+import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
 import {
   convertToUUID,
@@ -182,7 +182,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     filesInMemory
   )
 
-  await updateImageFilePathsForMarkdown(options, objectsTree, newFilesManager)
+  await updateImageFilePathsForMarkdown(objectsTree, newFilesManager)
 
   endGroup()
 
@@ -392,51 +392,6 @@ async function handleImageCaching(
   )
 
   return imagesCacheFilesMap
-}
-
-async function saveNewAssets(
-  objectsTree: NotionObjectTree,
-  existingFilesManager: FilesManager,
-  newFilesManager: FilesManager,
-  filesInMemory: FileBuffersMemory
-) {
-  await applyToAllImages({
-    objectsTree,
-    applyToImage: async (image) => {
-      if (existingFilesManager.isObjectNew(image)) {
-        await saveImage(image, newFilesManager, filesInMemory)
-      }
-    },
-  })
-}
-
-async function readOrDownloadNewImages(
-  objectsTree: NotionObjectTree,
-  imagesCacheFilesMap: FilesMap | undefined,
-  existingFilesManager: FilesManager,
-  filesInMemory: FileBuffersMemory
-) {
-  await applyToAllImages({
-    objectsTree,
-    applyToImage: async (image) => {
-      if (existingFilesManager.isObjectNew(image)) {
-        await readOrDownloadImage(image, imagesCacheFilesMap, filesInMemory)
-      }
-    },
-  })
-}
-
-async function updateImageFilePathsForMarkdown(
-  options: NotionPullOptions,
-  objectsTree: NotionObjectTree,
-  newFilesManager: FilesManager
-) {
-  await applyToAllImages({
-    objectsTree,
-    applyToImage: async (image) => {
-      await updateImageForMarkdown(image, newFilesManager)
-    },
-  })
 }
 
 function createImageNamingStrategy(

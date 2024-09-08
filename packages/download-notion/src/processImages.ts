@@ -1,8 +1,55 @@
+import { NotionObjectTree } from "notion-downloader"
+
 import { FilesManager } from "./files/FilesManager"
 import { FilesMap } from "./files/FilesMap"
 import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import { NotionImageLike } from "./notionObjects/objectTypes"
+import { applyToAllImages } from "./objectTree/applyToImages"
 import { FileBuffersMemory } from "./types"
+
+export async function readOrDownloadNewImages(
+  objectsTree: NotionObjectTree,
+  imagesCacheFilesMap: FilesMap | undefined,
+  existingFilesManager: FilesManager,
+  filesInMemory: FileBuffersMemory
+) {
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      if (existingFilesManager.isObjectNew(image)) {
+        await readOrDownloadImage(image, imagesCacheFilesMap, filesInMemory)
+      }
+    },
+  })
+}
+
+export async function updateImageFilePathsForMarkdown(
+  objectsTree: NotionObjectTree,
+  newFilesManager: FilesManager
+) {
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      await updateImageForMarkdown(image, newFilesManager)
+    },
+  })
+}
+
+export async function saveNewAssets(
+  objectsTree: NotionObjectTree,
+  existingFilesManager: FilesManager,
+  newFilesManager: FilesManager,
+  filesInMemory: FileBuffersMemory
+) {
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      if (existingFilesManager.isObjectNew(image)) {
+        await saveImage(image, newFilesManager, filesInMemory)
+      }
+    },
+  })
+}
 
 export async function readOrDownloadImage(
   image: NotionImageLike,
