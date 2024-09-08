@@ -66,6 +66,7 @@ export async function readOrDownloadImage(
   }
 }
 
+// TODO: Deprecate this function
 export async function buildPathAndUpdateMarkdown(
   image: NotionImageLike,
   existingFilesManager: FilesManager,
@@ -85,18 +86,19 @@ export async function buildPathAndUpdateMarkdown(
       path: imageFilename,
       lastEditedTime: image.lastEditedTime,
     })
-
-    const markdownPath = newFilesManager.get("markdown", "image", image.id).path
-    updateImageUrlToMarkdownImagePath(image, markdownPath)
   } else {
     copyRecord(existingFilesManager, newFilesManager, "image", image.id)
-    const imageRecordFromDirectory = newFilesManager.get(
-      "markdown",
-      "image",
-      image.id
-    )
-    updateImageUrlToMarkdownImagePath(image, imageRecordFromDirectory.path)
   }
+  const markdownPath = newFilesManager.get("markdown", "image", image.id).path
+  updateImageUrlToMarkdownImagePath(image, markdownPath)
+}
+
+export async function updateImageForMarkdown(
+  image: NotionImageLike,
+  newFilesManager: FilesManager
+) {
+  const markdownPath = newFilesManager.get("markdown", "image", image.id).path
+  updateImageUrlToMarkdownImagePath(image, markdownPath)
 }
 
 export async function saveImage(
@@ -157,12 +159,12 @@ export async function applyToAllImages({
   await Promise.all(promises)
 }
 
-function pageHasCover(
+export function pageHasCover(
   metadata: PageObjectResponse
 ): metadata is PageObjectResponseWithCover {
   return Boolean(metadata.cover)
 }
-function databaseHasCover(
+export function databaseHasCover(
   metadata: DatabaseObjectResponse
 ): metadata is DatabaseObjectResponseWithCover {
   return Boolean(metadata.cover)

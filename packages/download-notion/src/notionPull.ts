@@ -18,6 +18,7 @@ import { getFileTreeMap } from "./getFileTreeMap"
 import { FlatLayoutStrategy } from "./layoutStrategy/FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
 import { endGroup, error, group, info } from "./log"
+import { NamingStrategy } from "./namingStrategy/NamingStrategy"
 import { getImageNamingStrategy } from "./namingStrategy/getImageNamingStrategy"
 import {
   GithubSlugNamingStrategy,
@@ -36,6 +37,7 @@ import {
   readAndUpdateMetadata,
   readOrDownloadImage,
   saveImage,
+  updateImageForMarkdown,
 } from "./processImages"
 import {
   loadFilesManagerFile,
@@ -162,24 +164,39 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Stage 4: Building paths...")
   // 4. Path building
-  const { namingStrategy, layoutStrategy } = createStrategies(options)
+  const { layoutStrategy: markdownLayoutStrategy } = createStrategies(options)
+
+  const imageNamingStrategy = createImageNamingStrategy(
+    options,
+    objectsTree,
+    newFilesManager
+  )
+  const imageLayoutStrategy = createLayoutStrategy(
+    options.conversion.imageLayoutStrategy,
+    imageNamingStrategy
+  )
 
   getFileTreeMap(
     "",
     objectsTree,
     options.rootDbAsFolder,
-    layoutStrategy,
-    newFilesManager
-  )
-
-  // TODO: Because of the ancestor page or db strategy, this needs to go after db or page
-  await buildImageFilePaths(
-    options,
-    objectsTree,
+    markdownLayoutStrategy,
+    imageLayoutStrategy,
     existingFilesManager,
     newFilesManager,
     filesInMemory
   )
+
+  await updateImageFilePathsForMarkdown(options, objectsTree, newFilesManager)
+
+  // TODO: Deprecate this. It's not needed anymore with the new strategy
+  // await buildImageFilePaths(
+  //   options,
+  //   objectsTree,
+  //   existingFilesManager,
+  //   newFilesManager,
+  //   filesInMemory
+  // )
 
   endGroup()
 
@@ -256,11 +273,20 @@ function createStrategies(options: NotionPullOptions) {
       : options.conversion.namingStrategy === "guid"
       ? new GuidNamingStrategy()
       : new TitleNamingStrategy()
-  const layoutStrategy =
-    options.conversion.layoutStrategy === "FlatLayoutStrategy"
-      ? new FlatLayoutStrategy(namingStrategy)
-      : new HierarchicalLayoutStrategy(namingStrategy)
-  return { namingStrategy, layoutStrategy }
+  const layoutStrategy = createLayoutStrategy(
+    options.conversion.layoutStrategy,
+    namingStrategy
+  )
+  return { layoutStrategy }
+}
+
+function createLayoutStrategy(
+  layoutStrategy: "HierarchicalNamedLayoutStrategy" | "FlatLayoutStrategy",
+  namingStrategy: NamingStrategy
+) {
+  return layoutStrategy === "FlatLayoutStrategy"
+    ? new FlatLayoutStrategy(namingStrategy)
+    : new HierarchicalLayoutStrategy(namingStrategy)
 }
 
 function createDirectoriesAndPrefixes(options: NotionPullOptions) {
@@ -414,6 +440,19 @@ async function readOrDownloadNewImages(
   })
 }
 
+async function updateImageFilePathsForMarkdown(
+  options: NotionPullOptions,
+  objectsTree: NotionObjectTree,
+  newFilesManager: FilesManager
+) {
+  await applyToAllImages({
+    objectsTree,
+    applyToImage: async (image) => {
+      await updateImageForMarkdown(image, newFilesManager)
+    },
+  })
+}
+
 async function buildImageFilePaths(
   options: NotionPullOptions,
   objectsTree: NotionObjectTree,
@@ -450,17 +489,7 @@ function createImageNamingStrategy(
     options.conversion.imageNamingStrategy || "default",
     // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
     (image) =>
-      options.conversion.imageNamingStrategy == "default"
-        ? removePathExtension(
-            getAncestorPageOrDatabaseFilepath(
-              image,
-              objectsTree,
-              newFilesManager
-            )
-          )
-        : options.conversion.imageNamingStrategy == "default-flat"
-        ? getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
-        : ""
+      getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
   )
   return imageNamingStrategy
 }

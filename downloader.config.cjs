@@ -10,7 +10,7 @@ module.exports = {
     },
     statusPropertyName: "Status",
     statusPropertyValue: "Publish",
-    imageNamingStrategy: "default-flat",
+    imageNamingStrategy: "default",
     pageLinkHasExtension: false,
     slugProperty: "slug",
   },

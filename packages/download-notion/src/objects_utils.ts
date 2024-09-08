@@ -6,11 +6,17 @@ import {
 import { NotionCacheClient } from "notion-cache-client"
 import {
   IdWithType,
+  NotionObjectResponse,
   NotionObjectTree,
   NotionObjectTreeNode,
   NotionObjectsData,
   objectTreeToObjectIds,
 } from "notion-downloader"
+
+import { NotionBlockImage } from "./NotionBlockImage"
+import { NotionCoverImage } from "./NotionCoverImage"
+import { NotionImageLike } from "./objectTypes"
+import { databaseHasCover, pageHasCover } from "./processImages"
 
 export type PlainObjectsMap = Record<
   string,
@@ -98,4 +104,38 @@ export function getPageAncestorId(id: string, objectTree: NotionObjectTree) {
   if (parent.object === "block") {
     return getPageAncestorId(parent.id, objectTree)
   }
+}
+
+export function hasImageLikeObject(notionObject: NotionObjectResponse) {
+  if (notionObject.object === "block" && notionObject.type === "image") {
+    return true
+  }
+  if (notionObject.object === "page" && notionObject.cover) {
+    return true
+  }
+  if (notionObject.object === "database" && notionObject.cover) {
+    return true
+  }
+
+  return false
+}
+
+export function getImageLikeObject(
+  notionObject: NotionObjectResponse
+): NotionImageLike {
+  if (notionObject.object === "block" && notionObject.type === "image") {
+    return new NotionBlockImage(notionObject)
+  }
+  if (notionObject.object === "page") {
+    if (pageHasCover(notionObject)) {
+      return new NotionCoverImage(notionObject)
+    }
+  }
+  if (notionObject.object === "database") {
+    if (databaseHasCover(notionObject)) {
+      return new NotionCoverImage(notionObject)
+    }
+  }
+
+  throw new Error(`No image like object found for ${notionObject.object}`)
 }
