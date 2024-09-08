@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest"
 
 import { makeImagePersistencePlan } from "../src/MakeImagePersistencePlan"
 import { NotionPullOptions } from "../src/config/schema"
-import { FileBuffer } from "../src/types"
+import { FileBuffer } from "../src/notionObjects/fileBuffer"
 import { hashOfString } from "../src/utils"
 
 const optionsUsingDefaultNaming: NotionPullOptions = {
