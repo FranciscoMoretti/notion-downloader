@@ -5,7 +5,7 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
 import { NotionImageLike } from "./notionObjects/objectTypes"
-import { getPageAncestorId } from "./objectTreeUtills"
+import { getPageAncestorId } from "./objectTree/objectTreeUtills"
 
 export function convertToUUID(str: string): string {
   if (str.length !== 32) {

@@ -16,7 +16,6 @@ import {
   loadImagesCacheFilesMap,
   saveDataToJson,
 } from "./files/saveLoadUtils"
-import { filterTree } from "./filterTree"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { FlatLayoutStrategy } from "./layoutStrategy/FlatLayoutStrategy"
@@ -31,11 +30,12 @@ import {
   TitleNamingStrategy,
 } from "./namingStrategy/namingStrategies"
 import { NotionPage } from "./notionObjects/NotionPage"
-import { getAllObjectsInObjectsTree } from "./objectTreeUtills"
+import { applyToAllImages } from "./objectTree/applyToImages"
+import { filterTree } from "./objectTree/filterTree"
+import { getAllObjectsInObjectsTree } from "./objectTree/objectTreeUtills"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {
-  applyToAllImages,
   readOrDownloadImage,
   saveImage,
   updateImageForMarkdown,

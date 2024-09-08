@@ -4,7 +4,7 @@ import { NotionObjectTree } from "notion-downloader"
 import { FilesMap } from "./files/FilesMap"
 import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import { NotionImageLike } from "./notionObjects/objectTypes"
-import { applyToAllImages } from "./processImages"
+import { applyToAllImages } from "./objectTree/applyToImages"
 
 export async function fetchImages(
   objectsTree: NotionObjectTree,
