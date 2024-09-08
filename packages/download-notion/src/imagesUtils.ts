@@ -2,17 +2,11 @@ import https from "https"
 import * as Path from "path"
 import axios from "axios"
 import FileType from "file-type"
+import core from "file-type/core"
 import fs from "fs-extra"
 
 import { FileObject } from "./NotionImage"
 import { verbose } from "./log"
-
-// Extracting extension, mime, and buffer data into a separate type called FileData
-export type FileData = {
-  extension: string
-  mime: string
-  buffer: Buffer
-}
 
 export type OutputPaths = {
   primaryFileOutputPath: string
@@ -38,18 +32,26 @@ export function updateImageUrlToMarkdownImagePath(
   }
 }
 
-export async function readFile(source: string, type: "file" | "url") {
+export type FileBuffer = {
+  buffer: Buffer
+  fileType: core.FileTypeResult
+}
+
+export async function readFile(
+  source: string,
+  type: "file" | "url"
+): Promise<FileBuffer> {
   try {
     const buffer = await readBuffer(source, type)
     const fileType = await FileType.fromBuffer(buffer)
 
     if (!fileType) {
-      throw new Error(`Failed to determine file type for image at ${source}`)
+      throw new Error(`Failed to determine file type for file at ${source}`)
     }
 
     return { buffer, fileType }
   } catch (error) {
-    console.error(`Error reading image from ${source}:`, error)
+    console.error(`Error reading file from ${source}:`, error)
     throw error
   }
 }

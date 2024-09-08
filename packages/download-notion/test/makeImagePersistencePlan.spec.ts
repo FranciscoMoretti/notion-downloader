@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest"
 import { makeImagePersistencePlan } from "../src/MakeImagePersistencePlan"
 import { NotionPullOptions } from "../src/config/schema"
 import { ImageSet } from "../src/images"
+import { FileBuffer } from "../src/imagesUtils"
 import { hashOfString } from "../src/utils"
 
 const optionsUsingDefaultNaming: NotionPullOptions = {
@@ -33,9 +34,8 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
 
 const directoryContainingMarkdown = "/pathToParentSomewhere/"
 const slug = "my-page"
-const testFileData = {
-  extension: "png",
-  mime: "image/png",
+const testFileData: FileBuffer = {
+  fileType: { ext: "png", mime: "image/png" },
   buffer: Buffer.from("some fake image content"),
 }
 

@@ -7,7 +7,7 @@ import {
 import fs from "fs-extra"
 
 import { NotionObject } from "./NotionObject"
-import { FileData, ImageSet, readFile } from "./imagesUtils"
+import { FileBuffer, ImageSet, readFile } from "./imagesUtils"
 import { getImageUrl } from "./notion_objects_utils"
 
 export type PageObjectResponseWithCover = PageObjectResponse & {
@@ -28,7 +28,7 @@ type NotionImageResponses =
 // TODO: We might want to have them in memory while we build paths and  then save later
 export class NotionImage implements NotionObject {
   private imageSet: ImageSet
-  private fileData: FileData | null = null
+  private fileData: FileBuffer | null = null
   private metadata: NotionImageResponses
 
   constructor(imageResponse: NotionImageResponses) {
@@ -72,12 +72,8 @@ export class NotionImage implements NotionObject {
 
   // TODO: Consider extracting to util
   private async readAndSetFileData(source: string, type: "file" | "url") {
-    const { buffer, fileType } = await readFile(source, type)
-    this.fileData = {
-      extension: fileType.ext,
-      mime: fileType.mime,
-      buffer,
-    }
+    const fileBuffer = await readFile(source, type)
+    this.fileData = fileBuffer
     return this.fileData
   }
 
@@ -107,7 +103,7 @@ export class NotionImage implements NotionObject {
 
   get extension(): string {
     // TODO: Verify if failing if unknonwn mime type ever happens
-    return this.getFileData().extension
+    return this.getFileData().fileType.ext
   }
 
   get buffer(): Buffer {
@@ -132,7 +128,7 @@ export class NotionImage implements NotionObject {
       : this.metadata.image
   }
 
-  private getFileData(): FileData {
+  private getFileData(): FileBuffer {
     if (!this.fileData) {
       throw new Error("File data not read. Run read() before accessing")
     }
