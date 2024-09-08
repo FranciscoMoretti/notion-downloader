@@ -84,7 +84,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const optionsForLogging = getOptionsForLogging(options)
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
   // TODO: This should be moved up to the pull command that already loads configs
-  const pluginsConfig = await loadConfigAsync()
   const rootUUID = convertToUUID(options.rootId)
 
   const cacheDir = getCacheDir(options)
@@ -92,11 +91,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options.notionToken,
     cacheDir
   )
-  const notionToMarkdown = new NotionToMarkdown({
-    notionClient: cachedNotionClient,
-  })
-
-  const { namingStrategy, layoutStrategy } = createStrategies(options)
 
   const { objectsDirectories, markdownPrefixes } =
     createDirectoriesAndPrefixes(options)
@@ -135,7 +129,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   info("PULL: Notion Download Completed")
-  if (options.conversion.skip) return
+  if (options.conversion.skip) {
+    info("Skipping conversion phases")
+    return
+  }
 
   endGroup()
   group("Stage 2: Filtering pages...")
@@ -147,7 +144,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   group("Stage 3: Building paths...")
-  // --------  FILES ---------
+  const { namingStrategy, layoutStrategy } = createStrategies(options)
   getFileTreeMap(
     "",
     objectsTree,
@@ -173,6 +170,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info(`Found ${pagesToOutput.length} new pages`)
 
   group(`Stage 5: convert ${pagesToOutput.length} Notion pages to markdown...`)
+  const pluginsConfig = await loadConfigAsync()
+  const notionToMarkdown = new NotionToMarkdown({
+    notionClient: cachedNotionClient,
+  })
   await outputPages(
     options,
     pluginsConfig,
