@@ -114,3 +114,11 @@ export class FilesCleaner {
     throw new Error("get removal reason failed")
   }
 }
+
+export async function cleanup(
+  existingFilesManager: FilesManager,
+  newFilesManager: FilesManager
+) {
+  const filesCleaner = new FilesCleaner()
+  await filesCleaner.cleanupOldFiles(existingFilesManager, newFilesManager)
+}

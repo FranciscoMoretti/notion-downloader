@@ -7,8 +7,13 @@ import { NotionToMarkdown } from "notion-to-md"
 
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
+import {
+  createLayoutStrategy,
+  createMakrdownLayoutStrategy,
+  createStrategies,
+} from "./createStrategies"
 import { fetchImages } from "./fetchImages"
-import { FilesCleaner } from "./files/FilesCleaner"
+import { FilesCleaner, cleanup } from "./files/FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
 import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
@@ -18,17 +23,8 @@ import {
 } from "./files/saveLoadUtils"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
-import { FlatLayoutStrategy } from "./layoutStrategy/FlatLayoutStrategy"
-import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
 import { endGroup, error, group, info } from "./log"
-import { NamingStrategy } from "./namingStrategy/NamingStrategy"
-import { getImageNamingStrategy } from "./namingStrategy/getImageNamingStrategy"
-import {
-  GithubSlugNamingStrategy,
-  GuidNamingStrategy,
-  NotionSlugNamingStrategy,
-  TitleNamingStrategy,
-} from "./namingStrategy/namingStrategies"
+import { getImageNamingStrategy } from "./namingStrategy/getNamingStrategy"
 import { NotionPage } from "./notionObjects/NotionPage"
 import { applyToAllImages } from "./objectTree/applyToImages"
 import { filterTree } from "./objectTree/filterTree"
@@ -159,16 +155,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Stage 4: Building paths...")
   // 4. Path building
-  const { layoutStrategy: markdownLayoutStrategy } = createStrategies(options)
-
-  const imageNamingStrategy = createImageNamingStrategy(
+  const { markdownLayoutStrategy, imageLayoutStrategy } = createStrategies(
     options,
     objectsTree,
     newFilesManager
-  )
-  const imageLayoutStrategy = createLayoutStrategy(
-    options.conversion.imageLayoutStrategy,
-    imageNamingStrategy
   )
 
   getFileTreeMap(
@@ -247,32 +237,6 @@ function createCachedNotionClient(
     auth: notionToken,
     cacheOptions: { cacheDirectory: cacheDir },
   })
-}
-
-function createStrategies(options: NotionPullOptions) {
-  const namingStrategy =
-    options.conversion.namingStrategy === "github-slug"
-      ? // TODO: SLug naming strategies shouldn't have a blank value or undefined. Default should be in option parsing
-        new GithubSlugNamingStrategy(options.conversion.slugProperty || "")
-      : options.conversion.namingStrategy === "notion-slug"
-      ? new NotionSlugNamingStrategy(options.conversion.slugProperty || "")
-      : options.conversion.namingStrategy === "guid"
-      ? new GuidNamingStrategy()
-      : new TitleNamingStrategy()
-  const layoutStrategy = createLayoutStrategy(
-    options.conversion.layoutStrategy,
-    namingStrategy
-  )
-  return { layoutStrategy }
-}
-
-function createLayoutStrategy(
-  layoutStrategy: "HierarchicalNamedLayoutStrategy" | "FlatLayoutStrategy",
-  namingStrategy: NamingStrategy
-) {
-  return layoutStrategy === "FlatLayoutStrategy"
-    ? new FlatLayoutStrategy(namingStrategy)
-    : new HierarchicalLayoutStrategy(namingStrategy)
 }
 
 function createDirectoriesAndPrefixes(options: NotionPullOptions) {
@@ -394,34 +358,12 @@ async function handleImageCaching(
   return imagesCacheFilesMap
 }
 
-function createImageNamingStrategy(
-  options: NotionPullOptions,
-  objectsTree: NotionObjectTree,
-  newFilesManager: FilesManager
-) {
-  const imageNamingStrategy = getImageNamingStrategy(
-    options.conversion.imageNamingStrategy || "default",
-    // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
-    (image) =>
-      getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
-  )
-  return imageNamingStrategy
-}
-
 function getPagesToOutput(
   objectsTree: NotionObjectTree,
   existingFilesManager: FilesManager
 ) {
   const pages = objectsTree.getPages().map((page) => new NotionPage(page))
   return pages.filter((page) => existingFilesManager.isObjectNew(page))
-}
-
-async function cleanup(
-  existingFilesManager: FilesManager,
-  newFilesManager: FilesManager
-) {
-  const filesCleaner = new FilesCleaner()
-  await filesCleaner.cleanupOldFiles(existingFilesManager, newFilesManager)
 }
 
 async function outputPages(
