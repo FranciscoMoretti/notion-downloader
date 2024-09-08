@@ -1,9 +1,9 @@
 import chalk from "chalk"
 
-import { getFileUrl } from "./NotionFile"
-import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig } from "./config/configuration"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
+import { getFileUrl } from "./notionObjects/NotionFile"
+import { NotionPage } from "./notionObjects/NotionPage"
 import {
   IDocuNotionContext,
   IRegexMarkdownModification,

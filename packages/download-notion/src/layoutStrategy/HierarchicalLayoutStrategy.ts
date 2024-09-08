@@ -1,5 +1,5 @@
-import { NotionPage } from "../NotionPage"
 import { NamingStrategy } from "../namingStrategy/NamingStrategy"
+import { NotionPage } from "../notionObjects/NotionPage"
 import { NotionFileLikeObjects, NotionFolderLikeObjects } from "../objectTypes"
 import { LayoutStrategy } from "./LayoutStrategy"
 

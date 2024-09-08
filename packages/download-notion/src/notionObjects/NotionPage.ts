@@ -6,9 +6,9 @@ import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { BlockObjectTreeNode, NotionObjectTreeNode } from "notion-downloader"
 import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
+import { error } from "../log"
+import { parseLinkId } from "../plugins/internalLinks"
 import { NotionObject } from "./NotionObject"
-import { error } from "./log"
-import { parseLinkId } from "./plugins/internalLinks"
 
 export class NotionPage implements NotionObject {
   // TODO: Can this, Database and Image Extend the PageObjectResponse instead of using as metadata?

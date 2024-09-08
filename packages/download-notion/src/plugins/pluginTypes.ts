@@ -3,9 +3,9 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
 import { FilesManager } from "../FilesManager"
 import { FilesMap } from "../FilesMap"
-import { NotionPage } from "../NotionPage"
 import { NotionPullOptions } from "../config/schema"
 import { ICounts, NotionBlock } from "../index"
+import { NotionPage } from "../notionObjects/NotionPage"
 
 type linkConversionFunction = (
   context: IDocuNotionContext,

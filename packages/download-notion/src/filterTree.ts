@@ -1,9 +1,9 @@
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
-import { NotionDatabase } from "./NotionDatabase"
-import { getNotionObject } from "./NotionObjectUtils"
-import { NotionPage } from "./NotionPage"
 import { verbose } from "./log"
+import { NotionDatabase } from "./notionObjects/NotionDatabase"
+import { getNotionObject } from "./notionObjects/NotionObjectUtils"
+import { NotionPage } from "./notionObjects/NotionPage"
 
 export function filterTree(
   objectsTree: NotionObjectTree,

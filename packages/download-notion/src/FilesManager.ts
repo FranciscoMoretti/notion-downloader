@@ -1,5 +1,5 @@
 import { FileRecord, FileType, FilesMap, FilesMapData } from "./FilesMap"
-import { NotionObject } from "./NotionObject"
+import { NotionObject } from "./notionObjects/NotionObject"
 import {
   recordMapWithPrefix,
   recordWithPrefix,

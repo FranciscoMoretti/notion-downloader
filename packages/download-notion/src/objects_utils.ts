@@ -13,8 +13,8 @@ import {
   objectTreeToObjectIds,
 } from "notion-downloader"
 
-import { NotionBlockImage } from "./NotionBlockImage"
-import { NotionCoverImage } from "./NotionCoverImage"
+import { NotionBlockImage } from "./notionObjects/NotionBlockImage"
+import { NotionCoverImage } from "./notionObjects/NotionCoverImage"
 import { NotionImageLike } from "./objectTypes"
 import { databaseHasCover, pageHasCover } from "./processImages"
 

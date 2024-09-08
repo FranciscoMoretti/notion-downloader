@@ -3,7 +3,7 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
-import { FileBuffer } from "./types"
+import { FileBuffer } from "../types"
 
 export class NotionFile {
   private fileBuffer: FileBuffer | null = null

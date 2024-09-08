@@ -6,13 +6,13 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
-import { NotionBlockImage } from "./NotionBlockImage"
+import { readFile, saveFileBuffer } from "./imagesUtils"
+import { NotionBlockImage } from "./notionObjects/NotionBlockImage"
 import {
   DatabaseObjectResponseWithCover,
   NotionCoverImage,
   PageObjectResponseWithCover,
-} from "./NotionCoverImage"
-import { readFile, saveFileBuffer } from "./imagesUtils"
+} from "./notionObjects/NotionCoverImage"
 import { NotionImageLike } from "./objectTypes"
 import { FileBuffersMemory } from "./types"
 

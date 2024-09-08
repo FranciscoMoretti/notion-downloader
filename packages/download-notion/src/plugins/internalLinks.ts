@@ -1,7 +1,7 @@
 import path from "path"
 
-import { NotionPage } from "../NotionPage"
 import { error, warning } from "../log"
+import { NotionPage } from "../notionObjects/NotionPage"
 import { removePathExtension } from "../pathUtils"
 import { IDocuNotionContext, IPlugin } from "./pluginTypes"
 

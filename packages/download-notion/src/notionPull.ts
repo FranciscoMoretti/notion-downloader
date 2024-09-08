@@ -8,7 +8,6 @@ import { NotionToMarkdown } from "notion-to-md"
 import { FilesCleaner } from "./FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./FilesManager"
 import { FileType, FilesMap } from "./FilesMap"
-import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { fetchImages } from "./fetchImages"
@@ -26,6 +25,7 @@ import {
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
 } from "./namingStrategy/namingStrategies"
+import { NotionPage } from "./notionObjects/NotionPage"
 import { getAllObjectsInObjectsTree } from "./objects_utils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
