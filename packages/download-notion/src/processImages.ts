@@ -4,7 +4,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 import { NotionObjectTree } from "notion-downloader"
 
-import { FilesManager, copyRecord } from "./FilesManager"
+import { FilesManager } from "./FilesManager"
 import { FilesMap } from "./FilesMap"
 import { NotionBlockImage } from "./NotionBlockImage"
 import {
@@ -12,16 +12,9 @@ import {
   NotionCoverImage,
   PageObjectResponseWithCover,
 } from "./NotionCoverImage"
-import {
-  FileBuffer,
-  readFile,
-  saveFileBuffer,
-  updateImageUrlToMarkdownImagePath,
-} from "./imagesUtils"
-import { NamingStrategy } from "./namingStrategy/NamingStrategy"
+import { readFile, saveFileBuffer } from "./imagesUtils"
 import { NotionImageLike } from "./objectTypes"
-
-export type FileBuffersMemory = Record<string, FileBuffer>
+import { FileBuffersMemory } from "./types"
 
 export async function readOrDownloadImage(
   image: NotionImageLike,
@@ -41,7 +34,7 @@ export async function updateImageForMarkdown(
   newFilesManager: FilesManager
 ) {
   const markdownPath = newFilesManager.get("markdown", "image", image.id).path
-  updateImageUrlToMarkdownImagePath(image, markdownPath)
+  image.setUrl(markdownPath)
 }
 
 export async function saveImage(

@@ -1,4 +1,9 @@
-import { FileBuffer } from "./imagesUtils"
+import {
+  ImageBlockObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints"
+
+import { FileBuffer } from "./types"
 
 export class NotionFile {
   private fileBuffer: FileBuffer | null = null
@@ -17,9 +22,7 @@ export class NotionFile {
   }
 
   get url(): string {
-    return this.fileCore.type == "external"
-      ? this.fileCore.external.url
-      : this.fileCore.file.url
+    return getFileUrl(this.fileCore)
   }
 
   get extension(): string {
@@ -64,3 +67,11 @@ export type FileCoreObject =
         expiry_time: string
       }
     }
+
+export function getFileUrl(
+  image:
+    | ImageBlockObjectResponse["image"]
+    | NonNullable<PageObjectResponse["cover"]>
+): string {
+  return image.type === "external" ? image.external.url : image.file.url
+}

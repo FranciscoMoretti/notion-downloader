@@ -2,8 +2,7 @@ import { describe, expect, test } from "vitest"
 
 import { makeImagePersistencePlan } from "../src/MakeImagePersistencePlan"
 import { NotionPullOptions } from "../src/config/schema"
-import { ImageSet } from "../src/images"
-import { FileBuffer } from "../src/imagesUtils"
+import { FileBuffer } from "../src/types"
 import { hashOfString } from "../src/utils"
 
 const optionsUsingDefaultNaming: NotionPullOptions = {
@@ -39,7 +38,7 @@ const testFileData: FileBuffer = {
   buffer: Buffer.from("some fake image content"),
 }
 
-const testImageSet: ImageSet = {
+const testImageSet = {
   primaryUrl: "https://s3.us-west-2.amazonaws.com/primaryImage?Blah=foo",
   caption: "my caption",
 }

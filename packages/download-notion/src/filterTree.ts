@@ -46,7 +46,9 @@ export function filterTree(
       verbose(
         `Skipping [${objectResponse.object}] (${objectResponse.id}) ${
           notionObject.title
-        } ${`because it has status ${notionObject.status}`}`
+        } ${`because it has status ${notionObject.getGenericProperty(
+          statusPropertyName
+        )}`}`
       )
 
       tree.removeObject(notionObject.id)

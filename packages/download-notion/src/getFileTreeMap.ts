@@ -5,7 +5,7 @@ import { getNotionObject } from "./NotionObjectUtils"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { NotionImageLike } from "./objectTypes"
 import { getImageLikeObject, hasImageLikeObject } from "./objects_utils"
-import { FileBuffersMemory } from "./processImages"
+import { FileBuffersMemory } from "./types"
 
 export function getFileTreeMap(
   starterPath: string,

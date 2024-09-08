@@ -30,7 +30,6 @@ import { getAllObjectsInObjectsTree } from "./objects_utils"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {
-  FileBuffersMemory,
   applyToAllImages,
   readOrDownloadImage,
   saveImage,
@@ -43,6 +42,7 @@ import {
   saveToFile,
 } from "./saveLoadUtils"
 import { getMarkdownForPage } from "./transform"
+import { FileBuffersMemory } from "./types"
 import {
   convertToUUID,
   getAncestorPageOrDatabaseFilename,

@@ -1,9 +1,9 @@
 import chalk from "chalk"
 
+import { getFileUrl } from "./NotionFile"
 import { NotionPage } from "./NotionPage"
 import { IDocuNotionConfig } from "./config/configuration"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
-import { getImageUrl } from "./notion_objects_utils"
 import {
   IDocuNotionContext,
   IRegexMarkdownModification,
@@ -260,7 +260,7 @@ function getFrontMatter(page: NotionPage): string {
   const standardProperties = {
     title: `${page.title.replaceAll(":", "-")}`,
     id: page.metadata.id,
-    cover: page.metadata.cover ? getImageUrl(page.metadata.cover) : "",
+    cover: page.metadata.cover ? getFileUrl(page.metadata.cover) : "",
     created_time: page.metadata.created_time,
     last_edited_time: page.metadata.last_edited_time,
   }
