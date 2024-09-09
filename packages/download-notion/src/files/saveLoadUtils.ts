@@ -23,14 +23,15 @@ export function loadImagesCacheFilesMap(
   return undefined
 }
 
-export async function saveDataToJson(
+// TODO: Centralize JSON conversion
+export async function saveObjectToJson(
   data: any,
   filePath: string
 ): Promise<void> {
   await fs.writeJson(filePath, data, "utf8")
 }
 
-export async function saveToFile(
+export async function saveDataToFile(
   data: string,
   filePath: string
 ): Promise<void> {

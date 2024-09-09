@@ -7,11 +7,7 @@ import { NotionToMarkdown } from "notion-to-md"
 
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
-import {
-  createLayoutStrategy,
-  createMakrdownLayoutStrategy,
-  createStrategies,
-} from "./createStrategies"
+import { createStrategies } from "./createStrategies"
 import { fetchImages } from "./fetchImages"
 import { FilesCleaner, cleanup } from "./files/FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
@@ -19,7 +15,8 @@ import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
   loadFilesManagerFile,
   loadImagesCacheFilesMap,
-  saveDataToJson,
+  saveDataToFile,
+  saveObjectToJson,
 } from "./files/saveLoadUtils"
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
@@ -214,7 +211,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const filesMapFilePath =
     options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  await saveDataToJson(newFilesManager.toJSON(), filesMapFilePath)
+  await saveDataToFile(newFilesManager.toJSON(), filesMapFilePath)
   endGroup()
 }
 
@@ -328,7 +325,7 @@ async function downloadAndProcessObjectTree(
     cachingOptions: options.cache,
   })
 
-  await saveDataToJson(objectsTreeRootNode, cacheDir + "object_tree.json")
+  await saveObjectToJson(objectsTreeRootNode, cacheDir + "object_tree.json")
 
   const objectsData = await getAllObjectsInObjectsTree(
     objectsTreeRootNode,
@@ -350,7 +347,7 @@ async function handleImageCaching(
     new FilesMap()
 
   await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
-  await saveDataToJson(
+  await saveDataToFile(
     imagesCacheFilesMap.toJSON(),
     imagesCacheDir + "images_filesmap.json"
   )

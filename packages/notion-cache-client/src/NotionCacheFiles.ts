@@ -7,7 +7,7 @@ import {
   NotionDatabaseObjectsCache,
   NotionPageObjectsCache,
 } from "./notion-structures-types"
-import { loadDataFromJson, saveDataToJson } from "./utils"
+import { loadDataFromJson, saveObjectToJson } from "./utils"
 
 export class NotionCacheFiles {
   cacheDirectory: string
@@ -48,32 +48,35 @@ export class NotionCacheFiles {
     }
     const promises = []
     promises.push(
-      saveDataToJson(
+      saveObjectToJson(
         blocksChildrenCache,
         cacheDir + this.blockChildrenCacheFilename
       )
     )
 
     promises.push(
-      saveDataToJson(
+      saveObjectToJson(
         databaseChildrenCache,
         cacheDir + this.databaseChildrenCacheFilename
       )
     )
 
     promises.push(
-      saveDataToJson(pageObjectsCache, cacheDir + this.pageObjectsCacheFilename)
+      saveObjectToJson(
+        pageObjectsCache,
+        cacheDir + this.pageObjectsCacheFilename
+      )
     )
 
     promises.push(
-      saveDataToJson(
+      saveObjectToJson(
         databaseObjectsCache,
         cacheDir + this.databaseObjectsCacheFilename
       )
     )
 
     promises.push(
-      saveDataToJson(
+      saveObjectToJson(
         blockObjectsCache,
         cacheDir + this.blocksObjectsCacheFilename
       )
