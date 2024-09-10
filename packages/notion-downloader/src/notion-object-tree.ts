@@ -19,7 +19,7 @@ export type NotionObjectsData = {
 type IdToNodeMap = {
   page: Map<string, NotionObjectTreeNode>
   database: Map<string, NotionObjectTreeNode>
-  block: Map<string, NotionObjectTreeNode>
+  block: Map<string, BlockObjectTreeNode>
 }
 
 export type BlockObjectTreeNode = {
@@ -77,13 +77,20 @@ export class NotionObjectTree {
   }
 
   private buildIdToNodeMap(node: NotionObjectTreeNode) {
-    this.idToNodeMap[node.object].set(node.id, node)
+    this.setNodetoMap(node)
     for (const child of node.children) {
       this.buildIdToNodeMap(child)
     }
   }
 
-  // TODO: Consider doing the get operations starting from a specific node
+  private setNodetoMap(node: NotionObjectTreeNode) {
+    if (node.object === "block") {
+      this.idToNodeMap.block.set(node.id, node)
+    } else {
+      this.idToNodeMap[node.object].set(node.id, node)
+    }
+  }
+
   getPages(): PageObjectResponse[] {
     return Object.values(this.data.page)
   }
@@ -126,45 +133,6 @@ export class NotionObjectTree {
     }
   }
 
-  addObject(
-    object: PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
-  ) {
-    const { id, object: objectType } = object
-
-    // Add to data
-    this.data[objectType][id] = object
-
-    // Add to tree
-    const parent = simplifyParentObject(object.parent)
-    if (!parent) {
-      throw new Error("Parent not found")
-    }
-
-    const parentNode = this.getNodeById(parent.object, parent.id)
-    if (!parentNode) {
-      throw new Error("Parent node not found")
-    }
-    const newNode: NotionObjectTreeNode =
-      objectType === "block"
-        ? {
-            id,
-            object: objectType,
-            children: [],
-            parent: parent.id,
-            type: object.type,
-            has_children: object.has_children,
-          }
-        : {
-            id,
-            object: objectType,
-            children: [],
-            parent: parent.id,
-          }
-    parentNode.children.push(newNode)
-    // Add to mapping
-    this.idToNodeMap[objectType].set(id, newNode)
-  }
-
   getParentId(
     objectType: "page" | "database" | "block",
     id: string
@@ -192,11 +160,18 @@ export class NotionObjectTree {
     if (!node) return
     // First let children remove themselves, and then remove up to the start node
     for (const child of node.children) {
-      this.removeObject(objectType, child.id)
+      this.removeObject(child.object, child.id)
     }
-    // Delete from data
+    // Save parent before deleting
     const parentRaw = { ...this.data[node.object][id].parent }
+    // Delete from data
     delete this.data[node.object][id]
+    if (node.object === "block" && node.type === "child_page") {
+      delete this.data.page[id]
+    } else if (node.object === "block" && node.type === "child_database") {
+      delete this.data.database[id]
+    }
+
     // Delete from tree
     const parent = simplifyParentObject(parentRaw)
     if (parent) {
@@ -214,6 +189,29 @@ export class NotionObjectTree {
     objectType: "page" | "database" | "block",
     id: string
   ): NotionObjectTreeNode | undefined {
+    // If asked for a page or database, child_page and child_database have presedence over pages and databases
+    if (objectType === "page") {
+      const possible_child_page = this.idToNodeMap.block.get(id)
+      if (possible_child_page) {
+        if (possible_child_page.type === "child_page") {
+          return possible_child_page
+        } else {
+          throw new Error(`Block with id ${id} exists but is not a child page`)
+        }
+      }
+    } else if (objectType === "database") {
+      const possible_child_database = this.idToNodeMap.block.get(id)
+      if (possible_child_database) {
+        if (possible_child_database.type === "child_database") {
+          return possible_child_database
+        } else {
+          throw new Error(
+            `Block with id ${id} exists but is not a child database`
+          )
+        }
+      }
+    }
+
     return this.idToNodeMap[objectType].get(id)
   }
 }
