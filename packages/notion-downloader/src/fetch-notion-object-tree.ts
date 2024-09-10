@@ -129,6 +129,7 @@ async function fetchTreeRecursively(
         database_id: objectNode.id,
       }
     )
+    // TODO: Consider only getting block children if the `has_children` prop is true
     for (const childObject of databaseChildrenResults) {
       const newNode: NotionObjectTreeNode = {
         id: childObject.id,

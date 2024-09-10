@@ -1,3 +1,4 @@
+import path from "path"
 import fs from "fs-extra"
 
 import { FilesManager } from "./FilesManager"
@@ -28,6 +29,7 @@ export async function saveObjectToJson(
   data: any,
   filePath: string
 ): Promise<void> {
+  await fs.ensureDir(path.dirname(filePath))
   await fs.writeJson(filePath, data, "utf8")
 }
 
@@ -35,5 +37,6 @@ export async function saveDataToFile(
   data: string,
   filePath: string
 ): Promise<void> {
+  await fs.ensureDir(path.dirname(filePath))
   await fs.writeFile(filePath, data, "utf8")
 }

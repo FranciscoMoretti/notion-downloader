@@ -1,7 +1,7 @@
 import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
-import { NotionCacheClient } from "notion-cache-client"
+import { NotionCacheClient, convertToUUID } from "notion-cache-client"
 import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
@@ -36,7 +36,6 @@ import {
 import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
 import {
-  convertToUUID,
   getAncestorPageOrDatabaseFilename,
   sanitizeMarkdownOutputPath,
 } from "./utils"

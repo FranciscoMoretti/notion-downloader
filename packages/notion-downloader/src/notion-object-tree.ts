@@ -3,6 +3,7 @@ import {
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import { simplifyParentObject } from "notion-cache-client"
 
 export type NotionObjectResponse =
   | PageObjectResponse
@@ -13,6 +14,12 @@ export type NotionObjectsData = {
   page: Record<string, PageObjectResponse>
   database: Record<string, DatabaseObjectResponse>
   block: Record<string, BlockObjectResponse>
+}
+
+type IdToNodeMap = {
+  page: Map<string, NotionObjectTreeNode>
+  database: Map<string, NotionObjectTreeNode>
+  block: Map<string, NotionObjectTreeNode>
 }
 
 export type BlockObjectTreeNode = {
@@ -30,6 +37,7 @@ export type NotionObjectTreeNode =
       id: string
       object: "database" | "page"
       children: Array<NotionObjectTreeNode>
+      // TODO: Deprecate the parent string. It's not enough to id the parent because the type is needed too
       parent: string | null
     }
   | BlockObjectTreeNode
@@ -39,6 +47,7 @@ export type NotionObjectPlain =
       id: string
       object: "database" | "page"
       children: Array<string>
+      // TODO: Deprecate the parent string. It's not enough to id the parent because the type is needed too
       parent: string | null
     }
   | {
@@ -55,7 +64,11 @@ export type NotionObjectPlainMap = Record<string, NotionObjectPlain>
 export class NotionObjectTree {
   private data: NotionObjectsData // Responses from Notion API
   private tree: NotionObjectTreeNode // Tree structure
-  private idToNodeMap: Map<string, NotionObjectTreeNode> = new Map()
+  private idToNodeMap: IdToNodeMap = {
+    page: new Map(),
+    database: new Map(),
+    block: new Map(),
+  }
 
   constructor(rootNode: NotionObjectTreeNode, initialData: NotionObjectsData) {
     this.tree = rootNode
@@ -64,7 +77,7 @@ export class NotionObjectTree {
   }
 
   private buildIdToNodeMap(node: NotionObjectTreeNode) {
-    this.idToNodeMap.set(node.id, node)
+    this.idToNodeMap[node.object].set(node.id, node)
     for (const child of node.children) {
       this.buildIdToNodeMap(child)
     }
@@ -113,10 +126,6 @@ export class NotionObjectTree {
     }
   }
 
-  getNodeById(id: string): NotionObjectTreeNode | undefined {
-    return this.idToNodeMap.get(id)
-  }
-
   addObject(
     object: PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
   ) {
@@ -126,12 +135,12 @@ export class NotionObjectTree {
     this.data[objectType][id] = object
 
     // Add to tree
-    const parentId = getParentId(object.parent)
-    if (!parentId) {
-      throw new Error("Parent id not found")
+    const parent = simplifyParentObject(object.parent)
+    if (!parent) {
+      throw new Error("Parent not found")
     }
 
-    const parentNode = this.getNodeById(parentId)
+    const parentNode = this.getNodeById(parent.object, parent.id)
     if (!parentNode) {
       throw new Error("Parent node not found")
     }
@@ -141,7 +150,7 @@ export class NotionObjectTree {
             id,
             object: objectType,
             children: [],
-            parent: parentId,
+            parent: parent.id,
             type: object.type,
             has_children: object.has_children,
           }
@@ -149,69 +158,62 @@ export class NotionObjectTree {
             id,
             object: objectType,
             children: [],
-            parent: parentId,
+            parent: parent.id,
           }
     parentNode.children.push(newNode)
     // Add to mapping
-    this.idToNodeMap.set(id, newNode)
+    this.idToNodeMap[objectType].set(id, newNode)
   }
 
-  getParentId(id: string): string | null {
-    const node = this.getNodeById(id)
+  getParentId(
+    objectType: "page" | "database" | "block",
+    id: string
+  ): string | null {
+    const node = this.getNodeById(objectType, id)
     if (!node) return null
     return node.parent
   }
 
   getObject(
+    objectType: "page" | "database" | "block",
     id: string
-  ):
-    | PageObjectResponse
-    | DatabaseObjectResponse
-    | BlockObjectResponse
-    | undefined {
-    const node = this.getNodeById(id)
-    if (!node) return undefined
-    return this.data[node.object][id]
+  ): PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse {
+    const objectData = this.data[objectType][id]
+    if (!objectData) {
+      throw new Error(
+        `Object response not found for id: ${id} and type: ${objectType}`
+      )
+    }
+    return objectData
   }
 
-  removeObject(id: string) {
-    const node = this.getNodeById(id)
+  removeObject(objectType: "page" | "database" | "block", id: string) {
+    const node = this.getNodeById(objectType, id)
     if (!node) return
     // First let children remove themselves, and then remove up to the start node
     for (const child of node.children) {
-      this.removeObject(child.id)
+      this.removeObject(objectType, child.id)
     }
     // Delete from data
+    const parentRaw = { ...this.data[node.object][id].parent }
     delete this.data[node.object][id]
     // Delete from tree
-    const parentId = node.parent
-    if (parentId) {
-      const parentNode = this.getNodeById(parentId)
+    const parent = simplifyParentObject(parentRaw)
+    if (parent) {
+      const parentNode = this.getNodeById(parent.object, parent.id)
       if (!parentNode) return
       parentNode.children = parentNode.children.filter(
         (child) => child.id !== id
       )
     }
     // Delete from mapping
-    this.idToNodeMap.delete(id)
+    this.idToNodeMap[objectType].delete(id)
   }
-}
 
-export function getParentId(
-  parent:
-    | PageObjectResponse["parent"]
-    | DatabaseObjectResponse["parent"]
-    | BlockObjectResponse["parent"]
-) {
-  if (parent.type === "workspace") {
-    return null
-  } else if (parent.type === "page_id") {
-    return parent.page_id
-  } else if (parent.type === "database_id") {
-    return parent.database_id
-  } else if (parent.type === "block_id") {
-    return parent.block_id
-  } else {
-    throw new Error(`Unknown parent type: ${parent}`)
+  private getNodeById(
+    objectType: "page" | "database" | "block",
+    id: string
+  ): NotionObjectTreeNode | undefined {
+    return this.idToNodeMap[objectType].get(id)
   }
 }

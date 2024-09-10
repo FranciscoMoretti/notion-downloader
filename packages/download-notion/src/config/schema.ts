@@ -10,13 +10,22 @@ export const conversionSchema = z.object({
   statusPropertyName: z.string().default("Status"),
   statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
-  outputPaths: z.object({
-    markdown: z.string().default("./docs"),
-    images: z.string().default(""),
-  }),
-  markdownPrefixes: z.object({
-    images: z.string().default(""),
-  }),
+  outputPaths: z
+    .object({
+      markdown: z.string().default("./docs"),
+      images: z.string().default(""),
+    })
+    .default({
+      markdown: "./docs",
+      images: "",
+    }),
+  markdownPrefixes: z
+    .object({
+      images: z.string().default(""),
+    })
+    .default({
+      images: "",
+    }),
   layoutStrategy: z
     .enum(["HierarchicalNamedLayoutStrategy", "FlatLayoutStrategy"])
     .default("HierarchicalNamedLayoutStrategy"),

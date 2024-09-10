@@ -14,7 +14,6 @@ export {
 
 export { cacheOptionsSchema } from "./schema"
 export {
-  idFromIdWithType,
   idTypeToObjectType,
   objectTreeToObjectIds,
   IdWithType,

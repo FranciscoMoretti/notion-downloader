@@ -33,7 +33,7 @@ export function filterTree(
       verbose(
         `Skipping [${objectResponse.object}] (${objectResponse.id}) because parent has been filtered`
       )
-      tree.removeObject(objectResponse.id)
+      tree.removeObject(objectResponse.object, objectResponse.id)
       return { shouldRemove: true }
     }
 
@@ -51,7 +51,7 @@ export function filterTree(
         )}`}`
       )
 
-      tree.removeObject(notionObject.id)
+      tree.removeObject(objectResponse.object, objectResponse.id)
       return { shouldRemove: true }
     }
     return { shouldRemove: false }

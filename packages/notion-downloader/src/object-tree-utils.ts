@@ -9,6 +9,7 @@ export type IdWithType =
   | { database_id: string; type: "database_id" }
   | { block_id: string; type: "block_id" }
 
+// TODO: Plan objects should be divided by object type (page, database, block). Ids can be repeated across object types
 export function objectTreeToPlainObjects(
   objectTree: NotionObjectTreeNode
 ): NotionObjectPlainList {
@@ -26,30 +27,6 @@ export function objectTreeToPlainObjects(
   }
   recurse(objectTree)
   return nodes
-}
-
-export function plainObjectsToObjectsTree(
-  plainObjects: NotionObjectPlainList
-): NotionObjectTreeNode {
-  const rootObject = plainObjects.find((obj) => obj.parent === null)
-  if (!rootObject) {
-    throw new Error("Root object not found")
-  }
-  const plainObjectsMap = new Map(plainObjects.map((obj) => [obj.id, obj]))
-  function plainObjectsToObjectsTreeRecurse(id: string): NotionObjectTreeNode {
-    const plainObject = plainObjectsMap.get(id)
-    if (!plainObject) {
-      throw new Error(`Plain object not found: ${id}`)
-    }
-    const children = plainObject.children.map((childId) =>
-      plainObjectsToObjectsTreeRecurse(childId)
-    )
-    return {
-      ...plainObject,
-      children,
-    }
-  }
-  return plainObjectsToObjectsTreeRecurse(rootObject.id)
 }
 
 export function objectTreeToObjectIds(

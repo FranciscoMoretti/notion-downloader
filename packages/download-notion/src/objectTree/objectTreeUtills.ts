@@ -56,23 +56,57 @@ export async function getAllObjectsInObjectsTree(
     if (!object) {
       throw new Error(`Object not found: ${idWithType}`)
     }
-    if (object.object === "page") {
-      objects.page[object.id] = object
-    } else if (object.object === "database") {
-      objects.database[object.id] = object
-    } else if (object.object === "block") {
-      objects.block[object.id] = object
+    addObjectToData(object, objects)
+
+    // For blocks that contain a child page or child database, their responses have to be added as well
+    if (
+      object.object === "block" &&
+      (object.type === "child_page" || object.type === "child_database")
+    ) {
+      const idType = object.type === "child_page" ? "page_id" : "database_id"
+      const idWithType: IdWithType =
+        idType === "page_id"
+          ? {
+              type: idType,
+              page_id: object.id,
+            }
+          : {
+              type: "database_id",
+              database_id: object.id,
+            }
+      const adjacentObject = await getObjectTypeFromClient(client, idWithType)
+      if (!adjacentObject) {
+        throw new Error(`Child page not found: ${object.id}`)
+      }
+      addObjectToData(adjacentObject, objects)
     }
   }
   return objects
 }
 
-export function getPageAncestorId(id: string, objectTree: NotionObjectTree) {
-  const parentId = objectTree.getParentId(id)
+function addObjectToData(
+  object: PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse,
+  objects: NotionObjectsData
+) {
+  if (object.object === "page") {
+    objects.page[object.id] = object
+  } else if (object.object === "database") {
+    objects.database[object.id] = object
+  } else if (object.object === "block") {
+    objects.block[object.id] = object
+  }
+}
+
+export function getPageAncestorId(
+  objectType: "page" | "database" | "block",
+  id: string,
+  objectTree: NotionObjectTree
+) {
+  const parentId = objectTree.getParentId(objectType, id)
   if (!parentId) {
     return null
   }
-  const parent = objectTree.getObject(parentId)
+  const parent = objectTree.getObject(objectType, parentId)
   if (!parent) {
     return null
   }
@@ -81,9 +115,9 @@ export function getPageAncestorId(id: string, objectTree: NotionObjectTree) {
     return parent.id
   }
   if (parent.object === "database") {
-    return getPageAncestorId(parent.id, objectTree)
+    return getPageAncestorId("database", parent.id, objectTree)
   }
   if (parent.object === "block") {
-    return getPageAncestorId(parent.id, objectTree)
+    return getPageAncestorId("block", parent.id, objectTree)
   }
 }
