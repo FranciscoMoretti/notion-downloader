@@ -135,7 +135,10 @@ async function fetchTreeRecursively(
         id: childObject.id,
         object: childObject.object,
         children: [],
-        parent: objectNode.id,
+        parent: {
+          id: objectNode.id,
+          object: objectNode.object,
+        },
       }
 
       objectNode.children.push(newNode)
@@ -192,7 +195,10 @@ async function fetchTreeRecursively(
         children: [],
         has_children: childBlock.has_children,
         type: childBlock.type,
-        parent: objectNode.id,
+        parent: {
+          id: objectNode.id,
+          object: objectNode.object,
+        },
       }
       objectNode.children.push(newNode)
       if (

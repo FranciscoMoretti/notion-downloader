@@ -10,7 +10,7 @@ import { AssetType } from "../files/FilesMap"
 import { NotionFile } from "./NotionFile"
 import { iNotionAssetObject } from "./objectTypes"
 
-type NotionFileObjectResponses =
+export type NotionFileObjectResponses =
   | ImageBlockObjectResponse
   | FileBlockObjectResponse
   | AudioBlockObjectResponse

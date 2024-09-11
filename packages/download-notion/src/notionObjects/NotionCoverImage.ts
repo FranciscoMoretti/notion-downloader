@@ -15,7 +15,7 @@ export type DatabaseObjectResponseWithCover = DatabaseObjectResponse & {
   cover: NonNullable<DatabaseObjectResponse["cover"]>
 }
 
-type NotionCoverImageResponses =
+export type NotionCoverImageResponses =
   | PageObjectResponseWithCover
   | DatabaseObjectResponseWithCover
 

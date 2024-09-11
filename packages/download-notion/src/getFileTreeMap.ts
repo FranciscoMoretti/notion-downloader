@@ -3,8 +3,14 @@ import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 import { FilesManager, copyRecord } from "./files/FilesManager"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { getNotionObject } from "./notionObjects/NotionObjectUtils"
-import { NotionImageLike } from "./notionObjects/objectTypes"
 import {
+  NotionImageLike,
+  iNotionAssetObject,
+} from "./notionObjects/objectTypes"
+import {
+  NotionAssetObjectResponses,
+  getAssetObjectFromObjectResponse,
+  getAssetTypeFromObjectResponse,
   getImageLikeObject,
   hasImageLikeObject,
 } from "./notionObjects/objectutils"
@@ -60,24 +66,27 @@ export function getFileTreeMap(
       }
     }
 
-    if (hasImageLikeObject(objectResponse)) {
-      if (existingFilesManager.exists("image", objectResponse.id)) {
+    const assetType = getAssetTypeFromObjectResponse(objectResponse)
+    if (assetType) {
+      if (existingFilesManager.exists(assetType, objectResponse.id)) {
         copyRecord(
           existingFilesManager,
           newFilesManager,
-          "image",
+          assetType,
           objectResponse.id
         )
       } else {
-        const image = getImageLikeObject(objectResponse)
-        setFilebufferInImage(filesInMemory, image)
+        const asset = getAssetObjectFromObjectResponse(
+          objectResponse as NotionAssetObjectResponses
+        )
+        setFilebufferInImage(filesInMemory, asset)
         const imageFilename = imageLayoutStrategy.getPathForObject(
           parentContext.path,
-          image
+          asset
         )
-        newFilesManager.set("base", "image", image.id, {
+        newFilesManager.set("base", assetType, asset.id, {
           path: imageFilename,
-          lastEditedTime: image.lastEditedTime,
+          lastEditedTime: asset.lastEditedTime,
         })
       }
     }
@@ -95,11 +104,11 @@ export function getFileTreeMap(
 
 function setFilebufferInImage(
   filesInMemory: FileBuffersMemory,
-  image: NotionImageLike
+  asset: iNotionAssetObject
 ) {
-  const fileBuffer = filesInMemory[image.id]
+  const fileBuffer = filesInMemory[asset.id]
   if (!fileBuffer) {
-    throw new Error(`File buffer not found for asset ${image.id}`)
+    throw new Error(`File buffer not found for asset ${asset.id}`)
   }
-  image.setFileBuffer(fileBuffer)
+  asset.setFileBuffer(fileBuffer)
 }

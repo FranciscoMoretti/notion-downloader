@@ -10,5 +10,5 @@ export interface iNotionAssetObject extends NotionFile, NotionObject {
   assetType: AssetType
 }
 export type NotionImageLike = NotionBlockImage | NotionCoverImage
-export type NotionFileLikeObjects = NotionPage | NotionImageLike
+export type NotionFileLikeObjects = NotionPage | NotionImageLike | NotionFile
 export type NotionFolderLikeObjects = NotionPage | NotionDatabase

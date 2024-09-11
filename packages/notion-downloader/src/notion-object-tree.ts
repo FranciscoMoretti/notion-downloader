@@ -3,7 +3,7 @@ import {
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import { simplifyParentObject } from "notion-cache-client"
+import { SimpleParent, simplifyParentObject } from "notion-cache-client"
 
 export type NotionObjectResponse =
   | PageObjectResponse
@@ -28,7 +28,7 @@ export type BlockObjectTreeNode = {
   type: string
   has_children: boolean
   children: Array<NotionObjectTreeNode>
-  parent: string | null
+  parent: SimpleParent | null
 }
 
 // TODO: Mix this with ObjectsData in a class to have a tree with data. There should be a mapping from id to treeNode
@@ -37,8 +37,7 @@ export type NotionObjectTreeNode =
       id: string
       object: "database" | "page"
       children: Array<NotionObjectTreeNode>
-      // TODO: Deprecate the parent string. It's not enough to id the parent because the type is needed too
-      parent: string | null
+      parent: SimpleParent | null
     }
   | BlockObjectTreeNode
 
@@ -47,8 +46,7 @@ export type NotionObjectPlain =
       id: string
       object: "database" | "page"
       children: Array<string>
-      // TODO: Deprecate the parent string. It's not enough to id the parent because the type is needed too
-      parent: string | null
+      parent: SimpleParent | null
     }
   | {
       id: string
@@ -56,7 +54,7 @@ export type NotionObjectPlain =
       type: string
       has_children: boolean
       children: Array<string>
-      parent: string | null
+      parent: SimpleParent | null
     }
 export type NotionObjectPlainList = NotionObjectPlain[]
 export type NotionObjectPlainMap = Record<string, NotionObjectPlain>
@@ -133,26 +131,29 @@ export class NotionObjectTree {
     }
   }
 
-  getParentId(
+  getParent(
     objectType: "page" | "database" | "block",
     id: string
-  ): string | null {
+  ): SimpleParent | null {
     const node = this.getNodeById(objectType, id)
     if (!node) return null
+    if (node.id === this.tree.id) {
+      // Parent higher than root
+      return null
+    }
     return node.parent
   }
 
   getObject(
     objectType: "page" | "database" | "block",
     id: string
-  ): PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse {
+  ):
+    | PageObjectResponse
+    | DatabaseObjectResponse
+    | BlockObjectResponse
+    | undefined {
     const objectData = this.data[objectType][id]
-    if (!objectData) {
-      throw new Error(
-        `Object response not found for id: ${id} and type: ${objectType}`
-      )
-    }
-    return objectData
+    return objectData || undefined
   }
 
   removeObject(objectType: "page" | "database" | "block", id: string) {

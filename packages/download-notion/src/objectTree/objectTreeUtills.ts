@@ -102,22 +102,22 @@ export function getPageAncestorId(
   id: string,
   objectTree: NotionObjectTree
 ) {
-  const parentId = objectTree.getParentId(objectType, id)
-  if (!parentId) {
-    return null
-  }
-  const parent = objectTree.getObject(objectType, parentId)
+  const parent = objectTree.getParent(objectType, id)
   if (!parent) {
     return null
   }
+  const parentObject = objectTree.getObject(parent.object, parent.id)
+  if (!parentObject) {
+    return null
+  }
 
-  if (parent.object === "page") {
-    return parent.id
+  if (parentObject.object === "page") {
+    return parentObject.id
   }
-  if (parent.object === "database") {
-    return getPageAncestorId("database", parent.id, objectTree)
+  if (parentObject.object === "database") {
+    return getPageAncestorId("database", parentObject.id, objectTree)
   }
-  if (parent.object === "block") {
-    return getPageAncestorId("block", parent.id, objectTree)
+  if (parentObject.object === "block") {
+    return getPageAncestorId("block", parentObject.id, objectTree)
   }
 }

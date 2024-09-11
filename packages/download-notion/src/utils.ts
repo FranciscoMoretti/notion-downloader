@@ -46,7 +46,7 @@ function getAncestorPageOrDatabaseFilepath(
   }
 
   // It's a block. Ancestor is page
-  const ancestorPageId = getPageAncestorId(image.id, objectsTree)
+  const ancestorPageId = getPageAncestorId("block", image.id, objectsTree)
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
   }

@@ -27,15 +27,17 @@ export function convertToUUID(str: string): string {
   )}-${str.slice(16, 20)}-${str.slice(20)}`
 }
 
+export type SimpleParent = {
+  object: "page" | "database" | "block"
+  id: string
+}
+
 export function simplifyParentObject(
   parent:
     | PageObjectResponse["parent"]
     | DatabaseObjectResponse["parent"]
     | BlockObjectResponse["parent"]
-): {
-  object: "page" | "database" | "block"
-  id: string
-} | null {
+): SimpleParent | null {
   if (parent.type === "workspace") {
     return null
   } else if (parent.type === "page_id") {
