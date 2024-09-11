@@ -21,9 +21,7 @@ import {
 import { getBlockChildren } from "./getBlockChildren"
 import { getFileTreeMap } from "./getFileTreeMap"
 import { endGroup, error, group, info } from "./log"
-import { getImageNamingStrategy } from "./namingStrategy/getNamingStrategy"
 import { NotionPage } from "./notionObjects/NotionPage"
-import { applyToAllImages } from "./objectTree/applyToImages"
 import { filterTree } from "./objectTree/filterTree"
 import { getAllObjectsInObjectsTree } from "./objectTree/objectTreeUtills"
 import { convertInternalUrl } from "./plugins/internalLinks"
@@ -35,10 +33,7 @@ import {
 } from "./processImages"
 import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
-import {
-  getAncestorPageOrDatabaseFilename,
-  sanitizeMarkdownOutputPath,
-} from "./utils"
+import { sanitizeMarkdownOutputPath } from "./utils"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {
