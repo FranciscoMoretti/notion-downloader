@@ -30,7 +30,10 @@ export async function saveObjectToJson(
   filePath: string
 ): Promise<void> {
   await fs.ensureDir(path.dirname(filePath))
-  await fs.writeJson(filePath, data, "utf8")
+  await fs.writeJson(filePath, data, {
+    encoding: "utf8",
+    spaces: 2,
+  })
 }
 
 export async function saveDataToFile(

@@ -52,9 +52,6 @@ export const counts: OutputCounts = {
   error_because_no_slug: 0,
 }
 
-const CACHE_FOLDER = ".downloader"
-const FILES_MAP_FILE_PATH = CACHE_FOLDER + "/" + "files_map.json"
-
 export async function notionContinuosPull(options: NotionPullOptions) {
   // Wait forever
   while (true) {
@@ -70,6 +67,17 @@ export async function notionContinuosPull(options: NotionPullOptions) {
   }
 }
 
+function getCacheDirectories(options: NotionPullOptions) {
+  const cacheDir = getCachePath(options)
+  return {
+    cacheDir,
+    imagesCacheDir: cacheDir + "images/",
+    objectTreeCachePath: cacheDir + "object_tree.json",
+    filesMapCachePath: cacheDir + "files_map.json",
+    imagesCacheFilesMapPath: cacheDir + "images/images_filesmap.json",
+  }
+}
+
 export async function notionPull(options: NotionPullOptions): Promise<void> {
   // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   const optionsForLogging = getOptionsForLogging(options)
@@ -77,7 +85,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   // TODO: This should be moved up to the pull command that already loads configs
   const rootUUID = convertToUUID(options.rootId)
 
-  const cacheDir = getCacheDir(options)
+  const {
+    cacheDir,
+    imagesCacheDir,
+    objectTreeCachePath,
+    filesMapCachePath,
+    imagesCacheFilesMapPath,
+  } = getCacheDirectories(options)
   const cachedNotionClient = createCachedNotionClient(
     options.notionToken,
     cacheDir
@@ -90,7 +104,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     options,
     objectsDirectories,
     markdownPrefixes,
-    cachedNotionClient
+    cachedNotionClient,
+    filesMapCachePath
   )
 
   // TODO: Consider if this is necesary. All the paths seem to create their own directories.
@@ -110,12 +125,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     rootUUID,
     rootObjectType,
     options,
-    cacheDir
+    objectTreeCachePath
   )
 
   const imagesCacheFilesMap = await handleImageCaching(
     options,
-    cacheDir,
+    imagesCacheDir,
+    imagesCacheFilesMapPath,
     objectsTree
   )
 
@@ -203,9 +219,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   group("Stage 6: clean up old files & images...")
   await cleanup(existingFilesManager, newFilesManager)
 
-  const filesMapFilePath =
-    options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  await saveDataToFile(newFilesManager.toJSON(), filesMapFilePath)
+  await saveDataToFile(newFilesManager.toJSON(), filesMapCachePath)
   endGroup()
 }
 
@@ -216,7 +230,8 @@ function getOptionsForLogging(options: NotionPullOptions) {
   return optionsForLogging
 }
 
-function getCacheDir(options: NotionPullOptions): string {
+function getCachePath(options: NotionPullOptions): string {
+  const CACHE_FOLDER = ".downloader"
   return options.cwd.replace(/\/+$/, "") + `/${CACHE_FOLDER}/`
 }
 
@@ -253,11 +268,10 @@ async function setupFilesManagers(
   options: NotionPullOptions,
   objectsDirectories: ObjectPrefixDict,
   markdownPrefixes: ObjectPrefixDict,
-  cachedNotionClient: NotionCacheClient
+  cachedNotionClient: NotionCacheClient,
+  filesMapCachePath: string
 ) {
-  const filesMapFilePath =
-    options.cwd.replace(/\/+$/, "") + "/" + FILES_MAP_FILE_PATH
-  const previousFilesManager = loadFilesManagerFile(filesMapFilePath)
+  const previousFilesManager = loadFilesManagerFile(filesMapCachePath)
 
   if (previousFilesManager) {
     // TODO Create a directories change function
@@ -304,7 +318,7 @@ async function downloadAndProcessObjectTree(
   rootUUID: string,
   rootObjectType: "page" | "database",
   options: NotionPullOptions,
-  cacheDir: string
+  objectTreeCachePath: string
 ) {
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
   const objectsTreeRootNode = await downloadObjectTree({
@@ -319,7 +333,7 @@ async function downloadAndProcessObjectTree(
     cachingOptions: options.cache,
   })
 
-  await saveObjectToJson(objectsTreeRootNode, cacheDir + "object_tree.json")
+  await saveObjectToJson(objectsTreeRootNode, objectTreeCachePath)
 
   const objectsData = await getAllObjectsInObjectsTree(
     objectsTreeRootNode,
@@ -330,21 +344,17 @@ async function downloadAndProcessObjectTree(
 
 async function handleImageCaching(
   options: NotionPullOptions,
-  cacheDir: string,
+  imagesCacheDir: string,
+  imagesCacheFilesMapPath: string,
   objectsTree: NotionObjectTree
 ) {
   if (!options.cache.cacheImages) return undefined
 
-  const imagesCacheDir = cacheDir + "images/"
   const imagesCacheFilesMap =
-    loadImagesCacheFilesMap(imagesCacheDir + "images_filesmap.json") ||
-    new FilesMap()
+    loadImagesCacheFilesMap(imagesCacheFilesMapPath) || new FilesMap()
 
   await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
-  await saveDataToFile(
-    imagesCacheFilesMap.toJSON(),
-    imagesCacheDir + "images_filesmap.json"
-  )
+  await saveDataToFile(imagesCacheFilesMap.toJSON(), imagesCacheFilesMapPath)
 
   return imagesCacheFilesMap
 }
