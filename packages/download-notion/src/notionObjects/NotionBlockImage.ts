@@ -5,7 +5,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 
 import { NotionFile } from "./NotionFile"
-import { NotionObject } from "./NotionObject"
+import { iNotionAssetObject } from "./objectTypes"
 
 export type PageObjectResponseWithCover = PageObjectResponse & {
   cover: NonNullable<PageObjectResponse["cover"]>
@@ -17,8 +17,9 @@ export type DatabaseObjectResponseWithCover = DatabaseObjectResponse & {
 
 type NotionBlockImageResponses = ImageBlockObjectResponse
 
-export class NotionBlockImage extends NotionFile implements NotionObject {
+export class NotionBlockImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionBlockImageResponses
+  public assetType: "image" = "image"
 
   constructor(imageResponse: NotionBlockImageResponses) {
     super(imageResponse.image)

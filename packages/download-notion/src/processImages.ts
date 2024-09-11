@@ -2,22 +2,26 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
 import { FilesMap } from "./files/FilesMap"
+import { NotionFile } from "./notionObjects/NotionFile"
 import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
-import { NotionImageLike } from "./notionObjects/objectTypes"
-import { applyToAllImages } from "./objectTree/applyToImages"
+import {
+  NotionImageLike,
+  iNotionAssetObject,
+} from "./notionObjects/objectTypes"
+import { applyToAllAssets } from "./objectTree/applyToImages"
 import { FileBuffersMemory } from "./types"
 
 export async function readOrDownloadNewImages(
   objectsTree: NotionObjectTree,
-  imagesCacheFilesMap: FilesMap | undefined,
+  assetsCacheFilesMap: FilesMap | undefined,
   existingFilesManager: FilesManager,
   filesInMemory: FileBuffersMemory
 ) {
-  await applyToAllImages({
+  await applyToAllAssets({
     objectsTree,
-    applyToImage: async (image) => {
+    applyToAsset: async (image) => {
       if (existingFilesManager.isObjectNew(image)) {
-        await readOrDownloadImage(image, imagesCacheFilesMap, filesInMemory)
+        await readOrDownloadImage(image, assetsCacheFilesMap, filesInMemory)
       }
     },
   })
@@ -27,10 +31,10 @@ export async function updateImageFilePathsForMarkdown(
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
 ) {
-  await applyToAllImages({
+  await applyToAllAssets({
     objectsTree,
-    applyToImage: async (image) => {
-      await updateImageForMarkdown(image, newFilesManager)
+    applyToAsset: async (asset) => {
+      await updateImageForMarkdown(asset, newFilesManager)
     },
   })
 }
@@ -41,23 +45,23 @@ export async function saveNewAssets(
   newFilesManager: FilesManager,
   filesInMemory: FileBuffersMemory
 ) {
-  await applyToAllImages({
+  await applyToAllAssets({
     objectsTree,
-    applyToImage: async (image) => {
-      if (existingFilesManager.isObjectNew(image)) {
-        await saveImage(image, newFilesManager, filesInMemory)
+    applyToAsset: async (asset) => {
+      if (existingFilesManager.isObjectNew(asset)) {
+        await saveImage(asset, newFilesManager, filesInMemory)
       }
     },
   })
 }
 
 export async function readOrDownloadImage(
-  image: NotionImageLike,
-  imagesCacheFilesMap: FilesMap | undefined,
+  image: iNotionAssetObject,
+  assetsCacheFilesMap: FilesMap | undefined,
   filesInMemory: FileBuffersMemory
 ) {
-  if (imagesCacheFilesMap) {
-    const cachedImage = imagesCacheFilesMap.get("image", image.id)
+  if (assetsCacheFilesMap) {
+    const cachedImage = assetsCacheFilesMap.get("image", image.id)
     filesInMemory[image.id] = await readFile(cachedImage.path, "file")
   } else {
     filesInMemory[image.id] = await readFile(image.url, "url")
@@ -65,7 +69,7 @@ export async function readOrDownloadImage(
 }
 
 export async function updateImageForMarkdown(
-  image: NotionImageLike,
+  image: iNotionAssetObject,
   newFilesManager: FilesManager
 ) {
   const markdownPath = newFilesManager.get("markdown", "image", image.id).path
@@ -73,20 +77,20 @@ export async function updateImageForMarkdown(
 }
 
 export async function saveImage(
-  image: NotionImageLike,
+  asset: iNotionAssetObject,
   newFilesManager: FilesManager,
   filesInMemory: FileBuffersMemory
 ) {
   const imageFileOutputPath = newFilesManager.get(
     "output",
     "image",
-    image.id
+    asset.id
   ).path
 
   // TODO: This should be handled by a NotionFile class
-  const fileBuffer = filesInMemory[image.id]
+  const fileBuffer = filesInMemory[asset.id]
   if (!fileBuffer) {
-    throw new Error(`File buffer not found for ${image.id}`)
+    throw new Error(`File buffer not found for ${asset.id}`)
   }
   await saveFileBuffer(fileBuffer, imageFileOutputPath)
 }

@@ -14,7 +14,7 @@ export function loadFilesManagerFile(
   return undefined
 }
 
-export function loadImagesCacheFilesMap(
+export function loadassetsCacheFilesMap(
   filePath: string
 ): FilesMap | undefined {
   if (fs.existsSync(filePath)) {

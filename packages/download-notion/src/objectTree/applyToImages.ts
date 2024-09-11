@@ -1,23 +1,29 @@
 import { NotionObjectTree } from "notion-downloader"
 
+import { AssetType } from "../files/FilesMap"
 import { NotionBlockImage } from "../notionObjects/NotionBlockImage"
 import { NotionCoverImage } from "../notionObjects/NotionCoverImage"
-import { NotionImageLike } from "../notionObjects/objectTypes"
+import {
+  NotionImageLike,
+  iNotionAssetObject,
+} from "../notionObjects/objectTypes"
 import { databaseHasCover, pageHasCover } from "../notionObjects/objectutils"
 
-export async function applyToAllImages({
+export async function applyToAllAssets({
   objectsTree,
-  applyToImage,
+  applyToAsset,
+  assetTypes = ["image"],
 }: {
   objectsTree: NotionObjectTree
-  applyToImage: (image: NotionImageLike) => Promise<void>
+  applyToAsset: (asset: iNotionAssetObject) => Promise<void>
+  assetTypes?: AssetType[]
 }) {
   const promises: Promise<void>[] = []
 
   promises.push(
     ...objectsTree.getBlocks("image").map((block) => {
       const image = new NotionBlockImage(block)
-      return applyToImage(image)
+      return applyToAsset(image)
     })
   )
 
@@ -27,7 +33,7 @@ export async function applyToAllImages({
       .filter(pageHasCover)
       .map((pageResponse) => {
         const image = new NotionCoverImage(pageResponse)
-        return applyToImage(image)
+        return applyToAsset(image)
       })
   )
 
@@ -37,7 +43,7 @@ export async function applyToAllImages({
       .filter(databaseHasCover)
       .map((databaseResponse) => {
         const image = new NotionCoverImage(databaseResponse)
-        return applyToImage(image)
+        return applyToAsset(image)
       })
   )
 

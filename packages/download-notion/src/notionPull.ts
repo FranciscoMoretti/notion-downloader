@@ -9,12 +9,12 @@ import { NotionToMarkdown } from "notion-to-md"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { createStrategies } from "./createStrategies"
-import { fetchImages as fetchAssets } from "./fetchImages"
+import { fetchAssets } from "./fetchAssets"
 import { FilesCleaner, cleanup } from "./files/FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
 import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
-  loadImagesCacheFilesMap as loadAssetsCacheFilesMap,
+  loadassetsCacheFilesMap as loadAssetsCacheFilesMap,
   loadFilesManagerFile,
   saveDataToFile,
   saveObjectToJson,
@@ -129,7 +129,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectTreeCachePath
   )
 
-  const imagesCacheFilesMap = await cacheNewAssets(
+  const assetsCacheFilesMap = await cacheNewAssets(
     options,
     assetsCacheDir,
     assetsCacheFilesMapPath,
@@ -155,7 +155,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const filesInMemory: FileBuffersMemory = {}
   await readOrDownloadNewImages(
     objectsTree,
-    imagesCacheFilesMap,
+    assetsCacheFilesMap,
     existingFilesManager,
     filesInMemory
   )
@@ -375,7 +375,7 @@ async function cacheNewAssets(
   const assetsCacheFilesMap =
     loadAssetsCacheFilesMap(assetsCacheFilesMapPath) || new FilesMap()
 
-  await fetchAssets(objectsTree, "image", assetsCacheDir, assetsCacheFilesMap)
+  await fetchAssets(objectsTree, ["image"], assetsCacheDir, assetsCacheFilesMap)
   await saveDataToFile(assetsCacheFilesMap.toJSON(), assetsCacheFilesMapPath)
 
   return assetsCacheFilesMap

@@ -5,6 +5,7 @@ import {
 
 import { NotionFile } from "./NotionFile"
 import { NotionObject } from "./NotionObject"
+import { iNotionAssetObject } from "./objectTypes"
 
 export type PageObjectResponseWithCover = PageObjectResponse & {
   cover: NonNullable<PageObjectResponse["cover"]>
@@ -18,9 +19,9 @@ type NotionCoverImageResponses =
   | PageObjectResponseWithCover
   | DatabaseObjectResponseWithCover
 
-export class NotionCoverImage extends NotionFile implements NotionObject {
+export class NotionCoverImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionCoverImageResponses
-
+  public assetType: "image" = "image"
   constructor(imageResponse: NotionCoverImageResponses) {
     super(imageResponse.cover)
     this.metadata = imageResponse
