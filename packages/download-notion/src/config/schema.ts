@@ -10,21 +10,38 @@ export const conversionSchema = z.object({
   statusPropertyName: z.string().default("Status"),
   statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
+  // TODO: Simplify this logics for different assets types
   outputPaths: z
     .object({
       markdown: z.string().default("./docs"),
       images: z.string().default(""),
+      files: z.string().default(""),
+      videos: z.string().default(""),
+      pdfs: z.string().default(""),
+      audios: z.string().default(""),
     })
     .default({
       markdown: "./docs",
       images: "",
+      files: "",
+      videos: "",
+      pdfs: "",
+      audios: "",
     }),
   markdownPrefixes: z
     .object({
       images: z.string().default(""),
+      files: z.string().default(""),
+      videos: z.string().default(""),
+      pdfs: z.string().default(""),
+      audios: z.string().default(""),
     })
     .default({
       images: "",
+      files: "",
+      videos: "",
+      pdfs: "",
+      audios: "",
     }),
   layoutStrategy: z
     .enum(["HierarchicalNamedLayoutStrategy", "FlatLayoutStrategy"])

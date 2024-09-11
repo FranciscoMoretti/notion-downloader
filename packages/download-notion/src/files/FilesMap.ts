@@ -3,7 +3,8 @@ export type FileRecord = {
   lastEditedTime: string
 }
 
-export type FileRecordType = "page" | "database" | "image"
+export type AssetType = "image" | "file" | "video" | "pdf" | "audio"
+export type FileRecordType = "page" | "database" | AssetType
 
 export type FilesMapData = Record<FileRecordType, Record<string, FileRecord>>
 
@@ -12,6 +13,10 @@ export class FilesMap {
     page: {},
     database: {},
     image: {},
+    file: {},
+    video: {},
+    pdf: {},
+    audio: {},
   }
 
   exists(type: FileRecordType, id: string): boolean {

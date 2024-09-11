@@ -1,3 +1,4 @@
+import path from "path"
 import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
@@ -8,13 +9,13 @@ import { NotionToMarkdown } from "notion-to-md"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { createStrategies } from "./createStrategies"
-import { fetchImages } from "./fetchImages"
+import { fetchImages as fetchAssets } from "./fetchImages"
 import { FilesCleaner, cleanup } from "./files/FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
 import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
+  loadImagesCacheFilesMap as loadAssetsCacheFilesMap,
   loadFilesManagerFile,
-  loadImagesCacheFilesMap,
   saveDataToFile,
   saveObjectToJson,
 } from "./files/saveLoadUtils"
@@ -71,10 +72,10 @@ function getCacheDirectories(options: NotionPullOptions) {
   const cacheDir = getCachePath(options)
   return {
     cacheDir,
-    imagesCacheDir: cacheDir + "images/",
+    assetsCacheDir: cacheDir,
     objectTreeCachePath: cacheDir + "object_tree.json",
-    filesMapCachePath: cacheDir + "files_map.json",
-    imagesCacheFilesMapPath: cacheDir + "images/images_filesmap.json",
+    filesMapCachePath: cacheDir + "output_filesmap.json",
+    assetsCacheFilesMapPath: cacheDir + "assets_cache_filesmap.json",
   }
 }
 
@@ -87,10 +88,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   const {
     cacheDir,
-    imagesCacheDir,
+    assetsCacheDir,
     objectTreeCachePath,
     filesMapCachePath,
-    imagesCacheFilesMapPath,
+    assetsCacheFilesMapPath,
   } = getCacheDirectories(options)
   const cachedNotionClient = createCachedNotionClient(
     options.notionToken,
@@ -128,10 +129,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectTreeCachePath
   )
 
-  const imagesCacheFilesMap = await handleImageCaching(
+  const imagesCacheFilesMap = await cacheNewAssets(
     options,
-    imagesCacheDir,
-    imagesCacheFilesMapPath,
+    assetsCacheDir,
+    assetsCacheFilesMapPath,
     objectsTree
   )
 
@@ -246,10 +247,15 @@ function createCachedNotionClient(
 }
 
 function createDirectoriesAndPrefixes(options: NotionPullOptions) {
+  // TODO: Simplify this logic
   const objectsDirectories: ObjectPrefixDict = {
     page: options.conversion.outputPaths.markdown,
     database: options.conversion.outputPaths.markdown,
     image: options.conversion.outputPaths.images,
+    file: options.conversion.outputPaths.files,
+    video: options.conversion.outputPaths.videos,
+    pdf: options.conversion.outputPaths.pdfs,
+    audio: options.conversion.outputPaths.audios,
   }
 
   const markdownPrefixes: ObjectPrefixDict = {
@@ -258,6 +264,22 @@ function createDirectoriesAndPrefixes(options: NotionPullOptions) {
     image:
       options.conversion.markdownPrefixes.images ||
       options.conversion.outputPaths.images ||
+      ".",
+    file:
+      options.conversion.markdownPrefixes.files ||
+      options.conversion.outputPaths.files ||
+      ".",
+    video:
+      options.conversion.markdownPrefixes.videos ||
+      options.conversion.outputPaths.videos ||
+      ".",
+    pdf:
+      options.conversion.markdownPrefixes.pdfs ||
+      options.conversion.outputPaths.pdfs ||
+      ".",
+    audio:
+      options.conversion.markdownPrefixes.audios ||
+      options.conversion.outputPaths.audios ||
       ".",
   }
 
@@ -288,7 +310,7 @@ async function setupFilesManagers(
       info("Output directories changed. Clearing the cache.")
       // Reset the cache since assets URLs could have changed (cover images, block images)
       // TODO: Consider moving the image/asset files instead of removing them and clearing the cache
-      if (!options.cache.cacheImages) {
+      if (!options.cache.cacheAssets) {
         cachedNotionClient.cache.clearCache()
       }
     }
@@ -342,21 +364,21 @@ async function downloadAndProcessObjectTree(
   return new NotionObjectTree(objectsTreeRootNode, objectsData)
 }
 
-async function handleImageCaching(
+async function cacheNewAssets(
   options: NotionPullOptions,
-  imagesCacheDir: string,
-  imagesCacheFilesMapPath: string,
+  assetsCacheDir: string,
+  assetsCacheFilesMapPath: string,
   objectsTree: NotionObjectTree
 ) {
-  if (!options.cache.cacheImages) return undefined
+  if (!options.cache.cacheAssets) return undefined
 
-  const imagesCacheFilesMap =
-    loadImagesCacheFilesMap(imagesCacheFilesMapPath) || new FilesMap()
+  const assetsCacheFilesMap =
+    loadAssetsCacheFilesMap(assetsCacheFilesMapPath) || new FilesMap()
 
-  await fetchImages(objectsTree, imagesCacheDir, imagesCacheFilesMap)
-  await saveDataToFile(imagesCacheFilesMap.toJSON(), imagesCacheFilesMapPath)
+  await fetchAssets(objectsTree, "image", assetsCacheDir, assetsCacheFilesMap)
+  await saveDataToFile(assetsCacheFilesMap.toJSON(), assetsCacheFilesMapPath)
 
-  return imagesCacheFilesMap
+  return assetsCacheFilesMap
 }
 
 function getPagesToOutput(

@@ -5,7 +5,7 @@ module.exports = {
   rootId: "2242dcdbbcab4526b2bec93e1c088557",
   cache: {
     cleanCache: true,
-    cacheImages: false,
+    cacheAssets: false,
   },
   conversion: {
     skip: true,
