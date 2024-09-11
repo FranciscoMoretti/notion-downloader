@@ -1,4 +1,5 @@
 import { NotionObject } from "../notionObjects/NotionObject"
+import { iNotionAssetObject } from "../notionObjects/objectTypes"
 import { FileRecord, FileRecordType, FilesMap, FilesMapData } from "./FilesMap"
 import {
   recordMapWithPrefix,
@@ -29,23 +30,23 @@ export class FilesManager {
       page: markdownPrefixes?.page || "",
       database: markdownPrefixes?.database || "",
       image: markdownPrefixes?.image || "",
+      file: markdownPrefixes?.file || "",
+      pdf: markdownPrefixes?.pdf || "",
+      audio: markdownPrefixes?.audio || "",
+      video: markdownPrefixes?.video || "",
     }
   }
 
-  public isObjectNew(notionObject: NotionObject): boolean {
-    if (
-      !this.baseFilesMap.exists(
-        // TODO: Make this FilesMap structure more generic when we want to store more than images
-        notionObject.object == "block" ? "image" : notionObject.object,
-        notionObject.id
-      )
-    ) {
+  public isObjectNew(notionObject: iNotionAssetObject | NotionObject): boolean {
+    const recordType =
+      "assetType" in notionObject ? notionObject.assetType : notionObject.object
+    if (recordType === "block") {
+      throw new Error("Block records that are not assetsare not supported")
+    }
+    if (!this.baseFilesMap.exists(recordType, notionObject.id)) {
       return true
     }
-    const existingRecord = this.baseFilesMap.get(
-      notionObject.object == "block" ? "image" : notionObject.object,
-      notionObject.id
-    )
+    const existingRecord = this.baseFilesMap.get(recordType, notionObject.id)
     if (
       new Date(notionObject.lastEditedTime).getTime() >
       new Date(existingRecord.lastEditedTime).getTime()

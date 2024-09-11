@@ -13,7 +13,7 @@ import { databaseHasCover, pageHasCover } from "../notionObjects/objectutils"
 export async function applyToAllAssets({
   objectsTree,
   applyToAsset,
-  assetTypes = ["image"],
+  assetTypes = ["image", "video", "audio", "file", "pdf"],
 }: {
   objectsTree: NotionObjectTree
   applyToAsset: (asset: iNotionAssetObject) => Promise<void>
@@ -50,10 +50,10 @@ export async function applyToAllAssets({
     )
   }
 
-  // TODO: Create a for loop to go over all asset types (except image)
-  if (assetTypes.includes("file")) {
+  const assetsExceptImage = assetTypes.filter((type) => type !== "image")
+  for (const assetType of assetsExceptImage) {
     promises.push(
-      ...objectsTree.getBlocks("file").map((file) => {
+      ...objectsTree.getBlocks(assetType).map((file) => {
         const fileObject = new NotionFileObject(file)
         return applyToAsset(fileObject)
       })

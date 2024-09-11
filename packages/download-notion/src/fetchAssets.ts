@@ -6,11 +6,11 @@ import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import { iNotionAssetObject } from "./notionObjects/objectTypes"
 import { applyToAllAssets } from "./objectTree/applyToAssets"
 
-export async function fetchAssets(
+export async function preFetchAssets(
   objectsTree: NotionObjectTree,
-  assetTypes: AssetType[],
   outputDir: string,
-  assetsCacheFilesMap: FilesMap
+  assetsCacheFilesMap: FilesMap,
+  assetTypes: AssetType[] = ["image", "video", "audio", "file", "pdf"]
 ) {
   await applyToAllAssets({
     objectsTree,

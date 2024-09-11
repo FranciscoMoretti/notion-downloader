@@ -9,7 +9,7 @@ import { NotionToMarkdown } from "notion-to-md"
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
 import { NotionPullOptions } from "./config/schema"
 import { createStrategies } from "./createStrategies"
-import { fetchAssets } from "./fetchAssets"
+import { preFetchAssets } from "./fetchAssets"
 import { FilesCleaner, cleanup } from "./files/FilesCleaner"
 import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
 import { FileRecordType, FilesMap } from "./files/FilesMap"
@@ -28,10 +28,10 @@ import { getAllObjectsInObjectsTree } from "./objectTree/objectTreeUtills"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {
-  readOrDownloadNewImages,
+  readOrDownloadNewAssets,
   saveNewAssets,
-  updateImageFilePathsForMarkdown,
-} from "./processImages"
+  updateAssetFilePathsForMarkdown,
+} from "./processAssets"
 import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
 import { sanitizeMarkdownOutputPath } from "./utils"
@@ -153,7 +153,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Stage 3: Reading new assets...")
   const filesInMemory: FileBuffersMemory = {}
-  await readOrDownloadNewImages(
+  await readOrDownloadNewAssets(
     objectsTree,
     assetsCacheFilesMap,
     existingFilesManager,
@@ -180,7 +180,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     filesInMemory
   )
 
-  await updateImageFilePathsForMarkdown(objectsTree, newFilesManager)
+  await updateAssetFilePathsForMarkdown(objectsTree, newFilesManager)
 
   endGroup()
 
@@ -375,12 +375,7 @@ async function cacheNewAssets(
   const assetsCacheFilesMap =
     loadAssetsCacheFilesMap(assetsCacheFilesMapPath) || new FilesMap()
 
-  await fetchAssets(
-    objectsTree,
-    ["image", "file"],
-    assetsCacheDir,
-    assetsCacheFilesMap
-  )
+  await preFetchAssets(objectsTree, assetsCacheDir, assetsCacheFilesMap)
   await saveDataToFile(assetsCacheFilesMap.toJSON(), assetsCacheFilesMapPath)
 
   return assetsCacheFilesMap
