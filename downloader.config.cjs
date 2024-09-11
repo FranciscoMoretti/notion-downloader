@@ -4,6 +4,10 @@ module.exports = {
     outputPaths: {
       markdown: "./content/",
       images: "./public/assets/",
+      files: "./public/assets/",
+      videos: "./public/assets/",
+      audios: "./public/assets/",
+      pdfs: "./public/assets/",
     },
     markdownPrefixes: {
       images: "/assets",

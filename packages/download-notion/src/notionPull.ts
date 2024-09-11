@@ -184,7 +184,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   endGroup()
 
-  group("Stage 4: Saving new assets...")
+  group("Stage 5: Saving new assets...")
 
   await saveNewAssets(
     objectsTree,
@@ -202,7 +202,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info(`Found ${objectsTree.getPages().length} pages`)
   info(`Found ${pagesToOutput.length} new pages`)
 
-  group(`Stage 5: convert ${pagesToOutput.length} Notion pages to markdown...`)
+  group(`Stage 6: convert ${pagesToOutput.length} Notion pages to markdown...`)
   const pluginsConfig = await loadConfigAsync()
   const notionToMarkdown = new NotionToMarkdown({
     notionClient: cachedNotionClient,
@@ -217,7 +217,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
   endGroup()
 
-  group("Stage 6: clean up old files & images...")
+  group("Stage 7: clean up old files & images...")
   await cleanup(existingFilesManager, newFilesManager)
 
   await saveDataToFile(newFilesManager.toJSON(), filesMapCachePath)
