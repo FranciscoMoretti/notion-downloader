@@ -375,7 +375,12 @@ async function cacheNewAssets(
   const assetsCacheFilesMap =
     loadAssetsCacheFilesMap(assetsCacheFilesMapPath) || new FilesMap()
 
-  await fetchAssets(objectsTree, ["image"], assetsCacheDir, assetsCacheFilesMap)
+  await fetchAssets(
+    objectsTree,
+    ["image", "file"],
+    assetsCacheDir,
+    assetsCacheFilesMap
+  )
   await saveDataToFile(assetsCacheFilesMap.toJSON(), assetsCacheFilesMapPath)
 
   return assetsCacheFilesMap

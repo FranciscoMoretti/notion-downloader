@@ -8,7 +8,7 @@ import {
   NotionImageLike,
   iNotionAssetObject,
 } from "./notionObjects/objectTypes"
-import { applyToAllAssets } from "./objectTree/applyToImages"
+import { applyToAllAssets } from "./objectTree/applyToAssets"
 import { FileBuffersMemory } from "./types"
 
 export async function readOrDownloadNewImages(
