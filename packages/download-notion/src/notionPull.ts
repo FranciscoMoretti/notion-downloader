@@ -217,9 +217,13 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   // Only output pages that changed! The rest already exist.
-  const pagesToOutput = getPagesToOutput(objectsTree, existingFilesManager)
+  const pagesToOutput = getPagesToOutput(
+    objectsTree,
+    existingFilesManager,
+    optionsChanged
+  )
   info(`Found ${objectsTree.getPages().length} pages`)
-  info(`Found ${pagesToOutput.length} new pages`)
+  info(`Found ${pagesToOutput.length} to output`)
 
   group(`Stage 6: convert ${pagesToOutput.length} Notion pages to markdown...`)
   const pluginsConfig = await loadConfigAsync()
@@ -404,10 +408,13 @@ async function cacheNewAssets(
 
 function getPagesToOutput(
   objectsTree: NotionObjectTree,
-  existingFilesManager: FilesManager
+  existingFilesManager: FilesManager,
+  optionsChanged: boolean
 ) {
   const pages = objectsTree.getPages().map((page) => new NotionPage(page))
-  return pages.filter((page) => existingFilesManager.isObjectNew(page))
+  return pages.filter(
+    (page) => optionsChanged || existingFilesManager.isObjectNew(page)
+  )
 }
 
 async function outputPages(
