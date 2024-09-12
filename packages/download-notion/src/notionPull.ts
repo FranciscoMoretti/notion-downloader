@@ -16,6 +16,7 @@ import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
   loadassetsCacheFilesMap as loadAssetsCacheFilesMap,
   loadFilesManagerFile,
+  loadJsonToObject,
   saveDataToFile,
   saveObjectToJson,
 } from "./files/saveLoadUtils"
@@ -76,15 +77,26 @@ function getCacheDirectories(options: NotionPullOptions) {
     objectTreeCachePath: cacheDir + "object_tree.json",
     filesMapCachePath: cacheDir + "output_filesmap.json",
     assetsCacheFilesMapPath: cacheDir + "assets_cache_filesmap.json",
+    lastOptionsCachePath: cacheDir + "last_config.json",
   }
 }
 
+function haveOptionsChanged(
+  prevOptions: NotionPullOptions,
+  options: NotionPullOptions
+) {
+  // Deep compare all options except for the notionToken
+  const prevOptionsWithoutToken = { ...prevOptions, notionToken: undefined }
+  const optionsWithoutToken = { ...options, notionToken: undefined }
+  return (
+    JSON.stringify(prevOptionsWithoutToken) !==
+    JSON.stringify(optionsWithoutToken)
+  )
+}
+
 export async function notionPull(options: NotionPullOptions): Promise<void> {
-  // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   const optionsForLogging = getOptionsForLogging(options)
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
-  // TODO: This should be moved up to the pull command that already loads configs
-  const rootUUID = convertToUUID(options.rootId)
 
   const {
     cacheDir,
@@ -92,7 +104,17 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectTreeCachePath,
     filesMapCachePath,
     assetsCacheFilesMapPath,
+    lastOptionsCachePath,
   } = getCacheDirectories(options)
+
+  // Config cache
+  const prevOptions = await loadJsonToObject(lastOptionsCachePath)
+  const optionsChanged = prevOptions && haveOptionsChanged(prevOptions, options)
+  if (optionsChanged) {
+    info("Options changed: Output will be regenerated")
+  }
+
+  const rootUUID = convertToUUID(options.rootId)
   const cachedNotionClient = createCachedNotionClient(
     options.notionToken,
     cacheDir
@@ -108,9 +130,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     cachedNotionClient,
     filesMapCachePath
   )
-
-  // TODO: Consider if this is necesary. All the paths seem to create their own directories.
-  await createDirectories(options, cacheDir)
 
   info("Testing connection to Notion...")
   // Do a quick test to see if we can connect to the root so that we can give a better error than just a generic "could not find page" one.
@@ -219,12 +238,14 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Stage 7: clean up old files & images...")
   await cleanup(existingFilesManager, newFilesManager)
-
+  // Saving needs to happen at the end to prevent inconsistencies if fails mid execution
+  await saveObjectToJson(optionsForLogging, lastOptionsCachePath)
   await saveDataToFile(newFilesManager.toJSON(), filesMapCachePath)
   endGroup()
 }
 
 function getOptionsForLogging(options: NotionPullOptions) {
+  // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
   const optionsForLogging = { ...options }
   optionsForLogging.notionToken =
     optionsForLogging.notionToken.substring(0, 10) + "..."

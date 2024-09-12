@@ -36,6 +36,14 @@ export async function saveObjectToJson(
   })
 }
 
+export async function loadJsonToObject(filePath: string): Promise<any> {
+  if (fs.existsSync(filePath)) {
+    const jsonData = fs.readFileSync(filePath, "utf8")
+    return JSON.parse(jsonData)
+  }
+  return undefined
+}
+
 export async function saveDataToFile(
   data: string,
   filePath: string

@@ -10,7 +10,7 @@ module.exports = {
       pdfs: "./public/assets/",
     },
     markdownPrefixes: {
-      images: "/assets",
+      images: "/assets/",
     },
     statusPropertyName: "Status",
     statusPropertyValue: "Publish",
