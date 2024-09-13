@@ -3,14 +3,10 @@ module.exports = {
   conversion: {
     outputPaths: {
       markdown: "./content/",
-      images: "./public/assets/",
-      files: "./public/assets/",
-      videos: "./public/assets/",
-      audios: "./public/assets/",
-      pdfs: "./public/assets/",
+      assets: "./public/assets/",
     },
     markdownPrefixes: {
-      images: "/assets/",
+      image: "/assets/",
     },
     statusPropertyName: "Status",
     statusPropertyValue: "Publish",

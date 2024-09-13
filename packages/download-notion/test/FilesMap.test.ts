@@ -1,4 +1,3 @@
-import { ObjectPrefixDict } from "@/src/FilesManager"
 import { beforeEach, describe, expect, test } from "vitest"
 
 import { FileRecord, FilesMap } from "../src/files/FilesMap"
@@ -80,6 +79,10 @@ describe("FilesMap", () => {
       page: { "page-id": pageRecord },
       database: { "db-id": dbRecord },
       image: {},
+      file: {},
+      video: {},
+      pdf: {},
+      audio: {},
     })
   })
 

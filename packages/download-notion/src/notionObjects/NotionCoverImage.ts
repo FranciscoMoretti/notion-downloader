@@ -3,6 +3,7 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
+import { AssetType, FileType } from "../config/schema"
 import { NotionFile } from "./NotionFile"
 import { NotionObject } from "./NotionObject"
 import { iNotionAssetObject } from "./objectTypes"
@@ -21,7 +22,9 @@ export type NotionCoverImageResponses =
 
 export class NotionCoverImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionCoverImageResponses
-  public assetType: "image" = "image"
+  public assetType: AssetType = AssetType.Image
+  public fileType: FileType = AssetType.Image
+
   constructor(imageResponse: NotionCoverImageResponses) {
     super(imageResponse.cover)
     this.metadata = imageResponse

@@ -6,7 +6,7 @@ import {
   VideoBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
-import { AssetType } from "../files/FilesMap"
+import { AssetType, FileType, mapToAssetType } from "../config/schema"
 import { NotionFile } from "./NotionFile"
 import { iNotionAssetObject } from "./objectTypes"
 
@@ -20,6 +20,7 @@ export type NotionFileObjectResponses =
 export class NotionFileObject extends NotionFile implements iNotionAssetObject {
   private metadata: NotionFileObjectResponses
   public assetType: AssetType
+  public fileType: FileType = AssetType.Image
 
   constructor(fileObjectResponse: NotionFileObjectResponses) {
     const file = getFileFromObjectResponse(fileObjectResponse)
@@ -28,7 +29,7 @@ export class NotionFileObject extends NotionFile implements iNotionAssetObject {
     }
     super(file)
     this.metadata = fileObjectResponse
-    this.assetType = fileObjectResponse.type
+    this.assetType = mapToAssetType(fileObjectResponse.type)
   }
 
   get id(): string {

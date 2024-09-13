@@ -276,36 +276,51 @@ function createDirectoriesAndPrefixes(options: NotionPullOptions) {
   const objectsDirectories: ObjectPrefixDict = {
     page: options.conversion.outputPaths.markdown,
     database: options.conversion.outputPaths.markdown,
-    image: options.conversion.outputPaths.images,
-    file: options.conversion.outputPaths.files,
-    video: options.conversion.outputPaths.videos,
-    pdf: options.conversion.outputPaths.pdfs,
-    audio: options.conversion.outputPaths.audios,
+    image:
+      options.conversion.outputPaths.image != undefined
+        ? options.conversion.outputPaths.image
+        : options.conversion.outputPaths.assets,
+    file:
+      options.conversion.outputPaths.file != undefined
+        ? options.conversion.outputPaths.file
+        : options.conversion.outputPaths.assets,
+    video:
+      options.conversion.outputPaths.video != undefined
+        ? options.conversion.outputPaths.video
+        : options.conversion.outputPaths.assets,
+    pdf:
+      options.conversion.outputPaths.pdf != undefined
+        ? options.conversion.outputPaths.pdf
+        : options.conversion.outputPaths.assets,
+    audio:
+      options.conversion.outputPaths.audio != undefined
+        ? options.conversion.outputPaths.audio
+        : options.conversion.outputPaths.assets,
   }
 
   const markdownPrefixes: ObjectPrefixDict = {
-    page: "",
-    database: "",
+    page: options.conversion.markdownPrefixes.markdown,
+    database: options.conversion.markdownPrefixes.markdown,
     image:
-      options.conversion.markdownPrefixes.images ||
-      options.conversion.outputPaths.images ||
-      ".",
+      options.conversion.markdownPrefixes.image != undefined
+        ? options.conversion.markdownPrefixes.image
+        : options.conversion.markdownPrefixes.assets,
     file:
-      options.conversion.markdownPrefixes.files ||
-      options.conversion.outputPaths.files ||
-      ".",
+      options.conversion.markdownPrefixes.file != undefined
+        ? options.conversion.markdownPrefixes.file
+        : options.conversion.markdownPrefixes.assets,
     video:
-      options.conversion.markdownPrefixes.videos ||
-      options.conversion.outputPaths.videos ||
-      ".",
+      options.conversion.markdownPrefixes.video != undefined
+        ? options.conversion.markdownPrefixes.video
+        : options.conversion.markdownPrefixes.assets,
     pdf:
-      options.conversion.markdownPrefixes.pdfs ||
-      options.conversion.outputPaths.pdfs ||
-      ".",
+      options.conversion.markdownPrefixes.pdf != undefined
+        ? options.conversion.markdownPrefixes.pdf
+        : options.conversion.markdownPrefixes.assets,
     audio:
-      options.conversion.markdownPrefixes.audios ||
-      options.conversion.outputPaths.audios ||
-      ".",
+      options.conversion.markdownPrefixes.audio != undefined
+        ? options.conversion.markdownPrefixes.audio
+        : options.conversion.markdownPrefixes.assets,
   }
 
   return { objectsDirectories, markdownPrefixes }

@@ -1,6 +1,6 @@
 import { NotionImageLike } from "../notionObjects/objectTypes"
 import { findLastUuid, hashOfString } from "./../utils"
-import { NamingStrategy } from "./NamingStrategy"
+import { NamingStrategy, allNameableTypes } from "./NamingStrategy"
 
 // Original behavior and comment:
 //   Since most images come from pasting screenshots, there isn't normally a filename. That's fine, we just make a hash of the url
@@ -12,7 +12,7 @@ import { NamingStrategy } from "./NamingStrategy"
 
 export class LegacyImageNamingStrategy extends NamingStrategy {
   constructor() {
-    super(["block", "page", "database"])
+    super(allNameableTypes)
   }
 
   protected _nameForObject(notionObject: NotionImageLike): string {

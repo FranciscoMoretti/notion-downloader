@@ -2,14 +2,14 @@ import {
   NotionFileLikeObjects,
   NotionImageLike,
 } from "../notionObjects/objectTypes"
-import { NamingStrategy } from "./NamingStrategy"
+import { NamingStrategy, allNameableTypes } from "./NamingStrategy"
 
 export class DefaultBlockNamingStrategy extends NamingStrategy {
   private readonly getPageAncestorName: (image: NotionImageLike) => string
 
   constructor(getPageAncestorName: (image: NotionImageLike) => string) {
     // TODO: Consider another criteria for accepting. Images can be a block or cover (page, db)
-    super(["block", "database", "page"])
+    super(allNameableTypes)
     this.getPageAncestorName = getPageAncestorName
   }
 
@@ -21,7 +21,7 @@ export class DefaultBlockNamingStrategy extends NamingStrategy {
     return `${pageSlugPart}${notionObject.id}`
   }
 
-  public getFilename(notionObject: NotionImageLike): string {
+  public getFilename(notionObject: NotionFileLikeObjects): string {
     const name = this.getName(notionObject)
     return name + "." + notionObject.extension
   }

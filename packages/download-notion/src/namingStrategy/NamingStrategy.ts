@@ -1,36 +1,40 @@
+import { AssetType, FileType, ObjectType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { NotionFileLikeObjects } from "../notionObjects/objectTypes"
 
-export abstract class NamingStrategy {
-  private accepts: Set<"page" | "database" | "block">
+export type NameableType = ObjectType.Page | ObjectType.Database | AssetType
 
-  constructor(accepts: ("page" | "database" | "block")[]) {
+export const allNameableTypes: NameableType[] = [
+  ObjectType.Page,
+  ObjectType.Database,
+  AssetType.Image,
+  AssetType.File,
+  AssetType.Video,
+  AssetType.PDF,
+  AssetType.Audio,
+]
+
+export abstract class NamingStrategy {
+  private accepts: Set<NameableType>
+
+  constructor(accepts: NameableType[]) {
     this.accepts = new Set(accepts)
   }
 
-  public getName(notionObject: NotionObject): string {
+  public getName(notionObject: NotionFileLikeObjects): string {
     this.verifyAcceptsObject(notionObject)
     return this._nameForObject(notionObject)
   }
 
   public getFilename(notionObject: NotionFileLikeObjects) {
     const name = this.getName(notionObject)
-    const extension = this.getFileExtension(notionObject)
+    const extension = notionObject.extension
     return name + "." + extension
   }
 
   protected abstract _nameForObject(notionObject: NotionObject): string
 
-  private getFileExtension(notionObject: NotionFileLikeObjects) {
-    if (notionObject.object == "page") {
-      return "md"
-    } else if (notionObject.object == "block" && notionObject.type == "image") {
-      // TODO: Might need to read the file to get the extension!
-      return notionObject.extension
-    }
-  }
-
-  private verifyAcceptsObject(notionObject: NotionObject): void {
+  private verifyAcceptsObject(notionObject: NotionFileLikeObjects): void {
     if (!this.acceptsObject(notionObject)) {
       throw new Error(
         `Naming strategy does not accept ${notionObject.object} objects`
@@ -38,7 +42,13 @@ export abstract class NamingStrategy {
     }
   }
 
-  public acceptsObject(notionObject: NotionObject): boolean {
-    return this.accepts.has(notionObject.object)
+  public acceptsObject(notionObject: NotionFileLikeObjects): boolean {
+    if (notionObject.object === ObjectType.Page) {
+      return this.accepts.has(ObjectType.Page)
+    }
+    if (notionObject.object === ObjectType.Database) {
+      return this.accepts.has(ObjectType.Database)
+    }
+    return this.accepts.has(notionObject.assetType)
   }
 }

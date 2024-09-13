@@ -1,6 +1,6 @@
 import { NotionObjectTree } from "notion-downloader"
 
-import { AssetType } from "../files/FilesMap"
+import { AssetType } from "../config/schema"
 import { NotionBlockImage } from "../notionObjects/NotionBlockImage"
 import { NotionCoverImage } from "../notionObjects/NotionCoverImage"
 import { NotionFileObject } from "../notionObjects/NotionFileObject"
@@ -13,7 +13,13 @@ import { databaseHasCover, pageHasCover } from "../notionObjects/objectutils"
 export async function applyToAllAssets({
   objectsTree,
   applyToAsset,
-  assetTypes = ["image", "video", "audio", "file", "pdf"],
+  assetTypes = [
+    AssetType.Image,
+    AssetType.Video,
+    AssetType.Audio,
+    AssetType.File,
+    AssetType.PDF,
+  ],
 }: {
   objectsTree: NotionObjectTree
   applyToAsset: (asset: iNotionAssetObject) => Promise<void>
@@ -21,9 +27,9 @@ export async function applyToAllAssets({
 }) {
   const promises: Promise<void>[] = []
 
-  if (assetTypes.includes("image")) {
+  if (assetTypes.includes(AssetType.Image)) {
     promises.push(
-      ...objectsTree.getBlocks("image").map((block) => {
+      ...objectsTree.getBlocks(AssetType.Image).map((block) => {
         const image = new NotionBlockImage(block)
         return applyToAsset(image)
       })
@@ -50,7 +56,9 @@ export async function applyToAllAssets({
     )
   }
 
-  const assetsExceptImage = assetTypes.filter((type) => type !== "image")
+  const assetsExceptImage = assetTypes.filter(
+    (type) => type !== AssetType.Image
+  )
   for (const assetType of assetsExceptImage) {
     promises.push(
       ...objectsTree.getBlocks(assetType).map((file) => {

@@ -1,4 +1,4 @@
-import { ObjectPrefixDict } from "@/src/FilesManager"
+import { ObjectPrefixDict } from "@/src/files/FilesManager"
 import { describe, expect, test } from "vitest"
 
 import { FileRecord, FilesMapData } from "../src/files/FilesMap"
@@ -21,12 +21,20 @@ describe("recordPrefixUtils", () => {
     page: { "page-id": sampleFileRecord },
     database: { "db-id": sampleFileRecord },
     image: { "image-id": sampleFileRecord },
+    file: { "file-id": sampleFileRecord },
+    video: { "video-id": sampleFileRecord },
+    pdf: { "pdf-id": sampleFileRecord },
+    audio: { "audio-id": sampleFileRecord },
   }
 
   const samplePrefixes: ObjectPrefixDict = {
     page: "pages",
     database: "databases",
     image: "images",
+    file: "files",
+    video: "videos",
+    pdf: "pdfs",
+    audio: "audios",
   }
 
   test("recordWithPrefix", () => {
@@ -66,7 +74,7 @@ describe("recordPrefixUtils", () => {
   })
 
   test("toMapDataWithoutPrefix", () => {
-    const sampleFilesMapDataWithPrefix = {
+    const sampleFilesMapDataWithPrefix: FilesMapData = {
       page: {
         "page-id": { ...sampleFileRecord, path: "pages/path/to/file.txt" },
       },
@@ -75,6 +83,18 @@ describe("recordPrefixUtils", () => {
       },
       image: {
         "image-id": { ...sampleFileRecord, path: "images/path/to/file.txt" },
+      },
+      file: {
+        "file-id": { ...sampleFileRecord, path: "files/path/to/file.txt" },
+      },
+      video: {
+        "video-id": { ...sampleFileRecord, path: "videos/path/to/file.txt" },
+      },
+      pdf: {
+        "pdf-id": { ...sampleFileRecord, path: "pdfs/path/to/file.txt" },
+      },
+      audio: {
+        "audio-id": { ...sampleFileRecord, path: "audios/path/to/file.txt" },
       },
     }
 
@@ -85,5 +105,9 @@ describe("recordPrefixUtils", () => {
     expect(result.page["page-id"].path).toBe("/path/to/file.txt")
     expect(result.database["db-id"].path).toBe("/path/to/file.txt")
     expect(result.image["image-id"].path).toBe("/path/to/file.txt")
+    expect(result.file["file-id"].path).toBe("/path/to/file.txt")
+    expect(result.video["video-id"].path).toBe("/path/to/file.txt")
+    expect(result.pdf["pdf-id"].path).toBe("/path/to/file.txt")
+    expect(result.audio["audio-id"].path).toBe("/path/to/file.txt")
   })
 })

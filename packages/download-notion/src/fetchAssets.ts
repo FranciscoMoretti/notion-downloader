@@ -1,7 +1,8 @@
 import path from "path"
 import { NotionObjectTree } from "notion-downloader"
 
-import { AssetType, FilesMap } from "./files/FilesMap"
+import { AssetType } from "./config/schema"
+import { FilesMap } from "./files/FilesMap"
 import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import { iNotionAssetObject } from "./notionObjects/objectTypes"
 import { applyToAllAssets } from "./objectTree/applyToAssets"
@@ -10,7 +11,13 @@ export async function preFetchAssets(
   objectsTree: NotionObjectTree,
   outputDir: string,
   assetsCacheFilesMap: FilesMap,
-  assetTypes: AssetType[] = ["image", "video", "audio", "file", "pdf"]
+  assetTypes: AssetType[] = [
+    AssetType.Image,
+    AssetType.Video,
+    AssetType.Audio,
+    AssetType.File,
+    AssetType.PDF,
+  ]
 ) {
   await applyToAllAssets({
     objectsTree,

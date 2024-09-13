@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest"
 
 import { DefaultBlockNamingStrategy } from "../src/namingStrategy/DefaultImageNamingStrategy"
 import { LegacyImageNamingStrategy } from "../src/namingStrategy/LegacyImageNamingStrategy"
-import { NotionImageLike } from "../src/notionObjects/objectTypes"
+import {
+  NotionFileLikeObjects,
+  NotionImageLike,
+} from "../src/notionObjects/objectTypes"
 
 describe("Image Naming Strategies", () => {
   const mockNotionImage = {
@@ -14,7 +17,8 @@ describe("Image Naming Strategies", () => {
   } as NotionImageLike
 
   describe("DefaultImageNamingStrategy", () => {
-    const getPageAncestorFilename = (image: NotionImageLike) => "mock-page"
+    const getPageAncestorFilename = (notionObject: NotionFileLikeObjects) =>
+      "mock-page"
     const strategy = new DefaultBlockNamingStrategy(getPageAncestorFilename)
 
     it("should generate filename with ancestor page name", () => {

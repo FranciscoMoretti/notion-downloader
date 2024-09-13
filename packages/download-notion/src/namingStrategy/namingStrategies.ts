@@ -3,23 +3,24 @@
 import { slug } from "github-slugger"
 import sanitize from "sanitize-filename"
 
+import { ObjectType } from "../config/schema"
 import { NotionDatabase } from "../notionObjects/NotionDatabase"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { NotionPage } from "../notionObjects/NotionPage"
-import { NamingStrategy } from "./NamingStrategy"
+import { NamingStrategy, allNameableTypes } from "./NamingStrategy"
 
 export abstract class SlugNamingStrategy extends NamingStrategy {
   public slugProperty: string
 
   constructor(slugProperty: string) {
-    super(["page", "database"])
+    super([ObjectType.Page, ObjectType.Database])
     this.slugProperty = slugProperty || "Slug"
   }
 
   protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {
-    if (notionObject.object == "page") {
+    if (notionObject.object == ObjectType.Page) {
       return this._nameForPage(notionObject as NotionPage)
-    } else if (notionObject.object == "database") {
+    } else if (notionObject.object == ObjectType.Database) {
       return this._nameForDatabase(notionObject as NotionDatabase)
     } else {
       throw new Error(`Unknown object type: ${typeof notionObject}`)
@@ -68,7 +69,7 @@ export class NotionSlugNamingStrategy extends SlugNamingStrategy {
 
 export class GuidNamingStrategy extends NamingStrategy {
   constructor() {
-    super(["page", "database", "block"])
+    super(allNameableTypes)
   }
 
   protected _nameForObject(notionObject: NotionObject): string {
@@ -78,7 +79,7 @@ export class GuidNamingStrategy extends NamingStrategy {
 
 export class TitleNamingStrategy extends NamingStrategy {
   constructor() {
-    super(["page", "database"])
+    super([ObjectType.Page, ObjectType.Database])
   }
 
   protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {

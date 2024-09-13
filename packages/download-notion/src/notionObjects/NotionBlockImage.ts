@@ -4,6 +4,7 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
+import { AssetType, FileType } from "../config/schema"
 import { NotionFile } from "./NotionFile"
 import { iNotionAssetObject } from "./objectTypes"
 
@@ -19,7 +20,8 @@ type NotionBlockImageResponses = ImageBlockObjectResponse
 
 export class NotionBlockImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionBlockImageResponses
-  public assetType: "image" = "image"
+  public assetType: AssetType = AssetType.Image
+  public fileType: FileType = AssetType.Image
 
   constructor(imageResponse: NotionBlockImageResponses) {
     super(imageResponse.image)

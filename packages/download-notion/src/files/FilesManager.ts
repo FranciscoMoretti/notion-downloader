@@ -21,20 +21,12 @@ export class FilesManager {
     markdownPrefixes,
   }: {
     outputDirectories: ObjectPrefixDict
-    markdownPrefixes?: ObjectPrefixDict
+    markdownPrefixes: ObjectPrefixDict
     initialFilesMap?: FilesMap
   }) {
     this.baseFilesMap = initialFilesMap || new FilesMap()
     this.outputDirectories = outputDirectories
-    this.markdownPrefixes = {
-      page: markdownPrefixes?.page || "",
-      database: markdownPrefixes?.database || "",
-      image: markdownPrefixes?.image || "",
-      file: markdownPrefixes?.file || "",
-      pdf: markdownPrefixes?.pdf || "",
-      audio: markdownPrefixes?.audio || "",
-      video: markdownPrefixes?.video || "",
-    }
+    this.markdownPrefixes = markdownPrefixes
   }
 
   public isObjectNew(notionObject: iNotionAssetObject | NotionObject): boolean {

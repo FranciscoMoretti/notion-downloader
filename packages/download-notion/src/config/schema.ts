@@ -1,6 +1,38 @@
 import { cacheOptionsSchema } from "notion-downloader"
 import { z } from "zod"
 
+export enum AssetType {
+  Image = "image",
+  File = "file",
+  Video = "video",
+  PDF = "pdf",
+  Audio = "audio",
+}
+
+export enum TextType {
+  Markdown = "markdown",
+}
+
+export enum ObjectType {
+  Page = "page",
+  Database = "database",
+  Asset = "asset",
+}
+
+// Merge AssetType into FileType
+export type FileType = AssetType | TextType
+
+const assetTypesSchema = z
+  .object({
+    [AssetType.Image]: z.string().optional(),
+    [AssetType.File]: z.string().optional(),
+    [AssetType.Video]: z.string().optional(),
+    [AssetType.PDF]: z.string().optional(),
+    [AssetType.Audio]: z.string().optional(),
+  })
+  .partial()
+  .strict()
+
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
   statusTag: z.string().default("Publish"),
@@ -11,38 +43,20 @@ export const conversionSchema = z.object({
   statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
   // TODO: Simplify this logics for different assets types
-  outputPaths: z
-    .object({
-      markdown: z.string().default("./docs"),
-      images: z.string().default(""),
-      files: z.string().default(""),
-      videos: z.string().default(""),
-      pdfs: z.string().default(""),
-      audios: z.string().default(""),
+  outputPaths: assetTypesSchema
+    .extend({
+      [TextType.Markdown]: z.string().default("./content"),
+      assets: z.string().default("./assets"),
     })
-    .default({
-      markdown: "./docs",
-      images: "",
-      files: "",
-      videos: "",
-      pdfs: "",
-      audios: "",
-    }),
-  markdownPrefixes: z
-    .object({
-      images: z.string().default(""),
-      files: z.string().default(""),
-      videos: z.string().default(""),
-      pdfs: z.string().default(""),
-      audios: z.string().default(""),
+    .strict()
+    .default({}),
+  markdownPrefixes: assetTypesSchema
+    .extend({
+      [TextType.Markdown]: z.string().default(""),
+      assets: z.string().default(""),
     })
-    .default({
-      images: "",
-      files: "",
-      videos: "",
-      pdfs: "",
-      audios: "",
-    }),
+    .strict()
+    .default({}),
   layoutStrategy: z
     .enum(["HierarchicalNamedLayoutStrategy", "FlatLayoutStrategy"])
     .default("HierarchicalNamedLayoutStrategy"),
@@ -87,3 +101,20 @@ export const configFileOptionsSchema = pullOptionsSchema
 
 export type NotionPullOptions = z.infer<typeof pullOptionsSchema>
 export type ConversionOptions = z.infer<typeof conversionSchema>
+
+export function mapToAssetType(type: string): AssetType {
+  switch (type) {
+    case "image":
+      return AssetType.Image
+    case "file":
+      return AssetType.File
+    case "video":
+      return AssetType.Video
+    case "pdf":
+      return AssetType.PDF
+    case "audio":
+      return AssetType.Audio
+    default:
+      throw new Error(`Invalid asset type: ${type}`)
+  }
+}

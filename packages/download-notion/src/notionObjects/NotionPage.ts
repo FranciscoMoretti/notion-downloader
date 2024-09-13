@@ -1,18 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
-import { Client, isFullPage } from "@notionhq/client"
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
-import { BlockObjectTreeNode, NotionObjectTreeNode } from "notion-downloader"
-import { ListBlockChildrenResponseResults } from "notion-to-md/build/types"
 
+import { AssetType, FileType } from "../config/schema"
 import { error } from "../log"
-import { parseLinkId } from "../plugins/internalLinks"
 import { NotionObject } from "./NotionObject"
 
 export class NotionPage implements NotionObject {
   // TODO: Can this, Database and Image Extend the PageObjectResponse instead of using as metadata?
   public metadata: PageObjectResponse
+  public assetType: AssetType = AssetType.Image
+  public fileType: FileType = AssetType.Image
+  public extension: string = "md"
 
   public constructor(metadata: PageObjectResponse) {
     this.metadata = metadata

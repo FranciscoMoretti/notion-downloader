@@ -4,7 +4,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 import { NotionObjectResponse } from "notion-downloader"
 
-import { AssetType } from "../files/FilesMap"
+import { AssetType, mapToAssetType } from "../config/schema"
 import { NotionBlockImage } from "./NotionBlockImage"
 import {
   DatabaseObjectResponseWithCover,
@@ -33,19 +33,19 @@ export function getAssetTypeFromObjectResponse(
   notionObject: NotionObjectResponse
 ): AssetType | undefined {
   if (hasImageLikeObject(notionObject)) {
-    return "image"
+    return mapToAssetType("image")
   }
   if (notionObject.object === "block" && notionObject.type === "video") {
-    return "video"
+    return mapToAssetType("video")
   }
   if (notionObject.object === "block" && notionObject.type === "file") {
-    return "file"
+    return mapToAssetType("file")
   }
   if (notionObject.object === "block" && notionObject.type === "pdf") {
-    return "pdf"
+    return mapToAssetType("pdf")
   }
   if (notionObject.object === "block" && notionObject.type === "audio") {
-    return "audio"
+    return mapToAssetType("audio")
   }
   return undefined
 }
@@ -58,7 +58,7 @@ export function getAssetObjectFromObjectResponse(
   notionObject: NotionAssetObjectResponses
 ): iNotionAssetObject {
   const assetType = getAssetTypeFromObjectResponse(notionObject)
-  if (assetType == "image") {
+  if (assetType == AssetType.Image) {
     return getImageLikeObject(notionObject)
   } else if (assetType) {
     return new NotionFileObject(notionObject as NotionFileObjectResponses)
