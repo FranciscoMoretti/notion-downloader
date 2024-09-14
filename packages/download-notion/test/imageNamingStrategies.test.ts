@@ -1,3 +1,4 @@
+import { AssetType } from "@/src/config/schema"
 import { hashOfBufferContent, hashOfString } from "@/src/utils"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -14,6 +15,8 @@ describe("Image Naming Strategies", () => {
     id: "mock-block-id",
     extension: "png",
     buffer: Buffer.from("mock image data"),
+    assetType: AssetType.Image,
+    fileType: AssetType.Image,
   } as NotionImageLike
 
   describe("DefaultImageNamingStrategy", () => {
