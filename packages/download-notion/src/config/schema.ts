@@ -1,6 +1,5 @@
 import { ObjectType } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-downloader"
-import { m } from "vitest/dist/reporters-yx5ZTtEV"
 import { z } from "zod"
 
 export enum AssetType {
@@ -26,41 +25,45 @@ export const allAssetTyes = [
   AssetType.Audio,
 ]
 
-const assetPathsSchema = z.object({
-  [AssetType.Image]: z.string().optional(),
-  [AssetType.File]: z.string().optional(),
-  [AssetType.Video]: z.string().optional(),
-  [AssetType.PDF]: z.string().optional(),
-  [AssetType.Audio]: z.string().optional(),
-})
-
-const baseFilepathSchema = z
-  .object({
-    all: z.string().optional(),
-    assets: z.string().optional(),
-    [TextType.Markdown]: z.string().optional(),
-  })
-  .merge(assetPathsSchema)
-
-const filepathSchema = z.union([
-  baseFilepathSchema.extend({ all: z.string() }),
-  baseFilepathSchema.extend({
-    assets: z.string(),
-    [TextType.Markdown]: z.string(),
-  }),
-  baseFilepathSchema
-    .extend({
-      [TextType.Markdown]: z.string(),
-    })
-    .merge(assetPathsSchema.required()),
-])
-
 export enum LayoutStrategy {
   HierarchicalNamed = "HierarchicalNamedLayoutStrategy",
   Flat = "FlatLayoutStrategy",
 }
-
 export const layoutStrategySchema = z.nativeEnum(LayoutStrategy)
+
+function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
+  const assetPathsSchema = z.object({
+    [AssetType.Image]: valueSchema.optional(),
+    [AssetType.File]: valueSchema.optional(),
+    [AssetType.Video]: valueSchema.optional(),
+    [AssetType.PDF]: valueSchema.optional(),
+    [AssetType.Audio]: valueSchema.optional(),
+  })
+
+  const baseSchema = z
+    .object({
+      all: valueSchema.optional(),
+      assets: valueSchema.optional(),
+      [TextType.Markdown]: valueSchema.optional(),
+    })
+    .merge(assetPathsSchema)
+
+  return z.union([
+    baseSchema.extend({ all: valueSchema }),
+    baseSchema.extend({
+      assets: valueSchema,
+      [TextType.Markdown]: valueSchema,
+    }),
+    baseSchema
+      .extend({
+        [TextType.Markdown]: valueSchema,
+      })
+      .merge(assetPathsSchema.required()),
+  ])
+}
+
+const filepathSchema = createOptionsSchema(z.string())
+const layoutStrategyOptionsSchema = createOptionsSchema(layoutStrategySchema)
 
 export const pathOptionsSchema = z.union([z.string(), filepathSchema])
 
