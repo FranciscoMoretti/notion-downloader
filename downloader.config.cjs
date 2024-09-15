@@ -6,6 +6,7 @@ module.exports = {
       assets: "./public/assets/",
     },
     markdownPrefixes: {
+      default: "",
       image: "/assets/",
     },
     statusPropertyName: "Status",
