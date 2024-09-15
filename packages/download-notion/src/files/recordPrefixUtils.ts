@@ -1,4 +1,4 @@
-import { ObjectPrefixDict } from "./FilesManager"
+import { FilepathGroup } from "../config/schema"
 import { FileRecord, FilesMapData, allRecordTypes } from "./FilesMap"
 import { addPathPrefix, removePathPrefix } from "./pathUtils"
 
@@ -56,7 +56,7 @@ export function recordWithoutPrefix(
 
 export function toMapDataWithPrefix(
   filesMapData: FilesMapData,
-  prefixes: ObjectPrefixDict
+  prefixes: FilepathGroup
 ): FilesMapData {
   return Object.fromEntries(
     allRecordTypes.map((type) => [
@@ -68,7 +68,7 @@ export function toMapDataWithPrefix(
 
 export function toMapDataWithoutPrefix(
   filesMapData: FilesMapData,
-  prefixes: ObjectPrefixDict
+  prefixes: FilepathGroup
 ): FilesMapData {
   return Object.fromEntries(
     allRecordTypes.map((type) => [

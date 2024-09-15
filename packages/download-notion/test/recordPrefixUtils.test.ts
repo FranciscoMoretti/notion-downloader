@@ -1,4 +1,4 @@
-import { ObjectPrefixDict } from "@/src/files/FilesManager"
+import { FilepathGroup } from "@/src/config/schema"
 import { describe, expect, test } from "vitest"
 
 import { FileRecord, FilesMapData } from "../src/files/FilesMap"
@@ -27,7 +27,7 @@ describe("recordPrefixUtils", () => {
     audio: { "audio-id": sampleFileRecord },
   }
 
-  const samplePrefixes: ObjectPrefixDict = {
+  const samplePrefixes: FilepathGroup = {
     page: "pages",
     database: "databases",
     image: "images",

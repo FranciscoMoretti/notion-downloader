@@ -12,11 +12,15 @@ import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
-import { NotionPullOptions, parsePathFileOptions } from "./config/schema"
+import {
+  FilepathGroup,
+  NotionPullOptions,
+  parsePathFileOptions,
+} from "./config/schema"
 import { createStrategies } from "./createStrategies"
 import { preFetchAssets } from "./fetchAssets"
 import { FilesCleaner, cleanup } from "./files/FilesCleaner"
-import { FilesManager, ObjectPrefixDict } from "./files/FilesManager"
+import { FilesManager } from "./files/FilesManager"
 import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
   loadassetsCacheFilesMap as loadAssetsCacheFilesMap,
@@ -281,10 +285,10 @@ function createCachedNotionClient(
 
 function createDirectoriesAndPrefixes(options: NotionPullOptions) {
   // TODO: Simplify this logic
-  const objectsDirectories: ObjectPrefixDict = parsePathFileOptions(
+  const objectsDirectories: FilepathGroup = parsePathFileOptions(
     options.conversion.outputPaths
   )
-  const markdownPrefixes: ObjectPrefixDict = parsePathFileOptions(
+  const markdownPrefixes: FilepathGroup = parsePathFileOptions(
     options.conversion.markdownPrefixes
   )
   return { objectsDirectories, markdownPrefixes }
@@ -292,8 +296,8 @@ function createDirectoriesAndPrefixes(options: NotionPullOptions) {
 
 async function setupFilesManagers(
   options: NotionPullOptions,
-  objectsDirectories: ObjectPrefixDict,
-  markdownPrefixes: ObjectPrefixDict,
+  objectsDirectories: FilepathGroup,
+  markdownPrefixes: FilepathGroup,
   cachedNotionClient: NotionCacheClient,
   filesMapCachePath: string
 ) {

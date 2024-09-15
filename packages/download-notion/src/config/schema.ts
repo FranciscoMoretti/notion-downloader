@@ -173,6 +173,11 @@ type ParsedOptions<T> = {
   [AssetType.File]: T
 }
 
+export type FilepathGroup = ParsedOptions<z.infer<typeof pathSchema>>
+export type LayoutStrategyGroup = ParsedOptions<
+  z.infer<typeof layoutStrategySchema>
+>
+
 function parseFileOptions<T extends z.ZodType>(
   options: z.infer<ReturnType<typeof createOptionsSchema<T>>>
 ): ParsedOptions<z.infer<T>> {

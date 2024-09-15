@@ -1,6 +1,6 @@
 import { ObjectType, ObjectTypeSchema } from "notion-cache-client"
 
-import { mapToAssetType } from "../config/schema"
+import { FilepathGroup, mapToAssetType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { iNotionAssetObject } from "../notionObjects/objectTypes"
 import { FileRecord, FileRecordType, FilesMap, FilesMapData } from "./FilesMap"
@@ -15,16 +15,16 @@ type PathType = "base" | "output" | "markdown"
 export class FilesManager {
   // This class holds directories in which each file is located and relative paths to them
   protected baseFilesMap: FilesMap // Relative paths to files directories
-  protected outputDirectories: ObjectPrefixDict // Files directories
-  protected markdownPrefixes: ObjectPrefixDict // Markdown prefixes
+  protected outputDirectories: FilepathGroup // Files directories
+  protected markdownPrefixes: FilepathGroup // Markdown prefixes
 
   public constructor({
     outputDirectories,
     initialFilesMap,
     markdownPrefixes,
   }: {
-    outputDirectories: ObjectPrefixDict
-    markdownPrefixes: ObjectPrefixDict
+    outputDirectories: FilepathGroup
+    markdownPrefixes: FilepathGroup
     initialFilesMap?: FilesMap
   }) {
     this.baseFilesMap = initialFilesMap || new FilesMap()
@@ -159,7 +159,7 @@ export class FilesManager {
     })
   }
 
-  public getOutputDirectories(): ObjectPrefixDict {
+  public getOutputDirectories(): FilepathGroup {
     return { ...this.outputDirectories }
   }
 
@@ -177,4 +177,3 @@ export function copyRecord(
   const record = fromManager.get("base", recordType, recordId)
   toManager.set("base", recordType, recordId, record)
 }
-export type ObjectPrefixDict = Record<FileRecordType, string>
