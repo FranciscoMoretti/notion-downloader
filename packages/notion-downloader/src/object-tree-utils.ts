@@ -11,7 +11,6 @@ export type IdWithType =
   | { database_id: string; type: "database_id" }
   | { block_id: string; type: "block_id" }
 
-// TODO: Plan objects should be divided by object type (page, database, block). Ids can be repeated across object types
 export function objectTreeToPlainObjects(
   objectTree: NotionObjectTreeNode
 ): NotionObjectPlainList {

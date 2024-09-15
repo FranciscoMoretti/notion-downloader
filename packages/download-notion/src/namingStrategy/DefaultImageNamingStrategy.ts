@@ -8,7 +8,6 @@ export class DefaultBlockNamingStrategy extends NamingStrategy {
   private readonly getPageAncestorName: (image: NotionImageLike) => string
 
   constructor(getPageAncestorName: (image: NotionImageLike) => string) {
-    // TODO: Consider another criteria for accepting. Images can be a block or cover (page, db)
     super(allNameableTypes)
     this.getPageAncestorName = getPageAncestorName
   }

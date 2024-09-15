@@ -18,7 +18,6 @@ export const allRecordTypes: FileRecordType[] = [
   AssetType.Audio,
 ]
 
-// TODO: Cahnge the string to make it FileRecordType
 export type FilesMapData = Record<FileRecordType, Record<string, FileRecord>>
 
 export class FilesMap {

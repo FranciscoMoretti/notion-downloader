@@ -35,7 +35,6 @@ export type BlockObjectTreeNode = {
   parent: SimpleParent | null
 }
 
-// TODO: Mix this with ObjectsData in a class to have a tree with data. There should be a mapping from id to treeNode
 export type NotionObjectTreeNode =
   | {
       id: string
