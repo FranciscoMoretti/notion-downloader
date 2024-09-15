@@ -49,6 +49,7 @@ function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
     .merge(assetPathsSchema)
 
   return z.union([
+    valueSchema,
     baseSchema.extend({ all: valueSchema }),
     baseSchema.extend({
       assets: valueSchema,
@@ -62,20 +63,25 @@ function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
   ])
 }
 
-const filepathSchema = createOptionsSchema(z.string())
+function createFilesSchema<T extends z.ZodType>(valueSchema: T) {
+  return z.object({
+    [ObjectType.Page]: valueSchema,
+    [ObjectType.Database]: valueSchema,
+    [AssetType.Video]: valueSchema,
+    [AssetType.PDF]: valueSchema,
+    [AssetType.Audio]: valueSchema,
+    [AssetType.Image]: valueSchema,
+    [AssetType.File]: valueSchema,
+  })
+}
+
+const pathSchema = z.string()
+export const pathsSchema = createFilesSchema(pathSchema)
+
+const filepathSchema = createOptionsSchema(pathSchema)
 const layoutStrategyOptionsSchema = createOptionsSchema(layoutStrategySchema)
 
 export const pathOptionsSchema = z.union([z.string(), filepathSchema])
-
-export const pathsSchema = z.object({
-  [ObjectType.Page]: z.string(),
-  [ObjectType.Database]: z.string(),
-  [AssetType.Video]: z.string(),
-  [AssetType.PDF]: z.string(),
-  [AssetType.Audio]: z.string(),
-  [AssetType.Image]: z.string(),
-  [AssetType.File]: z.string(),
-})
 
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
@@ -157,61 +163,73 @@ export function mapToAssetType(type: string): AssetType {
   }
 }
 
-export function parsePathOptions(
-  pathOptions: z.infer<typeof pathOptionsSchema>
-): z.infer<typeof pathsSchema> {
-  if (typeof pathOptions === "string") {
+type ParsedOptions<T> = {
+  [ObjectType.Page]: T
+  [ObjectType.Database]: T
+  [AssetType.Video]: T
+  [AssetType.PDF]: T
+  [AssetType.Audio]: T
+  [AssetType.Image]: T
+  [AssetType.File]: T
+}
+
+function parseFileOptions<T extends z.ZodType>(
+  options: z.infer<ReturnType<typeof createOptionsSchema<T>>>
+): ParsedOptions<z.infer<T>> {
+  if (options instanceof z.ZodType && options.safeParse(options).success) {
     return {
-      [ObjectType.Page]: pathOptions,
-      [ObjectType.Database]: pathOptions,
-      [AssetType.Video]: pathOptions,
-      [AssetType.PDF]: pathOptions,
-      [AssetType.Audio]: pathOptions,
-      [AssetType.Image]: pathOptions,
-      [AssetType.File]: pathOptions,
-    }
+      [ObjectType.Page]: options,
+      [ObjectType.Database]: options,
+      [AssetType.Video]: options,
+      [AssetType.PDF]: options,
+      [AssetType.Audio]: options,
+      [AssetType.Image]: options,
+      [AssetType.File]: options,
+    } as ParsedOptions<z.infer<T>>
   }
   return {
-    // Database and page are the same because they are tighlty related
-    [ObjectType.Page]: firstDefined(
-      pathOptions[TextType.Markdown],
-      pathOptions.all
-    ),
+    [ObjectType.Page]: firstDefined(options[TextType.Markdown], options.all),
     [ObjectType.Database]: firstDefined(
-      pathOptions[TextType.Markdown],
-      pathOptions.all
+      options[TextType.Markdown],
+      options.all
     ),
     [AssetType.Video]: firstDefined(
-      pathOptions[AssetType.Video],
-      pathOptions.assets,
-      pathOptions.all
+      options[AssetType.Video],
+      options.assets,
+      options.all
     ),
     [AssetType.PDF]: firstDefined(
-      pathOptions[AssetType.PDF],
-      pathOptions.assets,
-      pathOptions.all
+      options[AssetType.PDF],
+      options.assets,
+      options.all
     ),
     [AssetType.Audio]: firstDefined(
-      pathOptions[AssetType.Audio],
-      pathOptions.assets,
-      pathOptions.all
+      options[AssetType.Audio],
+      options.assets,
+      options.all
     ),
     [AssetType.Image]: firstDefined(
-      pathOptions[AssetType.Image],
-      pathOptions.assets,
-      pathOptions.all
+      options[AssetType.Image],
+      options.assets,
+      options.all
     ),
     [AssetType.File]: firstDefined(
-      pathOptions[AssetType.File],
-      pathOptions.assets,
-      pathOptions.all
+      options[AssetType.File],
+      options.assets,
+      options.all
     ),
-  }
+  } as ParsedOptions<z.infer<T>>
 }
-function firstDefined(...args: (string | undefined)[]): string {
-  const firstDefined = args.find((arg) => arg != undefined)
-  if (firstDefined == undefined) {
-    throw new Error("No path defined")
+
+export const parsePathFileOptions = parseFileOptions<typeof pathSchema>
+export const parseLayoutStrategyFileOptions = parseFileOptions<
+  typeof layoutStrategySchema
+>
+
+function firstDefined<T>(...args: (T | undefined)[]): T {
+  const firstDefined = args.find((arg) => arg !== undefined)
+  if (firstDefined === undefined) {
+    throw new Error("No option defined")
   }
   return firstDefined
 }

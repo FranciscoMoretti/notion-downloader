@@ -79,13 +79,13 @@ export function getFileTreeMap(
         const asset = getAssetObjectFromObjectResponse(
           objectResponse as NotionAssetObjectResponses
         )
-        setFilebufferInImage(filesInMemory, asset)
-        const imageFilename = imageLayoutStrategy.getPathForObject(
+        setFilebufferInAsset(filesInMemory, asset)
+        const assetFilename = imageLayoutStrategy.getPathForObject(
           parentContext.path,
           asset
         )
         newFilesManager.set("base", assetType, asset.id, {
-          path: imageFilename,
+          path: assetFilename,
           lastEditedTime: asset.lastEditedTime,
         })
       }
@@ -102,7 +102,7 @@ export function getFileTreeMap(
   })
 }
 
-function setFilebufferInImage(
+function setFilebufferInAsset(
   filesInMemory: FileBuffersMemory,
   asset: iNotionAssetObject
 ) {

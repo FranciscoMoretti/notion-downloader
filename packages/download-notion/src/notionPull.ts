@@ -12,7 +12,7 @@ import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
-import { NotionPullOptions, parsePathOptions } from "./config/schema"
+import { NotionPullOptions, parsePathFileOptions } from "./config/schema"
 import { createStrategies } from "./createStrategies"
 import { preFetchAssets } from "./fetchAssets"
 import { FilesCleaner, cleanup } from "./files/FilesCleaner"
@@ -281,10 +281,10 @@ function createCachedNotionClient(
 
 function createDirectoriesAndPrefixes(options: NotionPullOptions) {
   // TODO: Simplify this logic
-  const objectsDirectories: ObjectPrefixDict = parsePathOptions(
+  const objectsDirectories: ObjectPrefixDict = parsePathFileOptions(
     options.conversion.outputPaths
   )
-  const markdownPrefixes: ObjectPrefixDict = parsePathOptions(
+  const markdownPrefixes: ObjectPrefixDict = parsePathFileOptions(
     options.conversion.markdownPrefixes
   )
   return { objectsDirectories, markdownPrefixes }
