@@ -43,7 +43,7 @@ export const pathOptionsSchema = z.union([
     // - Default is provided and 0 or more other props are provided
     // - markdown-like props are provided and assets-like props are provided
     // - Markdown-like props are (markdown, or (page and database))
-    // - Assets-like props are (assets, or (image, file, video, pdf, audio))
+    // - Assets-like props are (assets, or (image, file, video, pdf and audio))
     .extend({
       default: z.string().optional(),
       [ObjectType.Page]: z.string().optional(),
