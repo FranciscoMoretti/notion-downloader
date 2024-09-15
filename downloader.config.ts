@@ -1,12 +1,14 @@
 /** @type {import('notion-downloader-cli').Config} */
-module.exports = {
+import { Config } from "./packages/download-notion/src/index"
+
+export const config: Config = {
   conversion: {
     outputPaths: {
       markdown: "./content/",
       assets: "./public/assets/",
     },
     markdownPrefixes: {
-      default: "",
+      all: "",
       image: "/assets/",
     },
     statusPropertyName: "Status",

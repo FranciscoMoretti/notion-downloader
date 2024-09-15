@@ -56,6 +56,9 @@ importers:
       husky:
         specifier: ^8.0.3
         version: 8.0.3
+      notion-downloader-cli:
+        specifier: workspace:*
+        version: link:packages/download-notion
       postcss:
         specifier: ^8.4.24
         version: 8.4.38

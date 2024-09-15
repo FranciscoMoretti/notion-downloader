@@ -15,5 +15,3 @@ export const PageOrDatabaseSchema = z.enum([
   ObjectType.Page,
   ObjectType.Database,
 ])
-
-const object: PageOrDatabase = PageOrDatabaseSchema.parse("page")

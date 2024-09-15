@@ -17,16 +17,79 @@ export enum TextType {
 // Merge AssetType into FileType
 export type FileType = AssetType | TextType
 
-const assetTypesSchema = z
+const allAssetTypesSchema = z
   .object({
+    assets: z.string().optional(),
+    [AssetType.Image]: z.string(),
+    [AssetType.File]: z.string(),
+    [AssetType.Video]: z.string(),
+    [AssetType.PDF]: z.string(),
+    [AssetType.Audio]: z.string(),
+  })
+  .strict()
+
+const assetsWithOptionalTypesSchema = z
+  .object({
+    assets: z.string(),
     [AssetType.Image]: z.string().optional(),
     [AssetType.File]: z.string().optional(),
     [AssetType.Video]: z.string().optional(),
     [AssetType.PDF]: z.string().optional(),
     [AssetType.Audio]: z.string().optional(),
   })
-  .partial()
   .strict()
+
+const allMarkdownTypesSchema = z.object({
+  [TextType.Markdown]: z.string().optional(),
+  [ObjectType.Page]: z.string(),
+  [ObjectType.Database]: z.string(),
+})
+
+const allMarkdownOptionalTypesSchema = z.object({
+  [TextType.Markdown]: z.string(),
+  [ObjectType.Page]: z.string().optional(),
+  [ObjectType.Database]: z.string().optional(),
+})
+
+const allPathsGroupsSchema = z.union([
+  z.object({
+    all: z.string(),
+    [AssetType.Image]: z.string().optional(),
+    [AssetType.File]: z.string().optional(),
+    [AssetType.Video]: z.string().optional(),
+    [AssetType.PDF]: z.string().optional(),
+    [AssetType.Audio]: z.string().optional(),
+    [TextType.Markdown]: z.string().optional(),
+    [ObjectType.Page]: z.string().optional(),
+    [ObjectType.Database]: z.string().optional(),
+    assets: z.string().optional(),
+  }),
+  z.object({
+    all: z.string().optional(),
+    ...assetsWithOptionalTypesSchema.shape,
+    ...allMarkdownTypesSchema.shape,
+  }),
+  z.object({
+    all: z.string().optional(),
+    ...allAssetTypesSchema.shape,
+    ...allMarkdownTypesSchema.shape,
+  }),
+  z.object({
+    all: z.string().optional(),
+    ...allMarkdownOptionalTypesSchema.shape,
+    ...assetsWithOptionalTypesSchema.shape,
+  }),
+  z.object({
+    all: z.string().optional(),
+    ...allMarkdownOptionalTypesSchema.shape,
+    ...assetsWithOptionalTypesSchema.shape,
+  }),
+])
+
+const assetTypesSchema = z.union([
+  allAssetTypesSchema,
+  assetsWithOptionalTypesSchema,
+])
 
 export enum LayoutStrategy {
   HierarchicalNamed = "HierarchicalNamedLayoutStrategy",
@@ -35,25 +98,7 @@ export enum LayoutStrategy {
 
 export const layoutStrategySchema = z.nativeEnum(LayoutStrategy)
 
-export const pathOptionsSchema = z.union([
-  z.string(),
-  assetTypesSchema
-    // TODO: This schema should only be valid if:
-    // - The common string is provided
-    // - Default is provided and 0 or more other props are provided
-    // - markdown-like props are provided and assets-like props are provided
-    // - Markdown-like props are (markdown, or (page and database))
-    // - Assets-like props are (assets, or (image, file, video, pdf and audio))
-    .extend({
-      default: z.string().optional(),
-      [ObjectType.Page]: z.string().optional(),
-      [ObjectType.Database]: z.string().optional(),
-      [TextType.Markdown]: z.string().optional(),
-      assets: z.string().optional(),
-    })
-    .strict()
-    .default({}),
-])
+export const pathOptionsSchema = z.union([z.string(), allPathsGroupsSchema])
 
 export const pathsSchema = z.object({
   [ObjectType.Page]: z.string(),
@@ -98,7 +143,7 @@ export const pullOptionsSchema = z
     notionToken: z.string(),
     rootId: z.string(),
     rootObjectType: z
-      .enum([ObjectType.Page, ObjectType.Database, "auto"])
+      .enum([String(ObjectType.Page), String(ObjectType.Database), "auto"])
       .default("auto"),
     rootDbAsFolder: z.boolean().default(false),
 
@@ -108,7 +153,7 @@ export const pullOptionsSchema = z
     // System
     revalidatePeriod: z.number().default(-1),
     logLevel: z.string().default("info"),
-    cwd: z.string(),
+    cwd: z.string().default(process.cwd()),
 
     // Conversion Options
     conversion: conversionSchema,
@@ -121,6 +166,11 @@ export const configFileOptionsSchema = pullOptionsSchema
   .omit({ cwd: true })
 
 export type NotionPullOptions = z.infer<typeof pullOptionsSchema>
+export type NotionPullOptionsInput = Omit<
+  z.input<typeof pullOptionsSchema>,
+  "notionToken"
+>
+
 export type ConversionOptions = z.infer<typeof conversionSchema>
 
 export function mapToAssetType(type: string): AssetType {
@@ -158,37 +208,37 @@ export function parsePathOptions(
     [ObjectType.Page]: firstDefined(
       pathOptions[ObjectType.Page],
       pathOptions[TextType.Markdown],
-      pathOptions.default
+      pathOptions.all
     ),
     [ObjectType.Database]: firstDefined(
       pathOptions[ObjectType.Database],
       pathOptions[TextType.Markdown],
-      pathOptions.default
+      pathOptions.all
     ),
     [AssetType.Video]: firstDefined(
       pathOptions[AssetType.Video],
       pathOptions.assets,
-      pathOptions.default
+      pathOptions.all
     ),
     [AssetType.PDF]: firstDefined(
       pathOptions[AssetType.PDF],
       pathOptions.assets,
-      pathOptions.default
+      pathOptions.all
     ),
     [AssetType.Audio]: firstDefined(
       pathOptions[AssetType.Audio],
       pathOptions.assets,
-      pathOptions.default
+      pathOptions.all
     ),
     [AssetType.Image]: firstDefined(
       pathOptions[AssetType.Image],
       pathOptions.assets,
-      pathOptions.default
+      pathOptions.all
     ),
     [AssetType.File]: firstDefined(
       pathOptions[AssetType.File],
       pathOptions.assets,
-      pathOptions.default
+      pathOptions.all
     ),
   }
 }

@@ -10,3 +10,6 @@ export const cacheOptionsSchema = z
     cacheAssets: z.boolean().default(true),
   })
   .default({})
+
+export type CacheOptions = z.infer<typeof cacheOptionsSchema>
+export type CacheOptionsInput = z.input<typeof cacheOptionsSchema>

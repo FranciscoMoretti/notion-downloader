@@ -3,13 +3,13 @@ import { init } from "@/src/commands/init"
 import { pull } from "@/src/commands/pull"
 import { Command } from "commander"
 
-import { NotionPullOptions } from "./config/schema"
+import { NotionPullOptions, NotionPullOptionsInput } from "./config/schema"
 import { getPackageInfo } from "./utils_old/get-package-info"
 
 process.on("SIGINT", () => process.exit(0))
 process.on("SIGTERM", () => process.exit(0))
 
-export { NotionPullOptions as Config }
+export { NotionPullOptionsInput as Config }
 
 async function main() {
   const packageInfo = await getPackageInfo()

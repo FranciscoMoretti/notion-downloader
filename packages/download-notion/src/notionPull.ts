@@ -5,6 +5,7 @@ import fs from "fs-extra"
 import {
   NotionCacheClient,
   ObjectType,
+  PageOrDatabaseSchema,
   convertToUUID,
 } from "notion-cache-client"
 import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
@@ -140,7 +141,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const rootObjectType = await getRootObjectType({
     cachedNotionClient,
     rootUUID,
-    rootObjectType: options.rootObjectType,
+    rootObjectType:
+      options.rootObjectType == "auto"
+        ? "auto"
+        : PageOrDatabaseSchema.parse(options.rootObjectType),
   })
 
   group("Stage 1: walk children of the root page, looking for pages...")
