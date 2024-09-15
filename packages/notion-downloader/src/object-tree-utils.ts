@@ -1,3 +1,5 @@
+import { ObjectType } from "notion-cache-client"
+
 import {
   NotionObjectPlain,
   NotionObjectPlainList,
@@ -36,11 +38,11 @@ export function objectTreeToObjectIds(
   const ids: IdWithType[] = []
   const plainObjects = objectTreeToPlainObjects(objectTree)
   plainObjects.forEach((node) => {
-    if (node.object === "page") {
+    if (node.object === ObjectType.Page) {
       ids.push({ page_id: node.id, type: "page_id" })
-    } else if (node.object === "database") {
+    } else if (node.object === ObjectType.Database) {
       ids.push({ database_id: node.id, type: "database_id" })
-    } else if (node.object === "block") {
+    } else if (node.object === ObjectType.Block) {
       ids.push({ block_id: node.id, type: "block_id" })
       if (node.type === "child_database") {
         ids.push({ database_id: node.id, type: "database_id" })
@@ -52,17 +54,15 @@ export function objectTreeToObjectIds(
   return ids
 }
 
-export function idTypeToObjectType(
-  idWithType: IdWithType["type"]
-): "page" | "database" | "block" {
+export function idTypeToObjectType(idWithType: IdWithType["type"]): ObjectType {
   if (idWithType === "page_id") {
-    return "page"
+    return ObjectType.Page
   }
   if (idWithType === "database_id") {
-    return "database"
+    return ObjectType.Database
   }
   if (idWithType === "block_id") {
-    return "block"
+    return ObjectType.Block
   }
   throw new Error(`Invalid id type: ${idWithType}`)
 }

@@ -3,7 +3,6 @@ import { ListBlockChildrenResponseResult } from "notion-to-md/build/types"
 
 import { NotionPullOptions } from "../config/schema"
 import { FilesManager } from "../files/FilesManager"
-import { FilesMap } from "../files/FilesMap"
 import { ICounts, NotionBlock } from "../index"
 import { NotionPage } from "../notionObjects/NotionPage"
 

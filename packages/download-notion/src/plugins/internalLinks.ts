@@ -1,4 +1,5 @@
 import path from "path"
+import { ObjectType } from "notion-cache-client"
 
 import { removePathExtension } from "../files/pathUtils"
 import { error, warning } from "../log"
@@ -91,7 +92,7 @@ function convertLinkHref(
 ): string {
   let convertedLink = context.filesManager.get(
     "markdown",
-    "page",
+    ObjectType.Page,
     targetPage.id
   )?.path
   if (!context.options.conversion.pageLinkHasExtension) {

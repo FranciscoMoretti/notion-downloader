@@ -1,5 +1,5 @@
 import { ObjectPrefixDict } from "./FilesManager"
-import { FileRecord, FilesMapData } from "./FilesMap"
+import { FileRecord, FilesMapData, allRecordTypes } from "./FilesMap"
 import { addPathPrefix, removePathPrefix } from "./pathUtils"
 
 export function recordMapWithPrefix(
@@ -58,27 +58,22 @@ export function toMapDataWithPrefix(
   filesMapData: FilesMapData,
   prefixes: ObjectPrefixDict
 ): FilesMapData {
-  return {
-    page: recordMapWithPrefix(filesMapData.page, prefixes.page),
-    database: recordMapWithPrefix(filesMapData.database, prefixes.database),
-    image: recordMapWithPrefix(filesMapData.image, prefixes.image),
-    file: recordMapWithPrefix(filesMapData.file, prefixes.file),
-    video: recordMapWithPrefix(filesMapData.video, prefixes.video),
-    pdf: recordMapWithPrefix(filesMapData.pdf, prefixes.pdf),
-    audio: recordMapWithPrefix(filesMapData.audio, prefixes.audio),
-  }
+  return Object.fromEntries(
+    allRecordTypes.map((type) => [
+      type,
+      recordMapWithPrefix(filesMapData[type], prefixes[type]),
+    ])
+  ) as FilesMapData
 }
+
 export function toMapDataWithoutPrefix(
   filesMapData: FilesMapData,
   prefixes: ObjectPrefixDict
 ): FilesMapData {
-  return {
-    page: recordMapWithoutPrefix(filesMapData.page, prefixes.page),
-    database: recordMapWithoutPrefix(filesMapData.database, prefixes.database),
-    image: recordMapWithoutPrefix(filesMapData.image, prefixes.image),
-    file: recordMapWithoutPrefix(filesMapData.file, prefixes.file),
-    video: recordMapWithoutPrefix(filesMapData.video, prefixes.video),
-    pdf: recordMapWithoutPrefix(filesMapData.pdf, prefixes.pdf),
-    audio: recordMapWithoutPrefix(filesMapData.audio, prefixes.audio),
-  }
+  return Object.fromEntries(
+    allRecordTypes.map((type) => [
+      type,
+      recordMapWithoutPrefix(filesMapData[type], prefixes[type]),
+    ])
+  ) as FilesMapData
 }

@@ -2,6 +2,7 @@ import {
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import { ObjectType } from "notion-cache-client"
 
 import { AssetType, FileType } from "../config/schema"
 import { NotionFile } from "./NotionFile"
@@ -34,8 +35,13 @@ export class NotionCoverImage extends NotionFile implements iNotionAssetObject {
     return this.metadata.id
   }
 
-  get object() {
-    return this.metadata.object
+  get object(): ObjectType.Page | ObjectType.Database {
+    if (this.metadata.object === ObjectType.Page) {
+      return ObjectType.Page
+    } else if (this.metadata.object === ObjectType.Database) {
+      return ObjectType.Database
+    }
+    throw new Error("Invalid object type")
   }
 
   get lastEditedTime(): string {

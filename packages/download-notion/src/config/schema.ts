@@ -1,3 +1,4 @@
+import { ObjectType } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-downloader"
 import { z } from "zod"
 
@@ -11,12 +12,6 @@ export enum AssetType {
 
 export enum TextType {
   Markdown = "markdown",
-}
-
-export enum ObjectType {
-  Page = "page",
-  Database = "database",
-  Asset = "asset",
 }
 
 // Merge AssetType into FileType
@@ -42,7 +37,6 @@ export const conversionSchema = z.object({
   statusPropertyName: z.string().default("Status"),
   statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
-  // TODO: Simplify this logics for different assets types
   outputPaths: assetTypesSchema
     .extend({
       [TextType.Markdown]: z.string().default("./content"),
@@ -57,6 +51,7 @@ export const conversionSchema = z.object({
     })
     .strict()
     .default({}),
+  // TODO: Strategies should be per asset type
   layoutStrategy: z
     .enum(["HierarchicalNamedLayoutStrategy", "FlatLayoutStrategy"])
     .default("HierarchicalNamedLayoutStrategy"),
@@ -78,7 +73,9 @@ export const pullOptionsSchema = z
     // Notion Options
     notionToken: z.string(),
     rootId: z.string(),
-    rootObjectType: z.enum(["page", "database", "auto"]).default("auto"),
+    rootObjectType: z
+      .enum([ObjectType.Page, ObjectType.Database, "auto"])
+      .default("auto"),
     rootDbAsFolder: z.boolean().default(false),
 
     // Cache

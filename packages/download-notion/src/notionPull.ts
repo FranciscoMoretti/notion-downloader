@@ -2,7 +2,11 @@ import path from "path"
 import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
-import { NotionCacheClient, convertToUUID } from "notion-cache-client"
+import {
+  NotionCacheClient,
+  ObjectType,
+  convertToUUID,
+} from "notion-cache-client"
 import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
@@ -370,15 +374,10 @@ async function setupFilesManagers(
   return { existingFilesManager, newFilesManager }
 }
 
-async function createDirectories(options: NotionPullOptions, cacheDir: string) {
-  await fs.mkdir(options.conversion.outputPaths.markdown, { recursive: true })
-  await fs.mkdir(cacheDir, { recursive: true })
-}
-
 async function downloadAndProcessObjectTree(
   cachedNotionClient: NotionCacheClient,
   rootUUID: string,
-  rootObjectType: "page" | "database",
+  rootObjectType: ObjectType.Database | ObjectType.Page,
   options: NotionPullOptions,
   objectTreeCachePath: string
 ) {
@@ -449,7 +448,7 @@ async function outputPages(
   )
 
   for (const page of pages) {
-    const mdPath = filesManager.get("base", "page", page.id)?.path
+    const mdPath = filesManager.get("base", ObjectType.Page, page.id)?.path
     const mdPathWithRoot =
       sanitizeMarkdownOutputPath(options.conversion.outputPaths.markdown) +
       mdPath
@@ -493,18 +492,18 @@ async function tryGetFirstPageWithType({
   rootUUID,
 }: {
   cachedNotionClient: NotionCacheClient
-  rootObjectType: "page" | "database" | "auto"
+  rootObjectType: ObjectType.Page | ObjectType.Database | "auto"
   rootUUID: string
-}): Promise<"page" | "database"> {
+}): Promise<ObjectType.Page | ObjectType.Database> {
   // TODO: Here it retries 10 times before exiting if we use the cache client
   try {
     let pageResult = undefined
-    if (["auto", "page"].includes(rootObjectType)) {
+    if (["auto", ObjectType.Page].includes(rootObjectType)) {
       try {
         pageResult = await cachedNotionClient.pages.retrieve({
           page_id: rootUUID,
         })
-        return Promise.resolve("page")
+        return Promise.resolve(ObjectType.Page)
       } catch (e: any) {
         // Catch APIResponseError
         if (e.code !== "object_not_found") {
@@ -512,9 +511,9 @@ async function tryGetFirstPageWithType({
         }
       }
     }
-    if (["auto", "database"].includes(rootObjectType) || !pageResult) {
+    if (["auto", ObjectType.Database].includes(rootObjectType) || !pageResult) {
       await cachedNotionClient.databases.retrieve({ database_id: rootUUID })
-      return Promise.resolve("database")
+      return Promise.resolve(ObjectType.Database)
     }
   } catch (e: any) {
     Promise.reject(e)

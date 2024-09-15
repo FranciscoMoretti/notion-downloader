@@ -3,6 +3,7 @@ import {
   ImageBlockObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import { ObjectType } from "notion-cache-client"
 
 import { AssetType, FileType } from "../config/schema"
 import { NotionFile } from "./NotionFile"
@@ -18,6 +19,7 @@ export type DatabaseObjectResponseWithCover = DatabaseObjectResponse & {
 
 type NotionBlockImageResponses = ImageBlockObjectResponse
 
+// TODO: This should inherit from NotionBlock
 export class NotionBlockImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionBlockImageResponses
   public assetType: AssetType = AssetType.Image
@@ -36,8 +38,8 @@ export class NotionBlockImage extends NotionFile implements iNotionAssetObject {
     return this.metadata.id
   }
 
-  get object() {
-    return this.metadata.object
+  get object(): ObjectType.Block {
+    return ObjectType.Block
   }
 
   get type() {

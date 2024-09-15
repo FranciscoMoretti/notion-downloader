@@ -1,9 +1,11 @@
 import path from "path"
 import fs from "fs-extra"
+import { ObjectType } from "notion-cache-client"
 
+import { AssetType } from "../config/schema"
 import { info, verbose } from "../log"
 import { FilesManager } from "./FilesManager"
-import { FileRecord, FileRecordType } from "./FilesMap"
+import { FileRecord, FileRecordType, allRecordTypes } from "./FilesMap"
 
 export type ExtendedFileRecord = FileRecord & {
   id: string
@@ -15,24 +17,21 @@ export class FilesCleaner {
     newFilesManager: FilesManager
   ): Promise<void> {
     info("Cleaning up old files")
-    const oldFiles = this.getFileRecords(oldFilesManager, "page")
-    const newFiles = this.getFileRecords(newFilesManager, "page")
-    const oldImages = this.getFileRecords(oldFilesManager, "image")
-    const newImages = this.getFileRecords(newFilesManager, "image")
 
-    const pagesToRemove = this.getRecordsToRemove(oldFiles, newFiles)
-    const imagesToRemove = this.getRecordsToRemove(oldImages, newImages)
+    const recordsToRemove = allRecordTypes.flatMap((type) => {
+      const oldRecords = this.getFileRecords(oldFilesManager, type)
+      const newRecords = this.getFileRecords(newFilesManager, type)
+      return this.getRecordsToRemove(oldRecords, newRecords)
+    })
 
-    await this.removeRecords([...pagesToRemove, ...imagesToRemove])
+    await this.removeRecords(recordsToRemove)
   }
 
   public async cleanupAllFiles(filesManager: FilesManager): Promise<void> {
     info("Cleaning up all tracked files")
-    const allFiles = [
-      ...this.getFileRecords(filesManager, "page"),
-      ...this.getFileRecords(filesManager, "image"),
-      ...this.getFileRecords(filesManager, "database"),
-    ]
+    const allFiles = allRecordTypes.flatMap((type) =>
+      this.getFileRecords(filesManager, type)
+    )
 
     await this.removeRecords(allFiles)
   }

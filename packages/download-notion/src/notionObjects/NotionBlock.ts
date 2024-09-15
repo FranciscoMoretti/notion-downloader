@@ -1,4 +1,5 @@
 import { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { ObjectType } from "notion-cache-client"
 
 import { NotionObject } from "./NotionObject"
 
@@ -13,8 +14,8 @@ export class NotionBlock implements NotionObject {
     return this.metadata.id
   }
 
-  get object() {
-    return this.metadata.object
+  get object(): ObjectType.Block {
+    return ObjectType.Block
   }
 
   get type() {

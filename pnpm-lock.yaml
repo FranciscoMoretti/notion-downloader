@@ -244,6 +244,9 @@ importers:
       limiter-es6-compat:
         specifier: ^2.1.2
         version: 2.1.2
+      zod:
+        specifier: ^3.20.2
+        version: 3.23.8
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.1

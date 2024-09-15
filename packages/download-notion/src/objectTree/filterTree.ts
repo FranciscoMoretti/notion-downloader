@@ -1,3 +1,4 @@
+import { ObjectType, ObjectTypeSchema } from "notion-cache-client"
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { verbose } from "../log"
@@ -13,7 +14,7 @@ export function filterTree(
   function shouldFilterPageStatus(
     notionObject: NotionDatabase | NotionPage
   ): boolean {
-    if (notionObject.object !== "page") {
+    if (notionObject.object !== ObjectType.Page) {
       return false
     }
     const pageStatus = notionObject.getGenericProperty(statusPropertyName)
@@ -33,13 +34,15 @@ export function filterTree(
       verbose(
         `Skipping [${objectResponse.object}] (${objectResponse.id}) because parent has been filtered`
       )
-      tree.removeObject(objectResponse.object, objectResponse.id)
+      tree.removeObject(
+        ObjectTypeSchema.parse(objectResponse.object),
+        objectResponse.id
+      )
       return { shouldRemove: true }
     }
 
     if (
-      // TODO: We should filter databases as well (for wikis)
-      objectResponse.object === "page" &&
+      objectResponse.object === ObjectType.Page &&
       shouldFilterPageStatus(getNotionObject(objectResponse) as NotionPage)
     ) {
       const notionObject = getNotionObject(objectResponse) as NotionPage
@@ -51,7 +54,10 @@ export function filterTree(
         )}`}`
       )
 
-      tree.removeObject(objectResponse.object, objectResponse.id)
+      tree.removeObject(
+        ObjectTypeSchema.parse(objectResponse.object),
+        objectResponse.id
+      )
       return { shouldRemove: true }
     }
     return { shouldRemove: false }

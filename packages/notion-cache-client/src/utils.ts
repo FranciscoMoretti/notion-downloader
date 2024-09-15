@@ -5,6 +5,8 @@ import {
 } from "@notionhq/client/build/src/api-endpoints"
 import fs from "fs-extra"
 
+import { ObjectType } from "./notion-types"
+
 export async function saveObjectToJson(data: any, filename: string) {
   const json = JSON.stringify(data, null, 2)
   await fs.writeFile(filename, json)
@@ -28,7 +30,7 @@ export function convertToUUID(str: string): string {
 }
 
 export type SimpleParent = {
-  object: "page" | "database" | "block"
+  object: ObjectType
   id: string
 }
 
@@ -41,11 +43,11 @@ export function simplifyParentObject(
   if (parent.type === "workspace") {
     return null
   } else if (parent.type === "page_id") {
-    return { id: parent.page_id, object: "page" }
+    return { id: parent.page_id, object: ObjectType.Page }
   } else if (parent.type === "database_id") {
-    return { id: parent.database_id, object: "database" }
+    return { id: parent.database_id, object: ObjectType.Database }
   } else if (parent.type === "block_id") {
-    return { id: parent.block_id, object: "block" }
+    return { id: parent.block_id, object: ObjectType.Block }
   } else {
     throw new Error(`Unknown parent type: ${parent}`)
   }

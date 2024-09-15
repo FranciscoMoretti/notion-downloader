@@ -1,3 +1,5 @@
+import { AssetType } from "@/src/config/schema"
+import { ObjectType } from "notion-cache-client"
 import { beforeEach, describe, expect, test } from "vitest"
 
 import { FileRecord, FilesMap } from "../src/files/FilesMap"
@@ -10,7 +12,7 @@ describe("FilesMap", () => {
   })
 
   test("exists() returns false for non-existent record", () => {
-    expect(filesMap.exists("page", "nonexistent")).toBe(false)
+    expect(filesMap.exists(ObjectType.Page, "nonexistent")).toBe(false)
   })
 
   test("set() and exists() work correctly", () => {
@@ -18,8 +20,8 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set("page", "test-id", record)
-    expect(filesMap.exists("page", "test-id")).toBe(true)
+    filesMap.set(ObjectType.Page, "test-id", record)
+    expect(filesMap.exists(ObjectType.Page, "test-id")).toBe(true)
   })
 
   test("get() returns correct record", () => {
@@ -27,12 +29,12 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set("page", "test-id", record)
-    expect(filesMap.get("page", "test-id")).toEqual(record)
+    filesMap.set(ObjectType.Page, "test-id", record)
+    expect(filesMap.get(ObjectType.Page, "test-id")).toEqual(record)
   })
 
   test("get() throws error for non-existent record", () => {
-    expect(() => filesMap.get("page", "nonexistent")).toThrow(
+    expect(() => filesMap.get(ObjectType.Page, "nonexistent")).toThrow(
       "File record not found for page nonexistent"
     )
   })
@@ -42,9 +44,9 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set("page", "test-id", record)
-    filesMap.delete("page", "test-id")
-    expect(filesMap.exists("page", "test-id")).toBe(false)
+    filesMap.set(ObjectType.Page, "test-id", record)
+    filesMap.delete(ObjectType.Page, "test-id")
+    expect(filesMap.exists(ObjectType.Page, "test-id")).toBe(false)
   })
 
   test("getAllOfType() returns correct records", () => {
@@ -56,9 +58,9 @@ describe("FilesMap", () => {
       path: "/pages/test2.md",
       lastEditedTime: "2023-04-02T12:00:00Z",
     }
-    filesMap.set("page", "test-id-1", record1)
-    filesMap.set("page", "test-id-2", record2)
-    expect(filesMap.getAllOfType("page")).toEqual({
+    filesMap.set(ObjectType.Page, "test-id-1", record1)
+    filesMap.set(ObjectType.Page, "test-id-2", record2)
+    expect(filesMap.getAllOfType(ObjectType.Page)).toEqual({
       "test-id-1": record1,
       "test-id-2": record2,
     })
@@ -73,16 +75,16 @@ describe("FilesMap", () => {
       path: "/databases/test.csv",
       lastEditedTime: "2023-04-02T12:00:00Z",
     }
-    filesMap.set("page", "page-id", pageRecord)
-    filesMap.set("database", "db-id", dbRecord)
+    filesMap.set(ObjectType.Page, "page-id", pageRecord)
+    filesMap.set(ObjectType.Database, "db-id", dbRecord)
     expect(filesMap.getAll()).toEqual({
-      page: { "page-id": pageRecord },
-      database: { "db-id": dbRecord },
-      image: {},
-      file: {},
-      video: {},
-      pdf: {},
-      audio: {},
+      [ObjectType.Page]: { "page-id": pageRecord },
+      [ObjectType.Database]: { "db-id": dbRecord },
+      [AssetType.Image]: {},
+      [AssetType.File]: {},
+      [AssetType.Video]: {},
+      [AssetType.PDF]: {},
+      [AssetType.Audio]: {},
     })
   })
 
@@ -91,9 +93,9 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set("page", "test-id", record)
+    filesMap.set(ObjectType.Page, "test-id", record)
     const json = filesMap.toJSON()
     const newFilesMap = FilesMap.fromJSON(json)
-    expect(newFilesMap.get("page", "test-id")).toEqual(record)
+    expect(newFilesMap.get(ObjectType.Page, "test-id")).toEqual(record)
   })
 })

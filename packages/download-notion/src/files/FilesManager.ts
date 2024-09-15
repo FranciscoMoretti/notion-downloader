@@ -1,3 +1,6 @@
+import { ObjectType, ObjectTypeSchema } from "notion-cache-client"
+
+import { mapToAssetType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { iNotionAssetObject } from "../notionObjects/objectTypes"
 import { FileRecord, FileRecordType, FilesMap, FilesMapData } from "./FilesMap"
@@ -30,11 +33,7 @@ export class FilesManager {
   }
 
   public isObjectNew(notionObject: iNotionAssetObject | NotionObject): boolean {
-    const recordType =
-      "assetType" in notionObject ? notionObject.assetType : notionObject.object
-    if (recordType === "block") {
-      throw new Error("Block records that are not assetsare not supported")
-    }
+    const recordType = this._getRecordType(notionObject)
     if (!this.baseFilesMap.exists(recordType, notionObject.id)) {
       return true
     }
@@ -47,6 +46,19 @@ export class FilesManager {
     }
 
     return false
+  }
+
+  private _getRecordType(
+    notionObject: iNotionAssetObject | NotionObject
+  ): FileRecordType {
+    const recordType =
+      "assetType" in notionObject
+        ? mapToAssetType(notionObject.assetType)
+        : ObjectTypeSchema.parse(notionObject.object)
+    if (recordType === ObjectType.Block) {
+      throw new Error("Only block recrods that are assets are supported")
+    }
+    return recordType
   }
 
   public exists(type: FileRecordType, id: string): boolean {
@@ -95,7 +107,7 @@ export class FilesManager {
   public getAllOfType(
     pathType: PathType,
     type: FileRecordType
-  ): Record<string, FileRecord> {
+  ): Record<FileRecordType, FileRecord> {
     const records = this.baseFilesMap.getAllOfType(type)
     if (pathType === "output") {
       return recordMapWithPrefix(records, this.outputDirectories[type])

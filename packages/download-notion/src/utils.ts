@@ -1,6 +1,7 @@
 import crypto from "crypto"
 import * as Path from "path"
 import fs from "fs-extra"
+import { ObjectType } from "notion-cache-client"
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
@@ -39,18 +40,22 @@ function getAncestorPageOrDatabaseFilepath(
   objectsTree: NotionObjectTree,
   filesManager: FilesManager
 ): string {
-  if (image.object == "page") {
-    return filesManager.get("base", "page", image.id).path
-  } else if (image.object == "database") {
-    return filesManager.get("base", "database", image.id).path
+  if (image.object == ObjectType.Page) {
+    return filesManager.get("base", ObjectType.Page, image.id).path
+  } else if (image.object == ObjectType.Database) {
+    return filesManager.get("base", ObjectType.Database, image.id).path
   }
 
   // It's a block. Ancestor is page
-  const ancestorPageId = getPageAncestorId("block", image.id, objectsTree)
+  const ancestorPageId = getPageAncestorId(
+    ObjectType.Block,
+    image.id,
+    objectsTree
+  )
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for image " + image.id)
   }
-  return filesManager.get("base", "page", ancestorPageId).path
+  return filesManager.get("base", ObjectType.Page, ancestorPageId).path
 }
 
 export function getAncestorPageOrDatabaseFilename(

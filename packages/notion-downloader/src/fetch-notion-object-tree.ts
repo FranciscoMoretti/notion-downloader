@@ -3,7 +3,14 @@ import {
   ListBlockChildrenParameters,
   QueryDatabaseParameters,
 } from "@notionhq/client/build/src/api-endpoints"
-import { NotionCacheClient, logOperation } from "notion-cache-client"
+import {
+  CacheType,
+  NotionCacheClient,
+  ObjectType,
+  ObjectTypeSchema,
+  PageOrDatabaseSchema,
+  logOperation,
+} from "notion-cache-client"
 import { z } from "zod"
 
 import { NotionObjectTreeNode } from "./notion-object-tree"
@@ -19,7 +26,7 @@ interface DownloadObjectsOptions {
 
 export interface StartingNode {
   rootUUID: string
-  rootObjectType: "page" | "database"
+  rootObjectType: ObjectType.Page | ObjectType.Database
 }
 
 interface FetchingOptions {
@@ -94,8 +101,9 @@ async function fetchTreeRecursively(
   options?: DownloadObjectsOptions
 ) {
   if (
-    objectNode.object === "database" ||
-    (objectNode.object === "block" && objectNode.type === "child_database")
+    objectNode.object === ObjectType.Database ||
+    (objectNode.object === ObjectType.Block &&
+      objectNode.type === "child_database")
   ) {
     if (options?.downloadDatabases) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
@@ -119,7 +127,7 @@ async function fetchTreeRecursively(
       level: level,
       source: "WALKER",
       operation: "RETRIEVE",
-      resource_type: "database_children",
+      resource_type: CacheType.DATABASE_CHILDREN,
       id: objectNode.id,
     })
     const databaseChildrenResults = await collectPaginatedAPI(
@@ -129,11 +137,10 @@ async function fetchTreeRecursively(
         database_id: objectNode.id,
       }
     )
-    // TODO: Consider only getting block children if the `has_children` prop is true
     for (const childObject of databaseChildrenResults) {
       const newNode: NotionObjectTreeNode = {
         id: childObject.id,
-        object: childObject.object,
+        object: PageOrDatabaseSchema.parse(childObject.object),
         children: [],
         parent: {
           id: objectNode.id,
@@ -145,13 +152,15 @@ async function fetchTreeRecursively(
       await fetchTreeRecursively(newNode, level + 1, client, options)
     }
   } else if (
-    objectNode.object === "page" ||
-    (objectNode.object === "block" && objectNode.type === "child_page") ||
-    (objectNode.object === "block" && objectNode.has_children)
+    objectNode.object === ObjectType.Page ||
+    (objectNode.object === ObjectType.Block &&
+      objectNode.type === "child_page") ||
+    (objectNode.object === ObjectType.Block && objectNode.has_children)
   ) {
     if (
-      objectNode.object === "page" ||
-      (objectNode.object === "block" && objectNode.type === "child_page")
+      objectNode.object === ObjectType.Page ||
+      (objectNode.object === ObjectType.Block &&
+        objectNode.type === "child_page")
     ) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
       if (options?.downloadAllPages) {
@@ -175,7 +184,7 @@ async function fetchTreeRecursively(
       level: level,
       source: "WALKER",
       operation: "RETRIEVE",
-      resource_type: "block_children",
+      resource_type: CacheType.BLOCKS_CHILDREN,
       id: objectNode.id,
     })
     const blocksChildrenResults = await collectPaginatedAPI(
@@ -191,7 +200,7 @@ async function fetchTreeRecursively(
       }
       const newNode: NotionObjectTreeNode = {
         id: childBlock.id,
-        object: childBlock.object,
+        object: ObjectType.Block,
         children: [],
         has_children: childBlock.has_children,
         type: childBlock.type,

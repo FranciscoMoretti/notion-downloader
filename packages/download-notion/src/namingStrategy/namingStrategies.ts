@@ -1,9 +1,9 @@
 // Defining naming strategies
 
 import { slug } from "github-slugger"
+import { ObjectType } from "notion-cache-client"
 import sanitize from "sanitize-filename"
 
-import { ObjectType } from "../config/schema"
 import { NotionDatabase } from "../notionObjects/NotionDatabase"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { NotionPage } from "../notionObjects/NotionPage"

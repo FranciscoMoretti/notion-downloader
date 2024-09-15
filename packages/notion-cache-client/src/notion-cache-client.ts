@@ -44,6 +44,7 @@ import {
 import { NotionCache, NotionCacheOptions } from "./NotionCache"
 import { executeWithRateLimitAndRetries } from "./executeWithRateLimitAndRetries"
 import { logOperation } from "./logOperation"
+import { CacheType } from "./notion-structures-types"
 
 export class NotionCacheClient extends Client {
   cache: NotionCache
@@ -73,7 +74,7 @@ export class NotionCacheClient extends Client {
       level: number = 0
     ): Promise<GetBlockResponse> => {
       this.logClientMessage({
-        resource_type: "block",
+        resource_type: CacheType.BLOCK,
         source: "CLIENT",
         operation: "RETRIEVE",
         id: args.block_id,
@@ -89,7 +90,7 @@ export class NotionCacheClient extends Client {
         `blocks.retrieve(${args.block_id})`,
         () => {
           this.logClientMessage({
-            resource_type: "block",
+            resource_type: CacheType.BLOCK,
             source: "NOTION",
             operation: "RETRIEVE",
             id: args.block_id,
@@ -130,7 +131,7 @@ export class NotionCacheClient extends Client {
       ): Promise<ListBlockChildrenResponse> => {
         // When args others than block_id are used, we default to the method from ancestor
         this.logClientMessage({
-          resource_type: "block_children",
+          resource_type: CacheType.BLOCKS_CHILDREN,
           source: "CLIENT",
           operation: "RETRIEVE",
           id: args.block_id,
@@ -138,7 +139,7 @@ export class NotionCacheClient extends Client {
         })
         if (Object.values(args).filter(Boolean).length > 1) {
           this.logClientMessage({
-            resource_type: "block_children",
+            resource_type: CacheType.BLOCKS_CHILDREN,
             source: "NOTION",
             operation: "RETRIEVE",
             id: args.block_id,
@@ -160,7 +161,7 @@ export class NotionCacheClient extends Client {
           `blocks.children.list(${args.block_id})`,
           () => {
             this.logClientMessage({
-              resource_type: "block_children",
+              resource_type: CacheType.BLOCKS_CHILDREN,
               source: "NOTION",
               operation: "RETRIEVE",
               id: args.block_id,
@@ -190,7 +191,7 @@ export class NotionCacheClient extends Client {
     ): Promise<GetDatabaseResponse> => {
       // Check if we have it in cache
       this.logClientMessage({
-        resource_type: "database",
+        resource_type: CacheType.DATABASE,
         source: "CLIENT",
         operation: "RETRIEVE",
         id: args.database_id,
@@ -207,7 +208,7 @@ export class NotionCacheClient extends Client {
         `databases.retrieve(${args.database_id})`,
         () => {
           this.logClientMessage({
-            resource_type: "database",
+            resource_type: CacheType.DATABASE,
             source: "NOTION",
             operation: "RETRIEVE",
             id: args.database_id,
@@ -231,7 +232,7 @@ export class NotionCacheClient extends Client {
     ): Promise<QueryDatabaseResponse> => {
       // When args others than block_id are used, we default to the method from ancestor
       this.logClientMessage({
-        resource_type: "database_children",
+        resource_type: CacheType.DATABASE_CHILDREN,
         source: "CLIENT",
         operation: "RETRIEVE",
         id: args.database_id,
@@ -239,7 +240,7 @@ export class NotionCacheClient extends Client {
       })
       if (Object.values(args).filter(Boolean).length > 1) {
         this.logClientMessage({
-          resource_type: "database_children",
+          resource_type: CacheType.DATABASE_CHILDREN,
           source: "NOTION",
           operation: "RETRIEVE",
           id: args.database_id,
@@ -259,7 +260,7 @@ export class NotionCacheClient extends Client {
         `database.query(${args.database_id})`,
         () => {
           this.logClientMessage({
-            resource_type: "database_children",
+            resource_type: CacheType.DATABASE_CHILDREN,
             source: "NOTION",
             operation: "RETRIEVE",
             id: args.database_id,
@@ -300,7 +301,7 @@ export class NotionCacheClient extends Client {
       level: number = 0
     ): Promise<GetPageResponse> => {
       this.logClientMessage({
-        resource_type: "page",
+        resource_type: CacheType.PAGE,
         source: "CLIENT",
         operation: "RETRIEVE",
         id: args.page_id,
@@ -316,7 +317,7 @@ export class NotionCacheClient extends Client {
         `pages.retrieve(${args.page_id})`,
         () => {
           this.logClientMessage({
-            resource_type: "page",
+            resource_type: CacheType.PAGE,
             source: "NOTION",
             operation: "RETRIEVE",
             id: args.page_id,
@@ -356,12 +357,7 @@ export class NotionCacheClient extends Client {
     id: string
     source: "CLIENT" | "NOTION"
     operation: "RETRIEVE" | "CREATE" | "UPDATE"
-    resource_type:
-      | "block"
-      | "database"
-      | "page"
-      | "block_children"
-      | "database_children"
+    resource_type: CacheType
     level: number
   }) {
     logOperation({

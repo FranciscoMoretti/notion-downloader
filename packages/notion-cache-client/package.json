@@ -48,7 +48,8 @@
     "@notionhq/client": "^2.2.15",
     "chalk": "5.2.0",
     "fs-extra": "^11.1.0",
-    "limiter-es6-compat": "^2.1.2"
+    "limiter-es6-compat": "^2.1.2",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",

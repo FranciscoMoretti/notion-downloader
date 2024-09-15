@@ -1,3 +1,4 @@
+import { ObjectType } from "notion-cache-client"
 import { NotionObjectResponse } from "notion-downloader"
 
 import { NotionBlock } from "./NotionBlock"
@@ -6,11 +7,11 @@ import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
 
 export function getNotionObject(response: NotionObjectResponse) {
-  if (response.object == "page") {
+  if (response.object == ObjectType.Page) {
     return new NotionPage(response)
-  } else if (response.object == "database") {
+  } else if (response.object == ObjectType.Database) {
     return new NotionDatabase(response)
-  } else if (response.object == "block") {
+  } else if (response.object == ObjectType.Block) {
     if (response.type == "image") {
       return new NotionBlockImage(response)
     } else {

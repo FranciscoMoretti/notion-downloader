@@ -3,7 +3,11 @@ import {
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import { SimpleParent, simplifyParentObject } from "notion-cache-client"
+import {
+  ObjectType,
+  SimpleParent,
+  simplifyParentObject,
+} from "notion-cache-client"
 
 export type NotionObjectResponse =
   | PageObjectResponse
@@ -24,7 +28,7 @@ type IdToNodeMap = {
 
 export type BlockObjectTreeNode = {
   id: string
-  object: "block"
+  object: ObjectType.Block
   type: string
   has_children: boolean
   children: Array<NotionObjectTreeNode>
@@ -35,7 +39,7 @@ export type BlockObjectTreeNode = {
 export type NotionObjectTreeNode =
   | {
       id: string
-      object: "database" | "page"
+      object: ObjectType.Page | ObjectType.Database
       children: Array<NotionObjectTreeNode>
       parent: SimpleParent | null
     }
@@ -44,13 +48,13 @@ export type NotionObjectTreeNode =
 export type NotionObjectPlain =
   | {
       id: string
-      object: "database" | "page"
+      object: ObjectType.Database | ObjectType.Page
       children: Array<string>
       parent: SimpleParent | null
     }
   | {
       id: string
-      object: "block"
+      object: ObjectType.Block
       type: string
       has_children: boolean
       children: Array<string>
@@ -82,7 +86,7 @@ export class NotionObjectTree {
   }
 
   private setNodetoMap(node: NotionObjectTreeNode) {
-    if (node.object === "block") {
+    if (node.object === ObjectType.Block) {
       this.idToNodeMap.block.set(node.id, node)
     } else {
       this.idToNodeMap[node.object].set(node.id, node)
@@ -131,10 +135,7 @@ export class NotionObjectTree {
     }
   }
 
-  getParent(
-    objectType: "page" | "database" | "block",
-    id: string
-  ): SimpleParent | null {
+  getParent(objectType: ObjectType, id: string): SimpleParent | null {
     const node = this.getNodeById(objectType, id)
     if (!node) return null
     if (node.id === this.tree.id) {
@@ -145,7 +146,7 @@ export class NotionObjectTree {
   }
 
   getObject(
-    objectType: "page" | "database" | "block",
+    objectType: ObjectType,
     id: string
   ):
     | PageObjectResponse
@@ -156,7 +157,7 @@ export class NotionObjectTree {
     return objectData || undefined
   }
 
-  removeObject(objectType: "page" | "database" | "block", id: string) {
+  removeObject(objectType: ObjectType, id: string) {
     const node = this.getNodeById(objectType, id)
     if (!node) return
     // First let children remove themselves, and then remove up to the start node
@@ -167,9 +168,12 @@ export class NotionObjectTree {
     const parentRaw = { ...this.data[node.object][id].parent }
     // Delete from data
     delete this.data[node.object][id]
-    if (node.object === "block" && node.type === "child_page") {
+    if (node.object === ObjectType.Block && node.type === "child_page") {
       delete this.data.page[id]
-    } else if (node.object === "block" && node.type === "child_database") {
+    } else if (
+      node.object === ObjectType.Block &&
+      node.type === "child_database"
+    ) {
       delete this.data.database[id]
     }
 
@@ -187,11 +191,11 @@ export class NotionObjectTree {
   }
 
   private getNodeById(
-    objectType: "page" | "database" | "block",
+    objectType: ObjectType,
     id: string
   ): NotionObjectTreeNode | undefined {
     // If asked for a page or database, child_page and child_database have presedence over pages and databases
-    if (objectType === "page") {
+    if (objectType === ObjectType.Page) {
       const possible_child_page = this.idToNodeMap.block.get(id)
       if (possible_child_page) {
         if (possible_child_page.type === "child_page") {
@@ -200,7 +204,7 @@ export class NotionObjectTree {
           throw new Error(`Block with id ${id} exists but is not a child page`)
         }
       }
-    } else if (objectType === "database") {
+    } else if (objectType === ObjectType.Database) {
       const possible_child_database = this.idToNodeMap.block.get(id)
       if (possible_child_database) {
         if (possible_child_database.type === "child_database") {

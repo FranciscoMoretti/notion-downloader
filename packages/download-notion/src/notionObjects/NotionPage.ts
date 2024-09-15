@@ -1,4 +1,5 @@
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
+import { ObjectType } from "notion-cache-client"
 
 import { AssetType, FileType } from "../config/schema"
 import { error } from "../log"
@@ -23,8 +24,8 @@ export class NotionPage implements NotionObject {
     return this.metadata.last_edited_time
   }
 
-  public get object(): "page" {
-    return this.metadata.object
+  public get object(): ObjectType.Page {
+    return ObjectType.Page
   }
 
   public get isDatabaseChild(): boolean {

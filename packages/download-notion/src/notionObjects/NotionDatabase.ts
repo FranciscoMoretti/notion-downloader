@@ -2,6 +2,7 @@ import {
   DatabaseObjectResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import { ObjectType } from "notion-cache-client"
 
 import { NotionObject } from "./NotionObject"
 
@@ -21,8 +22,8 @@ export class NotionDatabase implements NotionObject {
     return this.metadata.last_edited_time
   }
 
-  public get object() {
-    return this.metadata.object
+  public get object(): ObjectType.Database {
+    return ObjectType.Database
   }
 
   // In Notion, pages from the Outline have "title"'s.

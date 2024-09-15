@@ -1,18 +1,14 @@
+import { ObjectType } from "notion-cache-client"
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { FilesManager, copyRecord } from "./files/FilesManager"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { getNotionObject } from "./notionObjects/NotionObjectUtils"
-import {
-  NotionImageLike,
-  iNotionAssetObject,
-} from "./notionObjects/objectTypes"
+import { iNotionAssetObject } from "./notionObjects/objectTypes"
 import {
   NotionAssetObjectResponses,
   getAssetObjectFromObjectResponse,
   getAssetTypeFromObjectResponse,
-  getImageLikeObject,
-  hasImageLikeObject,
 } from "./notionObjects/objectutils"
 import { FileBuffersMemory } from "./types"
 
@@ -39,11 +35,15 @@ export function getFileTreeMap(
     // New level path is created by objects that can contain files as children
     const newLevelPath =
       !parentContext.databaseIsRoot &&
-      (notionObject.object === "page" || notionObject.object === "database")
+      (notionObject.object === ObjectType.Page ||
+        notionObject.object === ObjectType.Database)
         ? markdownLayoutStrategy.newPathLevel(parentContext.path, notionObject)
         : parentContext.path
 
-    if (notionObject.object === "page" || notionObject.object === "database") {
+    if (
+      notionObject.object === ObjectType.Page ||
+      notionObject.object === ObjectType.Database
+    ) {
       if (existingFilesManager.exists(notionObject.object, notionObject.id)) {
         copyRecord(
           existingFilesManager,
@@ -53,7 +53,7 @@ export function getFileTreeMap(
         )
       } else {
         const objectPath =
-          notionObject.object == "database"
+          notionObject.object == ObjectType.Database
             ? newLevelPath
             : markdownLayoutStrategy.getPathForObject(
                 parentContext.path,

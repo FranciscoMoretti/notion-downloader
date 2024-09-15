@@ -5,6 +5,7 @@ import {
   PdfBlockObjectResponse,
   VideoBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
+import { ObjectTypeSchema } from "notion-cache-client"
 
 import { AssetType, FileType, mapToAssetType } from "../config/schema"
 import { NotionFile } from "./NotionFile"
@@ -37,7 +38,7 @@ export class NotionFileObject extends NotionFile implements iNotionAssetObject {
   }
 
   get object() {
-    return this.metadata.object
+    return ObjectTypeSchema.parse(this.metadata.object)
   }
 
   get type() {

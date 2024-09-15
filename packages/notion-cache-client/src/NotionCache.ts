@@ -13,13 +13,17 @@ import {
   BlocksChildrenCache,
   CacheData,
   CacheInfo,
+  CacheType,
   DatabaseChildrenCache,
   NotionBlockObjectsCache,
   NotionDatabaseObjectsCache,
   NotionPageObjectsCache,
+  getCacheType,
 } from "./notion-structures-types"
+import { ObjectType } from "./notion-types"
 
 export type NotionCacheOptions = {
+  // TODO: These cache objects should be grouped in a single cache or maybe moved to a load function
   pageObjectsCache?: NotionPageObjectsCache
   databaseObjectsCache?: NotionDatabaseObjectsCache
   blockObjectsCache?: NotionBlockObjectsCache
@@ -60,7 +64,7 @@ export class NotionCache {
     ) {
       this.logCacheMessage({
         operation: "HIT",
-        cache_type: "block",
+        cache_type: CacheType.BLOCK,
         id: id,
         level,
       })
@@ -69,7 +73,7 @@ export class NotionCache {
 
     this.logCacheMessage({
       operation: this.getNonHitOperation(this.blockObjectsCache[id]),
-      cache_type: "block",
+      cache_type: CacheType.BLOCK,
       id: id,
       level,
     })
@@ -84,7 +88,7 @@ export class NotionCache {
       this.blockObjectsCache[response.id].__needs_refresh = false
       this.logCacheMessage({
         operation: "SET_NO_CHANGE",
-        cache_type: "block",
+        cache_type: CacheType.BLOCK,
         id: response.id,
         level: level,
       })
@@ -105,7 +109,7 @@ export class NotionCache {
     }
     this.logCacheMessage({
       operation: "SET_NEW",
-      cache_type: "block",
+      cache_type: CacheType.BLOCK,
       id: response.id,
       level: level,
     })
@@ -118,7 +122,7 @@ export class NotionCache {
     ) {
       this.logCacheMessage({
         operation: "HIT",
-        cache_type: "block_children",
+        cache_type: CacheType.BLOCKS_CHILDREN,
         id: id,
         level,
       })
@@ -138,7 +142,7 @@ export class NotionCache {
 
     this.logCacheMessage({
       operation: this.getNonHitOperation(this.blocksChildrenCache[id]),
-      cache_type: "block_children",
+      cache_type: CacheType.BLOCKS_CHILDREN,
       id: id,
       level: level,
     })
@@ -158,7 +162,7 @@ export class NotionCache {
       this.blocksChildrenCache[id].__needs_refresh = false
       this.logCacheMessage({
         operation: "SET_NO_CHANGE",
-        cache_type: "block_children",
+        cache_type: CacheType.BLOCKS_CHILDREN,
         id: id,
         level: level,
       })
@@ -177,7 +181,7 @@ export class NotionCache {
     }
     this.logCacheMessage({
       operation: "SET_NEW",
-      cache_type: "block_children",
+      cache_type: CacheType.BLOCKS_CHILDREN,
       id: id,
       level: level,
     })
@@ -196,7 +200,7 @@ export class NotionCache {
     ) {
       this.logCacheMessage({
         operation: "HIT",
-        cache_type: "database",
+        cache_type: CacheType.DATABASE,
         id: id,
         level,
       })
@@ -205,7 +209,7 @@ export class NotionCache {
 
     this.logCacheMessage({
       operation: this.getNonHitOperation(this.databaseObjectsCache[id]),
-      cache_type: "database",
+      cache_type: CacheType.DATABASE,
       id: id,
       level,
     })
@@ -223,7 +227,7 @@ export class NotionCache {
       this.databaseObjectsCache[response.id].__needs_refresh = false
       this.logCacheMessage({
         operation: "SET_NO_CHANGE",
-        cache_type: "database",
+        cache_type: CacheType.DATABASE,
         id: response.id,
         level: level,
       })
@@ -241,7 +245,7 @@ export class NotionCache {
     }
     this.logCacheMessage({
       operation: "SET_NEW",
-      cache_type: "database",
+      cache_type: CacheType.DATABASE,
       id: response.id,
       level: level,
     })
@@ -254,7 +258,7 @@ export class NotionCache {
     ) {
       this.logCacheMessage({
         operation: "HIT",
-        cache_type: "database_children",
+        cache_type: CacheType.DATABASE_CHILDREN,
         id: id,
         level,
       })
@@ -266,7 +270,7 @@ export class NotionCache {
       const results = cacheItems.map((item) => {
         this.logCacheMessage({
           operation: "HIT",
-          cache_type: item.data.object,
+          cache_type: getCacheType(item.data.object),
           id: item?.data.id,
           level: level + 1,
         })
@@ -289,7 +293,7 @@ export class NotionCache {
     }
     this.logCacheMessage({
       operation: this.getNonHitOperation(this.databaseChildrenCache[id]),
-      cache_type: "database_children",
+      cache_type: CacheType.DATABASE_CHILDREN,
       id: id,
       level,
     })
@@ -316,7 +320,7 @@ export class NotionCache {
     }
     this.logCacheMessage({
       operation: operation,
-      cache_type: "database_children",
+      cache_type: CacheType.DATABASE_CHILDREN,
       id: id,
       level: level,
     })
@@ -339,7 +343,7 @@ export class NotionCache {
     ) {
       this.logCacheMessage({
         operation: "HIT",
-        cache_type: "page",
+        cache_type: CacheType.PAGE,
         id: id,
         level,
       })
@@ -348,7 +352,7 @@ export class NotionCache {
 
     this.logCacheMessage({
       operation: this.getNonHitOperation(this.pageObjectsCache[id]),
-      cache_type: "page",
+      cache_type: CacheType.PAGE,
       id: id,
       level,
     })
@@ -364,7 +368,7 @@ export class NotionCache {
       this.pageObjectsCache[response.id].__needs_refresh = false
       this.logCacheMessage({
         operation: "SET_NO_CHANGE",
-        cache_type: "page",
+        cache_type: CacheType.PAGE,
         id: response.id,
         level: level,
       })
@@ -383,7 +387,7 @@ export class NotionCache {
     }
     this.logCacheMessage({
       operation: "SET_NEW",
-      cache_type: "page",
+      cache_type: CacheType.PAGE,
       id: response.id,
       level,
     })
@@ -395,7 +399,7 @@ export class NotionCache {
   private _deleteBlockChildren(id: string, level: number = 0) {
     this.logCacheMessage({
       operation: "DELETE",
-      cache_type: "block_children",
+      cache_type: CacheType.BLOCKS_CHILDREN,
       id: id,
       level,
     })
@@ -403,7 +407,7 @@ export class NotionCache {
     childBlocks?.data.children.forEach((childId) => {
       this.logCacheMessage({
         operation: "DELETE",
-        cache_type: "block",
+        cache_type: CacheType.BLOCK,
         id: childId,
         level,
       })
@@ -420,7 +424,7 @@ export class NotionCache {
     )
 
     const response: ListBlockChildrenResponse = {
-      type: "block",
+      type: ObjectType.Block,
       block: {},
       object: "list",
       next_cursor: null,
@@ -451,12 +455,7 @@ export class NotionCache {
       | "MISS_NO_EXISTS"
       | "MISS_NEEDS_UPDATE"
       | "DELETE"
-    cache_type:
-      | "block"
-      | "database"
-      | "page"
-      | "block_children"
-      | "database_children"
+    cache_type: CacheType
     level: number
   }) {
     logOperation({

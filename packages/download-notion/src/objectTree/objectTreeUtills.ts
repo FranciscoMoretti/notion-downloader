@@ -3,7 +3,7 @@ import {
   DatabaseObjectResponse,
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
-import { NotionCacheClient } from "notion-cache-client"
+import { NotionCacheClient, ObjectType } from "notion-cache-client"
 import {
   IdWithType,
   NotionObjectResponse,
@@ -60,7 +60,7 @@ export async function getAllObjectsInObjectsTree(
 
     // For blocks that contain a child page or child database, their responses have to be added as well
     if (
-      object.object === "block" &&
+      object.object === ObjectType.Block &&
       (object.type === "child_page" || object.type === "child_database")
     ) {
       const idType = object.type === "child_page" ? "page_id" : "database_id"
@@ -88,17 +88,17 @@ function addObjectToData(
   object: PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse,
   objects: NotionObjectsData
 ) {
-  if (object.object === "page") {
+  if (object.object === ObjectType.Page) {
     objects.page[object.id] = object
-  } else if (object.object === "database") {
+  } else if (object.object === ObjectType.Database) {
     objects.database[object.id] = object
-  } else if (object.object === "block") {
+  } else if (object.object === ObjectType.Block) {
     objects.block[object.id] = object
   }
 }
 
 export function getPageAncestorId(
-  objectType: "page" | "database" | "block",
+  objectType: ObjectType,
   id: string,
   objectTree: NotionObjectTree
 ) {
@@ -111,13 +111,13 @@ export function getPageAncestorId(
     return null
   }
 
-  if (parentObject.object === "page") {
+  if (parentObject.object === ObjectType.Page) {
     return parentObject.id
   }
-  if (parentObject.object === "database") {
-    return getPageAncestorId("database", parentObject.id, objectTree)
+  if (parentObject.object === ObjectType.Database) {
+    return getPageAncestorId(ObjectType.Database, parentObject.id, objectTree)
   }
-  if (parentObject.object === "block") {
-    return getPageAncestorId("block", parentObject.id, objectTree)
+  if (parentObject.object === ObjectType.Block) {
+    return getPageAncestorId(ObjectType.Block, parentObject.id, objectTree)
   }
 }

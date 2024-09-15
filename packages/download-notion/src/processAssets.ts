@@ -2,7 +2,6 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
 import { FilesMap } from "./files/FilesMap"
-import { NotionFile } from "./notionObjects/NotionFile"
 import { readFile, saveFileBuffer } from "./notionObjects/fileBufferUtils"
 import {
   NotionImageLike,
