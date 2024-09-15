@@ -20,6 +20,7 @@ const explorer = cosmiconfig("downloader", {
     "downloader.json",
     "downloader.config.js",
     "downloader.config.cjs",
+    "downloader.config.ts",
   ],
 })
 

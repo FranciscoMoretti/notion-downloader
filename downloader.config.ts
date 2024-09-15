@@ -1,7 +1,6 @@
-/** @type {import('notion-downloader-cli').Config} */
 import { Config } from "./packages/download-notion/src/index"
 
-export const config: Config = {
+const config: Config = {
   conversion: {
     outputPaths: {
       markdown: "./content/",
@@ -27,3 +26,5 @@ export const config: Config = {
   logLevel: "debug",
   revalidatePeriod: -1,
 }
+
+export default config

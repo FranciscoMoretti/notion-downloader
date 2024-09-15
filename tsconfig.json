@@ -17,5 +17,5 @@
     "strict": true
   },
   "exclude": ["node_modules"],
-  "include": ["downloader.config.ts"]
+  "include": ["downloader.config.cjs"]
 }
