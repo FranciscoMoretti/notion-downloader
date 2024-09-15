@@ -1,5 +1,6 @@
 import { ObjectType } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-downloader"
+import { m } from "vitest/dist/reporters-yx5ZTtEV"
 import { z } from "zod"
 
 export enum AssetType {
@@ -17,78 +18,41 @@ export enum TextType {
 // Merge AssetType into FileType
 export type FileType = AssetType | TextType
 
-const allAssetTypesSchema = z
+export const allAssetTyes = [
+  AssetType.Image,
+  AssetType.File,
+  AssetType.Video,
+  AssetType.PDF,
+  AssetType.Audio,
+]
+
+const assetPathsSchema = z.object({
+  [AssetType.Image]: z.string().optional(),
+  [AssetType.File]: z.string().optional(),
+  [AssetType.Video]: z.string().optional(),
+  [AssetType.PDF]: z.string().optional(),
+  [AssetType.Audio]: z.string().optional(),
+})
+
+const baseFilepathSchema = z
   .object({
+    all: z.string().optional(),
     assets: z.string().optional(),
-    [AssetType.Image]: z.string(),
-    [AssetType.File]: z.string(),
-    [AssetType.Video]: z.string(),
-    [AssetType.PDF]: z.string(),
-    [AssetType.Audio]: z.string(),
-  })
-  .strict()
-
-const assetsWithOptionalTypesSchema = z
-  .object({
-    assets: z.string(),
-    [AssetType.Image]: z.string().optional(),
-    [AssetType.File]: z.string().optional(),
-    [AssetType.Video]: z.string().optional(),
-    [AssetType.PDF]: z.string().optional(),
-    [AssetType.Audio]: z.string().optional(),
-  })
-  .strict()
-
-const allMarkdownTypesSchema = z.object({
-  [TextType.Markdown]: z.string().optional(),
-  [ObjectType.Page]: z.string(),
-  [ObjectType.Database]: z.string(),
-})
-
-const allMarkdownOptionalTypesSchema = z.object({
-  [TextType.Markdown]: z.string(),
-  [ObjectType.Page]: z.string().optional(),
-  [ObjectType.Database]: z.string().optional(),
-})
-
-const allPathsGroupsSchema = z.union([
-  z.object({
-    all: z.string(),
-    [AssetType.Image]: z.string().optional(),
-    [AssetType.File]: z.string().optional(),
-    [AssetType.Video]: z.string().optional(),
-    [AssetType.PDF]: z.string().optional(),
-    [AssetType.Audio]: z.string().optional(),
     [TextType.Markdown]: z.string().optional(),
-    [ObjectType.Page]: z.string().optional(),
-    [ObjectType.Database]: z.string().optional(),
-    assets: z.string().optional(),
-  }),
-  z.object({
-    all: z.string().optional(),
-    ...assetsWithOptionalTypesSchema.shape,
-    ...allMarkdownTypesSchema.shape,
-  }),
-  z.object({
-    all: z.string().optional(),
-    ...allAssetTypesSchema.shape,
-    ...allMarkdownTypesSchema.shape,
-  }),
-  z.object({
-    all: z.string().optional(),
-    ...allMarkdownOptionalTypesSchema.shape,
-    ...assetsWithOptionalTypesSchema.shape,
-  }),
-  z.object({
-    all: z.string().optional(),
-    ...allMarkdownOptionalTypesSchema.shape,
-    ...assetsWithOptionalTypesSchema.shape,
-  }),
-])
+  })
+  .merge(assetPathsSchema)
 
-const assetTypesSchema = z.union([
-  allAssetTypesSchema,
-  assetsWithOptionalTypesSchema,
+const filepathSchema = z.union([
+  baseFilepathSchema.extend({ all: z.string() }),
+  baseFilepathSchema.extend({
+    assets: z.string(),
+    [TextType.Markdown]: z.string(),
+  }),
+  baseFilepathSchema
+    .extend({
+      [TextType.Markdown]: z.string(),
+    })
+    .merge(assetPathsSchema.required()),
 ])
 
 export enum LayoutStrategy {
@@ -98,7 +62,7 @@ export enum LayoutStrategy {
 
 export const layoutStrategySchema = z.nativeEnum(LayoutStrategy)
 
-export const pathOptionsSchema = z.union([z.string(), allPathsGroupsSchema])
+export const pathOptionsSchema = z.union([z.string(), filepathSchema])
 
 export const pathsSchema = z.object({
   [ObjectType.Page]: z.string(),
@@ -205,13 +169,12 @@ export function parsePathOptions(
     }
   }
   return {
+    // Database and page are the same because they are tighlty related
     [ObjectType.Page]: firstDefined(
-      pathOptions[ObjectType.Page],
       pathOptions[TextType.Markdown],
       pathOptions.all
     ),
     [ObjectType.Database]: firstDefined(
-      pathOptions[ObjectType.Database],
       pathOptions[TextType.Markdown],
       pathOptions.all
     ),
