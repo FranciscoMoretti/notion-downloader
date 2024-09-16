@@ -85,16 +85,17 @@ export const pathOptionsSchema = z.union([z.string(), filepathSchema])
 
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
-  statusTag: z.string().default("Publish"),
   overwrite: z.boolean().default(false),
   slugProperty: z.string().optional(),
   // TODO: filtering should be a list of configurable filters
+  // TODO: Status filtering value defined twice. Which one is used?
+  statusTag: z.string().default("Publish"),
   statusPropertyName: z.string().default("Status"),
   statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
-  layoutStrategy: layoutStrategySchema.default(
+  layoutStrategy: layoutStrategyOptionsSchema.default(
     LayoutStrategyNames.HierarchicalNamed
   ),
   // TODO: Strategies should be per asset type
