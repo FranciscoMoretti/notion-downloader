@@ -1,6 +1,7 @@
 import { ObjectType } from "notion-cache-client"
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
+import { LayoutStrategyGroup } from "./createStrategies"
 import { FilesManager, copyRecord } from "./files/FilesManager"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { getNotionObject } from "./notionObjects/NotionObjectUtils"
@@ -16,8 +17,7 @@ export function getFileTreeMap(
   starterPath: string,
   objectsTree: NotionObjectTree,
   databaseIsRootLevel: boolean,
-  markdownLayoutStrategy: LayoutStrategy,
-  imageLayoutStrategy: LayoutStrategy,
+  layoutStrategies: LayoutStrategyGroup,
   existingFilesManager: FilesManager,
 
   newFilesManager: FilesManager,
@@ -37,7 +37,10 @@ export function getFileTreeMap(
       !parentContext.databaseIsRoot &&
       (notionObject.object === ObjectType.Page ||
         notionObject.object === ObjectType.Database)
-        ? markdownLayoutStrategy.newPathLevel(parentContext.path, notionObject)
+        ? layoutStrategies[notionObject.object].newPathLevel(
+            parentContext.path,
+            notionObject
+          )
         : parentContext.path
 
     if (
@@ -55,7 +58,7 @@ export function getFileTreeMap(
         const objectPath =
           notionObject.object == ObjectType.Database
             ? newLevelPath
-            : markdownLayoutStrategy.getPathForObject(
+            : layoutStrategies[notionObject.object].getPathForObject(
                 parentContext.path,
                 notionObject
               )
@@ -80,7 +83,7 @@ export function getFileTreeMap(
           objectResponse as NotionAssetObjectResponses
         )
         setFilebufferInAsset(filesInMemory, asset)
-        const assetFilename = imageLayoutStrategy.getPathForObject(
+        const assetFilename = layoutStrategies[assetType].getPathForObject(
           parentContext.path,
           asset
         )

@@ -194,7 +194,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Stage 4: Building paths...")
   // 4. Path building
-  const { markdownLayoutStrategy, imageLayoutStrategy } = createStrategies(
+  const layoutStrategies = createStrategies(
     options,
     objectsTree,
     newFilesManager
@@ -204,8 +204,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     "",
     objectsTree,
     options.rootDbAsFolder,
-    markdownLayoutStrategy,
-    imageLayoutStrategy,
+    layoutStrategies,
     existingFilesManager,
     newFilesManager,
     filesInMemory

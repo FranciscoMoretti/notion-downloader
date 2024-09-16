@@ -25,11 +25,11 @@ export const allAssetTyes = [
   AssetType.Audio,
 ]
 
-export enum LayoutStrategy {
+export enum LayoutStrategyNames {
   HierarchicalNamed = "HierarchicalNamedLayoutStrategy",
   Flat = "FlatLayoutStrategy",
 }
-export const layoutStrategySchema = z.nativeEnum(LayoutStrategy)
+export const layoutStrategySchema = z.nativeEnum(LayoutStrategyNames)
 
 function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
   const assetPathsSchema = z.object({
@@ -96,10 +96,10 @@ export const conversionSchema = z.object({
   markdownPrefixes: pathOptionsSchema.default(""),
   // TODO: Strategies should be per asset type
   layoutStrategy: layoutStrategySchema.default(
-    LayoutStrategy.HierarchicalNamed
+    LayoutStrategyNames.HierarchicalNamed
   ),
   imageLayoutStrategy: layoutStrategySchema.default(
-    LayoutStrategy.HierarchicalNamed
+    LayoutStrategyNames.HierarchicalNamed
   ),
   namingStrategy: z
     .enum(["github-slug", "notion-slug", "guid", "title"])
@@ -163,7 +163,7 @@ export function mapToAssetType(type: string): AssetType {
   }
 }
 
-type ParsedOptions<T> = {
+export type GenericGroup<T> = {
   [ObjectType.Page]: T
   [ObjectType.Database]: T
   [AssetType.Video]: T
@@ -173,15 +173,16 @@ type ParsedOptions<T> = {
   [AssetType.File]: T
 }
 
-export type FilepathGroup = ParsedOptions<z.infer<typeof pathSchema>>
-export type LayoutStrategyGroup = ParsedOptions<
+export type FilepathGroup = GenericGroup<z.infer<typeof pathSchema>>
+export type LayoutStrategyGroupOptions = GenericGroup<
   z.infer<typeof layoutStrategySchema>
 >
 
 function parseFileOptions<T extends z.ZodType>(
-  options: z.infer<ReturnType<typeof createOptionsSchema<T>>>
-): ParsedOptions<z.infer<T>> {
-  if (options instanceof z.ZodType && options.safeParse(options).success) {
+  options: z.infer<ReturnType<typeof createOptionsSchema<T>>>,
+  valueSchema: z.ZodType
+): GenericGroup<z.infer<T>> {
+  if (valueSchema.safeParse(options).success) {
     return {
       [ObjectType.Page]: options,
       [ObjectType.Database]: options,
@@ -190,7 +191,7 @@ function parseFileOptions<T extends z.ZodType>(
       [AssetType.Audio]: options,
       [AssetType.Image]: options,
       [AssetType.File]: options,
-    } as ParsedOptions<z.infer<T>>
+    } as GenericGroup<z.infer<T>>
   }
   return {
     [ObjectType.Page]: firstDefined(options[TextType.Markdown], options.all),
@@ -223,13 +224,17 @@ function parseFileOptions<T extends z.ZodType>(
       options.assets,
       options.all
     ),
-  } as ParsedOptions<z.infer<T>>
+  } as GenericGroup<z.infer<T>>
 }
 
-export const parsePathFileOptions = parseFileOptions<typeof pathSchema>
-export const parseLayoutStrategyFileOptions = parseFileOptions<
-  typeof layoutStrategySchema
->
+export const parsePathFileOptions = (
+  opts: z.infer<ReturnType<typeof createOptionsSchema<typeof pathSchema>>>
+) => parseFileOptions<typeof pathSchema>(opts, pathSchema)
+export const parseLayoutStrategyFileOptions = (
+  opts: z.infer<
+    ReturnType<typeof createOptionsSchema<typeof layoutStrategySchema>>
+  >
+) => parseFileOptions<typeof layoutStrategySchema>(opts, layoutStrategySchema)
 
 function firstDefined<T>(...args: (T | undefined)[]): T {
   const firstDefined = args.find((arg) => arg !== undefined)

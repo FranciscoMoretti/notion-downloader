@@ -1,9 +1,16 @@
+import { ObjectType } from "notion-cache-client"
 import { NotionObjectTree } from "notion-downloader"
 
-import { NotionPullOptions } from "./config/schema"
+import {
+  AssetType,
+  GenericGroup,
+  LayoutStrategyGroupOptions,
+  NotionPullOptions,
+  parseLayoutStrategyFileOptions,
+} from "./config/schema"
 import { FilesManager } from "./files/FilesManager"
-import { FlatLayoutStrategy } from "./layoutStrategy/FlatLayoutStrategy"
-import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
+import { getLayoutStrategy } from "./getLayoutStrategy"
+import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { NamingStrategy } from "./namingStrategy/NamingStrategy"
 import {
   getImageNamingStrategy,
@@ -11,69 +18,104 @@ import {
 } from "./namingStrategy/getNamingStrategy"
 import { getAncestorPageOrDatabaseFilename } from "./utils"
 
+export type LayoutStrategyGroup = GenericGroup<LayoutStrategy>
+type NamingStrategyGroup = GenericGroup<NamingStrategy>
+
 export function createStrategies(
   options: NotionPullOptions,
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
-) {
-  const markdownLayoutStrategy = createMakrdownLayoutStrategy(options)
-  const imageLayoutStrategy = createImageLayoutStrategy(
+): LayoutStrategyGroup {
+  const namingStrategies: NamingStrategyGroup = getNamingStrategies(
     options,
     objectsTree,
     newFilesManager
   )
-  return { markdownLayoutStrategy, imageLayoutStrategy }
+  const layoutStrategyOptions = parseLayoutStrategyFileOptions(
+    options.conversion.layoutStrategy
+  )
+
+  const layoutStrategies: LayoutStrategyGroup = getLayoutStrategies(
+    layoutStrategyOptions,
+    namingStrategies
+  )
+  return layoutStrategies
 }
 
-function createImageLayoutStrategy(
+function getLayoutStrategies(
+  layoutStrategyOptions: LayoutStrategyGroupOptions,
+  namingStrategies: NamingStrategyGroup
+): LayoutStrategyGroup {
+  return {
+    [ObjectType.Page]: getLayoutStrategy(
+      layoutStrategyOptions[ObjectType.Page],
+      namingStrategies[ObjectType.Page]
+    ),
+    [ObjectType.Database]: getLayoutStrategy(
+      layoutStrategyOptions[ObjectType.Database],
+      namingStrategies[ObjectType.Database]
+    ),
+    [AssetType.Image]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.Image],
+      namingStrategies[AssetType.Image]
+    ),
+    [AssetType.File]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.File],
+      namingStrategies[AssetType.File]
+    ),
+    [AssetType.Video]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.Video],
+      namingStrategies[AssetType.Video]
+    ),
+    [AssetType.PDF]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.PDF],
+      namingStrategies[AssetType.PDF]
+    ),
+    [AssetType.Audio]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.Audio],
+      namingStrategies[AssetType.Audio]
+    ),
+  }
+}
+
+function getNamingStrategies(
   options: NotionPullOptions,
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
-) {
-  const imageNamingStrategy = createImageNamingStrategy(
-    options,
-    objectsTree,
-    newFilesManager
-  )
-  return createLayoutStrategy(
-    options.conversion.imageLayoutStrategy,
-    imageNamingStrategy
-  )
-}
-
-function createMakrdownLayoutStrategy(options: NotionPullOptions) {
-  const namingStrategy = getMarkdownNamingStrategy(
-    options.conversion.namingStrategy,
-    // TODO: SLug naming strategies shouldn't have a blank value or undefined. Default should be in option parsing
-    options.conversion.slugProperty || ""
-  )
-
-  const layoutStrategy = createLayoutStrategy(
-    options.conversion.layoutStrategy,
-    namingStrategy
-  )
-  return layoutStrategy
-}
-
-function createImageNamingStrategy(
-  options: NotionPullOptions,
-  objectsTree: NotionObjectTree,
-  newFilesManager: FilesManager
-) {
-  const imageNamingStrategy = getImageNamingStrategy(
-    options.conversion.imageNamingStrategy || "default",
-    // TODO: A new strategy could be with ancestor filename `getAncestorPageOrDatabaseFilename`
-    (image) =>
-      getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
-  )
-  return imageNamingStrategy
-}
-
-function createLayoutStrategy(
-  layoutStrategy: "HierarchicalNamedLayoutStrategy" | "FlatLayoutStrategy",
-  namingStrategy: NamingStrategy
-) {
-  return layoutStrategy === "FlatLayoutStrategy"
-    ? new FlatLayoutStrategy(namingStrategy)
-    : new HierarchicalLayoutStrategy(namingStrategy)
+): NamingStrategyGroup {
+  return {
+    [ObjectType.Page]: getMarkdownNamingStrategy(
+      options.conversion.namingStrategy,
+      options.conversion.slugProperty || ""
+    ),
+    [ObjectType.Database]: getMarkdownNamingStrategy(
+      options.conversion.namingStrategy,
+      options.conversion.slugProperty || ""
+    ),
+    [AssetType.Image]: getImageNamingStrategy(
+      options.conversion.imageNamingStrategy || "default",
+      (image) =>
+        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    ),
+    [AssetType.File]: getImageNamingStrategy(
+      options.conversion.imageNamingStrategy || "default",
+      (image) =>
+        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    ),
+    [AssetType.Video]: getImageNamingStrategy(
+      options.conversion.imageNamingStrategy || "default",
+      (image) =>
+        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    ),
+    [AssetType.PDF]: getImageNamingStrategy(
+      options.conversion.imageNamingStrategy || "default",
+      (image) =>
+        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    ),
+    [AssetType.Audio]: getImageNamingStrategy(
+      options.conversion.imageNamingStrategy || "default",
+      (image) =>
+        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    ),
+  }
 }
