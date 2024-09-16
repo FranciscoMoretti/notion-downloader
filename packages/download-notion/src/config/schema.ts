@@ -94,13 +94,10 @@ export const conversionSchema = z.object({
   pageLinkHasExtension: z.boolean().default(true),
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
-  // TODO: Strategies should be per asset type
   layoutStrategy: layoutStrategySchema.default(
     LayoutStrategyNames.HierarchicalNamed
   ),
-  imageLayoutStrategy: layoutStrategySchema.default(
-    LayoutStrategyNames.HierarchicalNamed
-  ),
+  // TODO: Strategies should be per asset type
   namingStrategy: z
     .enum(["github-slug", "notion-slug", "guid", "title"])
     .default("github-slug"),
