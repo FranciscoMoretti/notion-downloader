@@ -50,7 +50,7 @@ export async function downloadNotionObjectTree(
   cachingOptions: CachingOptions
 ) {
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTreeRootNode = await downloadObjectTree({
+  const objectsTreeRootNode = await fetchTreeStructureWithCache({
     client: cachedNotionClient,
     startingNode: startingNode,
     dataOptions: {
@@ -69,7 +69,7 @@ export async function downloadNotionObjectTree(
   return new NotionObjectTree(objectsTreeRootNode, objectsData)
 }
 
-export async function downloadObjectTree({
+export async function fetchTreeStructureWithCache({
   client,
   startingNode,
   dataOptions,
@@ -92,11 +92,12 @@ export async function downloadObjectTree({
   }
 
   // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTree: NotionObjectTreeNode = await fetchNotionObjectTree({
-    client: client,
-    startingNode: startingNode,
-    dataOptions: dataOptions,
-  })
+  const objectsTree: NotionObjectTreeNode =
+    await fetchNotionObjectTreeStructure({
+      client: client,
+      startingNode: startingNode,
+      dataOptions: dataOptions,
+    })
 
   if (["cache", "force-cache"].includes(cachingOptions.cacheStrategy)) {
     await client.cache.saveCache()
@@ -104,7 +105,7 @@ export async function downloadObjectTree({
   return objectsTree
 }
 
-export async function fetchNotionObjectTree({
+export async function fetchNotionObjectTreeStructure({
   startingNode,
   client,
   dataOptions: options,
