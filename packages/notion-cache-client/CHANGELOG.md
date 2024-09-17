@@ -1,5 +1,15 @@
 # notion-cache-client
 
+## 0.0.7
+
+### Patch Changes
+
+- [`4af458bf90aa689d03d2d36eb3cd83dbcd49c02a`](https://github.com/FranciscoMoretti/notion-downloader/commit/4af458bf90aa689d03d2d36eb3cd83dbcd49c02a) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Bug fixes and handling of corner cases
+
+- [`c3c10a6043978b768987d15a762c0ce3435950c0`](https://github.com/FranciscoMoretti/notion-downloader/commit/c3c10a6043978b768987d15a762c0ce3435950c0) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Download and cache all type of assets
+
+- [`7a55f5f12f3f81a632308d049e4ea1b7ad085ba2`](https://github.com/FranciscoMoretti/notion-downloader/commit/7a55f5f12f3f81a632308d049e4ea1b7ad085ba2) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Layout strategies and naming strategies now can be configurable per asset
+
 ## 0.0.6
 
 ### Patch Changes
