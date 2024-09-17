@@ -15,7 +15,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 
 import {
   StartingNode,
-  fetchNotionObjectTree,
+  fetchNotionObjectTreeStructure,
 } from "../src/fetch-notion-object-tree"
 import {
   groupIdsByType,
@@ -126,7 +126,7 @@ describe("FetchTreeRecursively", () => {
     const notionCacheClient = await buildNotionCacheClientWithFixture(
       "sample-site"
     )
-    const objectTree = await fetchNotionObjectTree({
+    const objectTree = await fetchNotionObjectTreeStructure({
       startingNode: startingNode,
       client: notionCacheClient,
       dataOptions: commonDataOptions,
@@ -149,7 +149,7 @@ describe("FetchTreeRecursively", () => {
     const notionCacheClient = await buildNotionCacheClientWithFixture(
       "sample-site"
     )
-    const objectTree = await fetchNotionObjectTree({
+    const objectTree = await fetchNotionObjectTreeStructure({
       startingNode: startingNode,
       client: notionCacheClient,
       dataOptions: commonDataOptions,

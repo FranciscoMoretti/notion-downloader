@@ -121,7 +121,7 @@ export async function fetchNotionObjectTreeStructure({
   return objectsTree
 }
 
-async function fetchTreeRecursively(
+export async function fetchTreeRecursively(
   objectNode: NotionObjectTreeNode,
   level: number,
   client: NotionCacheClient,
