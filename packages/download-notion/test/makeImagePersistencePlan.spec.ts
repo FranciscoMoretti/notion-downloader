@@ -11,7 +11,7 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
   markdownOutputPath: "",
   imgOutputPath: "",
   imgPrefixInMarkdown: "",
-  statusTag: "",
+  statusPropertyName: "Status",
   rootObjectType: "page",
   cache: {
     cacheDirectory: "",

@@ -56,12 +56,11 @@ export async function blocksToMarkdown(
     options: {
       notionToken: "",
       rootId: "",
-      locales: [],
       markdownOutputPath: "",
       imgOutputPath: "",
       cleanCache: false,
       imgPrefixInMarkdown: "",
-      statusTag: "",
+      statusPropertyName: "Status",
     },
     pages: pages ?? [],
     counts: {

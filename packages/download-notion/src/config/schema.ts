@@ -167,7 +167,6 @@ export const conversionSchema = z.object({
   slugProperty: z.string().optional(),
   // TODO: filtering should be a list of configurable filters
   // TODO: Status filtering value defined twice. Which one is used?
-  statusTag: z.string().default("Publish"),
   statusPropertyName: z.string().default("Status"),
   statusPropertyValue: z.string().default("Done"),
   pageLinkHasExtension: z.boolean().default(true),
