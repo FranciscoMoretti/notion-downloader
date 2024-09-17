@@ -8,7 +8,11 @@ import {
   PageOrDatabaseSchema,
   convertToUUID,
 } from "notion-cache-client"
-import { NotionObjectTree, downloadObjectTree } from "notion-downloader"
+import {
+  NotionObjectTree,
+  downloadNotionObjectTree,
+  downloadObjectTree,
+} from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
@@ -34,7 +38,6 @@ import { getFileTreeMap } from "./getFileTreeMap"
 import { endGroup, error, group, info } from "./log"
 import { NotionPage } from "./notionObjects/NotionPage"
 import { filterTree } from "./objectTree/filterTree"
-import { getAllObjectsInObjectsTree } from "./objectTree/objectTreeUtills"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IDocuNotionContext } from "./plugins/pluginTypes"
 import {
@@ -44,7 +47,6 @@ import {
 } from "./processAssets"
 import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
-import { sanitizeMarkdownOutputPath } from "./utils"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {
@@ -152,13 +154,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   group("Stage 1: walk children of the root page, looking for pages...")
-  const objectsTree = await downloadAndProcessObjectTree(
+  const objectsTree = await downloadNotionObjectTree(
     cachedNotionClient,
-    rootUUID,
-    rootObjectType,
-    options,
-    objectTreeCachePath
+    { rootUUID, rootObjectType },
+    options.cache
   )
+  await saveObjectToJson(objectsTree.getRoot(), objectTreeCachePath)
 
   const assetsCacheFilesMap = await cacheNewAssets(
     options,
@@ -335,35 +336,6 @@ async function setupFilesManagers(
   })
 
   return { existingFilesManager, newFilesManager }
-}
-
-async function downloadAndProcessObjectTree(
-  cachedNotionClient: NotionCacheClient,
-  rootUUID: string,
-  rootObjectType: ObjectType.Database | ObjectType.Page,
-  options: NotionPullOptions,
-  objectTreeCachePath: string
-) {
-  // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
-  const objectsTreeRootNode = await downloadObjectTree({
-    client: cachedNotionClient,
-    startingNode: { rootUUID, rootObjectType },
-    dataOptions: {
-      // TODO: Consider exposing this as options or making it a default input arg
-      downloadAllPages: true,
-      downloadDatabases: true,
-      followLinks: true,
-    },
-    cachingOptions: options.cache,
-  })
-
-  await saveObjectToJson(objectsTreeRootNode, objectTreeCachePath)
-
-  const objectsData = await getAllObjectsInObjectsTree(
-    objectsTreeRootNode,
-    cachedNotionClient
-  )
-  return new NotionObjectTree(objectsTreeRootNode, objectsData)
 }
 
 async function cacheNewAssets(

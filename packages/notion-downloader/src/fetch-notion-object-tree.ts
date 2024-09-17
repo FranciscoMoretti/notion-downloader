@@ -13,7 +13,8 @@ import {
 } from "notion-cache-client"
 import { z } from "zod"
 
-import { NotionObjectTreeNode } from "./notion-object-tree"
+import { NotionObjectTree, NotionObjectTreeNode } from "./notion-object-tree"
+import { getAllObjectsInObjectsTree } from "./objectTreeUtills"
 import { cacheOptionsSchema } from "./schema"
 
 // TODO: Consider making this compatible with client by returning more data
@@ -43,12 +44,37 @@ type DownloadOptions = FetchingOptions & {
   cachingOptions: CachingOptions
 }
 
+export async function downloadNotionObjectTree(
+  cachedNotionClient: NotionCacheClient,
+  startingNode: StartingNode,
+  cachingOptions: CachingOptions
+) {
+  // Page tree that stores relationship between pages and their children. It can store children recursively in any depth.
+  const objectsTreeRootNode = await downloadObjectTree({
+    client: cachedNotionClient,
+    startingNode: startingNode,
+    dataOptions: {
+      // TODO: Consider exposing this as options or making it a default input arg
+      downloadAllPages: true,
+      downloadDatabases: true,
+      followLinks: true,
+    },
+    cachingOptions: cachingOptions,
+  })
+
+  const objectsData = await getAllObjectsInObjectsTree(
+    objectsTreeRootNode,
+    cachedNotionClient
+  )
+  return new NotionObjectTree(objectsTreeRootNode, objectsData)
+}
+
 export async function downloadObjectTree({
   client,
   startingNode,
   dataOptions,
   cachingOptions,
-}: DownloadOptions) {
+}: DownloadOptions): Promise<NotionObjectTreeNode> {
   // TODO Implement the StorageOptions with loadCache and saveCache functions and create a cleanup func
   if (cachingOptions.cleanCache) {
     await client.cache.clearCache()
@@ -82,7 +108,7 @@ export async function fetchNotionObjectTree({
   startingNode,
   client,
   dataOptions: options,
-}: FetchingOptions) {
+}: FetchingOptions): Promise<NotionObjectTreeNode> {
   const objectsTree: NotionObjectTreeNode = {
     id: startingNode.rootUUID,
     object: startingNode.rootObjectType,

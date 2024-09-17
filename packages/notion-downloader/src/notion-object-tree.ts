@@ -92,6 +92,10 @@ export class NotionObjectTree {
     }
   }
 
+  getRoot(): NotionObjectTreeNode {
+    return this.tree
+  }
+
   getPages(): PageObjectResponse[] {
     return Object.values(this.data.page)
   }

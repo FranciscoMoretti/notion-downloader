@@ -2,6 +2,7 @@
 export {
   downloadObjectTree,
   fetchNotionObjectTree,
+  downloadNotionObjectTree,
 } from "./fetch-notion-object-tree"
 
 export {

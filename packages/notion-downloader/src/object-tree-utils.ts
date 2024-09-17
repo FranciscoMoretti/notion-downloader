@@ -16,7 +16,7 @@ export function objectTreeToPlainObjects(
 ): NotionObjectPlainList {
   const nodes: Array<NotionObjectPlain> = []
   function recurse(node: NotionObjectTreeNode) {
-    // Children should only be kept as ids
+    // TODO: Children should only be kept as ids
     const newNode = {
       ...node,
       children: node.children.map((child) => child.id),

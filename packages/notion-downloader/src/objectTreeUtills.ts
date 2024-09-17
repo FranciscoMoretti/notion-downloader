@@ -4,19 +4,9 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import { NotionCacheClient, ObjectType } from "notion-cache-client"
-import {
-  IdWithType,
-  NotionObjectResponse,
-  NotionObjectTree,
-  NotionObjectTreeNode,
-  NotionObjectsData,
-  objectTreeToObjectIds,
-} from "notion-downloader"
 
-export type PlainObjectsMap = Record<
-  string,
-  PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse
->
+import { NotionObjectTreeNode, NotionObjectsData } from "./notion-object-tree"
+import { IdWithType, objectTreeToObjectIds } from "./object-tree-utils"
 
 export async function getObjectTypeFromClient(
   client: NotionCacheClient,
@@ -94,30 +84,5 @@ function addObjectToData(
     objects.database[object.id] = object
   } else if (object.object === ObjectType.Block) {
     objects.block[object.id] = object
-  }
-}
-
-export function getPageAncestorId(
-  objectType: ObjectType,
-  id: string,
-  objectTree: NotionObjectTree
-) {
-  const parent = objectTree.getParent(objectType, id)
-  if (!parent) {
-    return null
-  }
-  const parentObject = objectTree.getObject(parent.object, parent.id)
-  if (!parentObject) {
-    return null
-  }
-
-  if (parentObject.object === ObjectType.Page) {
-    return parentObject.id
-  }
-  if (parentObject.object === ObjectType.Database) {
-    return getPageAncestorId(ObjectType.Database, parentObject.id, objectTree)
-  }
-  if (parentObject.object === ObjectType.Block) {
-    return getPageAncestorId(ObjectType.Block, parentObject.id, objectTree)
   }
 }

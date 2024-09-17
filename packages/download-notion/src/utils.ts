@@ -6,7 +6,6 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
 import { NotionObject } from "./notionObjects/NotionObject"
-import { getPageAncestorId } from "./objectTree/objectTreeUtills"
 
 export function findLastUuid(url: string): string | null {
   // Regex for a UUID surrounded by slashes
@@ -71,4 +70,29 @@ export function getAncestorPageOrDatabaseFilename(
 export function sanitizeMarkdownOutputPath(path: string) {
   // Remove trailing slashes
   return path.replace(/\/+$/, "")
+}
+
+export function getPageAncestorId(
+  objectType: ObjectType,
+  id: string,
+  objectTree: NotionObjectTree
+) {
+  const parent = objectTree.getParent(objectType, id)
+  if (!parent) {
+    return null
+  }
+  const parentObject = objectTree.getObject(parent.object, parent.id)
+  if (!parentObject) {
+    return null
+  }
+
+  if (parentObject.object === ObjectType.Page) {
+    return parentObject.id
+  }
+  if (parentObject.object === ObjectType.Database) {
+    return getPageAncestorId(ObjectType.Database, parentObject.id, objectTree)
+  }
+  if (parentObject.object === ObjectType.Block) {
+    return getPageAncestorId(ObjectType.Block, parentObject.id, objectTree)
+  }
 }
