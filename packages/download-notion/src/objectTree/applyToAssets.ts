@@ -4,10 +4,7 @@ import { AssetType } from "../config/schema"
 import { NotionBlockImage } from "../notionObjects/NotionBlockImage"
 import { NotionCoverImage } from "../notionObjects/NotionCoverImage"
 import { NotionFileObject } from "../notionObjects/NotionFileObject"
-import {
-  NotionImageLike,
-  iNotionAssetObject,
-} from "../notionObjects/objectTypes"
+import { iNotionAssetObject } from "../notionObjects/objectTypes"
 import { databaseHasCover, pageHasCover } from "../notionObjects/objectutils"
 
 export async function applyToAllAssets({

@@ -12,7 +12,6 @@ const config: Config = {
     },
     statusPropertyName: "Status",
     statusPropertyValue: "Publish",
-    imageNamingStrategy: "default",
     pageLinkHasExtension: false,
     slugProperty: "slug",
   },

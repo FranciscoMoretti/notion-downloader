@@ -33,12 +33,12 @@ export const layoutStrategySchema = z.nativeEnum(LayoutStrategyNames)
 
 export enum AllNamingSchemaName {
   Default = "default",
+  Guid = "guid",
 }
 
 export enum MarkdownNamingStrategyNames {
   GithubSlug = "github-slug",
   NotionSlug = "notion-slug",
-  Guid = "guid",
   Title = "title",
 }
 export enum AssetNamingStrategyNames {
@@ -176,14 +176,9 @@ export const conversionSchema = z.object({
   layoutStrategy: layoutStrategyOptionsSchema.default(
     LayoutStrategyNames.HierarchicalNamed
   ),
-  // TODO: Strategies should be per asset type
   namingStrategy: namingStrategyOptionsSchema.default(
     AllNamingSchemaName.Default
   ),
-  imageNamingStrategy: z
-    .enum(["default", "legacy"])
-    .optional()
-    .default("default"),
 })
 
 export const pullOptionsSchema = z
@@ -320,7 +315,10 @@ function parseFileOptions<T extends z.ZodType>(
 export function parseNamingStrategyFileOptions(
   options: z.infer<typeof namingStrategyOptionsSchema>
 ): NamingStrategyGroupOptions {
-  if (options === AllNamingSchemaName.Default) {
+  if (
+    options === AllNamingSchemaName.Default ||
+    options === AllNamingSchemaName.Guid
+  ) {
     return {
       [ObjectType.Page]: options,
       [ObjectType.Database]: options,

@@ -1,8 +1,5 @@
 import { NotionObject } from "../notionObjects/NotionObject"
-import {
-  NotionFileLikeObjects,
-  NotionImageLike,
-} from "../notionObjects/objectTypes"
+import { NotionFileLikeObjects } from "../notionObjects/objectTypes"
 import { NamingStrategy, allNameableTypes } from "./NamingStrategy"
 
 export class AncestorPrefixAssetNamingStrategy extends NamingStrategy {

@@ -1,7 +1,13 @@
+import {
+  AllNamingSchemaName,
+  AssetNamingStrategyNames,
+  AssetNamingStrategyType,
+  MarkdownNamingStrategyNames,
+  MarkdownNamingStrategyType,
+} from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
-import { NotionImageLike } from "../notionObjects/objectTypes"
 import { AncestorPrefixAssetNamingStrategy } from "./AncestorPrefixAssetNamingStrategy"
-import { LegacyImageNamingStrategy } from "./LegacyImageNamingStrategy"
+import { LegacyAssetNamingStrategy } from "./LegacyAssetNamingStrategy"
 import { NamingStrategy } from "./NamingStrategy"
 import {
   GithubSlugNamingStrategy,
@@ -11,34 +17,36 @@ import {
 } from "./namingStrategies"
 
 export function getAssetNamingStrategy(
-  namingStrategy: "ancestor-prefix" | "legacy" | "default",
+  namingStrategy: AssetNamingStrategyType,
   getPageAncestorName: (notionObject: NotionObject) => string
 ): NamingStrategy {
   switch (namingStrategy) {
-    case "default":
+    case AllNamingSchemaName.Default:
       return new AncestorPrefixAssetNamingStrategy(getPageAncestorName)
-    case "ancestor-prefix":
+    case AllNamingSchemaName.Guid:
+      return new GuidNamingStrategy()
+    case AssetNamingStrategyNames.AncestorPrefix:
       return new AncestorPrefixAssetNamingStrategy(getPageAncestorName)
-    case "legacy":
-      return new LegacyImageNamingStrategy()
+    case AssetNamingStrategyNames.Legacy:
+      return new LegacyAssetNamingStrategy()
     default:
       throw new Error(`Unknown image file name format: ${namingStrategy}`)
   }
 }
 export function getMarkdownNamingStrategy(
-  namingStrategy: "github-slug" | "notion-slug" | "guid" | "title" | "default",
+  namingStrategy: MarkdownNamingStrategyType,
   slugProperty: string
 ) {
   switch (namingStrategy) {
-    case "default":
+    case AllNamingSchemaName.Default:
       return new TitleNamingStrategy()
-    case "github-slug":
-      return new GithubSlugNamingStrategy(slugProperty)
-    case "notion-slug":
-      return new NotionSlugNamingStrategy(slugProperty)
-    case "guid":
+    case AllNamingSchemaName.Guid:
       return new GuidNamingStrategy()
-    case "title":
+    case MarkdownNamingStrategyNames.GithubSlug:
+      return new GithubSlugNamingStrategy(slugProperty)
+    case MarkdownNamingStrategyNames.NotionSlug:
+      return new NotionSlugNamingStrategy(slugProperty)
+    case MarkdownNamingStrategyNames.Title:
       return new TitleNamingStrategy()
     default:
       throw new Error(`Unknown markdown file name format: ${namingStrategy}`)

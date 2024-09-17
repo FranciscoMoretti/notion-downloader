@@ -3,7 +3,7 @@ import { hashOfBufferContent, hashOfString } from "@/src/utils"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { AncestorPrefixAssetNamingStrategy } from "../src/namingStrategy/AncestorPrefixAssetNamingStrategy"
-import { LegacyImageNamingStrategy } from "../src/namingStrategy/LegacyImageNamingStrategy"
+import { LegacyAssetNamingStrategy } from "../src/namingStrategy/LegacyAssetNamingStrategy"
 import {
   NotionFileLikeObjects,
   NotionImageLike,
@@ -41,7 +41,7 @@ describe("Image Naming Strategies", () => {
   })
 
   describe("LegacyImageNamingStrategy", () => {
-    const strategy = new LegacyImageNamingStrategy()
+    const strategy = new LegacyAssetNamingStrategy()
 
     it("should generate filename based on UUID from URL", () => {
       const UUID = "d1bcdc8c-b065-4e40-9a11-392aabeb220e"

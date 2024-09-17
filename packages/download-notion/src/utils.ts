@@ -6,7 +6,6 @@ import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
 import { NotionObject } from "./notionObjects/NotionObject"
-import { NotionImageLike } from "./notionObjects/objectTypes"
 import { getPageAncestorId } from "./objectTree/objectTreeUtills"
 
 export function findLastUuid(url: string): string | null {
