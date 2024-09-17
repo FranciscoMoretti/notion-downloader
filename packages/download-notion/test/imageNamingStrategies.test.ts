@@ -2,7 +2,7 @@ import { AssetType } from "@/src/config/schema"
 import { hashOfBufferContent, hashOfString } from "@/src/utils"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { DefaultBlockNamingStrategy } from "../src/namingStrategy/DefaultImageNamingStrategy"
+import { AncestorPrefixAssetNamingStrategy } from "../src/namingStrategy/AncestorPrefixAssetNamingStrategy"
 import { LegacyImageNamingStrategy } from "../src/namingStrategy/LegacyImageNamingStrategy"
 import {
   NotionFileLikeObjects,
@@ -22,7 +22,9 @@ describe("Image Naming Strategies", () => {
   describe("DefaultImageNamingStrategy", () => {
     const getPageAncestorFilename = (notionObject: NotionFileLikeObjects) =>
       "mock-page"
-    const strategy = new DefaultBlockNamingStrategy(getPageAncestorFilename)
+    const strategy = new AncestorPrefixAssetNamingStrategy(
+      getPageAncestorFilename
+    )
 
     it("should generate filename with ancestor page name", () => {
       const result = strategy.getFilename(mockNotionImage)
@@ -30,7 +32,9 @@ describe("Image Naming Strategies", () => {
     })
 
     it("should generate filename without ancestor page name", () => {
-      const strategyWithoutAncestor = new DefaultBlockNamingStrategy(() => "")
+      const strategyWithoutAncestor = new AncestorPrefixAssetNamingStrategy(
+        () => ""
+      )
       const result = strategyWithoutAncestor.getFilename(mockNotionImage)
       expect(result).toBe("mock-block-id.png")
     })

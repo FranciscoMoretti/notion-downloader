@@ -5,15 +5,17 @@ import {
   AssetType,
   GenericGroup,
   LayoutStrategyGroupOptions,
+  NamingStrategyGroupOptions,
   NotionPullOptions,
   parseLayoutStrategyFileOptions,
+  parseNamingStrategyFileOptions,
 } from "./config/schema"
 import { FilesManager } from "./files/FilesManager"
 import { getLayoutStrategy } from "./getLayoutStrategy"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { NamingStrategy } from "./namingStrategy/NamingStrategy"
 import {
-  getImageNamingStrategy,
+  getAssetNamingStrategy,
   getMarkdownNamingStrategy,
 } from "./namingStrategy/getNamingStrategy"
 import { getAncestorPageOrDatabaseFilename } from "./utils"
@@ -26,8 +28,13 @@ export function createStrategies(
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
 ): LayoutStrategyGroup {
+  const namingStrategiesOptions = parseNamingStrategyFileOptions(
+    options.conversion.namingStrategy
+  )
+
   const namingStrategies: NamingStrategyGroup = getNamingStrategies(
-    options,
+    namingStrategiesOptions,
+    options.conversion.slugProperty || "",
     objectsTree,
     newFilesManager
   )
@@ -79,43 +86,65 @@ function getLayoutStrategies(
 }
 
 function getNamingStrategies(
-  options: NotionPullOptions,
+  namingStrategyOptions: NamingStrategyGroupOptions,
+  slugProperty: string,
   objectsTree: NotionObjectTree,
   newFilesManager: FilesManager
 ): NamingStrategyGroup {
   return {
     [ObjectType.Page]: getMarkdownNamingStrategy(
-      options.conversion.namingStrategy,
-      options.conversion.slugProperty || ""
+      namingStrategyOptions[ObjectType.Page],
+      slugProperty
     ),
     [ObjectType.Database]: getMarkdownNamingStrategy(
-      options.conversion.namingStrategy,
-      options.conversion.slugProperty || ""
+      namingStrategyOptions[ObjectType.Database],
+
+      slugProperty
     ),
-    [AssetType.Image]: getImageNamingStrategy(
-      options.conversion.imageNamingStrategy || "default",
-      (image) =>
-        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    [AssetType.Image]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.Image],
+      (notionObject) =>
+        getAncestorPageOrDatabaseFilename(
+          notionObject,
+          objectsTree,
+          newFilesManager
+        )
     ),
-    [AssetType.File]: getImageNamingStrategy(
-      options.conversion.imageNamingStrategy || "default",
-      (image) =>
-        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    [AssetType.File]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.File],
+      (notionObject) =>
+        getAncestorPageOrDatabaseFilename(
+          notionObject,
+          objectsTree,
+          newFilesManager
+        )
     ),
-    [AssetType.Video]: getImageNamingStrategy(
-      options.conversion.imageNamingStrategy || "default",
-      (image) =>
-        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    [AssetType.Video]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.Video],
+      (notionObject) =>
+        getAncestorPageOrDatabaseFilename(
+          notionObject,
+          objectsTree,
+          newFilesManager
+        )
     ),
-    [AssetType.PDF]: getImageNamingStrategy(
-      options.conversion.imageNamingStrategy || "default",
-      (image) =>
-        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    [AssetType.PDF]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.PDF],
+      (notionObject) =>
+        getAncestorPageOrDatabaseFilename(
+          notionObject,
+          objectsTree,
+          newFilesManager
+        )
     ),
-    [AssetType.Audio]: getImageNamingStrategy(
-      options.conversion.imageNamingStrategy || "default",
-      (image) =>
-        getAncestorPageOrDatabaseFilename(image, objectsTree, newFilesManager)
+    [AssetType.Audio]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.Audio],
+      (notionObject) =>
+        getAncestorPageOrDatabaseFilename(
+          notionObject,
+          objectsTree,
+          newFilesManager
+        )
     ),
   }
 }

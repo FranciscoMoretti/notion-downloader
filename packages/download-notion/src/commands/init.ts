@@ -5,8 +5,8 @@ import {
   DEFAULT_TAILWIND_CONFIG,
   DEFAULT_TAILWIND_CSS,
   DEFAULT_UTILS,
+  configSchema,
   getConfig,
-  rawConfigSchema,
   resolveConfigPaths,
   type Config,
 } from "@/src/utils_old/get-config"
@@ -179,7 +179,7 @@ export async function promptForConfig(
     },
   ])
 
-  const config = rawConfigSchema.parse({
+  const config = configSchema.parse({
     $schema: "https://ui.shadcn.com/schema.json",
     style: options.style,
     tailwind: {
@@ -274,17 +274,17 @@ export async function promptForMinimalConfig(
     cssVariables = options.tailwindCssVariables
   }
 
-  const config = rawConfigSchema.parse({
+  const config = configSchema.parse({
     $schema: defaultConfig?.$schema,
-    style,
-    tailwind: {
-      ...defaultConfig?.tailwind,
-      baseColor,
-      cssVariables,
-    },
-    rsc: defaultConfig?.rsc,
-    tsx: defaultConfig?.tsx,
-    aliases: defaultConfig?.aliases,
+    // style,
+    // tailwind: {
+    //   ...defaultConfig?.tailwind,
+    //   baseColor,
+    //   cssVariables,
+    // },
+    // rsc: defaultConfig?.rsc,
+    // tsx: defaultConfig?.tsx,
+    // aliases: defaultConfig?.aliases,
   })
 
   // Write to file.

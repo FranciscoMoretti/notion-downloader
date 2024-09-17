@@ -5,6 +5,7 @@ import { ObjectType } from "notion-cache-client"
 import { NotionObjectTree } from "notion-downloader"
 
 import { FilesManager } from "./files/FilesManager"
+import { NotionObject } from "./notionObjects/NotionObject"
 import { NotionImageLike } from "./notionObjects/objectTypes"
 import { getPageAncestorId } from "./objectTree/objectTreeUtills"
 
@@ -36,35 +37,35 @@ export function filenameFromPath(path: string) {
   return filenameWithoutExtension
 }
 function getAncestorPageOrDatabaseFilepath(
-  image: NotionImageLike,
+  notionObject: NotionObject,
   objectsTree: NotionObjectTree,
   filesManager: FilesManager
 ): string {
-  if (image.object == ObjectType.Page) {
-    return filesManager.get("base", ObjectType.Page, image.id).path
-  } else if (image.object == ObjectType.Database) {
-    return filesManager.get("base", ObjectType.Database, image.id).path
+  if (notionObject.object == ObjectType.Page) {
+    return filesManager.get("base", ObjectType.Page, notionObject.id).path
+  } else if (notionObject.object == ObjectType.Database) {
+    return filesManager.get("base", ObjectType.Database, notionObject.id).path
   }
 
   // It's a block. Ancestor is page
   const ancestorPageId = getPageAncestorId(
     ObjectType.Block,
-    image.id,
+    notionObject.id,
     objectsTree
   )
   if (!ancestorPageId) {
-    throw new Error("Ancestor page not found for image " + image.id)
+    throw new Error("Ancestor page not found for object " + notionObject.id)
   }
   return filesManager.get("base", ObjectType.Page, ancestorPageId).path
 }
 
 export function getAncestorPageOrDatabaseFilename(
-  image: NotionImageLike,
+  notionObject: NotionObject,
   objectsTree: NotionObjectTree,
   filesManager: FilesManager
 ): string {
   return filenameFromPath(
-    getAncestorPageOrDatabaseFilepath(image, objectsTree, filesManager)
+    getAncestorPageOrDatabaseFilepath(notionObject, objectsTree, filesManager)
   )
 }
 

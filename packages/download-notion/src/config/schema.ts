@@ -31,8 +31,45 @@ export enum LayoutStrategyNames {
 }
 export const layoutStrategySchema = z.nativeEnum(LayoutStrategyNames)
 
+export enum AllNamingSchemaName {
+  Default = "default",
+}
+
+export enum MarkdownNamingStrategyNames {
+  GithubSlug = "github-slug",
+  NotionSlug = "notion-slug",
+  Guid = "guid",
+  Title = "title",
+}
+export enum AssetNamingStrategyNames {
+  Legacy = "legacy",
+  AncestorPrefix = "ancestor-prefix",
+}
+
+export const markdownNamingStrategySchema = z.union([
+  z.nativeEnum(MarkdownNamingStrategyNames),
+  z.nativeEnum(AllNamingSchemaName),
+])
+export const assetNamingStrategySchema = z.union([
+  z.nativeEnum(AssetNamingStrategyNames),
+  z.nativeEnum(AllNamingSchemaName),
+])
+const allNamingStrategySchema = markdownNamingStrategySchema.and(
+  assetNamingStrategySchema
+)
+
+export type MarkdownNamingStrategyType =
+  | MarkdownNamingStrategyNames
+  | AllNamingSchemaName
+
+export type AssetNamingStrategyType =
+  | AssetNamingStrategyNames
+  | AllNamingSchemaName
+
+export type AllNamingStrategyType = z.infer<typeof allNamingStrategySchema>
+
 function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
-  const assetPathsSchema = z.object({
+  const assetsBaseSchema = z.object({
     [AssetType.Image]: valueSchema.optional(),
     [AssetType.File]: valueSchema.optional(),
     [AssetType.Video]: valueSchema.optional(),
@@ -46,7 +83,7 @@ function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
       assets: valueSchema.optional(),
       [TextType.Markdown]: valueSchema.optional(),
     })
-    .merge(assetPathsSchema)
+    .merge(assetsBaseSchema)
 
   return z.union([
     valueSchema,
@@ -59,7 +96,43 @@ function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
       .extend({
         [TextType.Markdown]: valueSchema,
       })
-      .merge(assetPathsSchema.required()),
+      .merge(assetsBaseSchema.required()),
+  ])
+}
+
+function createAssetMarkdownOptionsSchema<
+  T extends z.ZodType,
+  U extends z.ZodType,
+  V extends z.ZodType<z.infer<T> & z.infer<U>>
+>(assetValueSchema: T, markdownValueSchema: U, allValueSchema: V) {
+  const assetsBaseSchema = z.object({
+    [AssetType.Image]: assetValueSchema.optional(),
+    [AssetType.File]: assetValueSchema.optional(),
+    [AssetType.Video]: assetValueSchema.optional(),
+    [AssetType.PDF]: assetValueSchema.optional(),
+    [AssetType.Audio]: assetValueSchema.optional(),
+  })
+
+  const baseSchema = z
+    .object({
+      all: allValueSchema.optional(),
+      assets: assetValueSchema.optional(),
+      [TextType.Markdown]: markdownValueSchema.optional(),
+    })
+    .merge(assetsBaseSchema)
+
+  return z.union([
+    allValueSchema,
+    baseSchema.extend({ all: allValueSchema }),
+    baseSchema.extend({
+      assets: assetValueSchema,
+      [TextType.Markdown]: markdownValueSchema,
+    }),
+    baseSchema
+      .extend({
+        [TextType.Markdown]: markdownValueSchema,
+      })
+      .merge(assetsBaseSchema.required()),
   ])
 }
 
@@ -80,6 +153,11 @@ export const pathsSchema = createFilesSchema(pathSchema)
 
 const filepathSchema = createOptionsSchema(pathSchema)
 const layoutStrategyOptionsSchema = createOptionsSchema(layoutStrategySchema)
+const namingStrategyOptionsSchema = createAssetMarkdownOptionsSchema(
+  assetNamingStrategySchema,
+  markdownNamingStrategySchema,
+  allNamingStrategySchema
+)
 
 export const pathOptionsSchema = z.union([z.string(), filepathSchema])
 
@@ -99,9 +177,9 @@ export const conversionSchema = z.object({
     LayoutStrategyNames.HierarchicalNamed
   ),
   // TODO: Strategies should be per asset type
-  namingStrategy: z
-    .enum(["github-slug", "notion-slug", "guid", "title"])
-    .default("github-slug"),
+  namingStrategy: namingStrategyOptionsSchema.default(
+    AllNamingSchemaName.Default
+  ),
   imageNamingStrategy: z
     .enum(["default", "legacy"])
     .optional()
@@ -171,9 +249,23 @@ export type GenericGroup<T> = {
   [AssetType.File]: T
 }
 
+export type GenericAssetMarkdownGroup<T, U> = {
+  [ObjectType.Page]: T
+  [ObjectType.Database]: T
+  [AssetType.Video]: U
+  [AssetType.PDF]: U
+  [AssetType.Audio]: U
+  [AssetType.Image]: U
+  [AssetType.File]: U
+}
+
 export type FilepathGroup = GenericGroup<z.infer<typeof pathSchema>>
 export type LayoutStrategyGroupOptions = GenericGroup<
   z.infer<typeof layoutStrategySchema>
+>
+export type NamingStrategyGroupOptions = GenericAssetMarkdownGroup<
+  z.infer<typeof markdownNamingStrategySchema>,
+  z.infer<typeof assetNamingStrategySchema>
 >
 
 function parseFileOptions<T extends z.ZodType>(
@@ -223,6 +315,54 @@ function parseFileOptions<T extends z.ZodType>(
       options.all
     ),
   } as GenericGroup<z.infer<T>>
+}
+
+export function parseNamingStrategyFileOptions(
+  options: z.infer<typeof namingStrategyOptionsSchema>
+): NamingStrategyGroupOptions {
+  if (options === AllNamingSchemaName.Default) {
+    return {
+      [ObjectType.Page]: options,
+      [ObjectType.Database]: options,
+      [AssetType.Video]: options,
+      [AssetType.PDF]: options,
+      [AssetType.Audio]: options,
+      [AssetType.Image]: options,
+      [AssetType.File]: options,
+    }
+  }
+  return {
+    [ObjectType.Page]: firstDefined(options[TextType.Markdown], options.all),
+    [ObjectType.Database]: firstDefined(
+      options[TextType.Markdown],
+      options.all
+    ),
+    [AssetType.Video]: firstDefined(
+      options[AssetType.Video],
+      options.assets,
+      options.all
+    ),
+    [AssetType.PDF]: firstDefined(
+      options[AssetType.PDF],
+      options.assets,
+      options.all
+    ),
+    [AssetType.Audio]: firstDefined(
+      options[AssetType.Audio],
+      options.assets,
+      options.all
+    ),
+    [AssetType.Image]: firstDefined(
+      options[AssetType.Image],
+      options.assets,
+      options.all
+    ),
+    [AssetType.File]: firstDefined(
+      options[AssetType.File],
+      options.assets,
+      options.all
+    ),
+  }
 }
 
 export const parsePathFileOptions = (

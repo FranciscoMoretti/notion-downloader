@@ -1,18 +1,19 @@
+import { NotionObject } from "../notionObjects/NotionObject"
 import {
   NotionFileLikeObjects,
   NotionImageLike,
 } from "../notionObjects/objectTypes"
 import { NamingStrategy, allNameableTypes } from "./NamingStrategy"
 
-export class DefaultBlockNamingStrategy extends NamingStrategy {
-  private readonly getPageAncestorName: (image: NotionImageLike) => string
+export class AncestorPrefixAssetNamingStrategy extends NamingStrategy {
+  private readonly getPageAncestorName: (notionObject: NotionObject) => string
 
-  constructor(getPageAncestorName: (image: NotionImageLike) => string) {
+  constructor(getPageAncestorName: (notionObject: NotionObject) => string) {
     super(allNameableTypes)
     this.getPageAncestorName = getPageAncestorName
   }
 
-  protected _nameForObject(notionObject: NotionImageLike): string {
+  protected _nameForObject(notionObject: NotionObject): string {
     // Don't start with . for empty ancestor page name
     const pageSlugPart = this.getPageAncestorName(notionObject)
       ? `${this.getPageAncestorName(notionObject)}.`
