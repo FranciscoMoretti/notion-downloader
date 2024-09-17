@@ -190,7 +190,11 @@ export const pullOptionsSchema = z
     rootDbAsFolder: z.boolean().default(false),
 
     // Cache
-    cache: cacheOptionsSchema,
+    cache: cacheOptionsSchema
+      .extend({
+        cacheAssets: z.boolean().default(true),
+      })
+      .default({}),
 
     // System
     revalidatePeriod: z.number().default(-1),

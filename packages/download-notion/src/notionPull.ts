@@ -8,11 +8,7 @@ import {
   PageOrDatabaseSchema,
   convertToUUID,
 } from "notion-cache-client"
-import {
-  NotionObjectTree,
-  downloadNotionObjectTree,
-  downloadObjectTree,
-} from "notion-downloader"
+import { NotionObjectTree, downloadNotionObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
