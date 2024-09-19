@@ -4,7 +4,6 @@ import { getConfig } from "@/src/utils_old/get-config"
 import { getPackageManager } from "@/src/utils_old/get-package-manager"
 import { handleError } from "@/src/utils_old/handle-error"
 import { logger } from "@/src/utils_old/logger"
-import { transform } from "@/src/utils_old/transformers"
 import chalk from "chalk"
 import { Command, Option } from "commander"
 import dotenv from "dotenv"
@@ -155,24 +154,6 @@ export const pull = new Command()
           }
         }
 
-        for (const file of item.files) {
-          let filePath = path.resolve(targetDir, file.name)
-
-          // Run transformers.
-          const content = await transform({
-            filename: file.name,
-            raw: file.content,
-            config,
-            baseColor,
-          })
-
-          if (!config.tsx) {
-            filePath = filePath.replace(/\.tsx$/, ".jsx")
-            filePath = filePath.replace(/\.ts$/, ".js")
-          }
-
-          await fs.writeFile(filePath, content)
-        }
 
         const packageManager = await getPackageManager(cwd)
 

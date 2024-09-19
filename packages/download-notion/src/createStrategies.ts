@@ -11,8 +11,8 @@ import {
   parseNamingStrategyFileOptions,
 } from "./config/schema"
 import { FilesManager } from "./files/FilesManager"
-import { getLayoutStrategy } from "./getLayoutStrategy"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
+import { getLayoutStrategy } from "./layoutStrategy/getLayoutStrategy"
 import { NamingStrategy } from "./namingStrategy/NamingStrategy"
 import {
   getAssetNamingStrategy,

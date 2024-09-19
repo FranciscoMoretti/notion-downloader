@@ -17,11 +17,12 @@ import { logger } from "@/src/utils_old/logger"
 import * as templates from "@/src/utils_old/templates"
 import chalk from "chalk"
 import { Command } from "commander"
-import { execa } from "execa"
 import template from "lodash.template"
 import ora from "ora"
 import prompts from "prompts"
 import { z } from "zod"
+
+// TODO: Let's implement the init command
 
 const PROJECT_DEPENDENCIES = [
   "tailwindcss-animate",
@@ -61,12 +62,9 @@ export const init = new Command()
 
       const projectConfig = await getProjectConfig(cwd)
       if (projectConfig) {
-        const config = await promptForMinimalConfig(
-          cwd,
-          projectConfig,
-          opts.defaults
+        logger.info(
+          `Configuration files already exist in directory ${cwd}. This operation will have no effect.`
         )
-        await runInit(cwd, config)
       } else {
         // Read config.
         const existingConfig = await getConfig(cwd)
@@ -222,80 +220,7 @@ export async function promptForConfig(
   return await resolveConfigPaths(cwd, config)
 }
 
-export async function promptForMinimalConfig(
-  cwd: string,
-  defaultConfig: Config,
-  defaults = false
-) {
-  const highlight = (text: string) => chalk.cyan(text)
-  let style = defaultConfig.style
-  let baseColor = defaultConfig.tailwind.baseColor
-  let cssVariables = defaultConfig.tailwind.cssVariables
-
-  if (!defaults) {
-    const styles = [] // await getRegistryStyles()
-    const baseColors = [] // await getRegistryBaseColors()
-
-    const options = await prompts([
-      {
-        type: "select",
-        name: "style",
-        message: `Which ${highlight("style")} would you like to use?`,
-        choices: styles.map((style) => ({
-          title: style.label,
-          value: style.name,
-        })),
-      },
-      {
-        type: "select",
-        name: "tailwindBaseColor",
-        message: `Which color would you like to use as ${highlight(
-          "base color"
-        )}?`,
-        choices: baseColors.map((color) => ({
-          title: color.label,
-          value: color.name,
-        })),
-      },
-      {
-        type: "toggle",
-        name: "tailwindCssVariables",
-        message: `Would you like to use ${highlight(
-          "CSS variables"
-        )} for colors?`,
-        initial: defaultConfig?.tailwind.cssVariables,
-        active: "yes",
-        inactive: "no",
-      },
-    ])
-
-    style = options.style
-    baseColor = options.tailwindBaseColor
-    cssVariables = options.tailwindCssVariables
-  }
-
-  const config = configSchema.parse({
-    $schema: defaultConfig?.$schema,
-    // style,
-    // tailwind: {
-    //   ...defaultConfig?.tailwind,
-    //   baseColor,
-    //   cssVariables,
-    // },
-    // rsc: defaultConfig?.rsc,
-    // tsx: defaultConfig?.tsx,
-    // aliases: defaultConfig?.aliases,
-  })
-
-  // Write to file.
-  logger.info("")
-  const spinner = ora(`Writing components.json...`).start()
-  const targetPath = path.resolve(cwd, "components.json")
-  await fs.writeFile(targetPath, JSON.stringify(config, null, 2), "utf8")
-  spinner.succeed()
-
-  return await resolveConfigPaths(cwd, config)
-}
+const CONFIG_FILENAME = "components.json"
 
 export async function runInit(cwd: string, config: Config) {
   const spinner = ora(`Initializing project...`)?.start()
@@ -351,43 +276,5 @@ export async function runInit(cwd: string, config: Config) {
     "utf8"
   )
 
-  // Write css file.
-  const baseColor = await getRegistryBaseColor(config.tailwind.baseColor)
-  if (baseColor) {
-    await fs.writeFile(
-      config.resolvedPaths.tailwindCss,
-      config.tailwind.cssVariables
-        ? baseColor.cssVarsTemplate
-        : baseColor.inlineColorsTemplate,
-      "utf8"
-    )
-  }
-
-  // Write cn file.
-  await fs.writeFile(
-    `${config.resolvedPaths.utils}.${extension}`,
-    extension === "ts" ? templates.UTILS : templates.UTILS_JS,
-    "utf8"
-  )
-
   spinner?.succeed()
-
-  // Install dependencies.
-  const dependenciesSpinner = ora(`Installing dependencies...`)?.start()
-  const packageManager = await getPackageManager(cwd)
-
-  // TODO: add support for other icon libraries.
-  const deps = [
-    ...PROJECT_DEPENDENCIES,
-    config.style === "new-york" ? "@radix-ui/react-icons" : "lucide-react",
-  ]
-
-  await execa(
-    packageManager,
-    [packageManager === "npm" ? "install" : "add", ...deps],
-    {
-      cwd,
-    }
-  )
-  dependenciesSpinner?.succeed()
 }
