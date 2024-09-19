@@ -15,6 +15,7 @@ import { logger } from "../utils_old/logger"
 const cleanupOptionsSchema = z.object({
   cwd: z.string(),
   yes: z.boolean(),
+  outputOnly: z.boolean(),
 })
 
 export const cleanup = new Command()
@@ -25,6 +26,11 @@ export const cleanup = new Command()
     "-c, --cwd <cwd>",
     "the working directory. defaults to the current directory.",
     process.cwd()
+  )
+  .option(
+    "-o, --output-only",
+    "only clean output files and remove the filesmap files.",
+    false
   )
   .action(async (opts) => {
     const options = cleanupOptionsSchema.parse(opts)
@@ -70,10 +76,10 @@ export const cleanup = new Command()
       const filesCleaner = new FilesCleaner()
       await filesCleaner.cleanupAllFiles(filesManager)
     }
-
-    if (cacheDir) {
-      await fs.rmdir(cacheDir, { recursive: true })
+    if (options.outputOnly) {
+      await fs.rm(outputFilesMapPath)
+    } else {
+      await fs.rm(cacheDir, { recursive: true })
     }
-
     console.log("All files and cache directory have been removed.")
   })
