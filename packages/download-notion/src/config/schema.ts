@@ -216,12 +216,13 @@ export const configFileOptionsSchema = pullOptionsSchema
   .partial()
   .omit({ cwd: true })
 
-export const defaultPullOptions = pullOptionsSchema
+export const defaultPullOptionsSchema = pullOptionsSchema
   .extend({
     rootId: uuidSchema.default("c974ccd9c70c4abd8a5bd4f5a294e5dd"),
   })
   .omit({ notionToken: true })
-  .parse({})
+
+export const defaultPullOptions = defaultPullOptionsSchema.parse({})
 
 export type NotionPullOptions = z.infer<typeof pullOptionsSchema>
 export type NotionPullOptionsInput = Omit<

@@ -19,7 +19,7 @@ import {
 } from "./config/schema"
 import { createStrategies } from "./createStrategies"
 import { preFetchAssets } from "./fetchAssets"
-import { FilesCleaner, cleanup } from "./files/FilesCleaner"
+import { FilesCleaner, cleanupOldsFiles } from "./files/FilesCleaner"
 import { FilesManager } from "./files/FilesManager"
 import { FileRecordType, FilesMap } from "./files/FilesMap"
 import {
@@ -249,7 +249,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   group("Stage 7: clean up old files & images...")
-  await cleanup(existingFilesManager, newFilesManager)
+  await cleanupOldsFiles(existingFilesManager, newFilesManager)
   // Saving needs to happen at the end to prevent inconsistencies if fails mid execution
   await saveObjectToJson(optionsForLogging, lastOptionsCachePath)
   await saveDataToFile(newFilesManager.toJSON(), filesMapCachePath)

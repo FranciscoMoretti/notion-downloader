@@ -20,7 +20,6 @@ test("init config-full", async () => {
   const config = await getConfig(targetDir)
   // TODO: Re-enable config testing once config is defined
   return
-  await runInit(targetDir, config)
 
   expect(mockMkdir).toHaveBeenNthCalledWith(
     1,

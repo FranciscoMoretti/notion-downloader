@@ -114,7 +114,7 @@ export class FilesCleaner {
   }
 }
 
-export async function cleanup(
+export async function cleanupOldsFiles(
   existingFilesManager: FilesManager,
   newFilesManager: FilesManager
 ) {

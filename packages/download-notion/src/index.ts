@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { cleanup } from "@/src/commands/cleanup"
 import { init } from "@/src/commands/init"
 import { pull } from "@/src/commands/pull"
 import { Command } from "commander"
@@ -23,7 +24,7 @@ async function main() {
       "display the version number"
     )
 
-  program.addCommand(init).addCommand(pull)
+  program.addCommand(init).addCommand(pull).addCommand(cleanup)
 
   program.parse()
 }

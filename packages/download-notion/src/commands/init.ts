@@ -28,6 +28,7 @@ export const init = new Command()
   .name("init")
   .description("initialize your project and install dependencies")
   .option("-y, --yes", "skip confirmation prompt.", false)
+  // TODO: Implement this defaults option
   .option("-d, --defaults,", "use default configuration.", false)
   .option(
     "-c, --cwd <cwd>",
@@ -115,6 +116,7 @@ export async function promptForConfig(cwd: string, skip = false) {
     ],
     {
       onCancel: () => {
+        console.log("Initialization cancelled.")
         process.exit(0)
       },
     }
