@@ -1,6 +1,6 @@
 import { existsSync, promises as fs } from "fs"
 import path from "path"
-import { getConfig } from "@/src/utils_old/get-config"
+import { DEFAULT_CONFIG_FILENAME, getConfig } from "@/src/utils_old/get-config"
 import { getPackageManager } from "@/src/utils_old/get-package-manager"
 import { handleError } from "@/src/utils_old/handle-error"
 import { logger } from "@/src/utils_old/logger"
@@ -82,7 +82,7 @@ export const pull = new Command()
         logger.warn(
           `Configuration is missing. Please run ${chalk.green(
             `init`
-          )} to create a components.json file.`
+          )} to create a ${DEFAULT_CONFIG_FILENAME} file.`
         )
         process.exit(1)
       }

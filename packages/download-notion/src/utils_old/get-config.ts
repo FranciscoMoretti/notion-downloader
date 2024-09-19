@@ -1,11 +1,12 @@
 import path from "path"
 import { resolveImport } from "@/src/utils_old/resolve-import"
-import { cosmiconfig, cosmiconfigSync } from "cosmiconfig"
+import { cosmiconfig } from "cosmiconfig"
 import { loadConfig } from "tsconfig-paths"
 import { z } from "zod"
 
 import { configFileOptionsSchema } from "../config/schema"
 
+export const DEFAULT_CONFIG_FILENAME = "downloader.json"
 export const DEFAULT_STYLE = "default"
 export const DEFAULT_COMPONENTS = "@/components"
 export const DEFAULT_UTILS = "@/lib/utils"
@@ -14,7 +15,6 @@ export const DEFAULT_TAILWIND_CONFIG = "tailwind.config.js"
 export const DEFAULT_TAILWIND_BASE_COLOR = "slate"
 
 // TODO: Figure out if we want to support all cosmiconfig formats.
-// A simple components.json file would be nice.
 const explorer = cosmiconfig("downloader", {
   searchPlaces: [
     "downloader.json",

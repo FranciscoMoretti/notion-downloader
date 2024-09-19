@@ -2,6 +2,7 @@ import { existsSync, promises as fs } from "fs"
 import path from "path"
 import {
   DEFAULT_COMPONENTS,
+  DEFAULT_CONFIG_FILENAME,
   DEFAULT_TAILWIND_CONFIG,
   DEFAULT_TAILWIND_CSS,
   DEFAULT_UTILS,
@@ -202,7 +203,7 @@ export async function promptForConfig(
       type: "confirm",
       name: "proceed",
       message: `Write configuration to ${highlight(
-        "components.json"
+        DEFAULT_CONFIG_FILENAME
       )}. Proceed?`,
       initial: true,
     })
@@ -214,15 +215,13 @@ export async function promptForConfig(
 
   // Write to file.
   logger.info("")
-  const spinner = ora(`Writing components.json...`).start()
-  const targetPath = path.resolve(cwd, "components.json")
+  const spinner = ora(`Writing ${DEFAULT_CONFIG_FILENAME}...`).start()
+  const targetPath = path.resolve(cwd, DEFAULT_CONFIG_FILENAME)
   await fs.writeFile(targetPath, JSON.stringify(config, null, 2), "utf8")
   spinner.succeed()
 
   return await resolveConfigPaths(cwd, config)
 }
-
-const CONFIG_FILENAME = "components.json"
 
 export async function runInit(cwd: string, config: Config) {
   const spinner = ora(`Initializing project...`)?.start()
