@@ -11,7 +11,6 @@ import {
   resolveConfigPaths,
   type Config,
 } from "@/src/utils_old/get-config"
-import { preFlight } from "@/src/utils_old/get-project-info"
 import { handleError } from "@/src/utils_old/handle-error"
 import { logger } from "@/src/utils_old/logger"
 import * as templates from "@/src/utils_old/templates"
@@ -48,8 +47,6 @@ export const init = new Command()
         logger.error(`The path ${cwd} does not exist. Please try again.`)
         process.exit(1)
       }
-
-      preFlight(cwd)
 
       const existingConfig = await getConfig(cwd)
       if (existingConfig) {
