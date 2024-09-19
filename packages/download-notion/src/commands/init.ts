@@ -76,7 +76,9 @@ export const init = new Command()
       logger.info(
         `${chalk.green(
           "Success!"
-        )} Project initialization completed. You may now add components.`
+        )} Project initialization completed. You may now run ${chalk.green(
+          "download-notion-cli pull"
+        )} to download your Notion content.`
       )
       logger.info("")
     } catch (error) {
