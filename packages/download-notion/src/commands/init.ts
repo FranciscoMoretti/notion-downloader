@@ -17,9 +17,17 @@ import * as templates from "@/src/utils_old/templates"
 import chalk from "chalk"
 import { Command } from "commander"
 import template from "lodash.template"
+import { cacheStrategiesSchema } from "notion-downloader"
 import ora from "ora"
 import prompts from "prompts"
 import { z } from "zod"
+
+import {
+  defaultOptionsSchema,
+  defaultPullOptions,
+  pullOptionsSchema,
+  rootObjectTypeSchema,
+} from "../config/schema"
 
 const initOptionsSchema = z.object({
   cwd: z.string(),
@@ -55,7 +63,29 @@ export const init = new Command()
         )
       } else {
         // Read config.
-        const config = await promptForConfig(cwd, existingConfig, options.yes)
+        const config = await promptForConfig(cwd, options.yes)
+        // Write to file. (move to init)
+
+        if (!options.yes) {
+          const { proceed } = await prompts({
+            type: "confirm",
+            name: "proceed",
+            message: `Write configuration to ${chalk.green(
+              DEFAULT_CONFIG_FILENAME
+            )}. Proceed?`,
+            initial: true,
+          })
+
+          if (!proceed) {
+            process.exit(0)
+          }
+        }
+        logger.info("")
+        const spinner = ora(`Writing ${DEFAULT_CONFIG_FILENAME}...`).start()
+        const targetPath = path.resolve(cwd, DEFAULT_CONFIG_FILENAME)
+        await fs.writeFile(targetPath, JSON.stringify(config, null, 2), "utf8")
+        spinner.succeed()
+
         await runInit(cwd, config)
       }
 
@@ -73,138 +103,61 @@ export const init = new Command()
     }
   })
 
-export async function promptForConfig(
-  cwd: string,
-  defaultConfig: Config | null = null,
-  skip = false
-) {
+export async function promptForConfig(cwd: string, skip = false) {
+  const defaultConfig = defaultPullOptions
   const highlight = (text: string) => chalk.cyan(text)
-
-  const styles = [] // await getRegistryStyles()
-  const baseColors = [] // await getRegistryBaseColors()
 
   const options = await prompts([
     {
       type: "toggle",
-      name: "typescript",
-      message: `Would you like to use ${highlight(
-        "TypeScript"
+      name: "skipConversion",
+      message: `Would you to ${highlight(
+        "skip convertion to markdown"
       )} (recommended)?`,
-      initial: defaultConfig?.tsx ?? true,
+      initial: defaultConfig.conversion.skip,
       active: "yes",
       inactive: "no",
     },
     {
       type: "select",
-      name: "style",
-      message: `Which ${highlight("style")} would you like to use?`,
-      choices: styles.map((style) => ({
-        title: style.label,
-        value: style.name,
+      name: "cacheStrategy",
+      message: `Which ${highlight("cache strategy")} would you like to use?`,
+      choices: cacheStrategiesSchema.options.map((cacheStrategy) => ({
+        title: cacheStrategy,
+        value: cacheStrategy,
       })),
     },
     {
       type: "select",
-      name: "tailwindBaseColor",
-      message: `Which color would you like to use as ${highlight(
-        "base color"
-      )}?`,
-      choices: baseColors.map((color) => ({
-        title: color.label,
-        value: color.name,
+      name: "rootObjectType",
+      message: `What is the ${highlight(
+        "root object type"
+      )} of your Notion content?`,
+      choices: rootObjectTypeSchema.options.map((type) => ({
+        title: type,
+        value: type,
       })),
     },
     {
       type: "text",
-      name: "tailwindCss",
-      message: `Where is your ${highlight("global CSS")} file?`,
-      initial: defaultConfig?.tailwind.css ?? DEFAULT_TAILWIND_CSS,
+      name: "rootId",
+      message: `What is the ${highlight("root ID")} of your Notion content?`,
+      initial: defaultConfig?.rootId ?? "",
     },
-    {
-      type: "toggle",
-      name: "tailwindCssVariables",
-      message: `Would you like to use ${highlight(
-        "CSS variables"
-      )} for colors?`,
-      initial: defaultConfig?.tailwind.cssVariables ?? true,
-      active: "yes",
-      inactive: "no",
-    },
-    {
-      type: "text",
-      name: "tailwindPrefix",
-      message: `Are you using a custom ${highlight(
-        "tailwind prefix eg. tw-"
-      )}? (Leave blank if not)`,
-      initial: "",
-    },
-    {
-      type: "text",
-      name: "tailwindConfig",
-      message: `Where is your ${highlight("tailwind.config.js")} located?`,
-      initial: defaultConfig?.tailwind.config ?? DEFAULT_TAILWIND_CONFIG,
-    },
-    {
-      type: "text",
-      name: "components",
-      message: `Configure the import alias for ${highlight("components")}:`,
-      initial: defaultConfig?.aliases["components"] ?? DEFAULT_COMPONENTS,
-    },
-    {
-      type: "text",
-      name: "utils",
-      message: `Configure the import alias for ${highlight("utils")}:`,
-      initial: defaultConfig?.aliases["utils"] ?? DEFAULT_UTILS,
-    },
-    {
-      type: "toggle",
-      name: "rsc",
-      message: `Are you using ${highlight("React Server Components")}?`,
-      initial: defaultConfig?.rsc ?? true,
-      active: "yes",
-      inactive: "no",
-    },
+    // TODO: Complete the rest of the options
   ])
 
   const config = configSchema.parse({
-    $schema: "https://ui.shadcn.com/schema.json",
-    style: options.style,
-    tailwind: {
-      config: options.tailwindConfig,
-      css: options.tailwindCss,
-      baseColor: options.tailwindBaseColor,
-      cssVariables: options.tailwindCssVariables,
-      prefix: options.tailwindPrefix,
+    // TODO: Set a schema $schema: "https://ui.shadcn.com/schema.json",
+    rootId: options.rootId,
+    rootObjectType: options.rootObjectType,
+    cache: {
+      cacheStrategy: options.cacheStrategy,
     },
-    rsc: options.rsc,
-    tsx: options.typescript,
-    aliases: {
-      utils: options.utils,
-      components: options.components,
+    conversion: {
+      skip: options.skipConversion,
     },
   })
-
-  if (!skip) {
-    const { proceed } = await prompts({
-      type: "confirm",
-      name: "proceed",
-      message: `Write configuration to ${highlight(
-        DEFAULT_CONFIG_FILENAME
-      )}. Proceed?`,
-      initial: true,
-    })
-
-    if (!proceed) {
-      process.exit(0)
-    }
-  }
-
-  // Write to file.
-  logger.info("")
-  const spinner = ora(`Writing ${DEFAULT_CONFIG_FILENAME}...`).start()
-  const targetPath = path.resolve(cwd, DEFAULT_CONFIG_FILENAME)
-  await fs.writeFile(targetPath, JSON.stringify(config, null, 2), "utf8")
-  spinner.succeed()
 
   return await resolveConfigPaths(cwd, config)
 }
@@ -212,7 +165,9 @@ export async function promptForConfig(
 export async function runInit(cwd: string, config: Config) {
   const spinner = ora(`Initializing project...`)?.start()
 
-  // TODO: Implement init to create a config file
+  spinner?.succeed()
+
+  // TODO: Implement init to create a config file. Consider spinner at the end
   return
 
   // Ensure all resolved paths directories exist.

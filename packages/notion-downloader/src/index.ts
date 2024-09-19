@@ -7,5 +7,5 @@ export {
   NotionObjectResponse,
 } from "./notion-object-tree"
 
-export { cacheOptionsSchema } from "./schema"
+export { cacheOptionsSchema, cacheStrategiesSchema } from "./schema"
 export { objectTreeToObjectIds, IdWithType } from "./object-tree-utils"

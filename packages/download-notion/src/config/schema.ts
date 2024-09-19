@@ -180,14 +180,18 @@ export const conversionSchema = z.object({
   ),
 })
 
+export const rootObjectTypeSchema = z.enum([
+  String(ObjectType.Page),
+  String(ObjectType.Database),
+  "auto",
+])
+const uuidSchema = z.string().length(32)
 export const pullOptionsSchema = z
   .object({
     // Notion Options
     notionToken: z.string(),
-    rootId: z.string(),
-    rootObjectType: z
-      .enum([String(ObjectType.Page), String(ObjectType.Database), "auto"])
-      .default("auto"),
+    rootId: uuidSchema,
+    rootObjectType: rootObjectTypeSchema.default("auto"),
     rootDbAsFolder: z.boolean().default(false),
 
     // Cache
@@ -203,7 +207,7 @@ export const pullOptionsSchema = z
     cwd: z.string().default(process.cwd()),
 
     // Conversion Options
-    conversion: conversionSchema,
+    conversion: conversionSchema.default({}),
   })
   .strict()
 
@@ -211,6 +215,13 @@ export const pullOptionsSchema = z
 export const configFileOptionsSchema = pullOptionsSchema
   .partial()
   .omit({ cwd: true })
+
+export const defaultPullOptions = pullOptionsSchema
+  .extend({
+    rootId: uuidSchema.default("c974ccd9c70c4abd8a5bd4f5a294e5dd"),
+  })
+  .omit({ notionToken: true })
+  .parse({})
 
 export type NotionPullOptions = z.infer<typeof pullOptionsSchema>
 export type NotionPullOptionsInput = Omit<

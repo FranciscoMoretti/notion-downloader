@@ -76,15 +76,16 @@ export async function getConfig(cwd: string) {
 export async function resolveConfigPaths(cwd: string, config: RawConfig) {
   return configSchema.parse({
     ...config,
-    resolvedPaths: {
-      tailwindConfig: path.resolve(cwd, config.tailwind.config),
-      tailwindCss: path.resolve(cwd, config.tailwind.css),
-      utils: await resolveImport(config.aliases["utils"], tsConfig),
-      components: await resolveImport(config.aliases["components"], tsConfig),
-      ui: config.aliases["ui"]
-        ? await resolveImport(config.aliases["ui"], tsConfig)
-        : await resolveImport(config.aliases["components"], tsConfig),
-    },
+    // TODO: Figure out if resolving paths is needed for output paths
+    // resolvedPaths: {
+    //   tailwindConfig: path.resolve(cwd, config.tailwind.config),
+    //   tailwindCss: path.resolve(cwd, config.tailwind.css),
+    //   utils: await resolveImport(config.aliases["utils"], tsConfig),
+    //   components: await resolveImport(config.aliases["components"], tsConfig),
+    //   ui: config.aliases["ui"]
+    //     ? await resolveImport(config.aliases["ui"], tsConfig)
+    //     : await resolveImport(config.aliases["components"], tsConfig),
+    // },
   })
 }
 
