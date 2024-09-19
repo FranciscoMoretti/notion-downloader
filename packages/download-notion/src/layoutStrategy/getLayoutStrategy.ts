@@ -1,6 +1,6 @@
-import { FlatLayoutStrategy } from "./layoutStrategy/FlatLayoutStrategy"
-import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
-import { NamingStrategy } from "./namingStrategy/NamingStrategy"
+import { NamingStrategy } from "../namingStrategy/NamingStrategy"
+import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
+import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 
 export function getLayoutStrategy(
   layoutStrategy: "HierarchicalNamedLayoutStrategy" | "FlatLayoutStrategy",
