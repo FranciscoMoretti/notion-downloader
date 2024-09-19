@@ -74,17 +74,6 @@ export async function getConfig(cwd: string) {
 }
 
 export async function resolveConfigPaths(cwd: string, config: RawConfig) {
-  // Read tsconfig.json.
-  const tsConfig = await loadConfig(cwd)
-
-  if (tsConfig.resultType === "failed") {
-    throw new Error(
-      `Failed to load ${config.tsx ? "tsconfig" : "jsconfig"}.json. ${
-        tsConfig.message ?? ""
-      }`.trim()
-    )
-  }
-
   return configSchema.parse({
     ...config,
     resolvedPaths: {

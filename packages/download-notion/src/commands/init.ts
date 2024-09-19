@@ -11,8 +11,7 @@ import {
   resolveConfigPaths,
   type Config,
 } from "@/src/utils_old/get-config"
-import { getPackageManager } from "@/src/utils_old/get-package-manager"
-import { getProjectConfig, preFlight } from "@/src/utils_old/get-project-info"
+import { preFlight } from "@/src/utils_old/get-project-info"
 import { handleError } from "@/src/utils_old/handle-error"
 import { logger } from "@/src/utils_old/logger"
 import * as templates from "@/src/utils_old/templates"
@@ -22,15 +21,6 @@ import template from "lodash.template"
 import ora from "ora"
 import prompts from "prompts"
 import { z } from "zod"
-
-// TODO: Let's implement the init command
-
-const PROJECT_DEPENDENCIES = [
-  "tailwindcss-animate",
-  "class-variance-authority",
-  "clsx",
-  "tailwind-merge",
-]
 
 const initOptionsSchema = z.object({
   cwd: z.string(),
@@ -61,14 +51,13 @@ export const init = new Command()
 
       preFlight(cwd)
 
-      const projectConfig = await getProjectConfig(cwd)
-      if (projectConfig) {
+      const existingConfig = await getConfig(cwd)
+      if (existingConfig) {
         logger.info(
           `Configuration files already exist in directory ${cwd}. This operation will have no effect.`
         )
       } else {
         // Read config.
-        const existingConfig = await getConfig(cwd)
         const config = await promptForConfig(cwd, existingConfig, options.yes)
         await runInit(cwd, config)
       }

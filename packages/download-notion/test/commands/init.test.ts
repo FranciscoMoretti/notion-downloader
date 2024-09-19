@@ -1,11 +1,9 @@
 import fs from "fs"
 import path from "path"
-import { execa } from "execa"
 import { afterEach, expect, test, vi } from "vitest"
 
 import { runInit } from "../../src/commands/init"
 import { getConfig } from "../../src/utils_old/get-config"
-import * as getPackageManger from "../../src/utils_old/get-package-manager"
 
 vi.mock("execa")
 vi.mock("fs/promises", () => ({
@@ -15,8 +13,6 @@ vi.mock("fs/promises", () => ({
 vi.mock("ora")
 
 test("init config-full", async () => {
-  vi.spyOn(getPackageManger, "getPackageManager").mockResolvedValue("pnpm")
-
   const mockMkdir = vi.spyOn(fs.promises, "mkdir").mockResolvedValue(undefined)
   const mockWriteFile = vi.spyOn(fs.promises, "writeFile").mockResolvedValue()
 
@@ -59,27 +55,12 @@ test("init config-full", async () => {
     expect.stringContaining(`import { type ClassValue, clsx } from "clsx"`),
     "utf8"
   )
-  expect(execa).toHaveBeenCalledWith(
-    "pnpm",
-    [
-      "add",
-      "tailwindcss-animate",
-      "class-variance-authority",
-      "clsx",
-      "tailwind-merge",
-      "@radix-ui/react-icons",
-    ],
-    {
-      cwd: targetDir,
-    }
-  )
 
   mockMkdir.mockRestore()
   mockWriteFile.mockRestore()
 })
 
 test("init config-partial", async () => {
-  vi.spyOn(getPackageManger, "getPackageManager").mockResolvedValue("npm")
   // TODO: Re-enable config testing once config is defined
   return
   const mockMkdir = vi.spyOn(fs.promises, "mkdir").mockResolvedValue(undefined)
@@ -122,20 +103,6 @@ test("init config-partial", async () => {
     expect.stringMatching(/utils.ts$/),
     expect.stringContaining(`import { type ClassValue, clsx } from "clsx"`),
     "utf8"
-  )
-  expect(execa).toHaveBeenCalledWith(
-    "npm",
-    [
-      "install",
-      "tailwindcss-animate",
-      "class-variance-authority",
-      "clsx",
-      "tailwind-merge",
-      "lucide-react",
-    ],
-    {
-      cwd: targetDir,
-    }
   )
 
   mockMkdir.mockRestore()
