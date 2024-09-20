@@ -280,7 +280,6 @@ function createCachedNotionClient(
 }
 
 function createDirectoriesAndPrefixes(options: NotionPullOptions) {
-  // TODO: Simplify this logic
   const objectsDirectories: FilepathGroup = parsePathFileOptions(
     options.conversion.outputPaths
   )
