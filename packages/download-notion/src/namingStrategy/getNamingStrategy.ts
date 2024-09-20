@@ -21,13 +21,13 @@ export function getAssetNamingStrategy(
   getPageAncestorName: (notionObject: NotionObject) => string
 ): NamingStrategy {
   switch (namingStrategy) {
-    case AllNamingSchemaName.Default:
+    case AllNamingSchemaName.enum.default:
       return new AncestorPrefixAssetNamingStrategy(getPageAncestorName)
-    case AllNamingSchemaName.Guid:
+    case AllNamingSchemaName.enum.guid:
       return new GuidNamingStrategy()
-    case AssetNamingStrategyNames.AncestorPrefix:
+    case AssetNamingStrategyNames.enum.ancestorPrefix:
       return new AncestorPrefixAssetNamingStrategy(getPageAncestorName)
-    case AssetNamingStrategyNames.Legacy:
+    case AssetNamingStrategyNames.enum.legacy:
       return new LegacyAssetNamingStrategy()
     default:
       throw new Error(`Unknown image file name format: ${namingStrategy}`)
@@ -38,15 +38,15 @@ export function getMarkdownNamingStrategy(
   slugProperty: string
 ) {
   switch (namingStrategy) {
-    case AllNamingSchemaName.Default:
+    case AllNamingSchemaName.enum.default:
       return new TitleNamingStrategy()
-    case AllNamingSchemaName.Guid:
+    case AllNamingSchemaName.enum.guid:
       return new GuidNamingStrategy()
-    case MarkdownNamingStrategyNames.GithubSlug:
+    case MarkdownNamingStrategyNames.enum.githubSlug:
       return new GithubSlugNamingStrategy(slugProperty)
-    case MarkdownNamingStrategyNames.NotionSlug:
+    case MarkdownNamingStrategyNames.enum.notionSlug:
       return new NotionSlugNamingStrategy(slugProperty)
-    case MarkdownNamingStrategyNames.Title:
+    case MarkdownNamingStrategyNames.enum.title:
       return new TitleNamingStrategy()
     default:
       throw new Error(`Unknown markdown file name format: ${namingStrategy}`)

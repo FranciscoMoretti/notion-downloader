@@ -22,8 +22,8 @@ type NotionBlockImageResponses = ImageBlockObjectResponse
 // TODO: This should inherit from NotionBlock
 export class NotionBlockImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionBlockImageResponses
-  public assetType: AssetType = AssetType.Image
-  public fileType: FileType = AssetType.Image
+  public assetType: AssetType = AssetType.enum.image
+  public fileType: FileType = AssetType.enum.image
 
   constructor(imageResponse: NotionBlockImageResponses) {
     super(imageResponse.image)

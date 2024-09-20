@@ -11,11 +11,11 @@ export type FileRecordType = ObjectType.Page | ObjectType.Database | AssetType
 export const allRecordTypes: FileRecordType[] = [
   ObjectType.Page,
   ObjectType.Database,
-  AssetType.Image,
-  AssetType.File,
-  AssetType.Video,
-  AssetType.PDF,
-  AssetType.Audio,
+  AssetType.enum.image,
+  AssetType.enum.file,
+  AssetType.enum.video,
+  AssetType.enum.pdf,
+  AssetType.enum.audio,
 ]
 
 export type FilesMapData = Record<FileRecordType, Record<string, FileRecord>>

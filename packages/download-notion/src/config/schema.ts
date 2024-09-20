@@ -2,86 +2,71 @@ import { ObjectType } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-downloader"
 import { z } from "zod"
 
-export enum AssetType {
-  Image = "image",
-  File = "file",
-  Video = "video",
-  PDF = "pdf",
-  Audio = "audio",
-}
+export const AssetType = z.enum(["image", "file", "video", "pdf", "audio"])
+export type AssetType = z.infer<typeof AssetType>
 
-export enum TextType {
-  Markdown = "markdown",
-}
+export const TextType = z.enum(["markdown"])
+export type TextType = z.infer<typeof TextType>
 
 // Merge AssetType into FileType
-export type FileType = AssetType | TextType
+export const FileType = z.union([AssetType, TextType])
+export type FileType = z.infer<typeof FileType>
 
-export const allAssetTyes = [
-  AssetType.Image,
-  AssetType.File,
-  AssetType.Video,
-  AssetType.PDF,
-  AssetType.Audio,
-]
+export const allAssetTyes = AssetType.options
 
-export enum LayoutStrategyNames {
-  Hierarchical = "hierarchical",
-  Flat = "flat",
-}
-export const layoutStrategySchema = z.nativeEnum(LayoutStrategyNames)
+export const LayoutStrategyNames = z.enum(["hierarchical", "flat"])
+export type LayoutStrategyNames = z.infer<typeof LayoutStrategyNames>
 
-export enum AllNamingSchemaName {
-  Default = "default",
-  Guid = "guid",
-}
+export const layoutStrategySchema = LayoutStrategyNames
 
-export enum MarkdownNamingStrategyNames {
-  GithubSlug = "github-slug",
-  NotionSlug = "notion-slug",
-  Title = "title",
-}
-export enum AssetNamingStrategyNames {
-  Legacy = "legacy",
-  AncestorPrefix = "ancestor-prefix",
-}
+export const AllNamingSchemaName = z.enum(["default", "guid"])
+export type AllNamingSchemaName = z.infer<typeof AllNamingSchemaName>
 
+export const MarkdownNamingStrategyNames = z.enum([
+  "githubSlug",
+  "notionSlug",
+  "title",
+])
+export type MarkdownNamingStrategyNames = z.infer<
+  typeof MarkdownNamingStrategyNames
+>
+
+export const AssetNamingStrategyNames = z.enum(["legacy", "ancestorPrefix"])
+export type AssetNamingStrategyNames = z.infer<typeof AssetNamingStrategyNames>
+
+// TODO: Convert these to other zod enums with types with same name, or discard if unnecessary
 export const markdownNamingStrategySchema = z.union([
-  z.nativeEnum(MarkdownNamingStrategyNames),
-  z.nativeEnum(AllNamingSchemaName),
+  MarkdownNamingStrategyNames,
+  AllNamingSchemaName,
 ])
 export const assetNamingStrategySchema = z.union([
-  z.nativeEnum(AssetNamingStrategyNames),
-  z.nativeEnum(AllNamingSchemaName),
+  AssetNamingStrategyNames,
+  AllNamingSchemaName,
 ])
 const allNamingStrategySchema = markdownNamingStrategySchema.and(
   assetNamingStrategySchema
 )
 
-export type MarkdownNamingStrategyType =
-  | MarkdownNamingStrategyNames
-  | AllNamingSchemaName
-
-export type AssetNamingStrategyType =
-  | AssetNamingStrategyNames
-  | AllNamingSchemaName
-
+export type MarkdownNamingStrategyType = z.infer<
+  typeof markdownNamingStrategySchema
+>
+export type AssetNamingStrategyType = z.infer<typeof assetNamingStrategySchema>
 export type AllNamingStrategyType = z.infer<typeof allNamingStrategySchema>
 
 function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
   const assetsBaseSchema = z.object({
-    [AssetType.Image]: valueSchema.optional(),
-    [AssetType.File]: valueSchema.optional(),
-    [AssetType.Video]: valueSchema.optional(),
-    [AssetType.PDF]: valueSchema.optional(),
-    [AssetType.Audio]: valueSchema.optional(),
+    [AssetType.enum.image]: valueSchema.optional(),
+    [AssetType.enum.file]: valueSchema.optional(),
+    [AssetType.enum.video]: valueSchema.optional(),
+    [AssetType.enum.pdf]: valueSchema.optional(),
+    [AssetType.enum.audio]: valueSchema.optional(),
   })
 
   const baseSchema = z
     .object({
       all: valueSchema.optional(),
       assets: valueSchema.optional(),
-      [TextType.Markdown]: valueSchema.optional(),
+      [TextType.enum.markdown]: valueSchema.optional(),
     })
     .merge(assetsBaseSchema)
 
@@ -90,11 +75,11 @@ function createOptionsSchema<T extends z.ZodType>(valueSchema: T) {
     baseSchema.extend({ all: valueSchema }),
     baseSchema.extend({
       assets: valueSchema,
-      [TextType.Markdown]: valueSchema,
+      [TextType.enum.markdown]: valueSchema,
     }),
     baseSchema
       .extend({
-        [TextType.Markdown]: valueSchema,
+        [TextType.enum.markdown]: valueSchema,
       })
       .merge(assetsBaseSchema.required()),
   ])
@@ -106,18 +91,18 @@ function createAssetMarkdownOptionsSchema<
   V extends z.ZodType<z.infer<T> & z.infer<U>>
 >(assetValueSchema: T, markdownValueSchema: U, allValueSchema: V) {
   const assetsBaseSchema = z.object({
-    [AssetType.Image]: assetValueSchema.optional(),
-    [AssetType.File]: assetValueSchema.optional(),
-    [AssetType.Video]: assetValueSchema.optional(),
-    [AssetType.PDF]: assetValueSchema.optional(),
-    [AssetType.Audio]: assetValueSchema.optional(),
+    [AssetType.enum.image]: assetValueSchema.optional(),
+    [AssetType.enum.file]: assetValueSchema.optional(),
+    [AssetType.enum.video]: assetValueSchema.optional(),
+    [AssetType.enum.pdf]: assetValueSchema.optional(),
+    [AssetType.enum.audio]: assetValueSchema.optional(),
   })
 
   const baseSchema = z
     .object({
       all: allValueSchema.optional(),
       assets: assetValueSchema.optional(),
-      [TextType.Markdown]: markdownValueSchema.optional(),
+      [TextType.enum.markdown]: markdownValueSchema.optional(),
     })
     .merge(assetsBaseSchema)
 
@@ -126,11 +111,11 @@ function createAssetMarkdownOptionsSchema<
     baseSchema.extend({ all: allValueSchema }),
     baseSchema.extend({
       assets: assetValueSchema,
-      [TextType.Markdown]: markdownValueSchema,
+      [TextType.enum.markdown]: markdownValueSchema,
     }),
     baseSchema
       .extend({
-        [TextType.Markdown]: markdownValueSchema,
+        [TextType.enum.markdown]: markdownValueSchema,
       })
       .merge(assetsBaseSchema.required()),
   ])
@@ -140,11 +125,11 @@ function createFilesSchema<T extends z.ZodType>(valueSchema: T) {
   return z.object({
     [ObjectType.Page]: valueSchema,
     [ObjectType.Database]: valueSchema,
-    [AssetType.Video]: valueSchema,
-    [AssetType.PDF]: valueSchema,
-    [AssetType.Audio]: valueSchema,
-    [AssetType.Image]: valueSchema,
-    [AssetType.File]: valueSchema,
+    [AssetType.enum.video]: valueSchema,
+    [AssetType.enum.pdf]: valueSchema,
+    [AssetType.enum.audio]: valueSchema,
+    [AssetType.enum.image]: valueSchema,
+    [AssetType.enum.file]: valueSchema,
   })
 }
 
@@ -173,10 +158,10 @@ export const conversionSchema = z.object({
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
   layoutStrategy: layoutStrategyOptionsSchema.default(
-    LayoutStrategyNames.Hierarchical
+    LayoutStrategyNames.enum.hierarchical
   ),
   namingStrategy: namingStrategyOptionsSchema.default(
-    AllNamingSchemaName.Default
+    AllNamingSchemaName.enum.default
   ),
 })
 
@@ -235,15 +220,15 @@ export type ConversionOptions = z.infer<typeof conversionSchema>
 export function mapToAssetType(type: string): AssetType {
   switch (type) {
     case "image":
-      return AssetType.Image
+      return AssetType.enum.image
     case "file":
-      return AssetType.File
+      return AssetType.enum.file
     case "video":
-      return AssetType.Video
+      return AssetType.enum.video
     case "pdf":
-      return AssetType.PDF
+      return AssetType.enum.pdf
     case "audio":
-      return AssetType.Audio
+      return AssetType.enum.audio
     default:
       throw new Error(`Invalid asset type: ${type}`)
   }
@@ -252,21 +237,21 @@ export function mapToAssetType(type: string): AssetType {
 export type GenericGroup<T> = {
   [ObjectType.Page]: T
   [ObjectType.Database]: T
-  [AssetType.Video]: T
-  [AssetType.PDF]: T
-  [AssetType.Audio]: T
-  [AssetType.Image]: T
-  [AssetType.File]: T
+  [AssetType.enum.video]: T
+  [AssetType.enum.pdf]: T
+  [AssetType.enum.audio]: T
+  [AssetType.enum.image]: T
+  [AssetType.enum.file]: T
 }
 
 export type GenericAssetMarkdownGroup<T, U> = {
   [ObjectType.Page]: T
   [ObjectType.Database]: T
-  [AssetType.Video]: U
-  [AssetType.PDF]: U
-  [AssetType.Audio]: U
-  [AssetType.Image]: U
-  [AssetType.File]: U
+  [AssetType.enum.video]: U
+  [AssetType.enum.pdf]: U
+  [AssetType.enum.audio]: U
+  [AssetType.enum.image]: U
+  [AssetType.enum.file]: U
 }
 
 export type FilepathGroup = GenericGroup<z.infer<typeof pathSchema>>
@@ -286,41 +271,44 @@ function parseFileOptions<T extends z.ZodType>(
     return {
       [ObjectType.Page]: options,
       [ObjectType.Database]: options,
-      [AssetType.Video]: options,
-      [AssetType.PDF]: options,
-      [AssetType.Audio]: options,
-      [AssetType.Image]: options,
-      [AssetType.File]: options,
+      [AssetType.enum.video]: options,
+      [AssetType.enum.pdf]: options,
+      [AssetType.enum.audio]: options,
+      [AssetType.enum.image]: options,
+      [AssetType.enum.file]: options,
     } as GenericGroup<z.infer<T>>
   }
   return {
-    [ObjectType.Page]: firstDefined(options[TextType.Markdown], options.all),
+    [ObjectType.Page]: firstDefined(
+      options[TextType.enum.markdown],
+      options.all
+    ),
     [ObjectType.Database]: firstDefined(
-      options[TextType.Markdown],
+      options[TextType.enum.markdown],
       options.all
     ),
-    [AssetType.Video]: firstDefined(
-      options[AssetType.Video],
+    [AssetType.enum.video]: firstDefined(
+      options[AssetType.enum.video],
       options.assets,
       options.all
     ),
-    [AssetType.PDF]: firstDefined(
-      options[AssetType.PDF],
+    [AssetType.enum.pdf]: firstDefined(
+      options[AssetType.enum.pdf],
       options.assets,
       options.all
     ),
-    [AssetType.Audio]: firstDefined(
-      options[AssetType.Audio],
+    [AssetType.enum.audio]: firstDefined(
+      options[AssetType.enum.audio],
       options.assets,
       options.all
     ),
-    [AssetType.Image]: firstDefined(
-      options[AssetType.Image],
+    [AssetType.enum.image]: firstDefined(
+      options[AssetType.enum.image],
       options.assets,
       options.all
     ),
-    [AssetType.File]: firstDefined(
-      options[AssetType.File],
+    [AssetType.enum.file]: firstDefined(
+      options[AssetType.enum.file],
       options.assets,
       options.all
     ),
@@ -331,47 +319,50 @@ export function parseNamingStrategyFileOptions(
   options: z.infer<typeof namingStrategyOptionsSchema>
 ): NamingStrategyGroupOptions {
   if (
-    options === AllNamingSchemaName.Default ||
-    options === AllNamingSchemaName.Guid
+    options === AllNamingSchemaName.enum.default ||
+    options === AllNamingSchemaName.enum.guid
   ) {
     return {
       [ObjectType.Page]: options,
       [ObjectType.Database]: options,
-      [AssetType.Video]: options,
-      [AssetType.PDF]: options,
-      [AssetType.Audio]: options,
-      [AssetType.Image]: options,
-      [AssetType.File]: options,
+      [AssetType.enum.video]: options,
+      [AssetType.enum.pdf]: options,
+      [AssetType.enum.audio]: options,
+      [AssetType.enum.image]: options,
+      [AssetType.enum.file]: options,
     }
   }
   return {
-    [ObjectType.Page]: firstDefined(options[TextType.Markdown], options.all),
+    [ObjectType.Page]: firstDefined(
+      options[TextType.enum.markdown],
+      options.all
+    ),
     [ObjectType.Database]: firstDefined(
-      options[TextType.Markdown],
+      options[TextType.enum.markdown],
       options.all
     ),
-    [AssetType.Video]: firstDefined(
-      options[AssetType.Video],
+    [AssetType.enum.video]: firstDefined(
+      options[AssetType.enum.video],
       options.assets,
       options.all
     ),
-    [AssetType.PDF]: firstDefined(
-      options[AssetType.PDF],
+    [AssetType.enum.pdf]: firstDefined(
+      options[AssetType.enum.pdf],
       options.assets,
       options.all
     ),
-    [AssetType.Audio]: firstDefined(
-      options[AssetType.Audio],
+    [AssetType.enum.audio]: firstDefined(
+      options[AssetType.enum.audio],
       options.assets,
       options.all
     ),
-    [AssetType.Image]: firstDefined(
-      options[AssetType.Image],
+    [AssetType.enum.image]: firstDefined(
+      options[AssetType.enum.image],
       options.assets,
       options.all
     ),
-    [AssetType.File]: firstDefined(
-      options[AssetType.File],
+    [AssetType.enum.file]: firstDefined(
+      options[AssetType.enum.file],
       options.assets,
       options.all
     ),

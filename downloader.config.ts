@@ -10,6 +10,10 @@ const config: Config = {
       all: "",
       image: "/assets/",
     },
+    layoutStrategy: {
+      markdown: "hierarchical",
+      assets: "flat",
+    },
     statusPropertyName: "Status",
     statusPropertyValue: "Publish",
     pageLinkHasExtension: false,

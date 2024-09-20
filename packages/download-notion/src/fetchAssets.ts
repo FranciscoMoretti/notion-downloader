@@ -12,11 +12,11 @@ export async function preFetchAssets(
   outputDir: string,
   assetsCacheFilesMap: FilesMap,
   assetTypes: AssetType[] = [
-    AssetType.Image,
-    AssetType.Video,
-    AssetType.Audio,
-    AssetType.File,
-    AssetType.PDF,
+    AssetType.enum.image,
+    AssetType.enum.video,
+    AssetType.enum.audio,
+    AssetType.enum.file,
+    AssetType.enum.pdf,
   ]
 ) {
   await applyToAllAssets({

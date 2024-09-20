@@ -21,7 +21,7 @@ export type NotionFileObjectResponses =
 export class NotionFileObject extends NotionFile implements iNotionAssetObject {
   private metadata: NotionFileObjectResponses
   public assetType: AssetType
-  public fileType: FileType = AssetType.Image
+  public fileType: FileType = AssetType.enum.image
 
   constructor(fileObjectResponse: NotionFileObjectResponses) {
     const file = getFileFromObjectResponse(fileObjectResponse)

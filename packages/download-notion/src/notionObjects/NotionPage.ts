@@ -8,8 +8,8 @@ import { NotionObject } from "./NotionObject"
 export class NotionPage implements NotionObject {
   // TODO: Can this, Database and Image Extend the PageObjectResponse instead of using as metadata?
   public metadata: PageObjectResponse
-  public assetType: AssetType = AssetType.Image
-  public fileType: FileType = AssetType.Image
+  public assetType: AssetType = AssetType.enum.image
+  public fileType: FileType = AssetType.enum.image
   public extension: string = "md"
 
   public constructor(metadata: PageObjectResponse) {

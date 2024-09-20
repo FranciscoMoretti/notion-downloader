@@ -7,7 +7,7 @@ export function getLayoutStrategy(
   layoutStrategy: LayoutStrategyNames,
   namingStrategy: NamingStrategy
 ) {
-  return layoutStrategy === LayoutStrategyNames.Flat
+  return layoutStrategy === LayoutStrategyNames.enum.flat
     ? new FlatLayoutStrategy(namingStrategy)
     : new HierarchicalLayoutStrategy(namingStrategy)
 }

@@ -5,10 +5,15 @@ export const cacheStrategiesSchema = z.enum([
   "no-cache",
   "force-cache",
 ])
+
+export type CacheStrategy = z.infer<typeof cacheStrategiesSchema>
+
 export const cacheOptionsSchema = z.object({
   cacheDirectory: z.string().default("./.downloader"),
   cleanCache: z.boolean().default(false),
-  cacheStrategy: cacheStrategiesSchema.default("cache"),
+  cacheStrategy: cacheStrategiesSchema.default(
+    cacheStrategiesSchema.enum.cache
+  ),
 })
 
 export type CacheOptions = z.infer<typeof cacheOptionsSchema>

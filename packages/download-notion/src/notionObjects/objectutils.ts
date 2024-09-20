@@ -71,7 +71,7 @@ export function getAssetObjectFromObjectResponse(
   notionObject: NotionAssetObjectResponses
 ): iNotionAssetObject {
   const assetType = getAssetTypeFromObjectResponse(notionObject)
-  if (assetType == AssetType.Image) {
+  if (assetType == AssetType.enum.image) {
     return getImageLikeObject(notionObject)
   } else if (assetType) {
     return new NotionFileObject(notionObject as NotionFileObjectResponses)

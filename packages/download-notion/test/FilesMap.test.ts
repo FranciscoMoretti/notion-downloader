@@ -80,11 +80,11 @@ describe("FilesMap", () => {
     expect(filesMap.getAll()).toEqual({
       [ObjectType.Page]: { "page-id": pageRecord },
       [ObjectType.Database]: { "db-id": dbRecord },
-      [AssetType.Image]: {},
-      [AssetType.File]: {},
-      [AssetType.Video]: {},
-      [AssetType.PDF]: {},
-      [AssetType.Audio]: {},
+      [AssetType.enum.image]: {},
+      [AssetType.enum.file]: {},
+      [AssetType.enum.video]: {},
+      [AssetType.enum.pdf]: {},
+      [AssetType.enum.audio]: {},
     })
   })
 

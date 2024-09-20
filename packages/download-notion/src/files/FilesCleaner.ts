@@ -2,7 +2,6 @@ import path from "path"
 import fs from "fs-extra"
 import { ObjectType } from "notion-cache-client"
 
-import { AssetType } from "../config/schema"
 import { info, verbose } from "../log"
 import { FilesManager } from "./FilesManager"
 import { FileRecord, FileRecordType, allRecordTypes } from "./FilesMap"

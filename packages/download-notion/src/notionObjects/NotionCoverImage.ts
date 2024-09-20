@@ -23,8 +23,8 @@ export type NotionCoverImageResponses =
 
 export class NotionCoverImage extends NotionFile implements iNotionAssetObject {
   private metadata: NotionCoverImageResponses
-  public assetType: AssetType = AssetType.Image
-  public fileType: FileType = AssetType.Image
+  public assetType: AssetType = AssetType.enum.image
+  public fileType: FileType = AssetType.enum.image
 
   constructor(imageResponse: NotionCoverImageResponses) {
     super(imageResponse.cover)

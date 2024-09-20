@@ -62,25 +62,25 @@ function getLayoutStrategies(
       layoutStrategyOptions[ObjectType.Database],
       namingStrategies[ObjectType.Database]
     ),
-    [AssetType.Image]: getLayoutStrategy(
-      layoutStrategyOptions[AssetType.Image],
-      namingStrategies[AssetType.Image]
+    [AssetType.enum.image]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.enum.image],
+      namingStrategies[AssetType.enum.image]
     ),
-    [AssetType.File]: getLayoutStrategy(
-      layoutStrategyOptions[AssetType.File],
-      namingStrategies[AssetType.File]
+    [AssetType.enum.file]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.enum.file],
+      namingStrategies[AssetType.enum.file]
     ),
-    [AssetType.Video]: getLayoutStrategy(
-      layoutStrategyOptions[AssetType.Video],
-      namingStrategies[AssetType.Video]
+    [AssetType.enum.video]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.enum.video],
+      namingStrategies[AssetType.enum.video]
     ),
-    [AssetType.PDF]: getLayoutStrategy(
-      layoutStrategyOptions[AssetType.PDF],
-      namingStrategies[AssetType.PDF]
+    [AssetType.enum.pdf]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.enum.pdf],
+      namingStrategies[AssetType.enum.pdf]
     ),
-    [AssetType.Audio]: getLayoutStrategy(
-      layoutStrategyOptions[AssetType.Audio],
-      namingStrategies[AssetType.Audio]
+    [AssetType.enum.audio]: getLayoutStrategy(
+      layoutStrategyOptions[AssetType.enum.audio],
+      namingStrategies[AssetType.enum.audio]
     ),
   }
 }
@@ -101,8 +101,8 @@ function getNamingStrategies(
 
       slugProperty
     ),
-    [AssetType.Image]: getAssetNamingStrategy(
-      namingStrategyOptions[AssetType.Image],
+    [AssetType.enum.image]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.enum.image],
       (notionObject) =>
         getAncestorPageOrDatabaseFilename(
           notionObject,
@@ -110,8 +110,8 @@ function getNamingStrategies(
           newFilesManager
         )
     ),
-    [AssetType.File]: getAssetNamingStrategy(
-      namingStrategyOptions[AssetType.File],
+    [AssetType.enum.file]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.enum.file],
       (notionObject) =>
         getAncestorPageOrDatabaseFilename(
           notionObject,
@@ -119,8 +119,8 @@ function getNamingStrategies(
           newFilesManager
         )
     ),
-    [AssetType.Video]: getAssetNamingStrategy(
-      namingStrategyOptions[AssetType.Video],
+    [AssetType.enum.video]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.enum.video],
       (notionObject) =>
         getAncestorPageOrDatabaseFilename(
           notionObject,
@@ -128,8 +128,8 @@ function getNamingStrategies(
           newFilesManager
         )
     ),
-    [AssetType.PDF]: getAssetNamingStrategy(
-      namingStrategyOptions[AssetType.PDF],
+    [AssetType.enum.pdf]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.enum.pdf],
       (notionObject) =>
         getAncestorPageOrDatabaseFilename(
           notionObject,
@@ -137,8 +137,8 @@ function getNamingStrategies(
           newFilesManager
         )
     ),
-    [AssetType.Audio]: getAssetNamingStrategy(
-      namingStrategyOptions[AssetType.Audio],
+    [AssetType.enum.audio]: getAssetNamingStrategy(
+      namingStrategyOptions[AssetType.enum.audio],
       (notionObject) =>
         getAncestorPageOrDatabaseFilename(
           notionObject,

@@ -11,11 +11,11 @@ export async function applyToAllAssets({
   objectsTree,
   applyToAsset,
   assetTypes = [
-    AssetType.Image,
-    AssetType.Video,
-    AssetType.Audio,
-    AssetType.File,
-    AssetType.PDF,
+    AssetType.enum.image,
+    AssetType.enum.video,
+    AssetType.enum.audio,
+    AssetType.enum.file,
+    AssetType.enum.pdf,
   ],
 }: {
   objectsTree: NotionObjectTree
@@ -24,9 +24,9 @@ export async function applyToAllAssets({
 }) {
   const promises: Promise<void>[] = []
 
-  if (assetTypes.includes(AssetType.Image)) {
+  if (assetTypes.includes(AssetType.enum.image)) {
     promises.push(
-      ...objectsTree.getBlocks(AssetType.Image).map((block) => {
+      ...objectsTree.getBlocks(AssetType.enum.image).map((block) => {
         const image = new NotionBlockImage(block)
         return applyToAsset(image)
       })
@@ -54,7 +54,7 @@ export async function applyToAllAssets({
   }
 
   const assetsExceptImage = assetTypes.filter(
-    (type) => type !== AssetType.Image
+    (type) => type !== AssetType.enum.image
   )
   for (const assetType of assetsExceptImage) {
     promises.push(

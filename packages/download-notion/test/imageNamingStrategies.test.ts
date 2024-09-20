@@ -15,8 +15,8 @@ describe("Image Naming Strategies", () => {
     id: "mock-block-id",
     extension: "png",
     buffer: Buffer.from("mock image data"),
-    assetType: AssetType.Image,
-    fileType: AssetType.Image,
+    assetType: AssetType.enum.image,
+    fileType: AssetType.enum.image,
   } as NotionImageLike
 
   describe("DefaultImageNamingStrategy", () => {
