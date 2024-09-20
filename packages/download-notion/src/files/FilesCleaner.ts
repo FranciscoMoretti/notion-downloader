@@ -29,7 +29,7 @@ export class FilesCleaner {
   public async cleanupAllFiles(filesManager: FilesManager): Promise<void> {
     info("Cleaning up all tracked files")
     const allFiles = allRecordTypes
-      .filter((type) => type !== ObjectType.Database)
+      .filter((type) => type !== ObjectType.enum.database)
       .flatMap((type) => this.getFileRecords(filesManager, type))
 
     await this.removeRecords(allFiles)

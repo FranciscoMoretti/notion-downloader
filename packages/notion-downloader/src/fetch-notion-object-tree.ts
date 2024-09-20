@@ -7,8 +7,7 @@ import {
   CacheType,
   NotionCacheClient,
   ObjectType,
-  ObjectTypeSchema,
-  PageOrDatabaseSchema,
+  PageOrDatabase,
   logOperation,
 } from "notion-cache-client"
 import { z } from "zod"
@@ -27,7 +26,7 @@ interface DownloadObjectsOptions {
 
 export interface StartingNode {
   rootUUID: string
-  rootObjectType: ObjectType.Page | ObjectType.Database
+  rootObjectType: PageOrDatabase
 }
 
 interface FetchingOptions {
@@ -128,8 +127,8 @@ export async function fetchTreeRecursively(
   options?: DownloadObjectsOptions
 ) {
   if (
-    objectNode.object === ObjectType.Database ||
-    (objectNode.object === ObjectType.Block &&
+    objectNode.object === ObjectType.enum.database ||
+    (objectNode.object === ObjectType.enum.block &&
       objectNode.type === "child_database")
   ) {
     if (options?.downloadDatabases) {
@@ -167,7 +166,7 @@ export async function fetchTreeRecursively(
     for (const childObject of databaseChildrenResults) {
       const newNode: NotionObjectTreeNode = {
         id: childObject.id,
-        object: PageOrDatabaseSchema.parse(childObject.object),
+        object: PageOrDatabase.parse(childObject.object),
         children: [],
         parent: {
           id: objectNode.id,
@@ -179,14 +178,14 @@ export async function fetchTreeRecursively(
       await fetchTreeRecursively(newNode, level + 1, client, options)
     }
   } else if (
-    objectNode.object === ObjectType.Page ||
-    (objectNode.object === ObjectType.Block &&
+    objectNode.object === ObjectType.enum.page ||
+    (objectNode.object === ObjectType.enum.block &&
       objectNode.type === "child_page") ||
-    (objectNode.object === ObjectType.Block && objectNode.has_children)
+    (objectNode.object === ObjectType.enum.block && objectNode.has_children)
   ) {
     if (
-      objectNode.object === ObjectType.Page ||
-      (objectNode.object === ObjectType.Block &&
+      objectNode.object === ObjectType.enum.page ||
+      (objectNode.object === ObjectType.enum.block &&
         objectNode.type === "child_page")
     ) {
       // Fetching to add it to the cache. Fetching the page object is not needed to recurse, only the block children.
@@ -227,7 +226,7 @@ export async function fetchTreeRecursively(
       }
       const newNode: NotionObjectTreeNode = {
         id: childBlock.id,
-        object: ObjectType.Block,
+        object: ObjectType.enum.block,
         children: [],
         has_children: childBlock.has_children,
         type: childBlock.type,

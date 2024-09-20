@@ -12,7 +12,7 @@ describe("FilesMap", () => {
   })
 
   test("exists() returns false for non-existent record", () => {
-    expect(filesMap.exists(ObjectType.Page, "nonexistent")).toBe(false)
+    expect(filesMap.exists(ObjectType.enum.page, "nonexistent")).toBe(false)
   })
 
   test("set() and exists() work correctly", () => {
@@ -20,8 +20,8 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set(ObjectType.Page, "test-id", record)
-    expect(filesMap.exists(ObjectType.Page, "test-id")).toBe(true)
+    filesMap.set(ObjectType.enum.page, "test-id", record)
+    expect(filesMap.exists(ObjectType.enum.page, "test-id")).toBe(true)
   })
 
   test("get() returns correct record", () => {
@@ -29,12 +29,12 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set(ObjectType.Page, "test-id", record)
-    expect(filesMap.get(ObjectType.Page, "test-id")).toEqual(record)
+    filesMap.set(ObjectType.enum.page, "test-id", record)
+    expect(filesMap.get(ObjectType.enum.page, "test-id")).toEqual(record)
   })
 
   test("get() throws error for non-existent record", () => {
-    expect(() => filesMap.get(ObjectType.Page, "nonexistent")).toThrow(
+    expect(() => filesMap.get(ObjectType.enum.page, "nonexistent")).toThrow(
       "File record not found for page nonexistent"
     )
   })
@@ -44,9 +44,9 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set(ObjectType.Page, "test-id", record)
-    filesMap.delete(ObjectType.Page, "test-id")
-    expect(filesMap.exists(ObjectType.Page, "test-id")).toBe(false)
+    filesMap.set(ObjectType.enum.page, "test-id", record)
+    filesMap.delete(ObjectType.enum.page, "test-id")
+    expect(filesMap.exists(ObjectType.enum.page, "test-id")).toBe(false)
   })
 
   test("getAllOfType() returns correct records", () => {
@@ -58,9 +58,9 @@ describe("FilesMap", () => {
       path: "/pages/test2.md",
       lastEditedTime: "2023-04-02T12:00:00Z",
     }
-    filesMap.set(ObjectType.Page, "test-id-1", record1)
-    filesMap.set(ObjectType.Page, "test-id-2", record2)
-    expect(filesMap.getAllOfType(ObjectType.Page)).toEqual({
+    filesMap.set(ObjectType.enum.page, "test-id-1", record1)
+    filesMap.set(ObjectType.enum.page, "test-id-2", record2)
+    expect(filesMap.getAllOfType(ObjectType.enum.page)).toEqual({
       "test-id-1": record1,
       "test-id-2": record2,
     })
@@ -75,11 +75,11 @@ describe("FilesMap", () => {
       path: "/databases/test.csv",
       lastEditedTime: "2023-04-02T12:00:00Z",
     }
-    filesMap.set(ObjectType.Page, "page-id", pageRecord)
-    filesMap.set(ObjectType.Database, "db-id", dbRecord)
+    filesMap.set(ObjectType.enum.page, "page-id", pageRecord)
+    filesMap.set(ObjectType.enum.database, "db-id", dbRecord)
     expect(filesMap.getAll()).toEqual({
-      [ObjectType.Page]: { "page-id": pageRecord },
-      [ObjectType.Database]: { "db-id": dbRecord },
+      [ObjectType.enum.page]: { "page-id": pageRecord },
+      [ObjectType.enum.database]: { "db-id": dbRecord },
       [AssetType.enum.image]: {},
       [AssetType.enum.file]: {},
       [AssetType.enum.video]: {},
@@ -93,9 +93,9 @@ describe("FilesMap", () => {
       path: "/pages/test.md",
       lastEditedTime: "2023-04-01T12:00:00Z",
     }
-    filesMap.set(ObjectType.Page, "test-id", record)
+    filesMap.set(ObjectType.enum.page, "test-id", record)
     const json = filesMap.toJSON()
     const newFilesMap = FilesMap.fromJSON(json)
-    expect(newFilesMap.get(ObjectType.Page, "test-id")).toEqual(record)
+    expect(newFilesMap.get(ObjectType.enum.page, "test-id")).toEqual(record)
   })
 })

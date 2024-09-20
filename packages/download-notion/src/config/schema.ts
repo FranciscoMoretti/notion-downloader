@@ -123,8 +123,8 @@ function createAssetMarkdownOptionsSchema<
 
 function createFilesSchema<T extends z.ZodType>(valueSchema: T) {
   return z.object({
-    [ObjectType.Page]: valueSchema,
-    [ObjectType.Database]: valueSchema,
+    [ObjectType.enum.page]: valueSchema,
+    [ObjectType.enum.database]: valueSchema,
     [AssetType.enum.video]: valueSchema,
     [AssetType.enum.pdf]: valueSchema,
     [AssetType.enum.audio]: valueSchema,
@@ -166,8 +166,8 @@ export const conversionSchema = z.object({
 })
 
 export const rootObjectTypeSchema = z.enum([
-  String(ObjectType.Page),
-  String(ObjectType.Database),
+  String(ObjectType.enum.page),
+  String(ObjectType.enum.database),
   "auto",
 ])
 const uuidSchema = z.string().length(32)
@@ -235,8 +235,8 @@ export function mapToAssetType(type: string): AssetType {
 }
 
 export type GenericGroup<T> = {
-  [ObjectType.Page]: T
-  [ObjectType.Database]: T
+  [ObjectType.enum.page]: T
+  [ObjectType.enum.database]: T
   [AssetType.enum.video]: T
   [AssetType.enum.pdf]: T
   [AssetType.enum.audio]: T
@@ -245,8 +245,8 @@ export type GenericGroup<T> = {
 }
 
 export type GenericAssetMarkdownGroup<T, U> = {
-  [ObjectType.Page]: T
-  [ObjectType.Database]: T
+  [ObjectType.enum.page]: T
+  [ObjectType.enum.database]: T
   [AssetType.enum.video]: U
   [AssetType.enum.pdf]: U
   [AssetType.enum.audio]: U
@@ -269,8 +269,8 @@ function parseFileOptions<T extends z.ZodType>(
 ): GenericGroup<z.infer<T>> {
   if (valueSchema.safeParse(options).success) {
     return {
-      [ObjectType.Page]: options,
-      [ObjectType.Database]: options,
+      [ObjectType.enum.page]: options,
+      [ObjectType.enum.database]: options,
       [AssetType.enum.video]: options,
       [AssetType.enum.pdf]: options,
       [AssetType.enum.audio]: options,
@@ -279,11 +279,11 @@ function parseFileOptions<T extends z.ZodType>(
     } as GenericGroup<z.infer<T>>
   }
   return {
-    [ObjectType.Page]: firstDefined(
+    [ObjectType.enum.page]: firstDefined(
       options[TextType.enum.markdown],
       options.all
     ),
-    [ObjectType.Database]: firstDefined(
+    [ObjectType.enum.database]: firstDefined(
       options[TextType.enum.markdown],
       options.all
     ),
@@ -323,8 +323,8 @@ export function parseNamingStrategyFileOptions(
     options === AllNamingSchemaName.enum.guid
   ) {
     return {
-      [ObjectType.Page]: options,
-      [ObjectType.Database]: options,
+      [ObjectType.enum.page]: options,
+      [ObjectType.enum.database]: options,
       [AssetType.enum.video]: options,
       [AssetType.enum.pdf]: options,
       [AssetType.enum.audio]: options,
@@ -333,11 +333,11 @@ export function parseNamingStrategyFileOptions(
     }
   }
   return {
-    [ObjectType.Page]: firstDefined(
+    [ObjectType.enum.page]: firstDefined(
       options[TextType.enum.markdown],
       options.all
     ),
-    [ObjectType.Database]: firstDefined(
+    [ObjectType.enum.database]: firstDefined(
       options[TextType.enum.markdown],
       options.all
     ),

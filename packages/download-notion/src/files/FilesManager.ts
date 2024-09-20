@@ -1,4 +1,4 @@
-import { ObjectType, ObjectTypeSchema } from "notion-cache-client"
+import { ObjectType, ObjectType } from "notion-cache-client"
 
 import { FilepathGroup, mapToAssetType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
@@ -54,7 +54,7 @@ export class FilesManager {
     const recordType =
       "assetType" in notionObject
         ? mapToAssetType(notionObject.assetType)
-        : ObjectTypeSchema.parse(notionObject.object)
+        : ObjectType.parse(notionObject.object)
     if (recordType === ObjectType.Block) {
       throw new Error("Only block recrods that are assets are supported")
     }

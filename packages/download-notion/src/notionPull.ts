@@ -5,7 +5,7 @@ import fs from "fs-extra"
 import {
   NotionCacheClient,
   ObjectType,
-  PageOrDatabaseSchema,
+  PageOrDatabase,
   convertToUUID,
 } from "notion-cache-client"
 import { NotionObjectTree, downloadNotionObjectTree } from "notion-downloader"
@@ -146,7 +146,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     rootObjectType:
       options.rootObjectType == "auto"
         ? "auto"
-        : PageOrDatabaseSchema.parse(options.rootObjectType),
+        : PageOrDatabase.parse(options.rootObjectType),
   })
 
   group("Stage 1: walk children of the root page, looking for pages...")
@@ -380,7 +380,7 @@ async function outputPages(
   for (const page of pages) {
     const mdPathWithRoot = filesManager.get(
       "output",
-      ObjectType.Page,
+      ObjectType.enum.page,
       page.id
     )?.path
     const markdown = await getMarkdownForPage(config, context, page)
@@ -423,18 +423,18 @@ async function tryGetFirstPageWithType({
   rootUUID,
 }: {
   cachedNotionClient: NotionCacheClient
-  rootObjectType: ObjectType.Page | ObjectType.Database | "auto"
+  rootObjectType: PageOrDatabase | "auto"
   rootUUID: string
-}): Promise<ObjectType.Page | ObjectType.Database> {
+}): Promise<PageOrDatabase> {
   // TODO: Here it retries 10 times before exiting if we use the cache client
   try {
     let pageResult = undefined
-    if (["auto", ObjectType.Page].includes(rootObjectType)) {
+    if (["auto", ObjectType.enum.page].includes(rootObjectType)) {
       try {
         pageResult = await cachedNotionClient.pages.retrieve({
           page_id: rootUUID,
         })
-        return Promise.resolve(ObjectType.Page)
+        return Promise.resolve(ObjectType.enum.page)
       } catch (e: any) {
         // Catch APIResponseError
         if (e.code !== "object_not_found") {
@@ -442,9 +442,12 @@ async function tryGetFirstPageWithType({
         }
       }
     }
-    if (["auto", ObjectType.Database].includes(rootObjectType) || !pageResult) {
+    if (
+      ["auto", ObjectType.enum.database].includes(rootObjectType) ||
+      !pageResult
+    ) {
       await cachedNotionClient.databases.retrieve({ database_id: rootUUID })
-      return Promise.resolve(ObjectType.Database)
+      return Promise.resolve(ObjectType.enum.database)
     }
   } catch (e: any) {
     Promise.reject(e)

@@ -7,11 +7,11 @@ import { NotionDatabase } from "./NotionDatabase"
 import { NotionPage } from "./NotionPage"
 
 export function getNotionObject(response: NotionObjectResponse) {
-  if (response.object == ObjectType.Page) {
+  if (response.object == ObjectType.enum.page) {
     return new NotionPage(response)
-  } else if (response.object == ObjectType.Database) {
+  } else if (response.object == ObjectType.enum.database) {
     return new NotionDatabase(response)
-  } else if (response.object == ObjectType.Block) {
+  } else if (response.object == ObjectType.enum.block) {
     if (response.type == "image") {
       return new NotionBlockImage(response)
     } else {

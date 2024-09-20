@@ -92,7 +92,7 @@ function convertLinkHref(
 ): string {
   let convertedLink = context.filesManager.get(
     "markdown",
-    ObjectType.Page,
+    ObjectType.enum.page,
     targetPage.id
   )?.path
   if (!context.options.conversion.pageLinkHasExtension) {

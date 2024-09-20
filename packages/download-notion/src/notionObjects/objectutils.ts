@@ -18,15 +18,15 @@ import { NotionImageLike, iNotionAssetObject } from "./objectTypes"
 
 export function hasImageLikeObject(notionObject: NotionObjectResponse) {
   if (
-    notionObject.object === ObjectType.Block &&
+    notionObject.object === ObjectType.enum.block &&
     notionObject.type === "image"
   ) {
     return true
   }
-  if (notionObject.object === ObjectType.Page && notionObject.cover) {
+  if (notionObject.object === ObjectType.enum.page && notionObject.cover) {
     return true
   }
-  if (notionObject.object === ObjectType.Database && notionObject.cover) {
+  if (notionObject.object === ObjectType.enum.database && notionObject.cover) {
     return true
   }
 
@@ -40,22 +40,25 @@ export function getAssetTypeFromObjectResponse(
     return mapToAssetType("image")
   }
   if (
-    notionObject.object === ObjectType.Block &&
+    notionObject.object === ObjectType.enum.block &&
     notionObject.type === "video"
   ) {
     return mapToAssetType("video")
   }
   if (
-    notionObject.object === ObjectType.Block &&
+    notionObject.object === ObjectType.enum.block &&
     notionObject.type === "file"
   ) {
     return mapToAssetType("file")
   }
-  if (notionObject.object === ObjectType.Block && notionObject.type === "pdf") {
+  if (
+    notionObject.object === ObjectType.enum.block &&
+    notionObject.type === "pdf"
+  ) {
     return mapToAssetType("pdf")
   }
   if (
-    notionObject.object === ObjectType.Block &&
+    notionObject.object === ObjectType.enum.block &&
     notionObject.type === "audio"
   ) {
     return mapToAssetType("audio")
@@ -84,17 +87,17 @@ export function getImageLikeObject(
   notionObject: NotionObjectResponse
 ): NotionImageLike {
   if (
-    notionObject.object === ObjectType.Block &&
+    notionObject.object === ObjectType.enum.block &&
     notionObject.type === "image"
   ) {
     return new NotionBlockImage(notionObject)
   }
-  if (notionObject.object === ObjectType.Page) {
+  if (notionObject.object === ObjectType.enum.page) {
     if (pageHasCover(notionObject)) {
       return new NotionCoverImage(notionObject)
     }
   }
-  if (notionObject.object === ObjectType.Database) {
+  if (notionObject.object === ObjectType.enum.database) {
     if (databaseHasCover(notionObject)) {
       return new NotionCoverImage(notionObject)
     }

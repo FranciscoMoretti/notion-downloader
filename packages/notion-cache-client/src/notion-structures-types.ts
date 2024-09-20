@@ -51,11 +51,11 @@ export type NotionBlockObjectsCache = Record<
 
 export function getCacheType(object: string): CacheType {
   switch (object) {
-    case ObjectType.Block:
+    case ObjectType.enum.block:
       return CacheType.BLOCK
-    case ObjectType.Database:
+    case ObjectType.enum.database:
       return CacheType.DATABASE
-    case ObjectType.Page:
+    case ObjectType.enum.page:
       return CacheType.PAGE
     default:
       throw new Error(`Invalid object type: ${object}`)

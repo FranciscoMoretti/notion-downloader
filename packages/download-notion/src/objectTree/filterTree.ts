@@ -1,4 +1,4 @@
-import { ObjectType, ObjectTypeSchema } from "notion-cache-client"
+import { ObjectType, ObjectType } from "notion-cache-client"
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { verbose } from "../log"
@@ -14,7 +14,7 @@ export function filterTree(
   function shouldFilterPageStatus(
     notionObject: NotionDatabase | NotionPage
   ): boolean {
-    if (notionObject.object !== ObjectType.Page) {
+    if (notionObject.object !== ObjectType.enum.page) {
       return false
     }
     const pageStatus = notionObject.getGenericProperty(statusPropertyName)
@@ -35,14 +35,14 @@ export function filterTree(
         `Skipping [${objectResponse.object}] (${objectResponse.id}) because parent has been filtered`
       )
       tree.removeObject(
-        ObjectTypeSchema.parse(objectResponse.object),
+        ObjectType.parse(objectResponse.object),
         objectResponse.id
       )
       return { shouldRemove: true }
     }
 
     if (
-      objectResponse.object === ObjectType.Page &&
+      objectResponse.object === ObjectType.enum.page &&
       shouldFilterPageStatus(getNotionObject(objectResponse) as NotionPage)
     ) {
       const notionObject = getNotionObject(objectResponse) as NotionPage
@@ -55,7 +55,7 @@ export function filterTree(
       )
 
       tree.removeObject(
-        ObjectTypeSchema.parse(objectResponse.object),
+        ObjectType.parse(objectResponse.object),
         objectResponse.id
       )
       return { shouldRemove: true }

@@ -424,7 +424,7 @@ export class NotionCache {
     )
 
     const response: ListBlockChildrenResponse = {
-      type: ObjectType.Block,
+      type: ObjectType.enum.block,
       block: {},
       object: "list",
       next_cursor: null,

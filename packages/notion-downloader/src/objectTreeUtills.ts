@@ -50,7 +50,7 @@ export async function getAllObjectsInObjectsTree(
 
     // For blocks that contain a child page or child database, their responses have to be added as well
     if (
-      object.object === ObjectType.Block &&
+      object.object === ObjectType.enum.block &&
       (object.type === "child_page" || object.type === "child_database")
     ) {
       const idType = object.type === "child_page" ? "page_id" : "database_id"
@@ -78,11 +78,11 @@ function addObjectToData(
   object: PageObjectResponse | DatabaseObjectResponse | BlockObjectResponse,
   objects: NotionObjectsData
 ) {
-  if (object.object === ObjectType.Page) {
+  if (object.object === ObjectType.enum.page) {
     objects.page[object.id] = object
-  } else if (object.object === ObjectType.Database) {
+  } else if (object.object === ObjectType.enum.database) {
     objects.database[object.id] = object
-  } else if (object.object === ObjectType.Block) {
+  } else if (object.object === ObjectType.enum.block) {
     objects.block[object.id] = object
   }
 }

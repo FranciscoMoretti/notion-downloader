@@ -54,13 +54,13 @@ function getLayoutStrategies(
   namingStrategies: NamingStrategyGroup
 ): LayoutStrategyGroup {
   return {
-    [ObjectType.Page]: getLayoutStrategy(
-      layoutStrategyOptions[ObjectType.Page],
-      namingStrategies[ObjectType.Page]
+    [ObjectType.enum.page]: getLayoutStrategy(
+      layoutStrategyOptions[ObjectType.enum.page],
+      namingStrategies[ObjectType.enum.page]
     ),
-    [ObjectType.Database]: getLayoutStrategy(
-      layoutStrategyOptions[ObjectType.Database],
-      namingStrategies[ObjectType.Database]
+    [ObjectType.enum.database]: getLayoutStrategy(
+      layoutStrategyOptions[ObjectType.enum.database],
+      namingStrategies[ObjectType.enum.database]
     ),
     [AssetType.enum.image]: getLayoutStrategy(
       layoutStrategyOptions[AssetType.enum.image],
@@ -92,12 +92,12 @@ function getNamingStrategies(
   newFilesManager: FilesManager
 ): NamingStrategyGroup {
   return {
-    [ObjectType.Page]: getMarkdownNamingStrategy(
-      namingStrategyOptions[ObjectType.Page],
+    [ObjectType.enum.page]: getMarkdownNamingStrategy(
+      namingStrategyOptions[ObjectType.enum.page],
       slugProperty
     ),
-    [ObjectType.Database]: getMarkdownNamingStrategy(
-      namingStrategyOptions[ObjectType.Database],
+    [ObjectType.enum.database]: getMarkdownNamingStrategy(
+      namingStrategyOptions[ObjectType.enum.database],
 
       slugProperty
     ),

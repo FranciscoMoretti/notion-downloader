@@ -39,22 +39,23 @@ function getAncestorPageOrDatabaseFilepath(
   objectsTree: NotionObjectTree,
   filesManager: FilesManager
 ): string {
-  if (notionObject.object == ObjectType.Page) {
-    return filesManager.get("base", ObjectType.Page, notionObject.id).path
-  } else if (notionObject.object == ObjectType.Database) {
-    return filesManager.get("base", ObjectType.Database, notionObject.id).path
+  if (notionObject.object == ObjectType.enum.page) {
+    return filesManager.get("base", ObjectType.enum.page, notionObject.id).path
+  } else if (notionObject.object == ObjectType.enum.database) {
+    return filesManager.get("base", ObjectType.enum.database, notionObject.id)
+      .path
   }
 
   // It's a block. Ancestor is page
   const ancestorPageId = getPageAncestorId(
-    ObjectType.Block,
+    ObjectType.enum.block,
     notionObject.id,
     objectsTree
   )
   if (!ancestorPageId) {
     throw new Error("Ancestor page not found for object " + notionObject.id)
   }
-  return filesManager.get("base", ObjectType.Page, ancestorPageId).path
+  return filesManager.get("base", ObjectType.enum.page, ancestorPageId).path
 }
 
 export function getAncestorPageOrDatabaseFilename(
@@ -86,13 +87,17 @@ export function getPageAncestorId(
     return null
   }
 
-  if (parentObject.object === ObjectType.Page) {
+  if (parentObject.object === ObjectType.enum.page) {
     return parentObject.id
   }
-  if (parentObject.object === ObjectType.Database) {
-    return getPageAncestorId(ObjectType.Database, parentObject.id, objectTree)
+  if (parentObject.object === ObjectType.enum.database) {
+    return getPageAncestorId(
+      ObjectType.enum.database,
+      parentObject.id,
+      objectTree
+    )
   }
-  if (parentObject.object === ObjectType.Block) {
-    return getPageAncestorId(ObjectType.Block, parentObject.id, objectTree)
+  if (parentObject.object === ObjectType.enum.block) {
+    return getPageAncestorId(ObjectType.enum.block, parentObject.id, objectTree)
   }
 }

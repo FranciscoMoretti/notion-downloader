@@ -24,8 +24,8 @@ export class NotionPage implements NotionObject {
     return this.metadata.last_edited_time
   }
 
-  public get object(): ObjectType.Page {
-    return ObjectType.Page
+  public get object() {
+    return ObjectType.enum.page
   }
 
   public get isDatabaseChild(): boolean {

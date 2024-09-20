@@ -37,11 +37,11 @@ export function objectTreeToObjectIds(
   const ids: IdWithType[] = []
   const plainObjects = objectTreeToPlainObjects(objectTree)
   plainObjects.forEach((node) => {
-    if (node.object === ObjectType.Page) {
+    if (node.object === ObjectType.enum.page) {
       ids.push({ page_id: node.id, type: "page_id" })
-    } else if (node.object === ObjectType.Database) {
+    } else if (node.object === ObjectType.enum.database) {
       ids.push({ database_id: node.id, type: "database_id" })
-    } else if (node.object === ObjectType.Block) {
+    } else if (node.object === ObjectType.enum.block) {
       ids.push({ block_id: node.id, type: "block_id" })
       if (node.type === "child_database") {
         ids.push({ database_id: node.id, type: "database_id" })
@@ -55,13 +55,13 @@ export function objectTreeToObjectIds(
 
 export function idTypeToObjectType(idWithType: IdWithType["type"]): ObjectType {
   if (idWithType === "page_id") {
-    return ObjectType.Page
+    return ObjectType.enum.page
   }
   if (idWithType === "database_id") {
-    return ObjectType.Database
+    return ObjectType.enum.database
   }
   if (idWithType === "block_id") {
-    return ObjectType.Block
+    return ObjectType.enum.block
   }
   throw new Error(`Invalid id type: ${idWithType}`)
 }

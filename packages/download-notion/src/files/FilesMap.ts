@@ -1,4 +1,4 @@
-import { ObjectType } from "notion-cache-client"
+import { ObjectType, PageOrDatabase } from "notion-cache-client"
 
 import { AssetType } from "../config/schema"
 
@@ -7,10 +7,10 @@ export type FileRecord = {
   lastEditedTime: string
 }
 
-export type FileRecordType = ObjectType.Page | ObjectType.Database | AssetType
+export type FileRecordType = PageOrDatabase | AssetType
 export const allRecordTypes: FileRecordType[] = [
-  ObjectType.Page,
-  ObjectType.Database,
+  ObjectType.enum.page,
+  ObjectType.enum.database,
   AssetType.enum.image,
   AssetType.enum.file,
   AssetType.enum.video,

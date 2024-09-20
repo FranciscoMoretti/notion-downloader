@@ -4,10 +4,13 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import {
+  BlockType,
   ObjectType,
+  PageOrDatabase,
   SimpleParent,
   simplifyParentObject,
 } from "notion-cache-client"
+import { z } from "zod"
 
 export type NotionObjectResponse =
   | PageObjectResponse
@@ -28,7 +31,7 @@ type IdToNodeMap = {
 
 export type BlockObjectTreeNode = {
   id: string
-  object: ObjectType.Block
+  object: BlockType
   type: string
   has_children: boolean
   children: Array<NotionObjectTreeNode>
@@ -38,7 +41,7 @@ export type BlockObjectTreeNode = {
 export type NotionObjectTreeNode =
   | {
       id: string
-      object: ObjectType.Page | ObjectType.Database
+      object: PageOrDatabase
       children: Array<NotionObjectTreeNode>
       parent: SimpleParent | null
     }
@@ -47,13 +50,13 @@ export type NotionObjectTreeNode =
 export type NotionObjectPlain =
   | {
       id: string
-      object: ObjectType.Database | ObjectType.Page
+      object: PageOrDatabase
       children: Array<string>
       parent: SimpleParent | null
     }
   | {
       id: string
-      object: ObjectType.Block
+      object: BlockType
       type: string
       has_children: boolean
       children: Array<string>
@@ -85,7 +88,7 @@ export class NotionObjectTree {
   }
 
   private setNodetoMap(node: NotionObjectTreeNode) {
-    if (node.object === ObjectType.Block) {
+    if (node.object === ObjectType.enum.block) {
       this.idToNodeMap.block.set(node.id, node)
     } else {
       this.idToNodeMap[node.object].set(node.id, node)
@@ -171,10 +174,10 @@ export class NotionObjectTree {
     const parentRaw = { ...this.data[node.object][id].parent }
     // Delete from data
     delete this.data[node.object][id]
-    if (node.object === ObjectType.Block && node.type === "child_page") {
+    if (node.object === ObjectType.enum.block && node.type === "child_page") {
       delete this.data.page[id]
     } else if (
-      node.object === ObjectType.Block &&
+      node.object === ObjectType.enum.block &&
       node.type === "child_database"
     ) {
       delete this.data.database[id]
@@ -198,7 +201,7 @@ export class NotionObjectTree {
     id: string
   ): NotionObjectTreeNode | undefined {
     // If asked for a page or database, child_page and child_database have presedence over pages and databases
-    if (objectType === ObjectType.Page) {
+    if (objectType === ObjectType.enum.page) {
       const possible_child_page = this.idToNodeMap.block.get(id)
       if (possible_child_page) {
         if (possible_child_page.type === "child_page") {
@@ -207,7 +210,7 @@ export class NotionObjectTree {
           throw new Error(`Block with id ${id} exists but is not a child page`)
         }
       }
-    } else if (objectType === ObjectType.Database) {
+    } else if (objectType === ObjectType.enum.database) {
       const possible_child_database = this.idToNodeMap.block.get(id)
       if (possible_child_database) {
         if (possible_child_database.type === "child_database") {

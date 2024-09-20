@@ -13,14 +13,14 @@ export abstract class SlugNamingStrategy extends NamingStrategy {
   public slugProperty: string
 
   constructor(slugProperty: string) {
-    super([ObjectType.Page, ObjectType.Database])
+    super([ObjectType.enum.page, ObjectType.enum.database])
     this.slugProperty = slugProperty || "Slug"
   }
 
   protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {
-    if (notionObject.object == ObjectType.Page) {
+    if (notionObject.object == ObjectType.enum.page) {
       return this._nameForPage(notionObject as NotionPage)
-    } else if (notionObject.object == ObjectType.Database) {
+    } else if (notionObject.object == ObjectType.enum.database) {
       return this._nameForDatabase(notionObject as NotionDatabase)
     } else {
       throw new Error(`Unknown object type: ${typeof notionObject}`)
@@ -79,7 +79,7 @@ export class GuidNamingStrategy extends NamingStrategy {
 
 export class TitleNamingStrategy extends NamingStrategy {
   constructor() {
-    super([ObjectType.Page, ObjectType.Database])
+    super([ObjectType.enum.page, ObjectType.enum.database])
   }
 
   protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {

@@ -43,11 +43,11 @@ export function simplifyParentObject(
   if (parent.type === "workspace") {
     return null
   } else if (parent.type === "page_id") {
-    return { id: parent.page_id, object: ObjectType.Page }
+    return { id: parent.page_id, object: ObjectType.enum.page }
   } else if (parent.type === "database_id") {
-    return { id: parent.database_id, object: ObjectType.Database }
+    return { id: parent.database_id, object: ObjectType.enum.database }
   } else if (parent.type === "block_id") {
-    return { id: parent.block_id, object: ObjectType.Block }
+    return { id: parent.block_id, object: ObjectType.enum.block }
   } else {
     throw new Error(`Unknown parent type: ${parent}`)
   }

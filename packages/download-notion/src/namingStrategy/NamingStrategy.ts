@@ -1,14 +1,14 @@
-import { ObjectType } from "notion-cache-client"
+import { ObjectType, PageOrDatabase } from "notion-cache-client"
 
 import { AssetType, FileType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { NotionFileLikeObjects } from "../notionObjects/objectTypes"
 
-export type NameableType = ObjectType.Page | ObjectType.Database | AssetType
+export type NameableType = PageOrDatabase | AssetType
 
 export const allNameableTypes: NameableType[] = [
-  ObjectType.Page,
-  ObjectType.Database,
+  ObjectType.enum.page,
+  ObjectType.enum.database,
   AssetType.enum.image,
   AssetType.enum.file,
   AssetType.enum.video,
@@ -45,11 +45,11 @@ export abstract class NamingStrategy {
   }
 
   public acceptsObject(notionObject: NotionFileLikeObjects): boolean {
-    if (notionObject.object === ObjectType.Page) {
-      return this.accepts.has(ObjectType.Page)
+    if (notionObject.object === ObjectType.enum.page) {
+      return this.accepts.has(ObjectType.enum.page)
     }
-    if (notionObject.object === ObjectType.Database) {
-      return this.accepts.has(ObjectType.Database)
+    if (notionObject.object === ObjectType.enum.database) {
+      return this.accepts.has(ObjectType.enum.database)
     }
     return this.accepts.has(notionObject.assetType)
   }

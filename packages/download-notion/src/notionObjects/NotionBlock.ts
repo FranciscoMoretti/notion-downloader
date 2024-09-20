@@ -14,8 +14,8 @@ export class NotionBlock implements NotionObject {
     return this.metadata.id
   }
 
-  get object(): ObjectType.Block {
-    return ObjectType.Block
+  get object() {
+    return ObjectType.enum.block
   }
 
   get type() {

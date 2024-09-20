@@ -38,8 +38,8 @@ export class NotionBlockImage extends NotionFile implements iNotionAssetObject {
     return this.metadata.id
   }
 
-  get object(): ObjectType.Block {
-    return ObjectType.Block
+  get object() {
+    return ObjectType.enum.block
   }
 
   get type() {

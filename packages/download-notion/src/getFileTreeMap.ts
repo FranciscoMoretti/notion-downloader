@@ -35,8 +35,8 @@ export function getFileTreeMap(
     // New level path is created by objects that can contain files as children
     const newLevelPath =
       !parentContext.databaseIsRoot &&
-      (notionObject.object === ObjectType.Page ||
-        notionObject.object === ObjectType.Database)
+      (notionObject.object === ObjectType.enum.page ||
+        notionObject.object === ObjectType.enum.database)
         ? layoutStrategies[notionObject.object].newPathLevel(
             parentContext.path,
             notionObject
@@ -44,8 +44,8 @@ export function getFileTreeMap(
         : parentContext.path
 
     if (
-      notionObject.object === ObjectType.Page ||
-      notionObject.object === ObjectType.Database
+      notionObject.object === ObjectType.enum.page ||
+      notionObject.object === ObjectType.enum.database
     ) {
       if (existingFilesManager.exists(notionObject.object, notionObject.id)) {
         copyRecord(
@@ -56,7 +56,7 @@ export function getFileTreeMap(
         )
       } else {
         const objectPath =
-          notionObject.object == ObjectType.Database
+          notionObject.object == ObjectType.enum.database
             ? newLevelPath
             : layoutStrategies[notionObject.object].getPathForObject(
                 parentContext.path,

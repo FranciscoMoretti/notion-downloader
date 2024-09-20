@@ -22,8 +22,8 @@ export class NotionDatabase implements NotionObject {
     return this.metadata.last_edited_time
   }
 
-  public get object(): ObjectType.Database {
-    return ObjectType.Database
+  public get object() {
+    return ObjectType.enum.database
   }
 
   // In Notion, pages from the Outline have "title"'s.
