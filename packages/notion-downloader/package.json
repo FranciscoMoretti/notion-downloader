@@ -1,6 +1,6 @@
 {
   "name": "notion-downloader",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A variant of the official notion client that uses a cache.",
   "publishConfig": {
     "access": "public"
