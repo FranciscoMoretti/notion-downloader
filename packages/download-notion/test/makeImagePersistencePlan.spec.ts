@@ -25,7 +25,7 @@ const optionsUsingDefaultNaming: NotionPullOptions = {
   slugProperty: "",
   overwrite: false,
   rootDbAsFolder: false,
-  layoutStrategy: "HierarchicalNamedLayoutStrategy",
+  layoutStrategy: "hierarchical",
   imageFileNameFormat: "default",
   namingStrategy: "guid",
   pageLinkHasExtension: false,

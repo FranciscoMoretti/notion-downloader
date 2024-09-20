@@ -26,8 +26,8 @@ export const allAssetTyes = [
 ]
 
 export enum LayoutStrategyNames {
-  HierarchicalNamed = "HierarchicalNamedLayoutStrategy",
-  Flat = "FlatLayoutStrategy",
+  Hierarchical = "hierarchical",
+  Flat = "flat",
 }
 export const layoutStrategySchema = z.nativeEnum(LayoutStrategyNames)
 
@@ -173,7 +173,7 @@ export const conversionSchema = z.object({
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
   layoutStrategy: layoutStrategyOptionsSchema.default(
-    LayoutStrategyNames.HierarchicalNamed
+    LayoutStrategyNames.Hierarchical
   ),
   namingStrategy: namingStrategyOptionsSchema.default(
     AllNamingSchemaName.Default

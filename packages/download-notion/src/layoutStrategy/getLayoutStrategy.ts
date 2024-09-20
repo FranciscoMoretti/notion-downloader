@@ -1,12 +1,13 @@
+import { LayoutStrategyNames } from "../config/schema"
 import { NamingStrategy } from "../namingStrategy/NamingStrategy"
 import { FlatLayoutStrategy } from "./FlatLayoutStrategy"
 import { HierarchicalLayoutStrategy } from "./HierarchicalLayoutStrategy"
 
 export function getLayoutStrategy(
-  layoutStrategy: "HierarchicalNamedLayoutStrategy" | "FlatLayoutStrategy",
+  layoutStrategy: LayoutStrategyNames,
   namingStrategy: NamingStrategy
 ) {
-  return layoutStrategy === "FlatLayoutStrategy"
+  return layoutStrategy === LayoutStrategyNames.Flat
     ? new FlatLayoutStrategy(namingStrategy)
     : new HierarchicalLayoutStrategy(namingStrategy)
 }

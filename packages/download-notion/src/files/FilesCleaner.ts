@@ -29,9 +29,9 @@ export class FilesCleaner {
 
   public async cleanupAllFiles(filesManager: FilesManager): Promise<void> {
     info("Cleaning up all tracked files")
-    const allFiles = allRecordTypes.flatMap((type) =>
-      this.getFileRecords(filesManager, type)
-    )
+    const allFiles = allRecordTypes
+      .filter((type) => type !== ObjectType.Database)
+      .flatMap((type) => this.getFileRecords(filesManager, type))
 
     await this.removeRecords(allFiles)
   }
