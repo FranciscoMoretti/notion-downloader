@@ -14,6 +14,10 @@ const config: Config = {
       markdown: "hierarchical",
       assets: "flat",
     },
+    namingStrategy: {
+      markdown: "githubSlug",
+      assets: "default",
+    },
     statusPropertyName: "Status",
     statusPropertyValue: "Publish",
     pageLinkHasExtension: false,
