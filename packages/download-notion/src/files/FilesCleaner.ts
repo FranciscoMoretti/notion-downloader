@@ -26,7 +26,7 @@ export class FilesCleaner {
       })
     await this.removeRecords(recordsToRemove)
 
-    const allFolders = this.getFileRecords(
+    const oldFolders = this.getFileRecords(
       oldFilesManager,
       ObjectType.enum.database
     )
@@ -35,7 +35,7 @@ export class FilesCleaner {
       ObjectType.enum.database
     )
     const folderRecordsToRemove = this.getRecordsToRemove(
-      allFolders,
+      oldFolders,
       newFolders
     )
 
