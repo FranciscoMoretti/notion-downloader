@@ -8,15 +8,10 @@ export type FileRecord = {
 }
 
 export type FileRecordType = PageOrDatabase | AssetType
-export const allRecordTypes: FileRecordType[] = [
-  ObjectType.enum.page,
-  ObjectType.enum.database,
-  AssetType.enum.image,
-  AssetType.enum.file,
-  AssetType.enum.video,
-  AssetType.enum.pdf,
-  AssetType.enum.audio,
-]
+export const allRecordTypes = [
+  ...PageOrDatabase.options,
+  ...AssetType.options,
+] as const
 
 export type FilesMapData = Record<FileRecordType, Record<string, FileRecord>>
 

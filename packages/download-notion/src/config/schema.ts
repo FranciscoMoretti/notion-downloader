@@ -1,4 +1,4 @@
-import { ObjectType } from "notion-cache-client"
+import { ObjectType, PageOrDatabase } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-downloader"
 import { z } from "zod"
 
@@ -234,15 +234,7 @@ export function mapToAssetType(type: string): AssetType {
   }
 }
 
-export type GenericGroup<T> = {
-  [ObjectType.enum.page]: T
-  [ObjectType.enum.database]: T
-  [AssetType.enum.video]: T
-  [AssetType.enum.pdf]: T
-  [AssetType.enum.audio]: T
-  [AssetType.enum.image]: T
-  [AssetType.enum.file]: T
-}
+export type GenericGroup<T> = Record<PageOrDatabase | AssetType, T>
 
 export type GenericAssetMarkdownGroup<T, U> = {
   [ObjectType.enum.page]: T
