@@ -11,6 +11,7 @@ import {
   parseNamingStrategyFileOptions,
 } from "./config/schema"
 import { FilesManager } from "./files/FilesManager"
+import { allRecordTypes } from "./files/FilesMap"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
 import { getLayoutStrategy } from "./layoutStrategy/getLayoutStrategy"
 import { NamingStrategy } from "./namingStrategy/NamingStrategy"

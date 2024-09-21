@@ -17,13 +17,38 @@ export class FilesCleaner {
   ): Promise<void> {
     info("Cleaning up old files")
 
-    const recordsToRemove = allRecordTypes.flatMap((type) => {
-      const oldRecords = this.getFileRecords(oldFilesManager, type)
-      const newRecords = this.getFileRecords(newFilesManager, type)
-      return this.getRecordsToRemove(oldRecords, newRecords)
-    })
-
+    const recordsToRemove = allRecordTypes
+      .filter((type) => type !== ObjectType.enum.database)
+      .flatMap((type) => {
+        const oldRecords = this.getFileRecords(oldFilesManager, type)
+        const newRecords = this.getFileRecords(newFilesManager, type)
+        return this.getRecordsToRemove(oldRecords, newRecords)
+      })
     await this.removeRecords(recordsToRemove)
+
+    const allFolders = this.getFileRecords(
+      oldFilesManager,
+      ObjectType.enum.database
+    )
+    const newFolders = this.getFileRecords(
+      newFilesManager,
+      ObjectType.enum.database
+    )
+    const folderRecordsToRemove = this.getRecordsToRemove(
+      allFolders,
+      newFolders
+    )
+
+    // Sort folders by path depth (descending)
+    const sortedFolders = folderRecordsToRemove.sort(
+      (a, b) => b.path.split(path.sep).length - a.path.split(path.sep).length
+    )
+
+    for (const folder of sortedFolders) {
+      if (fs.readdirSync(folder.path).length === 0) {
+        await this.removeRecords([folder])
+      }
+    }
   }
 
   public async cleanupAllFiles(filesManager: FilesManager): Promise<void> {
@@ -31,8 +56,16 @@ export class FilesCleaner {
     const allFiles = allRecordTypes
       .filter((type) => type !== ObjectType.enum.database)
       .flatMap((type) => this.getFileRecords(filesManager, type))
-
     await this.removeRecords(allFiles)
+
+    const folderRecordsToRemove = this.getFileRecords(
+      filesManager,
+      ObjectType.enum.database
+    )
+    const emptyFolders = folderRecordsToRemove.filter((record) => {
+      return fs.readdirSync(record.path).length === 0
+    })
+    await this.removeRecords(emptyFolders)
   }
 
   private async removeRecords(records: ExtendedFileRecord[]): Promise<void> {
@@ -68,7 +101,7 @@ export class FilesCleaner {
     newRecords: ExtendedFileRecord[]
   ): ExtendedFileRecord[] {
     const newRecordsMap = new Map(newRecords.map((r) => [r.id, r]))
-    return oldRecords.filter((oldRecord) => {
+    const filesRecords = oldRecords.filter((oldRecord) => {
       const newRecord = newRecordsMap.get(oldRecord.id)
       const reason = this.getRemoveReason(oldRecord, newRecord)
       if (reason) {
@@ -79,6 +112,7 @@ export class FilesCleaner {
       }
       return false
     })
+    return filesRecords
   }
 
   private getRemoveReason(
