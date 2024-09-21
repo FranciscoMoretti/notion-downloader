@@ -40,6 +40,12 @@ export class FilesCleaner {
     )
 
     // Sort folders by path depth (descending)
+    await this.removeFolderRecords(folderRecordsToRemove)
+  }
+
+  private async removeFolderRecords(
+    folderRecordsToRemove: ExtendedFileRecord[]
+  ) {
     const sortedFolders = folderRecordsToRemove.sort(
       (a, b) => b.path.split(path.sep).length - a.path.split(path.sep).length
     )
@@ -47,6 +53,8 @@ export class FilesCleaner {
     for (const folder of sortedFolders) {
       if (fs.readdirSync(folder.path).length === 0) {
         await this.removeRecords([folder])
+      } else {
+        info(`Skipping folder: [${folder.path}] because it is not empty`)
       }
     }
   }
@@ -58,20 +66,18 @@ export class FilesCleaner {
       .flatMap((type) => this.getFileRecords(filesManager, type))
     await this.removeRecords(allFiles)
 
+    info("Cleaning up all tracked folders")
     const folderRecordsToRemove = this.getFileRecords(
       filesManager,
       ObjectType.enum.database
     )
-    const emptyFolders = folderRecordsToRemove.filter((record) => {
-      return fs.readdirSync(record.path).length === 0
-    })
-    await this.removeRecords(emptyFolders)
+    await this.removeFolderRecords(folderRecordsToRemove)
   }
 
   private async removeRecords(records: ExtendedFileRecord[]): Promise<void> {
-    info(`Removing ${records.length} files`)
+    info(`Removing ${records.length} records`)
     for (const record of records) {
-      verbose(`Removing file: ${record.path} (ID: ${record.id})`)
+      verbose(`Removing record [path: ${record.path}] (ID: ${record.id})`)
       await this.removeFile(record.path)
     }
   }
