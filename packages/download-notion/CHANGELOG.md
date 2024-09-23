@@ -1,5 +1,15 @@
 # download-notion
 
+## 0.0.10
+
+### Patch Changes
+
+- [`6194fc412576bf312bece1c942e0611a7304e049`](https://github.com/FranciscoMoretti/notion-downloader/commit/6194fc412576bf312bece1c942e0611a7304e049) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Cleanup command and init as well
+
+- Updated dependencies [[`6194fc412576bf312bece1c942e0611a7304e049`](https://github.com/FranciscoMoretti/notion-downloader/commit/6194fc412576bf312bece1c942e0611a7304e049)]:
+  - notion-cache-client@0.0.8
+  - notion-downloader@0.0.8
+
 ## 0.0.9
 
 ### Patch Changes

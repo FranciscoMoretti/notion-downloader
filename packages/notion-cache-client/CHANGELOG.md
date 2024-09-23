@@ -1,5 +1,11 @@
 # notion-cache-client
 
+## 0.0.8
+
+### Patch Changes
+
+- [`6194fc412576bf312bece1c942e0611a7304e049`](https://github.com/FranciscoMoretti/notion-downloader/commit/6194fc412576bf312bece1c942e0611a7304e049) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Cleanup command and init as well
+
 ## 0.0.7
 
 ### Patch Changes
