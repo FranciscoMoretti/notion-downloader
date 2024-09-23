@@ -1,5 +1,11 @@
 # download-notion
 
+## 0.0.11
+
+### Patch Changes
+
+- [`f4e7e02df16ede0c0aba9b994b9eef064f5f151e`](https://github.com/FranciscoMoretti/notion-downloader/commit/f4e7e02df16ede0c0aba9b994b9eef064f5f151e) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Option to revalidate through cli
+
 ## 0.0.10
 
 ### Patch Changes
