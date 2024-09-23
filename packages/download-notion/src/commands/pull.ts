@@ -63,6 +63,10 @@ export const pull = new Command()
     "the working directory. defaults to the current directory.",
     process.cwd()
   )
+  .option(
+    "-p, --revalidate-period <period>",
+    "The period (in milliseconds) at which to revalidate the cache. Default: -1 (disabled)"
+  )
   .action(async (opts) => {
     try {
       // Validate the cwd option with zod

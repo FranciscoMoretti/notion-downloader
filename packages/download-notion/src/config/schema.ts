@@ -1,6 +1,6 @@
 import { ObjectType, PageOrDatabase } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-downloader"
-import { z } from "zod"
+import { coerce, z } from "zod"
 
 export const AssetType = z.enum(["image", "file", "video", "pdf", "audio"])
 export type AssetType = z.infer<typeof AssetType>
@@ -187,7 +187,7 @@ export const pullOptionsSchema = z
       .default({}),
 
     // System
-    revalidatePeriod: z.number().default(-1),
+    revalidatePeriod: z.coerce.number().default(-1),
     logLevel: z.string().default("info"),
     cwd: z.string().default(process.cwd()),
 

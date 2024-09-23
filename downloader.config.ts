@@ -31,7 +31,7 @@ const config: Config = {
     cacheStrategy: "cache",
   },
   logLevel: "debug",
-  revalidatePeriod: -1,
+  revalidatePeriod: 180,
 }
 
 export default config
