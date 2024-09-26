@@ -2,36 +2,20 @@ import { Config } from "./packages/download-notion/src/index"
 
 const config: Config = {
   conversion: {
-    outputPaths: {
-      markdown: "./content/",
-      assets: "./public/assets/",
-    },
-    markdownPrefixes: {
-      all: "",
-      image: "/assets/",
-    },
-    layoutStrategy: {
-      markdown: "hierarchical",
-      assets: "flat",
-    },
-    namingStrategy: {
-      markdown: "githubSlug",
-      assets: "default",
-    },
     statusPropertyName: "Status",
-    statusPropertyValue: "Publish",
+    statusPropertyValue: "*",
     pageLinkHasExtension: false,
     slugProperty: "slug",
   },
   rootDbAsFolder: true,
-  rootObjectType: "database",
-  rootId: "c974ccd9c70c4abd8a5bd4f5a294e5dd",
+  rootObjectType: "page",
+  rootId: "dcc4af9c53bf43d881f241b857da66a3",
   cache: {
     cleanCache: false,
     cacheStrategy: "cache",
   },
   logLevel: "debug",
-  revalidatePeriod: 180,
+  revalidatePeriod: -1,
 }
 
 export default config
