@@ -19,7 +19,7 @@ const defaultConfig: IDocuNotionConfig = {
 
     // Notion to Markdown transformers. Most things get transformed correctly by the notion-to-markdown library,
     // but some things need special handling.
-    standardColumnTransformer,
+    // standardColumnTransformer, // STandard column transformer uses notion unofficial API
     standardColumnListTransformer,
     standardCalloutTransformer,
     standardTableTransformer,
