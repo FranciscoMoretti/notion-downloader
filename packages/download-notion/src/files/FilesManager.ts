@@ -55,7 +55,7 @@ export class FilesManager {
       "assetType" in notionObject
         ? mapToAssetType(notionObject.assetType)
         : ObjectType.parse(notionObject.object)
-    if (recordType === ObjectType.Block) {
+    if (recordType === ObjectType.enum.block) {
       throw new Error("Only block recrods that are assets are supported")
     }
     return recordType
