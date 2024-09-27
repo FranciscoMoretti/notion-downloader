@@ -48,6 +48,7 @@ export function getFileTreeMap(
       notionObject.object === ObjectType.enum.database
     ) {
       if (existingFilesManager.exists(notionObject.object, notionObject.id)) {
+        // TODO: Copying or setting a new one should be handled internally by something that contains old and new file managers
         copyRecord(
           existingFilesManager,
           newFilesManager,
