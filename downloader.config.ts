@@ -9,7 +9,8 @@ const config: Config = {
   },
   rootDbAsFolder: true,
   rootObjectType: "page",
-  rootId: "dcc4af9c53bf43d881f241b857da66a3",
+  // TODO: FIx not  downloading by block childs
+  rootId: "74fe3069cc484ee5b94fb76bd67732ae",
   cache: {
     cleanCache: false,
     cacheStrategy: "cache",

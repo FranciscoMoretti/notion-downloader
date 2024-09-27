@@ -13,10 +13,15 @@ import {
   NotionCoverImageResponses,
   PageObjectResponseWithCover,
 } from "./NotionCoverImage"
-import { NotionFileObject, NotionFileObjectResponses } from "./NotionFileObject"
+import { FileCoreObject } from "./NotionFile"
+import {
+  NotionFileObject,
+  NotionFileObjectResponses,
+  getFileFromObjectResponse,
+} from "./NotionFileObject"
 import { NotionImageLike, iNotionAssetObject } from "./objectTypes"
 
-export function hasImageLikeObject(notionObject: NotionObjectResponse) {
+function hasImageLikeObject(notionObject: NotionObjectResponse) {
   if (
     notionObject.object === ObjectType.enum.block &&
     notionObject.type === "image"
@@ -33,9 +38,38 @@ export function hasImageLikeObject(notionObject: NotionObjectResponse) {
   return false
 }
 
+export function notionObjectHasExternalFile(
+  notionObject: NotionObjectResponse
+) {
+  if (
+    notionObject.object === ObjectType.enum.block &&
+    AssetType.options.includes(notionObject.type as AssetType)
+  ) {
+    const file = getFileFromObjectResponse(
+      notionObject as NotionFileObjectResponses
+    )
+    return file && isExternalFile(file)
+  }
+  if (notionObject.object === ObjectType.enum.page && notionObject.cover) {
+    return isExternalFile(notionObject.cover)
+  }
+  if (notionObject.object === ObjectType.enum.database && notionObject.cover) {
+    return isExternalFile(notionObject.cover)
+  }
+  return false
+}
+
+export function isExternalFile(notionFile: FileCoreObject) {
+  return notionFile.type === "external"
+}
+
 export function getAssetTypeFromObjectResponse(
   notionObject: NotionObjectResponse
 ): AssetType | undefined {
+  if (notionObjectHasExternalFile(notionObject)) {
+    return undefined
+  }
+
   if (hasImageLikeObject(notionObject)) {
     return mapToAssetType("image")
   }

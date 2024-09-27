@@ -1,6 +1,6 @@
 import { ObjectType, PageOrDatabase } from "notion-cache-client"
 
-import { AssetType, FileType } from "../config/schema"
+import { AssetType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { NotionFileLikeObjects } from "../notionObjects/objectTypes"
 

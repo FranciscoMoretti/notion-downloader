@@ -8,7 +8,7 @@ import {
 import { ObjectType } from "notion-cache-client"
 
 import { AssetType, FileType, mapToAssetType } from "../config/schema"
-import { NotionFile } from "./NotionFile"
+import { FileCoreObject, NotionFile } from "./NotionFile"
 import { iNotionAssetObject } from "./objectTypes"
 
 export type NotionFileObjectResponses =
@@ -21,7 +21,7 @@ export type NotionFileObjectResponses =
 export class NotionFileObject extends NotionFile implements iNotionAssetObject {
   private metadata: NotionFileObjectResponses
   public assetType: AssetType
-  public fileType: FileType = AssetType.enum.image
+  public fileType: FileType
 
   constructor(fileObjectResponse: NotionFileObjectResponses) {
     const file = getFileFromObjectResponse(fileObjectResponse)
@@ -31,6 +31,7 @@ export class NotionFileObject extends NotionFile implements iNotionAssetObject {
     super(file)
     this.metadata = fileObjectResponse
     this.assetType = mapToAssetType(fileObjectResponse.type)
+    this.fileType = this.assetType
   }
 
   get id(): string {
@@ -50,9 +51,9 @@ export class NotionFileObject extends NotionFile implements iNotionAssetObject {
   }
 }
 
-function getFileFromObjectResponse(
+export function getFileFromObjectResponse(
   fileObjectResponse: NotionFileObjectResponses
-) {
+): FileCoreObject | undefined {
   if (fileObjectResponse.type === "image") {
     return fileObjectResponse["image"]
   } else if (fileObjectResponse.type === "file") {

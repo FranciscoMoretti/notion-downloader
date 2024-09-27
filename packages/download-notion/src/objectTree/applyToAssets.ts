@@ -5,7 +5,11 @@ import { NotionBlockImage } from "../notionObjects/NotionBlockImage"
 import { NotionCoverImage } from "../notionObjects/NotionCoverImage"
 import { NotionFileObject } from "../notionObjects/NotionFileObject"
 import { iNotionAssetObject } from "../notionObjects/objectTypes"
-import { databaseHasCover, pageHasCover } from "../notionObjects/objectutils"
+import {
+  databaseHasCover,
+  notionObjectHasExternalFile,
+  pageHasCover,
+} from "../notionObjects/objectutils"
 
 export async function applyToAllAssets({
   objectsTree,
@@ -26,16 +30,20 @@ export async function applyToAllAssets({
 
   if (assetTypes.includes(AssetType.enum.image)) {
     promises.push(
-      ...objectsTree.getBlocks(AssetType.enum.image).map((block) => {
-        const image = new NotionBlockImage(block)
-        return applyToAsset(image)
-      })
+      ...objectsTree
+        .getBlocks(AssetType.enum.image)
+        .filter((block) => !notionObjectHasExternalFile(block))
+        .map((block) => {
+          const image = new NotionBlockImage(block)
+          return applyToAsset(image)
+        })
     )
 
     promises.push(
       ...objectsTree
         .getPages()
         .filter(pageHasCover)
+        .filter((pageResponse) => !notionObjectHasExternalFile(pageResponse))
         .map((pageResponse) => {
           const image = new NotionCoverImage(pageResponse)
           return applyToAsset(image)
@@ -46,6 +54,9 @@ export async function applyToAllAssets({
       ...objectsTree
         .getDatabases()
         .filter(databaseHasCover)
+        .filter(
+          (databaseResponse) => !notionObjectHasExternalFile(databaseResponse)
+        )
         .map((databaseResponse) => {
           const image = new NotionCoverImage(databaseResponse)
           return applyToAsset(image)
@@ -58,10 +69,13 @@ export async function applyToAllAssets({
   )
   for (const assetType of assetsExceptImage) {
     promises.push(
-      ...objectsTree.getBlocks(assetType).map((file) => {
-        const fileObject = new NotionFileObject(file)
-        return applyToAsset(fileObject)
-      })
+      ...objectsTree
+        .getBlocks(assetType)
+        .filter((block) => !notionObjectHasExternalFile(block))
+        .map((file) => {
+          const fileObject = new NotionFileObject(file)
+          return applyToAsset(fileObject)
+        })
     )
   }
 
