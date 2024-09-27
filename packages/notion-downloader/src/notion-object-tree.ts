@@ -134,7 +134,18 @@ export class NotionObjectTree {
     if (!objectResponse) {
       throw new Error(`Object response not found for id: ${startNode.id}`)
     }
-    const newContext = nodeAction(objectResponse, parentContext, this)
+    let newContext = nodeAction(objectResponse, parentContext, this)
+
+    // Handle child pages and databases. Traversing is through blocks, but actions are applied to pages and databases.
+    if (startNode.object === ObjectType.enum.block) {
+      if (startNode.type === "child_page") {
+        const pageObject = this.data.page[startNode.id]
+        newContext = nodeAction(pageObject, newContext, this)
+      } else if (startNode.type === "child_database") {
+        const databaseObject = this.data.database[startNode.id]
+        newContext = nodeAction(databaseObject, newContext, this)
+      }
+    }
 
     for (const child of startNode.children) {
       this.traverse(nodeAction, newContext, child)

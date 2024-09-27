@@ -1,4 +1,4 @@
-import { ObjectType, ObjectType } from "notion-cache-client"
+import { ObjectType } from "notion-cache-client"
 import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
 
 import { verbose } from "../log"
