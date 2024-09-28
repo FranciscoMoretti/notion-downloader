@@ -84,5 +84,16 @@ export class TitleNamingStrategy extends NamingStrategy {
 
   protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {
     return notionObject.title
+      .replace(/^\//, "")
+      .replaceAll("/", "-")
+      .replaceAll("\\", "-")
+      .replaceAll(":", "-")
+      .replaceAll("*", "-")
+      .replaceAll("?", "-")
+      .replaceAll('"', "-")
+      .replaceAll("<", "-")
+      .replaceAll(">", "-")
+      .replaceAll("|", "-")
+      .replaceAll("--", "-")
   }
 }
