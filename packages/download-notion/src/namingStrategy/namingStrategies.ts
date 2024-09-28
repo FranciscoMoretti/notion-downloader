@@ -28,7 +28,7 @@ export abstract class SlugNamingStrategy extends NamingStrategy {
   }
 
   private _nameForPage(page: NotionPage): string {
-    const explicitSlug = page.getPlainTextProperty(this.slugProperty, "")
+    const explicitSlug = page.getGenericProperty(this.slugProperty)
 
     return explicitSlug || this._slugify(page.title)
   }

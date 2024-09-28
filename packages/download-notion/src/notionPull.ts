@@ -1,5 +1,6 @@
 import { debug } from "console"
 import path from "path"
+import { performance } from "perf_hooks"
 import { exit } from "process"
 import { Client } from "@notionhq/client"
 import fs from "fs-extra"
@@ -103,6 +104,9 @@ function haveOptionsChanged(
 }
 
 export async function notionPull(options: NotionPullOptions): Promise<void> {
+  const startTime = performance.now()
+  const stageTimes: Record<string, number> = {}
+
   const optionsForLogging = getOptionsForLogging(options)
   info(`Options:${JSON.stringify(optionsForLogging, null, 2)}`)
 
@@ -151,12 +155,15 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   })
 
   group("Stage 1: walk children of the root page, looking for pages...")
+  const stage1Start = performance.now()
   const objectsTree = await downloadNotionObjectTree(
     cachedNotionClient,
     { rootUUID, rootObjectType },
     options.cache
   )
   await saveObjectToJson(objectsTree.getRoot(), objectTreeCachePath)
+  stageTimes["Stage 1"] = performance.now() - stage1Start
+  endGroup()
 
   const assetsCacheFilesMap = await cacheNewAssets(
     options,
@@ -176,14 +183,17 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   endGroup()
   group("Stage 2: Filtering pages...")
+  const stage2Start = performance.now()
   filterTree(
     objectsTree,
     options.conversion.statusPropertyName,
     options.conversion.statusPropertyValue
   )
+  stageTimes["Stage 2"] = performance.now() - stage2Start
   endGroup()
 
   group("Stage 3: Reading new assets...")
+  const stage3Start = performance.now()
   const filesInMemory: FileBuffersMemory = {}
   await readOrDownloadNewAssets(
     objectsTree,
@@ -191,9 +201,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     existingFilesManager,
     filesInMemory
   )
+  stageTimes["Stage 3"] = performance.now() - stage3Start
   endGroup()
 
   group("Stage 4: Building paths...")
+  const stage4Start = performance.now()
   // 4. Path building
   const layoutStrategies = createStrategies(
     options,
@@ -212,11 +224,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   await updateAssetFilePathsForMarkdown(objectsTree, newFilesManager)
-
+  stageTimes["Stage 4"] = performance.now() - stage4Start
   endGroup()
 
   group("Stage 5: Saving new assets...")
-
+  const stage5Start = performance.now()
   await saveNewAssets(
     objectsTree,
     existingFilesManager,
@@ -225,10 +237,12 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   // 5. Save assets
-
+  stageTimes["Stage 5"] = performance.now() - stage5Start
   endGroup()
 
   // Only output pages that changed! The rest already exist.
+  group(`Stage 6: convert Notion pages to markdown...`)
+  const stage6Start = performance.now()
   const pagesToOutput = getPagesToOutput(
     objectsTree,
     existingFilesManager,
@@ -237,7 +251,6 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info(`Found ${objectsTree.getPages().length} pages`)
   info(`Found ${pagesToOutput.length} to output`)
 
-  group(`Stage 6: convert ${pagesToOutput.length} Notion pages to markdown...`)
   const pluginsConfig = await loadConfigAsync()
   const notionToMarkdown = new NotionToMarkdown({
     notionClient: cachedNotionClient,
@@ -250,17 +263,30 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     notionToMarkdown,
     newFilesManager
   )
+  stageTimes["Stage 6"] = performance.now() - stage6Start
   endGroup()
 
   group("Stage 7: clean up old files & images...")
+  const stage7Start = performance.now()
   await cleanupOldsFiles(existingFilesManager, newFilesManager)
   // Saving needs to happen at the end to prevent inconsistencies if fails mid execution
   await saveObjectToJson(optionsForLogging, lastOptionsCachePath)
   await saveDataToFile(newFilesManager.toJSON(), filesMapCachePath)
+  stageTimes["Stage 7"] = performance.now() - stage7Start
   endGroup()
 
   group("Download report")
-  info(JSON.stringify(cachedNotionClient.stats))
+  for (const [key, value] of Object.entries(cachedNotionClient.stats)) {
+    info(`${key}: ${value}`)
+  }
+
+  info("Stage execution times:")
+  for (const [stage, time] of Object.entries(stageTimes)) {
+    info(`${stage}: ${time.toFixed(2)}ms`)
+  }
+
+  const totalTime = performance.now() - startTime
+  info(`Total execution time: ${totalTime.toFixed(2)}ms`)
   endGroup()
 }
 

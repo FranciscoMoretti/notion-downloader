@@ -1,9 +1,7 @@
-import {
-  DatabaseObjectResponse,
-  RichTextItemResponse,
-} from "@notionhq/client/build/src/api-endpoints"
+import { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { ObjectType } from "notion-cache-client"
 
+import { strigifyRichTextResponseArray } from "../properties/toPlainText"
 import { NotionObject } from "./NotionObject"
 
 // Response wrapper access class
@@ -28,22 +26,6 @@ export class NotionDatabase implements NotionObject {
 
   // In Notion, pages from the Outline have "title"'s.
   public get title(): string {
-    return this.richTextItemArrayToPlainText(
-      this.metadata.title,
-      "title missing"
-    )
-  }
-
-  // TODO: Move to util
-  private richTextItemArrayToPlainText(
-    textArray: RichTextItemResponse[],
-    defaultIfEmpty: string = ""
-  ) {
-    //console.log("textarray:" + JSON.stringify(textArray, null, 2));
-    return textArray && textArray.length
-      ? (textArray
-          .map((item: { plain_text: any }) => item.plain_text)
-          .join("") as string)
-      : defaultIfEmpty
+    return strigifyRichTextResponseArray(this.metadata.title)
   }
 }

@@ -2,24 +2,36 @@ import { Config } from "./packages/download-notion/src/index"
 
 const config: Config = {
   conversion: {
+    outputPaths: {
+      markdown: "./content/",
+      assets: "./public/assets/",
+    },
+    markdownPrefixes: {
+      all: "",
+      image: "/assets/",
+    },
+    layoutStrategy: {
+      markdown: "hierarchical",
+      assets: "flat",
+    },
+    namingStrategy: {
+      markdown: "githubSlug",
+      assets: "default",
+    },
     statusPropertyName: "Status",
-    statusPropertyValue: "*",
+    statusPropertyValue: "Publish",
     pageLinkHasExtension: false,
     slugProperty: "slug",
   },
   rootDbAsFolder: true,
-  rootObjectType: "page",
-  rootId: "dcc4af9c53bf43d881f241b857da66a3",
+  rootObjectType: "database",
+  rootId: "c974ccd9c70c4abd8a5bd4f5a294e5dd",
   cache: {
     cleanCache: false,
-    cacheStrategy: "cache",
+    cacheStrategy: "no-cache",
   },
-  logLevel: "info",
+  logLevel: "debug",
   revalidatePeriod: -1,
 }
 
 export default config
-
-// TODO Check 3640de39adfb (why is it calling block children multiple times?)
-
-// TODO Check 2a490906-8aa2-40dc-9da5-f1e7e7ebd567 (why is it retrieving block)
