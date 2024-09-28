@@ -260,7 +260,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
 
   group("Download report")
-  debug(cachedNotionClient.stats)
+  info(JSON.stringify(cachedNotionClient.stats))
   endGroup()
 }
 

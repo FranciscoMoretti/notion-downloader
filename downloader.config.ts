@@ -14,7 +14,7 @@ const config: Config = {
     cleanCache: false,
     cacheStrategy: "cache",
   },
-  logLevel: "debug",
+  logLevel: "info",
   revalidatePeriod: -1,
 }
 
