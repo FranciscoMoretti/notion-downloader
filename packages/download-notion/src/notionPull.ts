@@ -1,3 +1,4 @@
+import { debug } from "console"
 import path from "path"
 import { exit } from "process"
 import { Client } from "@notionhq/client"
@@ -165,6 +166,9 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   )
 
   info("PULL: Notion Download Completed")
+
+  debug(cachedNotionClient.stats)
+
   if (options.conversion.skip) {
     info("Skipping conversion phases")
     return
@@ -253,6 +257,10 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   // Saving needs to happen at the end to prevent inconsistencies if fails mid execution
   await saveObjectToJson(optionsForLogging, lastOptionsCachePath)
   await saveDataToFile(newFilesManager.toJSON(), filesMapCachePath)
+  endGroup()
+
+  group("Download report")
+  debug(cachedNotionClient.stats)
   endGroup()
 }
 

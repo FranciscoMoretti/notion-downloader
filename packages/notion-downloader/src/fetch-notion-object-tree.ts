@@ -236,15 +236,8 @@ export async function fetchTreeRecursively(
         },
       }
       objectNode.children.push(newNode)
-      if (
-        // TODO: Decide how to handle "mentions" (links to other objects)
-        childBlock.type == "child_page" ||
-        childBlock.type == "child_database" ||
-        childBlock.has_children
-      ) {
-        // Recurse if page or database (with children)
-        await fetchTreeRecursively(newNode, level + 1, client, options)
-      }
+      // Recurse
+      await fetchTreeRecursively(newNode, level + 1, client, options)
     }
   }
 }

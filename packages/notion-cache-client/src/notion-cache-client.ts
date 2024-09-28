@@ -49,6 +49,9 @@ import { CacheType } from "./notion-structures-types"
 export class NotionCacheClient extends Client {
   cache: NotionCache
   notionClient: Client
+  _stats: {
+    calls: Record<CacheType, number>
+  }
 
   constructor({
     auth,
@@ -62,6 +65,15 @@ export class NotionCacheClient extends Client {
     })
     this.cache = new NotionCache(cacheOptions)
     this.notionClient = new Client({ auth })
+    this._stats = {
+      calls: {
+        database: 0,
+        block: 0,
+        page: 0,
+        database_children: 0,
+        blocks_children: 0,
+      },
+    }
   }
 
   public readonly blocks = {
@@ -84,7 +96,6 @@ export class NotionCacheClient extends Client {
       if (blockFromCache) {
         return Promise.resolve(blockFromCache)
       }
-
       return executeWithRateLimitAndRetries(
         `blocks.retrieve(${args.block_id})`,
         () => {
@@ -346,6 +357,10 @@ export class NotionCacheClient extends Client {
     },
   }
 
+  public get stats() {
+    return this._stats
+  }
+
   private logClientMessage({
     resource_type,
     operation,
@@ -359,6 +374,10 @@ export class NotionCacheClient extends Client {
     resource_type: CacheType
     level: number
   }) {
+    if (source === "NOTION") {
+      // TODO: Debug stats, too many calls!!
+      this.stats.calls[resource_type]++
+    }
     logOperation({
       level,
       source: source,

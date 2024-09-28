@@ -6,6 +6,7 @@ import {
 
 import { ObjectType } from "./notion-types"
 
+// TODO: Replace with zod enum
 export enum CacheType {
   BLOCKS_CHILDREN = "blocks_children",
   DATABASE_CHILDREN = "database_children",
