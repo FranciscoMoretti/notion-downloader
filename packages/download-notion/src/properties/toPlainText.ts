@@ -32,6 +32,7 @@ import {
 } from "./types"
 
 type PageProperty = PageObjectResponse["properties"][string]
+type PropertyWithoutId<T> = Omit<T, "id"> & { id?: string }
 
 export function stringifyProperty(property: PageProperty) {
   switch (property.type) {
@@ -92,79 +93,91 @@ export function stringifyProperty(property: PageProperty) {
   }
 }
 
-export function stringifyNumber(property: Omit<NumberProperty, "id">): string {
+export function stringifyNumber(
+  property: PropertyWithoutId<NumberProperty>
+): string {
   return property.number?.toString() || ""
 }
 
-export function stringifyUrl(property: Omit<UrlProperty, "id">): string {
+export function stringifyUrl(property: PropertyWithoutId<UrlProperty>): string {
   return property.url || ""
 }
 
-export function stringifySelect(property: Omit<SelectProperty, "id">): string {
+export function stringifySelect(
+  property: PropertyWithoutId<SelectProperty>
+): string {
   return property.select?.name || ""
 }
 
 export function stringifyMultiSelect(
-  property: Omit<MultiSelectProperty, "id">
+  property: PropertyWithoutId<MultiSelectProperty>
 ): string {
   return property.multi_select.map((item) => item.name).join(", ")
 }
-export function stringifyStatus(property: Omit<StatusProperty, "id">): string {
+export function stringifyStatus(
+  property: PropertyWithoutId<StatusProperty>
+): string {
   return property.status?.name || ""
 }
 
-export function stringifyDate(property: Omit<DateProperty, "id">): string {
+export function stringifyDate(
+  property: PropertyWithoutId<DateProperty>
+): string {
   const date = property.date
   return stringifyDateResponse(date)
 }
 
-export function stringifyEmail(property: Omit<EmailProperty, "id">): string {
+export function stringifyEmail(
+  property: PropertyWithoutId<EmailProperty>
+): string {
   return property.email || ""
 }
 
 export function stringifyPhoneNumber(
-  property: Omit<PhoneNumberProperty, "id">
+  property: PropertyWithoutId<PhoneNumberProperty>
 ): string {
   return property.phone_number || ""
 }
 
 export function stringifyCheckbox(
-  property: Omit<CheckboxProperty, "id">
+  property: PropertyWithoutId<CheckboxProperty>
 ): string {
   return property.checkbox ? "true" : "false"
 }
 
-export function stringifyFiles(property: Omit<FilesProperty, "id">): string {
+export function stringifyFiles(
+  property: PropertyWithoutId<FilesProperty>
+): string {
   // TODO: Should these contain URLS or names?
   return property.files.map((file) => file.name).join(", ")
 }
 
 export function stringifyCreatedBy(
-  property: Omit<CreatedByProperty, "id">
+  property: PropertyWithoutId<CreatedByProperty>
 ): string {
   return stringifyUserResponse(property.created_by)
 }
 
 export function stringifyCreatedTime(
-  property: Omit<CreatedTimeProperty, "id">
+  property: PropertyWithoutId<CreatedTimeProperty>
 ): string {
   return property.created_time
 }
 
 export function stringifyLastEditedBy(
-  property: Omit<LastEditedByProperty, "id">
+  property: PropertyWithoutId<LastEditedByProperty>
 ): string {
   return stringifyUserResponse(property.last_edited_by)
 }
 
 export function stringifyLastEditedTime(
-  property: Omit<LastEditedTimeProperty, "id">
+  property: PropertyWithoutId<LastEditedTimeProperty>
 ): string {
   return property.last_edited_time
 }
 
 export function stringifyFormula(
-  property: Omit<FormulaProperty, "id">
+  property: PropertyWithoutId<FormulaProperty>
 ): string {
   if (property.formula.type === "string") {
     return property.formula.string || ""
@@ -178,12 +191,14 @@ export function stringifyFormula(
   return "unknown formula type"
 }
 
-export function stringifyButton(property: Omit<ButtonProperty, "id">): string {
-  return Object.keys(property.button).join(", ") || ""
+export function stringifyButton(
+  property: PropertyWithoutId<ButtonProperty>
+): string {
+  return "button"
 }
 
 export function stringifyUniqueId(
-  property: Omit<UniqueIdProperty, "id">
+  property: PropertyWithoutId<UniqueIdProperty>
 ): string {
   // {
   //     type: "unique_id";
@@ -199,7 +214,7 @@ export function stringifyUniqueId(
 }
 
 export function stringifyVerification(
-  property: Omit<VerificationProperty, "id">
+  property: PropertyWithoutId<VerificationProperty>
 ): string {
   const verification = property.verification
   // TODO: Decide if verification should include the verfied_by information
@@ -209,29 +224,35 @@ export function stringifyVerification(
   return verification.state
 }
 
-export function stringifyTitle(property: Omit<TitleProperty, "id">): string {
+export function stringifyTitle(
+  property: PropertyWithoutId<TitleProperty>
+): string {
   return strigifyRichTextResponseArray(property.title)
 }
 
 export function stringifyRichText(
-  property: Omit<RichTextProperty, "id">
+  property: PropertyWithoutId<RichTextProperty>
 ): string {
   return strigifyRichTextResponseArray(property.rich_text)
 }
 
-export function stringifyPeople(property: Omit<PeopleProperty, "id">): string {
+export function stringifyPeople(
+  property: PropertyWithoutId<PeopleProperty>
+): string {
   return property.people
     .map((person) => stringifyUserResponse(person))
     .join(", ")
 }
 
 export function stringifyRelation(
-  property: Omit<RelationProperty, "id">
+  property: PropertyWithoutId<RelationProperty>
 ): string {
   return property.relation.map((relation) => relation.id).join(", ")
 }
 
-export function stringifyRollup(property: Omit<RollupProperty, "id">): string {
+export function stringifyRollup(
+  property: PropertyWithoutId<RollupProperty>
+): string {
   // {
   //     "id": "%5E%7Cy%3C",
   //     "type": "rollup",
