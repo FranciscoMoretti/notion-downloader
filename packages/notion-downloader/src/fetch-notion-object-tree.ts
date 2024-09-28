@@ -156,6 +156,9 @@ export async function fetchTreeRecursively(
       resource_type: CacheType.DATABASE_CHILDREN,
       id: objectNode.id,
     })
+
+    // NOTE: notion cache client already collects paginated APIs but this is left here for
+    // Future compatibility with official client
     const databaseChildrenResults = await collectPaginatedAPI(
       (args: QueryDatabaseParameters) =>
         client.databases.query(args, level + 1),
@@ -213,6 +216,8 @@ export async function fetchTreeRecursively(
       resource_type: CacheType.BLOCKS_CHILDREN,
       id: objectNode.id,
     })
+    // NOTE: notion cache client already collects paginated APIs but this is left here for
+    // Future compatibility with official client
     const blocksChildrenResults = await collectPaginatedAPI(
       (args: ListBlockChildrenParameters) =>
         client.blocks.children.list(args, level + 1),

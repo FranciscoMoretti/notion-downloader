@@ -8,8 +8,8 @@ const config: Config = {
     slugProperty: "slug",
   },
   rootDbAsFolder: true,
-  rootObjectType: "page",
-  rootId: "dcc4af9c53bf43d881f241b857da66a3",
+  rootObjectType: "database",
+  rootId: "bbad12b67bcf4390bb503b177f17a9f1",
   cache: {
     cleanCache: false,
     cacheStrategy: "cache",
@@ -19,7 +19,3 @@ const config: Config = {
 }
 
 export default config
-
-// TODO Check 3640de39adfb (why is it calling block children multiple times?)
-
-// TODO Check 2a490906-8aa2-40dc-9da5-f1e7e7ebd567 (why is it retrieving block)

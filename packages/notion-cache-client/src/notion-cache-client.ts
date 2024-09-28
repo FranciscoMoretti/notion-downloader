@@ -1,6 +1,7 @@
 import { info } from "console"
 import {
   Client,
+  collectPaginatedAPI,
   isFullBlock,
   isFullDatabase,
   isFullPage,
@@ -31,6 +32,7 @@ import {
   ListDatabasesParameters,
   ListDatabasesResponse,
   PageObjectResponse,
+  PartialBlockObjectResponse,
   QueryDatabaseParameters,
   QueryDatabaseResponse,
   UpdateBlockParameters,
@@ -158,6 +160,8 @@ export class NotionCacheClient extends Client {
           return this.notionClient.blocks.children.list(args)
         }
 
+        // TODO: Fix, when getting multiple pages, the new page replaces the old one because of args
+
         // Check if we have it in cache
         const childrenFromCache = this.cache.getBlockChildren(
           args.block_id,
@@ -167,21 +171,45 @@ export class NotionCacheClient extends Client {
           return Promise.resolve(childrenFromCache)
         }
 
-        return executeWithRateLimitAndRetries(
-          `blocks.children.list(${args.block_id})`,
-          () => {
-            this.logClientMessage({
-              resource_type: CacheType.BLOCKS_CHILDREN,
-              source: "NOTION",
-              operation: "RETRIEVE",
-              id: args.block_id,
-              level: level + 1,
-            })
-            return this.notionClient.blocks.children.list(args)
+        return collectPaginatedAPI(
+          (args: ListBlockChildrenParameters) =>
+            executeWithRateLimitAndRetries(
+              `blocks.children.list(${args.block_id})`,
+              () => {
+                this.logClientMessage({
+                  resource_type: CacheType.BLOCKS_CHILDREN,
+                  source: "NOTION",
+                  operation: "RETRIEVE",
+                  id: args.block_id,
+                  level: level + 1,
+                })
+                return this.notionClient.blocks.children.list(args)
+              }
+            ),
+          { block_id: args.block_id }
+        ).then((blocksChildrenResults) => {
+          const fullBlocksChildrenResults = blocksChildrenResults.filter(
+            (block) => isFullBlock(block)
+          ) as BlockObjectResponse[]
+          if (
+            fullBlocksChildrenResults.length !== blocksChildrenResults.length
+          ) {
+            throw new Error(
+              `Non full blocks in children: ${JSON.stringify(
+                blocksChildrenResults
+              )}`
+            )
           }
-        ).then((response) => {
-          this.cache.setBlockChildren(args.block_id, response, level + 1)
-          return response
+
+          const fullBlocksChildrenResponse = this._toBlockChildrenResponse(
+            fullBlocksChildrenResults
+          )
+          this.cache.setBlockChildren(
+            args.block_id,
+            fullBlocksChildrenResponse,
+            level + 1
+          )
+          return fullBlocksChildrenResponse
         })
       },
     },
@@ -266,22 +294,44 @@ export class NotionCacheClient extends Client {
         return Promise.resolve(databaseChildrenFromCache)
       }
 
-      return executeWithRateLimitAndRetries(
-        `database.query(${args.database_id})`,
-        () => {
-          this.logClientMessage({
-            resource_type: CacheType.DATABASE_CHILDREN,
-            source: "NOTION",
-            operation: "RETRIEVE",
-            id: args.database_id,
-            level: level + 1,
-          })
-          return this.notionClient.databases.query(args)
+      return collectPaginatedAPI(
+        (args: QueryDatabaseParameters) =>
+          executeWithRateLimitAndRetries(
+            `database.query(${args.database_id})`,
+            () => {
+              this.logClientMessage({
+                resource_type: CacheType.DATABASE_CHILDREN,
+                source: "NOTION",
+                operation: "RETRIEVE",
+                id: args.database_id,
+                level: level + 1,
+              })
+              return this.notionClient.databases.query(args)
+            }
+          ),
+        { database_id: args.database_id }
+      ).then((databaseChildrenResults) => {
+        const fullDatabaseChildrenResults = databaseChildrenResults.filter(
+          (database) => isFullPageOrDatabase(database)
+        ) as (PageObjectResponse | DatabaseObjectResponse)[]
+        if (
+          fullDatabaseChildrenResults.length !== databaseChildrenResults.length
+        ) {
+          throw new Error(
+            `Non full page or database children: ${JSON.stringify(
+              databaseChildrenResults
+            )}`
+          )
         }
-      ).then((response) => {
-        // Saving to database children cache
-        this.cache.setDatabaseChildren(args.database_id, response, level + 1)
-        return response
+        const databaseChildrenResponse = this._toDatabaseChildrenResponse(
+          fullDatabaseChildrenResults
+        )
+        this.cache.setDatabaseChildren(
+          args.database_id,
+          databaseChildrenResponse,
+          level + 1
+        )
+        return databaseChildrenResponse
       })
     },
 
@@ -355,6 +405,36 @@ export class NotionCacheClient extends Client {
         return this.notionClient.pages.properties.retrieve(args)
       },
     },
+  }
+
+  private _toBlockChildrenResponse(
+    blocksChildrenResults: BlockObjectResponse[]
+  ): ListBlockChildrenResponse & {
+    results: BlockObjectResponse[]
+  } {
+    return {
+      type: "block",
+      block: {},
+      object: "list",
+      next_cursor: null,
+      has_more: false,
+      results: blocksChildrenResults,
+    }
+  }
+
+  private _toDatabaseChildrenResponse(
+    databaseChildrenResults: (DatabaseObjectResponse | PageObjectResponse)[]
+  ): QueryDatabaseResponse & {
+    results: (DatabaseObjectResponse | PageObjectResponse)[]
+  } {
+    return {
+      type: "page_or_database",
+      page_or_database: {},
+      object: "list",
+      next_cursor: null,
+      has_more: false,
+      results: databaseChildrenResults,
+    }
   }
 
   public get stats() {
