@@ -1,5 +1,17 @@
 # download-notion
 
+## 0.0.12
+
+### Patch Changes
+
+- [`13306405ad03ab8e906080171a40c548c90d2a6d`](https://github.com/FranciscoMoretti/notion-downloader/commit/13306405ad03ab8e906080171a40c548c90d2a6d) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Fixed bugs and implemented property conversion for all props
+
+- [`5b34ba79e4488ae23fffd781b3b8fca40a29d63f`](https://github.com/FranciscoMoretti/notion-downloader/commit/5b34ba79e4488ae23fffd781b3b8fca40a29d63f) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - New release
+
+- Updated dependencies [[`13306405ad03ab8e906080171a40c548c90d2a6d`](https://github.com/FranciscoMoretti/notion-downloader/commit/13306405ad03ab8e906080171a40c548c90d2a6d), [`5b34ba79e4488ae23fffd781b3b8fca40a29d63f`](https://github.com/FranciscoMoretti/notion-downloader/commit/5b34ba79e4488ae23fffd781b3b8fca40a29d63f)]:
+  - notion-cache-client@0.0.9
+  - notion-downloader@0.0.9
+
 ## 0.0.11
 
 ### Patch Changes
