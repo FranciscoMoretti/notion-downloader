@@ -18,7 +18,9 @@ export function filterTree(
       return false
     }
     const pageStatus = notionObject.getGenericProperty(statusPropertyName)
+    const isDatabaseChild = notionObject.isDatabaseChild
     return (
+      isDatabaseChild &&
       statusPropertyValue !== "" &&
       statusPropertyValue !== "*" &&
       pageStatus !== statusPropertyValue
