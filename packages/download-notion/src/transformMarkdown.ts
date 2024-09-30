@@ -248,17 +248,26 @@ function registerNotionToMarkdownCustomTransforms(
   })
 }
 
+function sanitizeProp(value: string): string {
+  // Cant start with @ because it is used by notion to represent a property
+  const sanitized = value.replaceAll(":", "-").trim()
+  if (sanitized.startsWith("@")) {
+    return `_${sanitized}`
+  }
+  return sanitized
+}
+
 // enhance:make this built-in plugin so that it can be overridden
 function getFrontMatter(page: NotionPage): string {
   const customProperties = Object.fromEntries(
-    Object.entries(page.metadata.properties).map(([key, _]) => [
-      key,
-      page.getGenericProperty(key),
-    ])
+    Object.entries(page.metadata.properties).map(([key, _]) => {
+      const value = page.getGenericProperty(key)
+      return [key, value ? sanitizeProp(value) : undefined]
+    })
   )
 
   const standardProperties = {
-    title: `${page.title.replaceAll(":", "-")}`,
+    title: `${sanitizeProp(page.title)}`,
     id: page.metadata.id,
     cover: page.metadata.cover ? getFileUrl(page.metadata.cover) : "",
     created_time: page.metadata.created_time,
