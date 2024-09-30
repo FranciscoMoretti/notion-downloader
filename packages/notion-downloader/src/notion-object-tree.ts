@@ -132,7 +132,9 @@ export class NotionObjectTree {
   ) {
     const objectResponse = this.data[startNode.object][startNode.id]
     if (!objectResponse) {
-      throw new Error(`Object response not found for id: ${startNode.id}`)
+      throw new Error(
+        `Object response not found for type: ${startNode.object} id: ${startNode.id}`
+      )
     }
     let newContext = nodeAction(objectResponse, parentContext, this)
 

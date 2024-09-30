@@ -153,7 +153,7 @@ export const conversionSchema = z.object({
   slugProperty: z.string().optional(),
   // TODO: filtering should be a list of configurable filters
   statusPropertyName: z.string().default("Status"),
-  statusPropertyValue: z.string().default("Done"),
+  statusPropertyValue: z.string().default("*"),
   pageLinkHasExtension: z.boolean().default(true),
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
