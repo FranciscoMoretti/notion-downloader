@@ -32,6 +32,7 @@ export async function applyToAllAssets({
     promises.push(
       ...objectsTree
         .getBlocks(AssetType.enum.image)
+        // TODO: Consider downloading external images toggled by a setting
         .filter((block) => !notionObjectHasExternalFile(block))
         .map((block) => {
           const image = new NotionBlockImage(block)
