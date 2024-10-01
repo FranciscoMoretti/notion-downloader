@@ -6,7 +6,6 @@ const config: Config = {
     statusPropertyValue: "*",
     pageLinkHasExtension: false,
     slugProperty: "slug",
-    overwrite: true,
   },
   rootDbAsFolder: true,
   rootObjectType: "page",
