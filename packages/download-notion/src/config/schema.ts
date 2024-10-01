@@ -148,7 +148,6 @@ export const pathOptionsSchema = z.union([z.string(), filepathSchema])
 
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
-  // TODO: Implement the overwrite feature
   overwrite: z.boolean().default(false),
   slugProperty: z.string().optional(),
   // TODO: filtering should be a list of configurable filters
