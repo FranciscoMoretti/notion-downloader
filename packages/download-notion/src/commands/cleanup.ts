@@ -50,35 +50,41 @@ export const cleanup = new Command()
 
     const cacheDir = pullOptions.cache.cacheDirectory
     const outputFilesMapPath = path.join(cacheDir, "output_filesmap.json")
-    const filesManager = loadFilesManagerFile(outputFilesMapPath)
-
-    const confirm =
-      options.yes ||
-      (await prompts(
-        [
+    if (!existsSync(outputFilesMapPath)) {
+      console.log(
+        "Output filesmap not found. Skipping cleanup of output files."
+      )
+    } else {
+      const filesManager = loadFilesManagerFile(outputFilesMapPath)
+      const confirm =
+        options.yes ||
+        (await prompts(
+          [
+            {
+              type: "confirm",
+              name: "confirm",
+              message: "Are you sure you want to delete all files?",
+            },
+          ],
           {
-            type: "confirm",
-            name: "confirm",
-            message: "Are you sure you want to delete all files?",
-          },
-        ],
-        {
-          onCancel: () => {
-            console.log("Cleanup cancelled.")
-            process.exit(0)
-          },
-        }
-      ))
-
-    if (!confirm) return
-    if (filesManager) {
-      const filesCleaner = new FilesCleaner()
-      await filesCleaner.cleanupAllFiles(filesManager)
+            onCancel: () => {
+              console.log("Cleanup cancelled.")
+              process.exit(0)
+            },
+          }
+        ))
+      if (!confirm) return
+      if (filesManager) {
+        const filesCleaner = new FilesCleaner()
+        await filesCleaner.cleanupAllFiles(filesManager)
+      }
+      await fs.rm(outputFilesMapPath)
     }
     if (options.outputOnly) {
-      await fs.rm(outputFilesMapPath)
+      console.log("Skipping cache directory cleanup.")
     } else {
+      console.log("Cleaning up cache directory...")
       await fs.rm(cacheDir, { recursive: true })
     }
-    console.log("All files and cache directory have been removed.")
+    console.log("Cleanup complete.")
   })
