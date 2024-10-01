@@ -6,6 +6,7 @@ const config: Config = {
     statusPropertyValue: "*",
     pageLinkHasExtension: false,
     slugProperty: "slug",
+    overwrite: true,
   },
   rootDbAsFolder: true,
   rootObjectType: "page",
@@ -14,7 +15,7 @@ const config: Config = {
     cleanCache: false,
     cacheStrategy: "cache",
   },
-  logLevel: "debug",
+  logLevel: "info",
   revalidatePeriod: -1,
 }
 

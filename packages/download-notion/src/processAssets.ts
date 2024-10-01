@@ -14,12 +14,13 @@ export async function readOrDownloadNewAssets(
   objectsTree: NotionObjectTree,
   assetsCacheFilesMap: FilesMap | undefined,
   existingFilesManager: FilesManager,
-  filesInMemory: FileBuffersMemory
+  filesInMemory: FileBuffersMemory,
+  overwrite: boolean
 ) {
   await applyToAllAssets({
     objectsTree,
     applyToAsset: async (asset) => {
-      if (existingFilesManager.isObjectNew(asset)) {
+      if (overwrite || existingFilesManager.isObjectNew(asset)) {
         await readOrDownloadImage(asset, assetsCacheFilesMap, filesInMemory)
       }
     },
@@ -42,12 +43,13 @@ export async function saveNewAssets(
   objectsTree: NotionObjectTree,
   existingFilesManager: FilesManager,
   newFilesManager: FilesManager,
-  filesInMemory: FileBuffersMemory
+  filesInMemory: FileBuffersMemory,
+  overwrite: boolean
 ) {
   await applyToAllAssets({
     objectsTree,
     applyToAsset: async (asset) => {
-      if (existingFilesManager.isObjectNew(asset)) {
+      if (overwrite || existingFilesManager.isObjectNew(asset)) {
         await saveAsset(asset, newFilesManager, filesInMemory)
       }
     },

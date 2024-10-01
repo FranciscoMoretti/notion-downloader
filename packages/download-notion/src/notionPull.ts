@@ -199,7 +199,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectsTree,
     assetsCacheFilesMap,
     existingFilesManager,
-    filesInMemory
+    filesInMemory,
+    options.conversion.overwrite
   )
   stageTimes["Stage 3"] = performance.now() - stage3Start
   endGroup()
@@ -233,7 +234,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     objectsTree,
     existingFilesManager,
     newFilesManager,
-    filesInMemory
+    filesInMemory,
+    options.conversion.overwrite
   )
 
   // 5. Save assets
@@ -246,7 +248,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const pagesToOutput = getPagesToOutput(
     objectsTree,
     existingFilesManager,
-    optionsChanged
+    options.conversion.overwrite || optionsChanged
   )
   info(`Found ${objectsTree.getPages().length} pages`)
   info(`Found ${pagesToOutput.length} to output`)
@@ -387,11 +389,11 @@ async function cacheNewAssets(
 function getPagesToOutput(
   objectsTree: NotionObjectTree,
   existingFilesManager: FilesManager,
-  optionsChanged: boolean
+  overwrite: boolean
 ) {
   const pages = objectsTree.getPages().map((page) => new NotionPage(page))
   return pages.filter(
-    (page) => optionsChanged || existingFilesManager.isObjectNew(page)
+    (page) => overwrite || existingFilesManager.isObjectNew(page)
   )
 }
 

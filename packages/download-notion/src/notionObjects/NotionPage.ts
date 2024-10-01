@@ -1,16 +1,15 @@
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { ObjectType } from "notion-cache-client"
 
-import { AssetType, FileType } from "../config/schema"
+import { AssetType, FileType, TextType } from "../config/schema"
 import { error } from "../log"
-import { stringifyProperty, stringifyText } from "../properties/toPlainText"
+import { stringifyProperty } from "../properties/toPlainText"
 import { NotionObject } from "./NotionObject"
 
 export class NotionPage implements NotionObject {
   // TODO: Can this, Database and Image Extend the PageObjectResponse instead of using as metadata?
   public metadata: PageObjectResponse
-  public assetType: AssetType = AssetType.enum.image
-  public fileType: FileType = AssetType.enum.image
+  public fileType: FileType = TextType.enum.markdown
   public extension: string = "md"
 
   public constructor(metadata: PageObjectResponse) {
