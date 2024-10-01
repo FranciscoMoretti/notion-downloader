@@ -7,7 +7,7 @@ import { ICounts, NotionBlock } from "../index"
 import { NotionPage } from "../notionObjects/NotionPage"
 
 type linkConversionFunction = (
-  context: IDocuNotionContext,
+  context: IPluginContext,
   markdownLink: string
 ) => string
 
@@ -22,7 +22,7 @@ export type IPlugin = {
   notionToMarkdownTransforms?: {
     type: string
     getStringFromBlock: (
-      context: IDocuNotionContext,
+      context: IPluginContext,
       block: NotionBlock
     ) => string | Promise<string>
   }[]
@@ -48,7 +48,7 @@ export type IRegexMarkdownModification = {
   replacementPattern?: string
   // Instead of a pattern, you can use this if you have to ask a server somewhere for help in getting the new markdown
   getReplacement?(
-    context: IDocuNotionContext,
+    context: IPluginContext,
     match: RegExpExecArray
   ): Promise<string>
   // normally, anything in code blocks is will be ignored. If you want to make changes inside of code blocks, set this to true.
@@ -62,16 +62,16 @@ export type IRegexMarkdownModification = {
 
 export type ICustomNotionToMarkdownConversion = (
   block: ListBlockChildrenResponseResult,
-  context: IDocuNotionContext
+  context: IPluginContext
 ) => () => Promise<string>
 
 export type IGetBlockChildrenFn = (id: string) => Promise<NotionBlock[]>
 
-export type IDocuNotionContext = {
+export type IPluginContext = {
   options: NotionPullOptions
   getBlockChildren: IGetBlockChildrenFn
   notionToMarkdown: NotionToMarkdown
-  pageInfo: IDocuNotionContextPageInfo
+  pageInfo: IPluginContextPageInfo
   convertNotionLinkToLocalDocusaurusLink: (url: string) => string | undefined
   pages: NotionPage[]
   counts: ICounts
@@ -83,7 +83,7 @@ export type IDocuNotionContext = {
   imports: string[]
 }
 
-export type IDocuNotionContextPageInfo = {
+export type IPluginContextPageInfo = {
   directoryContainingMarkdown: string
   slug: string
 }

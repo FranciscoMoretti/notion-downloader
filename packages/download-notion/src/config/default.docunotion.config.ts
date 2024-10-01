@@ -8,9 +8,9 @@ import { standardVideoTransformer } from "../plugins/VideoTransformer"
 import { gifEmbed, imgurGifEmbed } from "../plugins/embedTweaks"
 import { standardExternalLinkConversion } from "../plugins/externalLinks"
 import { standardInternalLinkConversion } from "../plugins/internalLinks"
-import { IDocuNotionConfig } from "./configuration"
+import { IPluginsConfig } from "./configuration"
 
-const defaultConfig: IDocuNotionConfig = {
+const defaultConfig: IPluginsConfig = {
   plugins: [
     // Notion "Block" JSON modifiers
     standardEscapeHtmlBlockModifier,

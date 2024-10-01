@@ -1,18 +1,18 @@
 import chalk from "chalk"
 
-import { IDocuNotionConfig } from "./config/configuration"
+import { IPluginsConfig } from "./config/configuration"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import { getFileUrl } from "./notionObjects/NotionFile"
 import { NotionPage } from "./notionObjects/NotionPage"
 import {
-  IDocuNotionContext,
+  IPluginContext,
   IRegexMarkdownModification,
 } from "./plugins/pluginTypes"
 import { NotionBlock } from "./types"
 
 export async function getMarkdownForPage(
-  config: IDocuNotionConfig,
-  context: IDocuNotionContext,
+  config: IPluginsConfig,
+  context: IPluginContext,
   page: NotionPage
 ): Promise<string> {
   info(`Reading & converting page ${page.id}/${page.title}`)
@@ -28,8 +28,8 @@ export async function getMarkdownForPage(
 
 // this is split off from getMarkdownForPage so that unit tests can provide the block contents
 export async function getMarkdownFromNotionBlocks(
-  context: IDocuNotionContext,
-  config: IDocuNotionConfig,
+  context: IPluginContext,
+  config: IPluginsConfig,
   blocks: Array<NotionBlock>
 ): Promise<string> {
   // changes to the blocks we get from notion API
@@ -62,7 +62,7 @@ export async function getMarkdownFromNotionBlocks(
 // operations on notion blocks before they are converted to markdown
 function doNotionBlockTransforms(
   blocks: Array<NotionBlock>,
-  config: IDocuNotionConfig
+  config: IPluginsConfig
 ) {
   for (const block of blocks) {
     config.plugins.forEach((plugin) => {
@@ -77,8 +77,8 @@ function doNotionBlockTransforms(
 }
 
 async function doTransformsOnMarkdown(
-  context: IDocuNotionContext,
-  config: IDocuNotionConfig,
+  context: IPluginContext,
+  config: IPluginsConfig,
   input: string
 ) {
   const regexMods: IRegexMarkdownModification[] = config.plugins
@@ -146,7 +146,7 @@ async function doTransformsOnMarkdown(
 }
 
 async function doNotionToMarkdown(
-  docunotionContext: IDocuNotionContext,
+  docunotionContext: IPluginContext,
   blocks: Array<NotionBlock>
 ) {
   let mdBlocks = await docunotionContext.notionToMarkdown.blocksToMarkdown(
@@ -170,9 +170,9 @@ async function doNotionToMarkdown(
 // Raw links come in without a leading slash, e.g. [link_to_page](4a6de8c0-b90b-444b-8a7b-d534d6ec71a4)
 // Inline links come in with a leading slash, e.g. [pointer to the introduction](/4a6de8c0b90b444b8a7bd534d6ec71a4)
 function doLinkFixes(
-  context: IDocuNotionContext,
+  context: IPluginContext,
   markdown: string,
-  config: IDocuNotionConfig
+  config: IPluginsConfig
 ): string {
   const linkRegExp = /\[.*?\]\([^\)]*?\)/g
 
@@ -223,8 +223,8 @@ function doLinkFixes(
 
 // overrides for the conversions that notion-to-md does
 function registerNotionToMarkdownCustomTransforms(
-  config: IDocuNotionConfig,
-  docunotionContext: IDocuNotionContext
+  config: IPluginsConfig,
+  docunotionContext: IPluginContext
 ) {
   config.plugins.forEach((plugin) => {
     if (plugin.notionToMarkdownTransforms) {

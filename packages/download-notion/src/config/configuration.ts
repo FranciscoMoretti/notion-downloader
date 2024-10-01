@@ -4,14 +4,14 @@ import { error, verbose } from "../log"
 import { IPlugin } from "../plugins/pluginTypes"
 import defaultConfig from "./default.docunotion.config"
 
-export type IDocuNotionConfig = {
+export type IPluginsConfig = {
   plugins: IPlugin[]
 }
 
 // read the plugins from the config file
 // and add them to the map
-export async function loadConfigAsync(): Promise<IDocuNotionConfig> {
-  let config: IDocuNotionConfig = defaultConfig
+export async function loadConfigAsync(): Promise<IPluginsConfig> {
+  let config: IPluginsConfig = defaultConfig
   try {
     // for now, all we have is plugins
     config = {

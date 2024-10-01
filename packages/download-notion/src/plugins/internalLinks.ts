@@ -4,14 +4,14 @@ import { ObjectType } from "notion-cache-client"
 import { removePathExtension } from "../files/pathUtils"
 import { error, warning } from "../log"
 import { NotionPage } from "../notionObjects/NotionPage"
-import { IDocuNotionContext, IPlugin } from "./pluginTypes"
+import { IPlugin, IPluginContext } from "./pluginTypes"
 
 // converts a url to a local link, if it is a link to a page in the Notion site
 // only here for plugins, notion won't normally be giving us raw urls (at least not that I've noticed)
 // If it finds a URL but can't find the page it points to, it will return undefined.
 // If it doesn't find a match at all, it returns undefined.
 export function convertInternalUrl(
-  context: IDocuNotionContext,
+  context: IPluginContext,
   url: string
 ): string | undefined {
   const kGetIDFromNotionURL = /https:\/\/www\.notion\.so\S+-([a-z,0-9]+)+.*/
@@ -39,7 +39,7 @@ export function convertInternalUrl(
 
 // handles the whole markdown link, including the label
 function convertInternalLink(
-  context: IDocuNotionContext,
+  context: IPluginContext,
   markdownLink: string
 ): string {
   // match both [foo](/123) and [bar](https://www.notion.so/123) <-- the "mention" link style
@@ -86,7 +86,7 @@ function convertLinkLabel(targetPage: NotionPage, text: string): string {
   else return targetPage.title
 }
 function convertLinkHref(
-  context: IDocuNotionContext,
+  context: IPluginContext,
   targetPage: NotionPage,
   url: string
 ): string {

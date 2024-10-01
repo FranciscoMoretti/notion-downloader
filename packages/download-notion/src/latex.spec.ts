@@ -3,11 +3,11 @@ import { NotionToMarkdown } from "notion-to-md"
 import { describe, expect, test } from "vitest"
 
 import { NotionPageLegacy } from "./NotionPageLegacy"
-import { IDocuNotionConfig } from "./config/configuration"
+import { IPluginsConfig } from "./config/configuration"
 import defaultConfig from "./config/default.docunotion.config"
 import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
 import { convertInternalUrl } from "./plugins/internalLinks"
-import { IDocuNotionContext } from "./plugins/pluginTypes"
+import { IPluginContext } from "./plugins/pluginTypes"
 import { getMarkdownFromNotionBlocks } from "./transformMarkdown"
 import { NotionBlock } from "./types"
 
@@ -26,9 +26,9 @@ test("Latex Rendering", async () => {
 
   const layoutStrategy = new HierarchicalLayoutStrategy()
 
-  const config: IDocuNotionConfig = defaultConfig
+  const config: IPluginsConfig = defaultConfig
 
-  const context: IDocuNotionContext = {
+  const context: IPluginContext = {
     getBlockChildren: (id: string) => {
       return new Promise<NotionBlock[]>((resolve) =>
         resolve(new Array<NotionBlock>())

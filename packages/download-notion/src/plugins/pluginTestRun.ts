@@ -3,16 +3,16 @@ import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
 import { NotionPageLegacy } from "../NotionPageLegacy"
-import { IDocuNotionConfig } from "../config/configuration"
+import { IPluginsConfig } from "../config/configuration"
 import { numberChildrenIfNumberedList } from "../getBlockChildren"
 import { NotionPage } from "../notionObjects/NotionPage"
 import { getMarkdownFromNotionBlocks } from "../transformMarkdown"
 import { NotionBlock } from "../types"
 import { convertInternalUrl } from "./internalLinks"
-import { IDocuNotionContext } from "./pluginTypes"
+import { IPluginContext } from "./pluginTypes"
 
 export async function blocksToMarkdown(
-  config: IDocuNotionConfig,
+  config: IPluginsConfig,
   blocks: NotionBlock[],
   pages?: NotionPage[],
   // Notes on children:
@@ -33,7 +33,7 @@ export async function blocksToMarkdown(
   //   console.log(pages[0]);
   //   console.log(pages[0].matchesLinkId);
   // }
-  const docunotionContext: IDocuNotionContext = {
+  const docunotionContext: IPluginContext = {
     notionToMarkdown: notionToMD,
     getBlockChildren: (id: string) => {
       // We call numberChildrenIfNumberedList here because the real getBlockChildren does
@@ -234,7 +234,7 @@ export function makeSamplePageObject(options: {
 }
 
 export async function oneBlockToMarkdown(
-  config: IDocuNotionConfig,
+  config: IPluginsConfig,
   block: Record<string, unknown>,
   targetPage?: NotionPageLegacy,
   targetPage2?: NotionPageLegacy

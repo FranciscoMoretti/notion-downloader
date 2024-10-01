@@ -13,7 +13,7 @@ import {
 import { NotionObjectTree, downloadNotionObjectTree } from "notion-downloader"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { IDocuNotionConfig, loadConfigAsync } from "./config/configuration"
+import { IPluginsConfig, loadConfigAsync } from "./config/configuration"
 import {
   FilepathGroup,
   NotionPullOptions,
@@ -37,7 +37,7 @@ import { endGroup, error, group, info } from "./log"
 import { NotionPage } from "./notionObjects/NotionPage"
 import { filterTree } from "./objectTree/filterTree"
 import { convertInternalUrl } from "./plugins/internalLinks"
-import { IDocuNotionContext } from "./plugins/pluginTypes"
+import { IPluginContext } from "./plugins/pluginTypes"
 import {
   readOrDownloadNewAssets,
   saveNewAssets,
@@ -395,13 +395,13 @@ function getPagesToOutput(
 
 async function outputPages(
   options: NotionPullOptions,
-  config: IDocuNotionConfig,
+  config: IPluginsConfig,
   pages: Array<NotionPage>,
   client: Client,
   notionToMarkdown: NotionToMarkdown,
   filesManager: FilesManager
 ) {
-  const context: IDocuNotionContext = createContext(
+  const context: IPluginContext = createContext(
     options,
     pages,
     client,
@@ -429,7 +429,7 @@ function createContext(
   client: Client,
   notionToMarkdown: NotionToMarkdown,
   filesManager: FilesManager
-): IDocuNotionContext {
+): IPluginContext {
   const context = {
     getBlockChildren: (id: string) => getBlockChildren(id, client),
     // this changes with each page
