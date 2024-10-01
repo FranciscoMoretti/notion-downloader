@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest"
 
 import { NotionPageLegacy } from "./NotionPageLegacy"
 import { IPluginsConfig } from "./config/configuration"
-import defaultConfig from "./config/default.docunotion.config"
+import defaultConfig from "./config/default.plugin.config"
 import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IPluginContext } from "./plugins/pluginTypes"

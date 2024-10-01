@@ -146,10 +146,10 @@ async function doTransformsOnMarkdown(
 }
 
 async function doNotionToMarkdown(
-  docunotionContext: IPluginContext,
+  pluginContext: IPluginContext,
   blocks: Array<NotionBlock>
 ) {
-  let mdBlocks = await docunotionContext.notionToMarkdown.blocksToMarkdown(
+  let mdBlocks = await pluginContext.notionToMarkdown.blocksToMarkdown(
     // We need to provide a copy of blocks.
     // Calling blocksToMarkdown can modify the values in the blocks. If it does, and then
     // we have to retry, we end up retrying with the modified values, which
@@ -160,7 +160,7 @@ async function doNotionToMarkdown(
   )
 
   const markdown =
-    docunotionContext.notionToMarkdown.toMarkdownString(mdBlocks).parent || ""
+    pluginContext.notionToMarkdown.toMarkdownString(mdBlocks).parent || ""
   return markdown
 }
 
@@ -224,7 +224,7 @@ function doLinkFixes(
 // overrides for the conversions that notion-to-md does
 function registerNotionToMarkdownCustomTransforms(
   config: IPluginsConfig,
-  docunotionContext: IPluginContext
+  pluginContext: IPluginContext
 ) {
   config.plugins.forEach((plugin) => {
     if (plugin.notionToMarkdownTransforms) {
@@ -233,14 +233,14 @@ function registerNotionToMarkdownCustomTransforms(
           "registering custom transform",
           `${plugin.name} for ${transform.type}`
         )
-        docunotionContext.notionToMarkdown.setCustomTransformer(
+        pluginContext.notionToMarkdown.setCustomTransformer(
           transform.type,
           (block: any) => {
             logDebug(
               "notion to MD conversion of ",
               `${transform.type} with plugin: ${plugin.name}`
             )
-            return transform.getStringFromBlock(docunotionContext, block)
+            return transform.getStringFromBlock(pluginContext, block)
           }
         )
       })

@@ -33,7 +33,7 @@ export async function blocksToMarkdown(
   //   console.log(pages[0]);
   //   console.log(pages[0].matchesLinkId);
   // }
-  const docunotionContext: IPluginContext = {
+  const pluginContext: IPluginContext = {
     notionToMarkdown: notionToMD,
     getBlockChildren: (id: string) => {
       // We call numberChildrenIfNumberedList here because the real getBlockChildren does
@@ -44,7 +44,7 @@ export async function blocksToMarkdown(
       })
     },
     convertNotionLinkToLocalDocusaurusLink: (url: string) => {
-      return convertInternalUrl(docunotionContext, url)
+      return convertInternalUrl(pluginContext, url)
     },
     imports: [],
 
@@ -93,9 +93,9 @@ export async function blocksToMarkdown(
 
   if (pages && pages.length) {
     // console.log(pages[0].matchesLinkId);
-    // console.log(docunotionContext.pages[0].matchesLinkId);
+    // console.log(pluginContext.pages[0].matchesLinkId);
   }
-  const r = await getMarkdownFromNotionBlocks(docunotionContext, config, blocks)
+  const r = await getMarkdownFromNotionBlocks(pluginContext, config, blocks)
   //console.log("blocksToMarkdown", r);
   return r
 }

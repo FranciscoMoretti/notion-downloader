@@ -2,7 +2,7 @@ import { exit } from "process"
 
 import { error, verbose } from "../log"
 import { IPlugin } from "../plugins/pluginTypes"
-import defaultConfig from "./default.docunotion.config"
+import defaultConfig from "./default.plugin.config"
 
 export type IPluginsConfig = {
   plugins: IPlugin[]

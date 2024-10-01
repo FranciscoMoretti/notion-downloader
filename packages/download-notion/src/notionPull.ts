@@ -289,7 +289,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 }
 
 function getOptionsForLogging(options: NotionPullOptions) {
-  // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it to docu-notion.
+  // It's helpful when troubleshooting CI secrets and environment variables to see what options actually made it.
   const optionsForLogging = { ...options }
   optionsForLogging.notionToken =
     optionsForLogging.notionToken.substring(0, 10) + "..."
