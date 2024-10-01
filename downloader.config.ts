@@ -2,8 +2,6 @@ import { Config } from "./packages/download-notion/src/index"
 
 const config: Config = {
   conversion: {
-    statusPropertyName: "Status",
-    statusPropertyValue: "*",
     pageLinkHasExtension: false,
     slugProperty: "slug",
   },

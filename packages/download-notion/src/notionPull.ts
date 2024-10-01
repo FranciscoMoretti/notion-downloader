@@ -184,11 +184,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   endGroup()
   group("Stage 2: Filtering pages...")
   const stage2Start = performance.now()
-  filterTree(
-    objectsTree,
-    options.conversion.statusPropertyName,
-    options.conversion.statusPropertyValue
-  )
+  filterTree(objectsTree, options.conversion.filters)
   stageTimes["Stage 2"] = performance.now() - stage2Start
   endGroup()
 

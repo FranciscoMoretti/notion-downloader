@@ -144,15 +144,25 @@ const namingStrategyOptionsSchema = createAssetMarkdownOptionsSchema(
   allNamingStrategySchema
 )
 
+const filterTypeSchema = z.enum(["property"])
+export type FilterType = z.infer<typeof filterTypeSchema>
+
 export const pathOptionsSchema = z.union([z.string(), filepathSchema])
+
+const filterSchema = z.object({
+  propertyName: z.string(),
+  propertyValue: z.string(),
+  fitlerType: filterTypeSchema,
+})
+
+export type Filter = z.infer<typeof filterSchema>
 
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
   overwrite: z.boolean().default(false),
   slugProperty: z.string().optional(),
-  // TODO: filtering should be a list of configurable filters
-  statusPropertyName: z.string().default("Status"),
-  statusPropertyValue: z.string().default("*"),
+  filters: z.array(filterSchema).default([]),
+
   pageLinkHasExtension: z.boolean().default(true),
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
