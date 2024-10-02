@@ -1,4 +1,8 @@
 import {
+  buildNotionCacheClientWithFixture,
+  buildNotionCacheWithFixture,
+} from "@notion-fixtures/fixtures/fixtureUtils"
+import {
   BlockObjectResponse,
   DatabaseObjectResponse,
   ListBlockChildrenParameters,
@@ -23,10 +27,6 @@ import {
   objectTreeToObjectIds,
   objectTreeToPlainObjects,
 } from "../src/object-tree-utils"
-import {
-  buildNotionCacheClientWithFixture,
-  buildNotionCacheWithFixture,
-} from "./fixtureUtils"
 
 const sampleSiteReader = await buildNotionCacheWithFixture("sample-site")
 
