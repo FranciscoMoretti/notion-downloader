@@ -1,5 +1,15 @@
 # download-notion
 
+## 0.0.13
+
+### Patch Changes
+
+- [`3a4ad2b775a8f05fd6b1f083ffca94b92dc2f924`](https://github.com/FranciscoMoretti/notion-downloader/commit/3a4ad2b775a8f05fd6b1f083ffca94b92dc2f924) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Array of generic filters, and bug fixes in filtering
+
+- Updated dependencies [[`3a4ad2b775a8f05fd6b1f083ffca94b92dc2f924`](https://github.com/FranciscoMoretti/notion-downloader/commit/3a4ad2b775a8f05fd6b1f083ffca94b92dc2f924)]:
+  - notion-cache-client@0.0.10
+  - notion-downloader@0.0.10
+
 ## 0.0.12
 
 ### Patch Changes
