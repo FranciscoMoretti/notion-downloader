@@ -9,9 +9,8 @@ import {
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { NotionCache } from "../src/NotionCache"
-import { createTempDir } from "./utils"
 import { buildNotionCacheWithFixture } from "./fixtureUtils"
-import { addSecondsToIsoString } from "./utils"
+import { addSecondsToIsoString, createTempDir } from "./utils"
 
 const sampleSiteReader = await buildNotionCacheWithFixture("sample-site")
 // Find a block without children from the cache by iterating over the blocks objects
@@ -22,9 +21,9 @@ const blocksObjectsData = Object.values(sampleSiteReader.blockObjectsCache).map(
 const pageObjectsData = Object.values(sampleSiteReader.pageObjectsCache).map(
   (block) => block.data
 )
-const databaseObjectsData = Object.values(sampleSiteReader.databaseObjectsCache).map(
-  (block) => block.data
-)
+const databaseObjectsData = Object.values(
+  sampleSiteReader.databaseObjectsCache
+).map((block) => block.data)
 const blockObjectsDataMap = blocksObjectsData.reduce((acc, block) => {
   acc[block.id] = block
   return acc
@@ -38,23 +37,24 @@ const databaseObjectsDataMap = databaseObjectsData.reduce((acc, database) => {
   return acc
 }, {} as Record<string, DatabaseObjectResponse>)
 
-
 const blocksChildrenMap = sampleSiteReader.blocksChildrenCache
 const databaseChildrenMap = sampleSiteReader.databaseChildrenCache
 const blockResponse = blocksObjectsData[0]
 const pageResponse = pageObjectsData[0]
 export const databaseResponse = databaseObjectsData[0]
-const pageOrDatabaseChildrenOfDatabase = databaseChildrenMap[databaseResponse.id].data.children.map<(PageObjectResponse|DatabaseObjectResponse)>(
+const pageOrDatabaseChildrenOfDatabase = databaseChildrenMap[
+  databaseResponse.id
+].data.children.map<PageObjectResponse | DatabaseObjectResponse>(
   (childId) => pageObjectsDataMap[childId] || databaseObjectsDataMap[childId]
 )
-const blockChildrenOfPage = blocksChildrenMap[pageResponse.id].data.children.map(
-  (childId) => blockObjectsDataMap[childId]
-)
+const blockChildrenOfPage = blocksChildrenMap[
+  pageResponse.id
+].data.children.map((childId) => blockObjectsDataMap[childId])
 const blockWithChildren = blocksObjectsData.find((block) => block.has_children)!
 // A block can be a nested page, which has page as parent type
-const blockChildrenOfBlock = blocksChildrenMap[blockWithChildren.id].data.children.map(
-  (childId) => blockObjectsDataMap[childId]
-)
+const blockChildrenOfBlock = blocksChildrenMap[
+  blockWithChildren.id
+].data.children.map((childId) => blockObjectsDataMap[childId])
 const blockChildrenOfBlockResponse: ListBlockChildrenResponse = {
   type: "block",
   block: {},
@@ -73,7 +73,7 @@ const blockChildrenOfPageResponse: ListBlockChildrenResponse = {
   results: blockChildrenOfPage,
 }
 
-const pageOrDatabaseChildrenOfDatabaseResponse: QueryDatabaseResponse  = {
+const pageOrDatabaseChildrenOfDatabaseResponse: QueryDatabaseResponse = {
   type: "page_or_database",
   page_or_database: {},
   object: "list",
@@ -81,7 +81,6 @@ const pageOrDatabaseChildrenOfDatabaseResponse: QueryDatabaseResponse  = {
   has_more: false,
   results: pageOrDatabaseChildrenOfDatabase,
 }
-
 
 describe("NotionCache - block", () => {
   it("gets a hit for existent block", async () => {
@@ -110,7 +109,8 @@ describe("NotionCache - block children", () => {
   it("gets block children from cache", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!blockWithChildren) throw new Error("No block found")
-    if (!blockChildrenOfBlockResponse) throw new Error("No block children found")
+    if (!blockChildrenOfBlockResponse)
+      throw new Error("No block children found")
 
     expect(notionCache.getBlockChildren(blockWithChildren.id)).toStrictEqual(
       blockChildrenOfBlockResponse
@@ -122,9 +122,13 @@ describe("NotionCache - block children", () => {
       cacheDirectory: "dummy",
     })
     if (!blockWithChildren) throw new Error("No block found")
-    if (!blockChildrenOfBlockResponse) throw new Error("No block children found")
+    if (!blockChildrenOfBlockResponse)
+      throw new Error("No block children found")
 
-    notionCache.setBlockChildren(blockWithChildren.id, blockChildrenOfBlockResponse)
+    notionCache.setBlockChildren(
+      blockWithChildren.id,
+      blockChildrenOfBlockResponse
+    )
     expect(notionCache.getBlockChildren(blockWithChildren.id)).toStrictEqual(
       blockChildrenOfBlockResponse
     )
@@ -132,28 +136,27 @@ describe("NotionCache - block children", () => {
 })
 
 describe("NotionCache - page", () => {
-    it("gets a hit for existent page", async () => {
-      const notionCache = await buildNotionCacheWithFixture("sample-site")
-      if (!pageResponse) throw new Error("No page found")
-      const page = notionCache.getPage(pageResponse.id)
-      expect(page).toBeDefined()
-    })
-    it("gets a miss for non-existent page", async () => {
-      const notionCache = await buildNotionCacheWithFixture("sample-site")
-      const page = notionCache.getPage("non-existent-page")
-      expect(page).toBeUndefined()
-    })
+  it("gets a hit for existent page", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    if (!pageResponse) throw new Error("No page found")
+    const page = notionCache.getPage(pageResponse.id)
+    expect(page).toBeDefined()
+  })
+  it("gets a miss for non-existent page", async () => {
+    const notionCache = await buildNotionCacheWithFixture("sample-site")
+    const page = notionCache.getPage("non-existent-page")
+    expect(page).toBeUndefined()
+  })
 
-    it("sets a page and retrieves it", async () => {
-      const notionCache = new NotionCache({
-        cacheDirectory: "dummy",
-      })
-      if (!pageResponse) throw new Error("No page found")
-      notionCache.setPage(pageResponse)
-      expect(notionCache.getPage(pageResponse.id)).toStrictEqual(pageResponse)
+  it("sets a page and retrieves it", async () => {
+    const notionCache = new NotionCache({
+      cacheDirectory: "dummy",
     })
+    if (!pageResponse) throw new Error("No page found")
+    notionCache.setPage(pageResponse)
+    expect(notionCache.getPage(pageResponse.id)).toStrictEqual(pageResponse)
+  })
 })
-
 
 describe("NotionCache - database", () => {
   it("gets a hit for existent database", async () => {
@@ -174,7 +177,9 @@ describe("NotionCache - database", () => {
     })
     if (!databaseResponse) throw new Error("No database found")
     notionCache.setDatabase(databaseResponse)
-    expect(notionCache.getDatabase(databaseResponse.id)).toStrictEqual(databaseResponse)
+    expect(notionCache.getDatabase(databaseResponse.id)).toStrictEqual(
+      databaseResponse
+    )
   })
 })
 
@@ -182,7 +187,8 @@ describe("NotionCache - database children", () => {
   it("gets database children from cache", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!databaseResponse) throw new Error("No database found")
-    if (!pageOrDatabaseChildrenOfDatabaseResponse) throw new Error("No database children found")
+    if (!pageOrDatabaseChildrenOfDatabaseResponse)
+      throw new Error("No database children found")
 
     expect(notionCache.getDatabaseChildren(databaseResponse.id)).toStrictEqual(
       pageOrDatabaseChildrenOfDatabaseResponse
@@ -194,7 +200,8 @@ describe("NotionCache - database children", () => {
       cacheDirectory: "dummy",
     })
     if (!databaseResponse) throw new Error("No database found")
-    if (!blockChildrenOfPageResponse) throw new Error("No database children found")
+    if (!blockChildrenOfPageResponse)
+      throw new Error("No database children found")
 
     notionCache.setDatabaseChildren(
       databaseResponse.id,
@@ -205,8 +212,6 @@ describe("NotionCache - database children", () => {
     )
   })
 })
-
-
 
 describe("NotionCache - refresh", () => {
   // Refresh for blocks and blocks children
@@ -268,7 +273,9 @@ describe("NotionCache - refresh", () => {
       last_edited_time: newDate,
     }
     notionCache.setPage(moreRecentPageResponse)
-    expect(notionCache.getPage(pageResponse.id)).toStrictEqual(moreRecentPageResponse)
+    expect(notionCache.getPage(pageResponse.id)).toStrictEqual(
+      moreRecentPageResponse
+    )
     expect(notionCache.getBlockChildren(pageResponse.id)).toBeUndefined()
   })
   // Refresh for database
@@ -324,7 +331,8 @@ describe("NotionCache - refresh", () => {
     expect(notionCache.getDatabaseChildren(databaseResponse.id)).toStrictEqual(
       pageOrDatabaseChildrenOfDatabaseResponse
     )
-    const childPagesOrDatabases = pageOrDatabaseChildrenOfDatabaseResponse.results
+    const childPagesOrDatabases =
+      pageOrDatabaseChildrenOfDatabaseResponse.results
     childPagesOrDatabases.forEach((child) => {
       expect(notionCache.getPage(child.id)).toStrictEqual(child)
     })
@@ -332,8 +340,8 @@ describe("NotionCache - refresh", () => {
   it("setting a database children refreshes children by children based on its date", async () => {
     const notionCache = await buildNotionCacheWithFixture("sample-site")
     if (!databaseResponse) throw new Error("No database found")
-      // TODO Extract as add to edited time function
-    const newDate = addSecondsToIsoString(60)
+    // TODO Extract as add to edited time function
+    const newDate = addSecondsToIsoString(databaseResponse.last_edited_time, 60)
 
     // Modify the date of one of the children
     const firstChild = pageOrDatabaseChildrenOfDatabaseResponse.results[0]
@@ -343,28 +351,31 @@ describe("NotionCache - refresh", () => {
     }
     const moreRecentDatabaseResponse = {
       ...pageOrDatabaseChildrenOfDatabaseResponse,
-      results: [moreRecentChild, ...pageOrDatabaseChildrenOfDatabaseResponse.results.slice(1)],
+      results: [
+        moreRecentChild,
+        ...pageOrDatabaseChildrenOfDatabaseResponse.results.slice(1),
+      ],
     }
     notionCache.setDatabaseChildren(
       databaseResponse.id,
       moreRecentDatabaseResponse
     )
-    expect(
-      notionCache.getDatabaseChildren(databaseResponse.id)
-    ).toStrictEqual(moreRecentDatabaseResponse)
+    expect(notionCache.getDatabaseChildren(databaseResponse.id)).toStrictEqual(
+      moreRecentDatabaseResponse
+    )
     // The changed child is updated in cache
     expect(notionCache.getPage(firstChild.id)).toStrictEqual(moreRecentChild)
     // Its child blocks are removed from cache
     expect(notionCache.getBlockChildren(firstChild.id)).toBeUndefined()
     // The other children are not updated in cache and its child block are not removed
-    pageOrDatabaseChildrenOfDatabaseResponse.results.slice(1).forEach((child) => {
-      expect(notionCache.getPage(child.id)).toStrictEqual(child)
-      expect(notionCache.getBlockChildren(child.id)).toBeDefined()
-    })
+    pageOrDatabaseChildrenOfDatabaseResponse.results
+      .slice(1)
+      .forEach((child) => {
+        expect(notionCache.getPage(child.id)).toStrictEqual(child)
+        expect(notionCache.getBlockChildren(child.id)).toBeDefined()
+      })
   })
-
 })
-
 
 describe("NotionCache - Persistance", () => {
   it("saves cache to file system and loads it back", async () => {
@@ -430,4 +441,3 @@ describe("NotionCache - Persistance", () => {
     expect(notionCacheFiles2.blockObjectsCache).toEqual({})
   })
 })
-
