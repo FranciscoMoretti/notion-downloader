@@ -1,3 +1,5 @@
+import { buildNotionCacheClientWithFixture } from "@notion-fixtures/fixtures/fixtureUtils"
+import { createTempDir } from "@notion-fixtures/fixtures/utils"
 import {
   BlockObjectResponse,
   DatabaseObjectResponse,
@@ -9,8 +11,6 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { NotionCacheClient } from "../src/notion-cache-client"
-import { buildNotionCacheClientWithFixture } from "./fixtureUtils"
-import { createTempDir } from "./utils"
 
 const sampleSiteReader = await buildNotionCacheClientWithFixture("sample-site")
 // Find a block without children from the cache by iterating over the blocks objects

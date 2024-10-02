@@ -1,0 +1,27 @@
+{
+  "name": "@notion-fixtures/fixtures",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./fixtureUtils": "./fixtureUtils.ts",
+    "./utils": "./utils.ts"
+  },
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
+  },
+  "dependencies": {
+    "notion-cache-client": "0.0.8"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8.37.0",
+    "@types/node": "^18.16.0",
+    "@types/prettier": "^2.7.2",
+    "typescript": "^5.0.4"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "9e204616-f109-452f-bdc7-737e5c7c93cd": {
+    "data": {
+      "object": "database",
+      "id": "9e204616-f109-452f-bdc7-737e5c7c93cd",
+      "cover": null,
+      "icon": null,
+      "created_time": "2024-09-09T06:59:00.000Z",
+      "created_by": {
+        "object": "user",
+        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
+      },
+      "last_edited_by": {
+        "object": "user",
+        "id": "43d55929-7f6a-457a-85a8-062176d5ba78"
+      },
+      "last_edited_time": "2024-09-09T06:59:00.000Z",
+      "title": [
+        {
+          "type": "text",
+          "text": {
+            "content": "Database sample",
+            "link": null
+          },
+          "annotations": {
+            "bold": false,
+            "italic": false,
+            "strikethrough": false,
+            "underline": false,
+            "code": false,
+            "color": "default"
+          },
+          "plain_text": "Database sample",
+          "href": null
+        }
+      ],
+      "description": [],
+      "is_inline": true,
+      "properties": {
+        "Tags": {
+          "id": "Pv~L",
+          "name": "Tags",
+          "type": "multi_select",
+          "multi_select": {
+            "options": []
+          }
+        },
+        "Name": {
+          "id": "title",
+          "name": "Name",
+          "type": "title",
+          "title": {}
+        }
+      },
+      "parent": {
+        "type": "page_id",
+        "page_id": "2242dcdb-bcab-4526-b2be-c93e1c088557"
+      },
+      "url": "https://www.notion.so/9e204616f109452fbdc7737e5c7c93cd",
+      "public_url": null,
+      "archived": false,
+      "in_trash": false,
+      "request_id": "2678237e-1892-4c74-b321-e0cf702a6157"
+    },
+    "__needs_refresh": false
+  }
+}

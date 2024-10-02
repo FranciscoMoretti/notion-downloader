@@ -1,10 +1,11 @@
 import path from "node:path"
-import { NotionCache } from "../src/NotionCache"
-import { NotionCacheClient } from "../src/notion-cache-client"
+import { NotionCache, NotionCacheClient } from "notion-cache-client"
 
 export function getFixture(name: "sample-site") {
   return path.resolve(__dirname, `fixtures/${name}/.downloader`)
 }
+// TODO: Fixtures should be moved to its own package
+
 export async function buildNotionCacheWithFixture(name: "sample-site") {
   const cacheDirectory = getFixture(name)
   const notionCache = new NotionCache({
