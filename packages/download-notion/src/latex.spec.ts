@@ -1,18 +1,19 @@
 import { Client } from "@notionhq/client"
+import { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
-import { describe, expect, test } from "vitest"
+import { expect, test } from "vitest"
 
-import { NotionPageLegacy } from "./NotionPageLegacy"
 import { IPluginsConfig } from "./config/configuration"
 import defaultConfig from "./config/default.plugin.config"
-import { HierarchicalLayoutStrategy } from "./layoutStrategy/HierarchicalLayoutStrategy"
+import { defaultPullOptions, parsePathFileOptions } from "./config/schema"
+import { FilesManager } from "./files/FilesManager"
+import { NotionPage } from "./notionObjects/NotionPage"
 import { convertInternalUrl } from "./plugins/internalLinks"
 import { IPluginContext } from "./plugins/pluginTypes"
 import { getMarkdownFromNotionBlocks } from "./transformMarkdown"
-import { NotionBlock } from "./types"
 
 test("Latex Rendering", async () => {
-  const pages = new Array<NotionPageLegacy>()
+  const pages = new Array<NotionPage>()
   const counts = {
     output_normally: 0,
     skipped_because_empty: 0,
@@ -24,14 +25,12 @@ test("Latex Rendering", async () => {
     auth: "",
   })
 
-  const layoutStrategy = new HierarchicalLayoutStrategy()
-
   const config: IPluginsConfig = defaultConfig
 
   const context: IPluginContext = {
     getBlockChildren: (id: string) => {
-      return new Promise<NotionBlock[]>((resolve) =>
-        resolve(new Array<NotionBlock>())
+      return new Promise<BlockObjectResponse[]>((resolve) =>
+        resolve(new Array<BlockObjectResponse>())
       )
     },
     // this changes with each page
@@ -39,17 +38,12 @@ test("Latex Rendering", async () => {
       directoryContainingMarkdown: "",
       slug: "",
     },
-    layoutStrategy: layoutStrategy,
     notionToMarkdown: new NotionToMarkdown({ notionClient }),
-    options: {
-      notionToken: "",
-      rootId: "",
-      markdownOutputPath: "",
-      imgOutputPath: "",
-      imgPrefixInMarkdown: "",
-      statusPropertyName: "Status",
-    },
-
+    options: { ...defaultPullOptions, notionToken: "" },
+    filesManager: new FilesManager({
+      outputDirectories: parsePathFileOptions(""),
+      markdownPrefixes: parsePathFileOptions(""),
+    }),
     pages: pages,
     counts: counts, // review will this get copied or pointed to?
     imports: [],
@@ -57,7 +51,7 @@ test("Latex Rendering", async () => {
       convertInternalUrl(context, url),
   }
 
-  const blocks: Array<NotionBlock> = [
+  const blocks: Array<BlockObjectResponse> = [
     {
       object: "block",
       id: "169e1c47-6706-4518-adca-73086b2738ac",
@@ -97,6 +91,7 @@ test("Latex Rendering", async () => {
         ],
         color: "default",
       },
+      in_trash: false,
     },
   ]
 
