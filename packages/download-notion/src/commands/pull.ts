@@ -85,7 +85,6 @@ export const pull = new Command()
             `init`
           )} to create a ${DEFAULT_CONFIG_FILENAME} file.`
         )
-        process.exit(1)
       }
       // Prefer options to config, and config to env vars
       const mergedOptions = {

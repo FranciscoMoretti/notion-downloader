@@ -1,5 +1,6 @@
 import chalk from "chalk"
 
+// TODO: Unify loggers
 export const logger = {
   error(...args: unknown[]) {
     console.log(chalk.red(...args))
