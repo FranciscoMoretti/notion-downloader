@@ -45,6 +45,7 @@ import {
 } from "./processAssets"
 import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
+import { handleError } from "./utils_old/handle-error"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {
@@ -491,7 +492,7 @@ async function getRootObjectType(
   params: Parameters<typeof tryGetFirstPageWithType>[0]
 ) {
   return tryGetFirstPageWithType(params).catch((e) => {
-    error(
+    handleError(
       `notion downloader could not retrieve the root page from Notion. \r\na) Check that the root page id really is "${
         params.rootUUID
       }".\r\nb) Check that your Notion API token (the "Integration Secret") is correct.
@@ -501,6 +502,5 @@ async function getRootObjectType(
         params.rootObjectType
       }\r\n`
     )
-    exit(1)
   })
 }

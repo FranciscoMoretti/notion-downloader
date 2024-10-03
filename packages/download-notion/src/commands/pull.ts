@@ -75,13 +75,12 @@ export const pull = new Command()
       // Ensure target directory exists.
       const cwd = path.resolve(opts.cwd)
       if (!existsSync(cwd)) {
-        logger.error(`The path ${cwd} does not exist. Please try again.`)
-        process.exit(1)
+        handleError(`The path ${cwd} does not exist. Please try again.`)
       }
 
       const config = await getConfig(cwd)
       if (!config) {
-        logger.warn(
+        handleError(
           `Configuration is missing. Please run ${chalk.green(
             `init`
           )} to create a ${DEFAULT_CONFIG_FILENAME} file.`

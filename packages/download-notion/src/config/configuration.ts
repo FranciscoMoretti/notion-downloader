@@ -2,6 +2,7 @@ import { exit } from "process"
 
 import { error, verbose } from "../log"
 import { IPlugin } from "../plugins/pluginTypes"
+import { handleError } from "../utils_old/handle-error"
 import defaultConfig from "./default.plugin.config"
 
 export type IPluginsConfig = {
@@ -18,8 +19,7 @@ export async function loadConfigAsync(): Promise<IPluginsConfig> {
       plugins: defaultConfig.plugins,
     }
   } catch (e: any) {
-    error(e.message)
-    exit(1)
+    handleError(e.message)
   }
   verbose(`Active plugins: [${config.plugins.map((p) => p.name).join(", ")}]`)
   return config

@@ -9,6 +9,7 @@ import { defaultPullOptionsSchema, pullOptionsSchema } from "../config/schema"
 import { FilesCleaner } from "../files/FilesCleaner"
 import { loadFilesManagerFile } from "../files/saveLoadUtils"
 import { getConfig } from "../utils_old/get-config"
+import { handleError } from "../utils_old/handle-error"
 import { logger } from "../utils_old/logger"
 
 const cleanupOptionsSchema = z.object({
@@ -37,14 +38,12 @@ export const cleanup = new Command()
 
     // Ensure target directory exists.
     if (!existsSync(cwd)) {
-      logger.error(`The path ${cwd} does not exist. Please try again.`)
-      process.exit(1)
+      handleError(`The path ${cwd} does not exist. Please try again.`)
     }
 
     const config = await getConfig(cwd)
     if (!config) {
-      console.error("Configuration not found.")
-      process.exit(1)
+      handleError("Configuration not found.")
     }
     const pullOptions = defaultPullOptionsSchema.parse(config)
 
@@ -86,5 +85,5 @@ export const cleanup = new Command()
       console.log("Cleaning up cache directory...")
       await fs.rm(cacheDir, { recursive: true })
     }
-    console.log("Cleanup complete.")
+    logger.info("Cleanup complete.")
   })

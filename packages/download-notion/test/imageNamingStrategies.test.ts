@@ -1,13 +1,11 @@
 import { AssetType } from "@/src/config/schema"
-import { hashOfBufferContent, hashOfString } from "@/src/utils"
-import { beforeEach, describe, expect, it } from "vitest"
+import { NotionObject } from "@/src/notionObjects/NotionObject"
+import { hashOfString } from "@/src/utils"
+import { describe, expect, it } from "vitest"
 
 import { AncestorPrefixAssetNamingStrategy } from "../src/namingStrategy/AncestorPrefixAssetNamingStrategy"
 import { LegacyAssetNamingStrategy } from "../src/namingStrategy/LegacyAssetNamingStrategy"
-import {
-  NotionFileLikeObjects,
-  NotionImageLike,
-} from "../src/notionObjects/objectTypes"
+import { NotionImageLike } from "../src/notionObjects/objectTypes"
 
 describe("Image Naming Strategies", () => {
   const mockNotionImage = {
@@ -20,8 +18,7 @@ describe("Image Naming Strategies", () => {
   } as NotionImageLike
 
   describe("DefaultImageNamingStrategy", () => {
-    const getPageAncestorFilename = (notionObject: NotionFileLikeObjects) =>
-      "mock-page"
+    const getPageAncestorFilename = (notionObject: NotionObject) => "mock-page"
     const strategy = new AncestorPrefixAssetNamingStrategy(
       getPageAncestorFilename
     )

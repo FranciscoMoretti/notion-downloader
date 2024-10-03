@@ -42,8 +42,7 @@ export const init = new Command()
 
       // Ensure target directory exists.
       if (!existsSync(cwd)) {
-        logger.error(`The path ${cwd} does not exist. Please try again.`)
-        process.exit(1)
+        handleError(`The path ${cwd} does not exist. Please try again.`)
       }
 
       const existingConfig = await getConfig(cwd)
