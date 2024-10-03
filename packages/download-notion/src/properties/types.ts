@@ -168,3 +168,5 @@ export type RollupProperty = Extract<
   { type: "rollup" }
 >
 export type RollupPropertyValue = RollupProperty["rollup"]
+
+export type PageProperty = PageObjectResponse["properties"][string]

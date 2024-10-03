@@ -1,10 +1,14 @@
 import { Client } from "@notionhq/client"
-import { GetPageResponse } from "@notionhq/client/build/src/api-endpoints"
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { NotionPageLegacy } from "../NotionPageLegacy"
 import { IPluginsConfig } from "../config/configuration"
+import { defaultPullOptions, parsePathFileOptions } from "../config/schema"
+import { FilesManager } from "../files/FilesManager"
+import { FilesMap } from "../files/FilesMap"
 import { numberChildrenIfNumberedList } from "../getBlockChildren"
+import { FlatLayoutStrategy } from "../layoutStrategy/FlatLayoutStrategy"
+import { NotionSlugNamingStrategy } from "../namingStrategy/namingStrategies"
 import { NotionPage } from "../notionObjects/NotionPage"
 import { getMarkdownFromNotionBlocks } from "../transformMarkdown"
 import { NotionBlock } from "../types"
@@ -33,6 +37,18 @@ export async function blocksToMarkdown(
   //   console.log(pages[0]);
   //   console.log(pages[0].matchesLinkId);
   // }
+
+  // TODO: The steps from notion pull should be refactored and reused here
+  const filesMap = new FilesMap()
+  const strategy = new NotionSlugNamingStrategy("Slug")
+  const layoutStrategy = new FlatLayoutStrategy(strategy)
+  pages?.forEach((page) => {
+    filesMap.set(page.object, page.id, {
+      path: layoutStrategy.getPathForObject("/", page),
+      lastEditedTime: page.lastEditedTime,
+    })
+  })
+
   const pluginContext: IPluginContext = {
     notionToMarkdown: notionToMD,
     getBlockChildren: (id: string) => {
@@ -53,15 +69,12 @@ export async function blocksToMarkdown(
       directoryContainingMarkdown: "not yet",
       slug: "not yet",
     },
-    options: {
-      notionToken: "",
-      rootId: "",
-      markdownOutputPath: "",
-      imgOutputPath: "",
-      cleanCache: false,
-      imgPrefixInMarkdown: "",
-      statusPropertyName: "Status",
-    },
+    options: { ...defaultPullOptions, notionToken: "" },
+    filesManager: new FilesManager({
+      outputDirectories: parsePathFileOptions(""),
+      markdownPrefixes: parsePathFileOptions(""),
+      initialFilesMap: filesMap,
+    }),
     pages: pages ?? [],
     counts: {
       output_normally: 0,
@@ -107,7 +120,7 @@ export function makeSamplePageObject(options: {
   slug?: string
   name?: string
   id?: string
-}): NotionPageLegacy {
+}): NotionPage {
   let slugObject: any = {
     Slug: {
       id: "%7D%3D~K",
@@ -142,7 +155,7 @@ export function makeSamplePageObject(options: {
     }
 
   const id = options.id || "4a6de8c0-b90b-444b-8a7b-d534d6ec71a4"
-  const m: GetPageResponse = {
+  const metadata: PageObjectResponse = {
     object: "page",
     id: id,
     created_time: "2022-08-08T21:07:00.000Z",
@@ -217,16 +230,12 @@ export function makeSamplePageObject(options: {
         ],
       },
     },
+    in_trash: false,
+    public_url: `https://www.notion.so/Hello-World-${id}`,
     url: `https://www.notion.so/Hello-World-${id}`,
   }
 
-  const p = new NotionPageLegacy({
-    layoutContext: "/Second-Level/Third-Level",
-    pageId: id,
-    order: 0,
-    metadata: m,
-    foundDirectlyInOutline: false,
-  })
+  const p = new NotionPage(metadata)
 
   // console.log(p.matchesLinkId);
 
@@ -236,8 +245,8 @@ export function makeSamplePageObject(options: {
 export async function oneBlockToMarkdown(
   config: IPluginsConfig,
   block: Record<string, unknown>,
-  targetPage?: NotionPageLegacy,
-  targetPage2?: NotionPageLegacy
+  targetPage?: NotionPage,
+  targetPage2?: NotionPage
 ): Promise<string> {
   // just in case someone expects these other properties that aren't normally relevant,
   // we merge the given block properties into an actual, full block

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 
-import { NotionPageLegacy } from "../NotionPageLegacy"
 import { setLogLevel } from "../log"
+import { NotionPage } from "../notionObjects/NotionPage"
 import { standardCalloutTransformer } from "./CalloutTransformer"
 import { standardExternalLinkConversion } from "./externalLinks"
 import { standardInternalLinkConversion } from "./internalLinks"
@@ -35,9 +35,10 @@ test("urls that show up as raw text get left that way", async () => {
 // See https://github.com/sillsdev/docu-notion/issues/97
 test("mention-style link to an existing page", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPageName = "Hello-World"
+  const targetPage = makeSamplePageObject({
     slug: undefined,
-    name: "Hello World",
+    name: targetPageName,
     id: targetPageId,
   })
 
@@ -71,14 +72,15 @@ test("mention-style link to an existing page", async () => {
     },
     targetPage
   )
-  expect(results.trim()).toBe(`[foo](/${targetPageId})`)
+  expect(results.trim()).toBe(`[foo](/${targetPageName})`)
 })
 
 test("link to an existing page on this site that has no slug", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPageName = "Hello-World"
+  const targetPage = makeSamplePageObject({
     slug: undefined,
-    name: "Hello World",
+    name: targetPageName,
     id: targetPageId,
   })
 
@@ -138,11 +140,14 @@ test("link to an existing page on this site that has no slug", async () => {
     },
     targetPage
   )
-  expect(results.trim()).toBe(`Inline [great page](/${targetPageId}) the end.`)
+  expect(results.trim()).toBe(
+    `Inline [great page](/${targetPageName}) the end.`
+  )
 })
 
 test("link to a heading block on a page", async () => {
   const targetPageId = "123"
+  const targetPageName = "Hello-World"
   const blocks = {
     type: "paragraph",
     paragraph: {
@@ -197,9 +202,9 @@ test("link to a heading block on a page", async () => {
     },
   }
   setLogLevel("verbose")
-  const noSlugTargetPage: NotionPageLegacy = makeSamplePageObject({
+  const noSlugTargetPage = makeSamplePageObject({
     slug: undefined,
-    name: "Hello World",
+    name: targetPageName,
     id: targetPageId,
   })
 
@@ -207,10 +212,10 @@ test("link to a heading block on a page", async () => {
 
   // the ending parentheses messed up a regex at one point.
   expect(noSlugResults.trim()).toBe(
-    `(Inline [heading on some page](/${targetPageId}#456) the end.)`
+    `(Inline [heading on some page](/${targetPageName}#456) the end.)`
   )
 
-  const slugTargetPage: NotionPageLegacy = makeSamplePageObject({
+  const slugTargetPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -224,7 +229,7 @@ test("link to a heading block on a page", async () => {
 // Text that has been selected and turned into a link to one of our pages
 test("inline link to an existing page on this site uses slug", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -278,7 +283,7 @@ test("inline link to an existing page on this site uses slug", async () => {
 // this is the kind of link you get if you just insert a "link to page" to Notion
 test("raw link to an existing page on this site that has a slug", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "point-to-me",
     name: "Point to Me",
     id: targetPageId,
@@ -309,7 +314,7 @@ test("raw link to an existing page on this site that has a slug", async () => {
 
 test("link in a bulleted list", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "the-page",
     name: "Something",
     id: targetPageId,
@@ -349,7 +354,7 @@ test("link in a bulleted list", async () => {
 test("link to an a heading on a page on this site uses slug", async () => {
   const targetPageId = "123"
   const headingBlockId = "456"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -491,7 +496,7 @@ test("links to other notion pages that are not in this site give PROBLEM LINK", 
 
 test("internal link inside callout", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -565,7 +570,7 @@ Callouts inline [great page](/hello-world).
 
 test("internal link inside codeblock ignored", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: targetPageId,
@@ -608,17 +613,19 @@ test("internal link inside codeblock ignored", async () => {
 })
 
 test("multiple internal links in a paragraph", async () => {
+  const targetPageAName = "Hello-World-A"
   const targetPageAId = "123"
-  const targetPageA: NotionPageLegacy = makeSamplePageObject({
+  const targetPageA = makeSamplePageObject({
     slug: undefined,
-    name: "Hello World A",
-    id: targetPageAId,
+    name: targetPageAName,
+    id: "123",
   })
+  const targetPageBName = "Hello-World-B"
   const targetPageBId = "456"
-  const targetPageB: NotionPageLegacy = makeSamplePageObject({
+  const targetPageB = makeSamplePageObject({
     slug: undefined,
-    name: "Hello World B",
-    id: targetPageBId,
+    name: targetPageBName,
+    id: "456",
   })
 
   const results = await getMarkdown(
@@ -681,13 +688,15 @@ test("multiple internal links in a paragraph", async () => {
     targetPageA,
     targetPageB
   )
-  expect(results.trim()).toBe(`[A](/${targetPageAId}) [B](/${targetPageBId})`)
+  expect(results.trim()).toBe(
+    `[A](/${targetPageAName}) [B](/${targetPageBName})`
+  )
 })
 
 async function getMarkdown(
   block: Record<string, unknown>,
-  targetPage?: NotionPageLegacy,
-  targetPage2?: NotionPageLegacy
+  targetPage?: NotionPage,
+  targetPage2?: NotionPage
 ) {
   const config = {
     plugins: [

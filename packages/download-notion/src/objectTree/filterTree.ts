@@ -17,7 +17,7 @@ function shouldFilter(
       return false
     }
 
-    const pageStatus = notionObject.getGenericProperty(filter.propertyName)
+    const pageStatus = notionObject.getPropertyAsPlainText(filter.propertyName)
     const isDatabaseChild = notionObject.isDatabaseChild
 
     const filterResult =

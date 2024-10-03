@@ -18,6 +18,7 @@ import {
   LastEditedTimeProperty,
   MultiSelectProperty,
   NumberProperty,
+  PageProperty,
   PeopleProperty,
   PhoneNumberProperty,
   RelationProperty,
@@ -31,7 +32,6 @@ import {
   VerificationProperty,
 } from "./types"
 
-type PageProperty = PageObjectResponse["properties"][string]
 type PropertyWithoutId<T> = Omit<T, "id"> & { id?: string }
 
 export function stringifyProperty(property: PageProperty) {

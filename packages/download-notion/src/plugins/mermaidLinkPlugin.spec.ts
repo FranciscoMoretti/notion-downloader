@@ -1,13 +1,14 @@
 import { expect, test } from "vitest"
 
-import { NotionPageLegacy } from "../NotionPageLegacy"
 import { error } from "../log"
+import { standardExternalLinkConversion } from "./externalLinks"
+import { standardInternalLinkConversion } from "./internalLinks"
 import { makeSamplePageObject, oneBlockToMarkdown } from "./pluginTestRun"
 import { IPlugin, IPluginContext } from "./pluginTypes"
 
 test("raw url inside a mermaid codeblock gets converted to path using slug of that page", async () => {
   const targetPageId = "123"
-  const targetPage: NotionPageLegacy = makeSamplePageObject({
+  const targetPage = makeSamplePageObject({
     slug: "slug-of-target",
     name: "My Target Page",
     id: targetPageId,
@@ -54,8 +55,7 @@ test("raw url inside a mermaid codeblock gets converted to path using slug of th
           const docusaurusUrl =
             context.convertNotionLinkToLocalDocusaurusLink(url)
           if (docusaurusUrl) {
-            // eslint-disable-next-line @typescript-eslint/await-thenable
-            return await match[0].replace(url, docusaurusUrl)
+            return match[0].replace(url, docusaurusUrl)
           } else {
             error(`Could not convert link ${url} to a local docusaurus link`)
             return match[0]
@@ -67,8 +67,8 @@ test("raw url inside a mermaid codeblock gets converted to path using slug of th
 
   const config = {
     plugins: [
-      // standardInternalLinkConversion,
-      // standardExternalLinkConversion,
+      standardInternalLinkConversion,
+      standardExternalLinkConversion,
       mermaidLinks,
     ],
   }

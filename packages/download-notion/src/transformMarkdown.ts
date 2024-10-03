@@ -261,7 +261,7 @@ function sanitizeProp(value: string): string {
 function getFrontMatter(page: NotionPage): string {
   const customProperties = Object.fromEntries(
     Object.entries(page.metadata.properties).map(([key, _]) => {
-      const value = page.getGenericProperty(key)
+      const value = page.getPropertyAsPlainText(key)
       return [key, value ? sanitizeProp(value) : undefined]
     })
   )

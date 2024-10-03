@@ -163,7 +163,7 @@ export const conversionSchema = z.object({
   slugProperty: z.string().optional(),
   filters: z.array(filterSchema).default([]),
 
-  pageLinkHasExtension: z.boolean().default(true),
+  pageLinkHasExtension: z.boolean().default(false),
   outputPaths: pathOptionsSchema.default("./content"),
   markdownPrefixes: pathOptionsSchema.default(""),
   layoutStrategy: layoutStrategyOptionsSchema.default(

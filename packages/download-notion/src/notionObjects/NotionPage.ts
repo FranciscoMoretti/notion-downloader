@@ -4,6 +4,7 @@ import { ObjectType } from "notion-cache-client"
 import { AssetType, FileType, TextType } from "../config/schema"
 import { error } from "../log"
 import { stringifyProperty } from "../properties/toPlainText"
+import { PageProperty } from "../properties/types"
 import { NotionObject } from "./NotionObject"
 
 export class NotionPage implements NotionObject {
@@ -47,7 +48,7 @@ export class NotionPage implements NotionObject {
     const titlePropertyKey = this.isDatabaseChild
       ? this.getTitlePropertyKey()
       : "title"
-    return this.getGenericProperty(titlePropertyKey) || "Title missing"
+    return this.getPropertyAsPlainText(titlePropertyKey) || "Title missing"
   }
 
   private getTitlePropertyKey(): string {
@@ -63,11 +64,16 @@ export class NotionPage implements NotionObject {
     return titleProperty
   }
 
-  // TODO: Move these methods into the `toPlainText` file
-  public getGenericProperty(propertyName: string): string | undefined {
+  public getPropertyAsPlainText(propertyName: string): string | undefined {
+    const property = this.getProperty(propertyName)
+    if (!property) return undefined
+    return stringifyProperty(property)
+  }
+
+  public getProperty(propertyName: string): PageProperty | undefined {
     const type = (this.metadata as any).properties?.[propertyName]?.type
     if (!type) return undefined
     const property = this.metadata.properties[propertyName]
-    return stringifyProperty(property)
+    return property
   }
 }
