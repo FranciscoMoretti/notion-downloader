@@ -1,10 +1,10 @@
 import * as fs from "fs"
 import * as path from "path"
+import { createTempDir } from "@notion-fixtures/fixtures/utils"
 import { describe, expect, it } from "vitest"
 
 import { NotionCacheFiles } from "../src/NotionCacheFiles"
 import { loadDataFromJson } from "../src/utils"
-import { createTempDir } from "./utils"
 
 const blockChildrenCacheFilename = "block_children_cache.json"
 const databaseChildrenCacheFilename = "database_children_cache.json"
