@@ -16,8 +16,8 @@ async function main() {
   const packageInfo = await getPackageInfo()
 
   const program = new Command()
-    .name("shadcn-ui")
-    .description("add components and dependencies to your project")
+    .name("notion-downloader")
+    .description("Download your Notion data, pages and assets")
     .version(
       packageInfo.version || "1.0.0",
       "-v, --version",
