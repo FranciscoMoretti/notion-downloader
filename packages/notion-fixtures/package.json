@@ -10,10 +10,10 @@
     "./utils": "./utils.ts"
   },
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "lint": "next lint",
-    "start": "next start"
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "update-fixtures": "find fixtures -maxdepth 1 -mindepth 1 -type d | xargs -I {} pnpm exec notion-downloader-cli pull --cwd {}",
+    "test": "vitest run"
   },
   "dependencies": {
     "notion-cache-client": "0.0.8"

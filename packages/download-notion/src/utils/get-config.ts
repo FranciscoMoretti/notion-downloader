@@ -1,6 +1,5 @@
 import path from "path"
 import { cosmiconfig } from "cosmiconfig"
-import { loadConfig } from "tsconfig-paths"
 import { z } from "zod"
 
 import { configFileOptionsSchema } from "../config/schema"

@@ -8,9 +8,9 @@ import { z } from "zod"
 import { defaultPullOptionsSchema, pullOptionsSchema } from "../config/schema"
 import { FilesCleaner } from "../files/FilesCleaner"
 import { loadFilesManagerFile } from "../files/saveLoadUtils"
-import { getConfig } from "../utils_old/get-config"
-import { handleError } from "../utils_old/handle-error"
-import { logger } from "../utils_old/logger"
+import { getConfig } from "../utils/get-config"
+import { handleError } from "../utils/handle-error"
+import { logger } from "../utils/logger"
 
 const cleanupOptionsSchema = z.object({
   cwd: z.string(),

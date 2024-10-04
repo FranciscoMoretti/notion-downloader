@@ -2,7 +2,7 @@ import { exit } from "process"
 
 import { error, verbose } from "../log"
 import { IPlugin } from "../plugins/pluginTypes"
-import { handleError } from "../utils_old/handle-error"
+import { handleError } from "../utils/handle-error"
 import defaultConfig from "./default.plugin.config"
 
 export type IPluginsConfig = {

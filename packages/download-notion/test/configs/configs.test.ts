@@ -1,8 +1,6 @@
 import path from "path"
-import { getConfig } from "@/src/utils_old/get-config"
-import { afterEach, expect, test, vi } from "vitest"
-
-import { runInit } from "../../src/commands/init"
+import { getConfig } from "@/src/utils/get-config"
+import { expect, test } from "vitest"
 
 test("init config-full", async () => {
   const targetDir = path.resolve(__dirname, "../fixtures/config-full")

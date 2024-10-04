@@ -45,7 +45,7 @@ import {
 } from "./processAssets"
 import { getMarkdownForPage } from "./transformMarkdown"
 import { FileBuffersMemory } from "./types"
-import { handleError } from "./utils_old/handle-error"
+import { handleError } from "./utils/handle-error"
 import { writePage } from "./writePage"
 
 export interface OutputCounts {

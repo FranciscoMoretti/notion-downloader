@@ -6,9 +6,9 @@ import {
   getConfig,
   resolveConfigPaths,
   type Config,
-} from "@/src/utils_old/get-config"
-import { handleError } from "@/src/utils_old/handle-error"
-import { logger } from "@/src/utils_old/logger"
+} from "@/src/utils/get-config"
+import { handleError } from "@/src/utils/handle-error"
+import { logger } from "@/src/utils/logger"
 import chalk from "chalk"
 import { Command } from "commander"
 import { cacheStrategiesSchema } from "notion-downloader"
