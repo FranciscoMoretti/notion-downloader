@@ -34,6 +34,7 @@ export const pull = new Command()
       // TODO: These options default override the ones from the config file. Figure out how to integrate cosmiconfig and commander
       " Default: false"
   )
+  // TODO: Consider relying more on config than on options.
   // .option(
   //   "-m, --markdown-output-path  <string>",
   //   "Root of the hierarchy for md files. WARNING: docu-notion will delete files from this directory. Note also that if it finds localized images, it will create an i18n/ directory as a sibling." +
