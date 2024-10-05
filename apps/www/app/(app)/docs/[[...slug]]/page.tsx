@@ -10,12 +10,12 @@ import Balancer from "react-wrap-balancer"
 import { siteConfig } from "@/config/site"
 import { getTableOfContents } from "@/lib/toc"
 import { absoluteUrl, cn } from "@/lib/utils"
+import { badgeVariants } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Mdx } from "@/components/mdx-components"
 import { OpenInV0Cta } from "@/components/open-in-v0-cta"
 import { DocsPager } from "@/components/pager"
 import { DashboardTableOfContents } from "@/components/toc"
-import { badgeVariants } from "@/registry/new-york/ui/badge"
-import { ScrollArea } from "@/registry/new-york/ui/scroll-area"
 
 interface DocPageProps {
   params: {

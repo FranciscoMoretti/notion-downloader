@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowRightIcon } from "@radix-ui/react-icons"
 import { Blocks, PieChart } from "lucide-react"
 
-import { Separator } from "@/registry/new-york/ui/separator"
+import { Separator } from "@/components/ui/separator"
 
 export function Announcement() {
   return (

@@ -10,33 +10,19 @@ import { NpmCommands } from "types/unist"
 import { Event } from "@/lib/events"
 import { cn } from "@/lib/utils"
 import { useConfig } from "@/hooks/use-config"
-import { Callout } from "@/components/callout"
-import { CodeBlockWrapper } from "@/components/code-block-wrapper"
-import { ComponentExample } from "@/components/component-example"
-import { ComponentPreview } from "@/components/component-preview"
-import { ComponentSource } from "@/components/component-source"
-import { CopyButton, CopyNpmCommandButton } from "@/components/copy-button"
-import { FrameworkDocs } from "@/components/framework-docs"
-import { StyleWrapper } from "@/components/style-wrapper"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/registry/new-york/ui/accordion"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/registry/new-york/ui/alert"
-import { AspectRatio } from "@/registry/new-york/ui/aspect-ratio"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/registry/new-york/ui/tabs"
-import { Style } from "@/registry/registry-styles"
+} from "@/components/ui/accordion"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Callout } from "@/components/callout"
+import { CodeBlockWrapper } from "@/components/code-block-wrapper"
+import { CopyButton, CopyNpmCommandButton } from "@/components/copy-button"
+import { FrameworkDocs } from "@/components/framework-docs"
 
 const components = {
   Accordion,
@@ -177,17 +163,15 @@ const components = {
     __withMeta__,
     __src__,
     __event__,
-    __style__,
     ...props
   }: React.HTMLAttributes<HTMLPreElement> & {
-    __style__?: Style["name"]
     __rawString__?: string
     __withMeta__?: boolean
     __src__?: string
     __event__?: Event["name"]
   } & NpmCommands) => {
     return (
-      <StyleWrapper styleName={__style__}>
+      <>
         <pre
           className={cn(
             "mb-4 mt-6 max-h-[650px] overflow-x-auto rounded-lg border bg-zinc-950 py-4 dark:bg-zinc-900",
@@ -217,7 +201,7 @@ const components = {
               className={cn("absolute right-4 top-4", __withMeta__ && "top-16")}
             />
           )}
-      </StyleWrapper>
+      </>
     )
   },
   code: ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => (
@@ -231,9 +215,6 @@ const components = {
   ),
   Image,
   Callout,
-  ComponentPreview,
-  ComponentExample,
-  ComponentSource,
   AspectRatio,
   CodeBlockWrapper: ({ ...props }) => (
     <CodeBlockWrapper className="rounded-md border" {...props} />
@@ -321,9 +302,7 @@ interface MdxProps {
 
 export function Mdx({ code }: MdxProps) {
   const [config] = useConfig()
-  const Component = useMDXComponent(code, {
-    style: config.style,
-  })
+  const Component = useMDXComponent(code)
 
   return (
     <div className="mdx">

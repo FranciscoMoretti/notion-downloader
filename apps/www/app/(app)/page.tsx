@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
+import { Button } from "@/components/ui/button"
 import { Announcement } from "@/components/announcement"
 import { ExamplesNav } from "@/components/examples-nav"
 import {
@@ -10,8 +11,6 @@ import {
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/page-header"
-import { Button } from "@/registry/new-york/ui/button"
-import MailPage from "@/app/(app)/examples/mail/page"
 
 export default function IndexPage() {
   return (
@@ -57,7 +56,10 @@ export default function IndexPage() {
       </section>
       <section className="hidden md:block">
         <div className="overflow-hidden rounded-lg border bg-background shadow">
-          <MailPage />
+          {/* Placholder for a component that shows the lib with wow factor */}
+          <div className="flex items-center justify-center">
+            DEMO Image/animation
+          </div>
         </div>
       </section>
     </div>

@@ -14,9 +14,7 @@ export interface DocsSidebarNavProps {
 export function DocsSidebarNav({ config }: DocsSidebarNavProps) {
   const pathname = usePathname()
 
-  const items = pathname?.startsWith("/charts")
-    ? config.chartsNav
-    : config.sidebarNav
+  const items = config.sidebarNav
 
   return items.length ? (
     <div className="w-full">
