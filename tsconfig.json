@@ -16,6 +16,5 @@
     "skipLibCheck": true,
     "strict": true
   },
-  "exclude": ["node_modules"],
-  "include": ["downloader.config.cjs"]
+  "exclude": ["node_modules"]
 }

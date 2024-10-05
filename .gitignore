@@ -45,4 +45,4 @@ tsconfig.tsbuildinfo
 .downloader/*
 ./packages/*/.downloader
 ./content
-public
+./public
