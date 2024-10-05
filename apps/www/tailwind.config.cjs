@@ -1,3 +1,5 @@
+const { fontFamily } = require("tailwindcss/defaultTheme")
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -76,6 +78,7 @@ module.exports = {
         "caret-blink": "caret-blink 1.25s ease-out infinite",
       },
     },
+
     plugins: [require("tailwindcss-animate")],
   },
 }
