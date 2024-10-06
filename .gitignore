@@ -44,5 +44,7 @@ tsconfig.tsbuildinfo
 # Downloader
 .downloader/*
 ./packages/*/.downloader
-./content
-./public
+
+# Content and public folders
+/content
+/public
