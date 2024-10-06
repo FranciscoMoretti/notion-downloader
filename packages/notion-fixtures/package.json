@@ -12,8 +12,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
-    "update-fixtures": "find fixtures -maxdepth 1 -mindepth 1 -type d | xargs -I {} pnpm exec notion-downloader pull --cwd {}",
-    "test": "vitest run"
+    "update-fixtures": "find fixtures -maxdepth 1 -mindepth 1 -type d | xargs -I {} pnpm exec notion-downloader pull --cwd {}"
   },
   "dependencies": {
     "notion-cache-client": "0.0.8"
