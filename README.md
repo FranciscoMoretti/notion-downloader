@@ -6,7 +6,7 @@ A powerful suite of tools for downloading, caching, and converting Notion conten
 
 This repository contains the following packages:
 
-1. [notion-downloader-cli](#notion-downloader-cli)
+1. [notion-downloader](#notion-downloader)
 2. [notion-downloader](#notion-downloader)
 3. [notion-cache-client](#notion-cache-client)
 
@@ -22,24 +22,24 @@ This repository contains the following packages:
 ## Installation
 
 ```bash
-npm install notion-downloader-cli
+npm install notion-downloader
 ```
 
 ## Usage
 
 For detailed usage instructions, please refer to the individual package READMEs.
 
-### notion-downloader-cli
+### notion-downloader
 
 Create a configuration file named `downloader.config.cjs` in your project root:
 
 Then, run the downloader:
 
 ```bash
-npx notion-downloader-cli pull --notion-token "your-notion-token"
+npx notion-downloader pull --notion-token "your-notion-token"
 ```
 
-### notion-downloader
+### notion-tree
 
 ```typescript
 import { downloadNotionObjectTree } from "notion-downloader"

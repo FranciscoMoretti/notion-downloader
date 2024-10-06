@@ -49,7 +49,6 @@
     "pub:beta": "pnpm build && pnpm publish --no-git-checks --access public --tag beta",
     "pub:next": "pnpm build && pnpm publish --no-git-checks --access public --tag next",
     "pub:release": "pnpm build && pnpm publish --access public",
-    "update-fixtures": "find test/fixtures -maxdepth 1 -mindepth 1 -type d | xargs -I {} pnpm exec notion-downloader-cli pull --cwd {}",
     "test": "vitest run"
   },
   "dependencies": {

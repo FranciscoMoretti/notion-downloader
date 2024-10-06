@@ -19,7 +19,7 @@ A powerful tool to download and convert all your notion content.
 ## Installation
 
 ```bash
-npm install notion-downloader-cli
+npm install notion-downloader
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ npm install notion-downloader-cli
 1. Create a configuration file named `downloader.config.cjs` in your project root:
 
 ```typescript
-import { Config } from "notion-downloader-cli"
+import { Config } from "notion-downloader"
 
 const config: Config = {
   conversion: {
@@ -61,7 +61,7 @@ export default config
 2. Run the downloader:
 
 ```bash
-npx notion-downloader-cli pull --notion-token "your-notion-token"
+npx notion-downloader pull --notion-token "your-notion-token"
 ```
 
 ## Configuration Options

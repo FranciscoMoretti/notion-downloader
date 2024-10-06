@@ -1,4 +1,4 @@
-/** @type {import('notion-downloader-cli').Config} */
+/** @type {import('notion-downloader').Config} */
 module.exports = {
   rootDbAsFolder: false,
   rootObjectType: "page",

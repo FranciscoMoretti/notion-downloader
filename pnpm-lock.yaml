@@ -50,9 +50,9 @@ importers:
       husky:
         specifier: ^8.0.3
         version: 8.0.3
-      notion-downloader-cli:
+      notion-downloader:
         specifier: workspace:*
-        version: link:packages/download-notion
+        version: link:packages/notion-downloader
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -225,9 +225,6 @@ importers:
       input-otp:
         specifier: ^1.2.2
         version: 1.2.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      jotai:
-        specifier: ^2.1.0
-        version: 2.10.0(@types/react@18.3.3)(react@18.3.1)
       lodash.template:
         specifier: ^4.5.0
         version: 4.5.0
@@ -365,7 +362,38 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
 
-  packages/download-notion:
+  packages/notion-cache-client:
+    dependencies:
+      '@notionhq/client':
+        specifier: ^2.2.15
+        version: 2.2.15
+      chalk:
+        specifier: 5.2.0
+        version: 5.2.0
+      fs-extra:
+        specifier: ^11.1.0
+        version: 11.2.0
+      limiter-es6-compat:
+        specifier: ^2.1.2
+        version: 2.1.2
+      zod:
+        specifier: ^3.20.2
+        version: 3.23.8
+    devDependencies:
+      '@notion-fixtures/fixtures':
+        specifier: workspace:*
+        version: link:../notion-fixtures
+      '@types/fs-extra':
+        specifier: ^11.0.1
+        version: 11.0.4
+      tsup:
+        specifier: ^6.6.3
+        version: 6.7.0(postcss@8.4.39)(ts-node@10.9.2(@types/node@20.12.12)(typescript@4.9.5))(typescript@4.9.5)
+      typescript:
+        specifier: ^4.9.3
+        version: 4.9.5
+
+  packages/notion-downloader:
     dependencies:
       '@babel/core':
         specifier: ^7.22.1
@@ -488,37 +516,6 @@ importers:
       type-fest:
         specifier: ^3.8.0
         version: 3.13.1
-      typescript:
-        specifier: ^4.9.3
-        version: 4.9.5
-
-  packages/notion-cache-client:
-    dependencies:
-      '@notionhq/client':
-        specifier: ^2.2.15
-        version: 2.2.15
-      chalk:
-        specifier: 5.2.0
-        version: 5.2.0
-      fs-extra:
-        specifier: ^11.1.0
-        version: 11.2.0
-      limiter-es6-compat:
-        specifier: ^2.1.2
-        version: 2.1.2
-      zod:
-        specifier: ^3.20.2
-        version: 3.23.8
-    devDependencies:
-      '@notion-fixtures/fixtures':
-        specifier: workspace:*
-        version: link:../notion-fixtures
-      '@types/fs-extra':
-        specifier: ^11.0.1
-        version: 11.0.4
-      tsup:
-        specifier: ^6.6.3
-        version: 6.7.0(postcss@8.4.39)(ts-node@10.9.2(@types/node@20.12.12)(typescript@4.9.5))(typescript@4.9.5)
       typescript:
         specifier: ^4.9.3
         version: 4.9.5
@@ -4606,18 +4603,6 @@ packages:
 
   jju@1.4.0:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
-
-  jotai@2.10.0:
-    resolution: {integrity: sha512-8W4u0aRlOIwGlLQ0sqfl/c6+eExl5D8lZgAUolirZLktyaj4WnxO/8a0HEPmtriQAB6X5LMhXzZVmw02X0P0qQ==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      '@types/react': '>=17.0.0'
-      react: '>=17.0.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      react:
-        optional: true
 
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
@@ -11391,11 +11376,6 @@ snapshots:
   jiti@1.21.0: {}
 
   jju@1.4.0: {}
-
-  jotai@2.10.0(@types/react@18.3.3)(react@18.3.1):
-    optionalDependencies:
-      '@types/react': 18.3.3
-      react: 18.3.1
 
   joycon@3.1.1: {}
 

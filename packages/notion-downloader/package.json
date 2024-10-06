@@ -1,5 +1,5 @@
 {
-  "name": "notion-downloader-cli",
+  "name": "notion-downloader",
   "version": "0.0.13",
   "description": "A CLI to download notion pages.",
   "publishConfig": {
@@ -13,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/franciscomoretti/notion-downloader.git",
-    "directory": "packages/notion-downloader-cli"
+    "directory": "packages/notion-downloader"
   },
   "files": [
     "dist"
