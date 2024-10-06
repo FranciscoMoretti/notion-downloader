@@ -430,12 +430,12 @@ importers:
       notion-client:
         specifier: ^4
         version: 4.19.8
-      notion-downloader:
-        specifier: workspace:*
-        version: link:../notion-downloader
       notion-to-md:
         specifier: 3.1.1
         version: 3.1.1
+      notion-tree:
+        specifier: workspace:*
+        version: link:../notion-tree
       ora:
         specifier: ^6.1.2
         version: 6.3.1
@@ -523,7 +523,26 @@ importers:
         specifier: ^4.9.3
         version: 4.9.5
 
-  packages/notion-downloader:
+  packages/notion-fixtures:
+    dependencies:
+      notion-cache-client:
+        specifier: 0.0.8
+        version: 0.0.8
+    devDependencies:
+      '@types/eslint':
+        specifier: ^8.37.0
+        version: 8.56.12
+      '@types/node':
+        specifier: ^18.16.0
+        version: 18.19.54
+      '@types/prettier':
+        specifier: ^2.7.2
+        version: 2.7.3
+      typescript:
+        specifier: ^5.0.4
+        version: 5.6.2
+
+  packages/notion-tree:
     dependencies:
       '@notionhq/client':
         specifier: ^2.2.15
@@ -547,25 +566,6 @@ importers:
       typescript:
         specifier: ^4.9.3
         version: 4.9.5
-
-  packages/notion-fixtures:
-    dependencies:
-      notion-cache-client:
-        specifier: 0.0.8
-        version: 0.0.8
-    devDependencies:
-      '@types/eslint':
-        specifier: ^8.37.0
-        version: 8.56.12
-      '@types/node':
-        specifier: ^18.16.0
-        version: 18.19.54
-      '@types/prettier':
-        specifier: ^2.7.2
-        version: 2.7.3
-      typescript:
-        specifier: ^5.0.4
-        version: 5.6.2
 
 packages:
 

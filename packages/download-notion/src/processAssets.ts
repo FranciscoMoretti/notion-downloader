@@ -1,4 +1,4 @@
-import { NotionObjectTree } from "notion-downloader"
+import { NotionObjectTree } from "notion-tree"
 
 import { FilesManager } from "./files/FilesManager"
 import { FilesMap } from "./files/FilesMap"

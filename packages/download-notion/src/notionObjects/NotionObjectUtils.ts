@@ -1,5 +1,5 @@
 import { ObjectType } from "notion-cache-client"
-import { NotionObjectResponse } from "notion-downloader"
+import { NotionObjectResponse } from "notion-tree"
 
 import { NotionBlock } from "./NotionBlock"
 import { NotionBlockImage } from "./NotionBlockImage"

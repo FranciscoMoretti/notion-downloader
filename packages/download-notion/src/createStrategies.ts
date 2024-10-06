@@ -1,5 +1,5 @@
 import { ObjectType } from "notion-cache-client"
-import { NotionObjectTree } from "notion-downloader"
+import { NotionObjectTree } from "notion-tree"
 
 import {
   AssetType,

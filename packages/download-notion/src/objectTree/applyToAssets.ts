@@ -1,4 +1,4 @@
-import { NotionObjectTree } from "notion-downloader"
+import { NotionObjectTree } from "notion-tree"
 
 import { AssetType } from "../config/schema"
 import { NotionBlockImage } from "../notionObjects/NotionBlockImage"

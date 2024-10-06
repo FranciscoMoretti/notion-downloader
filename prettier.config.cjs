@@ -17,7 +17,6 @@ module.exports = {
     "^@/hooks/(.*)$",
     "^@/components/ui/(.*)$",
     "^@/components/(.*)$",
-    "^@/registry/(.*)$",
     "^@/styles/(.*)$",
     "^@/app/(.*)$",
     "",

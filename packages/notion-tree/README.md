@@ -11,7 +11,7 @@ A powerful package for downloading and caching Notion content.
 ## Installation
 
 ```bash
-npm install notion-downloader
+npm install notion-tree
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ npm install notion-downloader
 ### Downloading a Notion Object Tree
 
 ```typescript
-import { downloadNotionObjectTree } from "notion-downloader"
+import { downloadNotionObjectTree } from "notion-tree"
 
 const objectTree = await downloadNotionObjectTree(
   cachedNotionClient,

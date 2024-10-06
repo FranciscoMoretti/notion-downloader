@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev ",
-    "build": "contentlayer2 build && pnpm build:registry && next build",
-    "build:registry": "tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-registry.mts && prettier --loglevel silent --write \"registry/**/*.{ts,tsx,mdx}\" --cache",
+    "build": "contentlayer2 build && next build",
     "build:docs": "contentlayer2 build",
     "seed:tasks": "tsx --tsconfig ./tsconfig.scripts.json ./app/(app)/examples/tasks/data/seed.ts",
     "start": "next start ",
@@ -64,7 +63,6 @@
     "framer-motion": "^11.0.24",
     "geist": "^1.2.2",
     "input-otp": "^1.2.2",
-    "jotai": "^2.1.0",
     "lodash.template": "^4.5.0",
     "lucide-react": "0.359.0",
     "markdown-wasm": "^1.2.0",

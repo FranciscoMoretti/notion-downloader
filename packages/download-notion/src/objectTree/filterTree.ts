@@ -1,5 +1,5 @@
 import { ObjectType } from "notion-cache-client"
-import { NotionObjectResponse, NotionObjectTree } from "notion-downloader"
+import { NotionObjectResponse, NotionObjectTree } from "notion-tree"
 
 import { Filter } from "../config/schema"
 import { verbose } from "../log"

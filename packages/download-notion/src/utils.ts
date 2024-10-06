@@ -2,7 +2,7 @@ import crypto from "crypto"
 import * as Path from "path"
 import fs from "fs-extra"
 import { ObjectType } from "notion-cache-client"
-import { NotionObjectTree } from "notion-downloader"
+import { NotionObjectTree } from "notion-tree"
 
 import { FilesManager } from "./files/FilesManager"
 import { NotionObject } from "./notionObjects/NotionObject"

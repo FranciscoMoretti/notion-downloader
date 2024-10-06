@@ -8,10 +8,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.test.ts",
-    "../notion-downloader/src/objectTreeUtills.ts"
-  ],
+  "include": ["src/**/*.ts", "test/**/*.test.ts"],
   "exclude": ["node_modules"]
 }

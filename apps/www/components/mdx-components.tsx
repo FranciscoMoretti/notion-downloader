@@ -9,7 +9,6 @@ import { NpmCommands } from "types/unist"
 
 import { Event } from "@/lib/events"
 import { cn } from "@/lib/utils"
-import { useConfig } from "@/hooks/use-config"
 import {
   Accordion,
   AccordionContent,
@@ -301,7 +300,6 @@ interface MdxProps {
 }
 
 export function Mdx({ code }: MdxProps) {
-  const [config] = useConfig()
   const Component = useMDXComponent(code)
 
   return (

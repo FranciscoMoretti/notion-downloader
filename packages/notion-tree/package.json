@@ -1,5 +1,5 @@
 {
-  "name": "notion-downloader",
+  "name": "notion-tree",
   "version": "0.0.10",
   "description": "A variant of the official notion client that uses a cache.",
   "publishConfig": {
@@ -13,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/franciscomoretti/notion-downloader.git",
-    "directory": "packages/notion-downloader"
+    "directory": "packages/notion-tree"
   },
   "files": [
     "dist"
@@ -22,7 +22,7 @@
     "notion",
     "notion-client",
     "notion-backup",
-    "notion-downloader"
+    "notion-tree"
   ],
   "type": "module",
   "bin": "./dist/index.js",

@@ -1,5 +1,5 @@
 import path from "path"
-import { NotionObjectTree } from "notion-downloader"
+import { NotionObjectTree } from "notion-tree"
 
 import { AssetType } from "./config/schema"
 import { FilesMap } from "./files/FilesMap"

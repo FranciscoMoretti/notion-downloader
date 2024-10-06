@@ -3,7 +3,7 @@ import {
   PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 import { ObjectType } from "notion-cache-client"
-import { NotionObjectResponse } from "notion-downloader"
+import { NotionObjectResponse } from "notion-tree"
 
 import { AssetType, mapToAssetType } from "../config/schema"
 import { NotionBlockImage } from "./NotionBlockImage"

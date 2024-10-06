@@ -1,5 +1,5 @@
 import { ObjectType, PageOrDatabase } from "notion-cache-client"
-import { cacheOptionsSchema } from "notion-downloader"
+import { cacheOptionsSchema } from "notion-tree"
 import { coerce, z } from "zod"
 
 export const AssetType = z.enum(["image", "file", "video", "pdf", "audio"])
