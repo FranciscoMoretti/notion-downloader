@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "notion downloader",
+  name: "Notion Downloader",
   url: "https://downloader.franciscomoretti.com",
   ogImage: "https://downloader.franciscomoretti.com/og.jpg",
   description:
