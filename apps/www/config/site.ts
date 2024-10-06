@@ -1,12 +1,12 @@
 export const siteConfig = {
-  name: "shadcn/ui",
-  url: "https://ui.shadcn.com",
-  ogImage: "https://ui.shadcn.com/og.jpg",
+  name: "notion downloader",
+  url: "https://downloader.franciscomoretti.com",
+  ogImage: "https://downloader.franciscomoretti.com/og.jpg",
   description:
     "Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.",
   links: {
-    twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn-ui/ui",
+    twitter: "https://twitter.com/franmoretti_",
+    github: "https://github.com/franciscomoretti/notion-downloader",
   },
 }
 
