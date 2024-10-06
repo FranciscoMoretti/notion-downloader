@@ -3,7 +3,7 @@ export const siteConfig = {
   url: "https://downloader.franciscomoretti.com",
   ogImage: "https://downloader.franciscomoretti.com/og.jpg",
   description:
-    "Beautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.",
+    "Download and convert all your Notion pages, databases, and assets.",
   links: {
     twitter: "https://twitter.com/franmoretti_",
     github: "https://github.com/franciscomoretti/notion-downloader",
