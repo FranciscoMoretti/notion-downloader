@@ -2,9 +2,11 @@
 
 A powerful suite of tools for downloading, caching, and converting Notion content to Markdown.
 
+![Download Notion content](apps/www/app/opengraph-image.png)
+
 ## Documentation
 
-[Documentation](https://downloader.franciscomoretti.com/docs/)
+Visit [https://downloader.franciscomoretti.com/docs](https://downloader.franciscomoretti.com/docs/) to view the documentation.
 
 ## Contributing
 
