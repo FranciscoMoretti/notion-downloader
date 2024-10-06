@@ -4,7 +4,6 @@ import Link from "next/link"
 import { siteConfig } from "@/config/site"
 import { Button } from "@/components/ui/button"
 import { Announcement } from "@/components/announcement"
-import { ExamplesNav } from "@/components/examples-nav"
 import {
   PageActions,
   PageHeader,
@@ -17,10 +16,12 @@ export default function IndexPage() {
     <div className="container relative">
       <PageHeader>
         <Announcement />
-        <PageHeaderHeading>Build your component library</PageHeaderHeading>
+        <PageHeaderHeading>
+          Download and sync your Notion content
+        </PageHeaderHeading>
         <PageHeaderDescription>
-          Beautifully designed components that you can copy and paste into your
-          apps.
+          Easily download your Notion pages and databases to Markdown, images,
+          and more. Keep your content in sync with automatic updates.
         </PageHeaderDescription>
         <PageActions>
           <Button asChild size="sm">
@@ -37,14 +38,16 @@ export default function IndexPage() {
           </Button>
         </PageActions>
       </PageHeader>
-      <ExamplesNav className="[&>a:first-child]:text-primary" />
+
       <section className="block">
-        <div className="overflow-hidden rounded-lg border bg-background shadow">
-          {/* Placholder for a component that shows the lib with wow factor */}
-          <div className="flex items-center justify-center">
-            DEMO Image/animation
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold">Features</h2>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Download Notion pages and databases to Markdown files</li>
+          <li>Download images, files, and other assets</li>
+          <li>Customize the output directory structure and file naming</li>
+          <li>Automatically sync changes from Notion</li>
+          <li>Flexible caching options to optimize performance</li>
+        </ul>
       </section>
     </div>
   )
