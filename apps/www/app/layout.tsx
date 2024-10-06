@@ -29,11 +29,11 @@ export const metadata: Metadata = {
   ],
   authors: [
     {
-      name: "shadcn",
-      url: "https://shadcn.com",
+      name: "francisco moretti",
+      url: "https://franciscomoretti.com",
     },
   ],
-  creator: "shadcn",
+  creator: "francisco moretti",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -55,9 +55,10 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: "@shadcn",
+    creator: "@franmoretti_",
   },
   icons: {
+    // TODO: Create icons
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
