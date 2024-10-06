@@ -1,6 +1,6 @@
-# Notion Download MD
+# Notion Downloader
 
-A powerful suite of tools for downloading, caching, and converting Notion content to Markdown.
+Easily download your Notion pages and databases to Markdown, images, and more. Keep your content in sync with automatic updates.
 
 ![Download Notion content](apps/www/app/opengraph-image.png)
 
