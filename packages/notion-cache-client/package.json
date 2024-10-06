@@ -1,6 +1,6 @@
 {
   "name": "notion-cache-client",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "A variant of the official notion client that uses a cache.",
   "publishConfig": {
     "access": "public"
