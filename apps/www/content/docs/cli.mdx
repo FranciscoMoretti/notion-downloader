@@ -1,104 +1,84 @@
 ---
 title: CLI
-description: Use the CLI to add components to your project.
+description: Use the CLI to download and manage Notion content.
 ---
-
-<Callout>
-
-**Note:** We just released a new `shadcn` CLI. See the [changelog](/docs/changelog) for more information.
-
-</Callout>
 
 ## init
 
-Use the `init` command to initialize configuration and dependencies for a new project.
-
-The `init` command installs dependencies, adds the `cn` util, configures `tailwind.config.js`, and CSS variables for the project.
+Use the `init` command to set up your Notion downloader configuration.
 
 ```bash
-npx shadcn@latest init
+notion-downloader init
 ```
 
-You will be asked a few questions to configure `components.json`:
+You'll be prompted to enter your configuration options:
 
-```txt showLineNumbers
-Which style would you like to use? › New York
-Which color would you like to use as base color? › Zinc
-Do you want to use CSS variables for colors? › no / yes
+```txt
+Would you to skip convertion to markdown (recommended)? (Y/n)
+Which cache strategy would you like to use? (cache-only/cache-first/no-cache)
+What is the root object type of your Notion content? (page/database)
+What is the root ID of your Notion content?
 ```
 
 ### Options
 
 ```txt
-Usage: shadcn init [options] [components...]
+Usage: notion-downloader init [options]
 
 initialize your project and install dependencies
 
-Arguments:
-  components         the components to add or a url to the component.
-
 Options:
-  -d, --defaults    use default values i.e new-york, zinc and css variables. (default: false)
-  -f, --force       force overwrite of existing components.json. (default: false)
-  -y, --yes         skip confirmation prompt. (default: false)
-  -c, --cwd <cwd>   the working directory. defaults to the current directory.
+  -y, --yes        skip confirmation prompt. (default: false)
+  -d, --defaults   use default configuration. (default: false)
+  -c, --cwd <cwd>  the working directory. defaults to the current directory.
   -h, --help       display help for command
 ```
 
-## add
+## pull
 
-Use the `add` command to add components and dependencies to your project.
+Use the `pull` command to download content from Notion.
 
 ```bash
-npx shadcn@latest add [component]
-```
-
-You will be presented with a list of components to choose from:
-
-```txt
-Which components would you like to add? › Space to select. A to toggle all.
-Enter to submit.
-
-◯  accordion
-◯  alert
-◯  alert-dialog
-◯  aspect-ratio
-◯  avatar
-◯  badge
-◯  button
-◯  calendar
-◯  card
-◯  checkbox
+notion-downloader pull
 ```
 
 ### Options
 
 ```txt
-Usage: shadcn add [options] [components...]
+Usage: notion-downloader pull [options]
 
-add a component to your project
+pull pages from notion
 
-Arguments:
-  components         the components to add or a url to the component.
+Options:
+  -n, --notion-token <string>        notion api token, which looks like secret_3bc1b50XFYb15123RHF243x43450XFY33250XFYa343
+  -r, --root-page <string>           The 31 character ID of the page which is the root of your docs page in notion. The code will look like 9120ec9960244ead80fa2ef4bc1bba25. This page must have a child page named 'Outline'
+  -d, --root-is-db                   Whether the root page is a database. If not, it must be a 'page'. Default: false
+  -c, --clean-cache                  Clear the cache before starting. WARNING: this will remove all files from the cache directory. Default: false
+  -l, --log-level <level>            Log level (choices: "info", "verbose", "debug")
+  -o, --overwrite                    overwrite existing files. Default: false
+  -c, --cwd <cwd>                    the working directory. defaults to the current directory.
+  -p, --revalidate-period <period>   The period (in milliseconds) at which to revalidate the cache. Default: -1 (disabled)
+  -h, --help                         display help for command
+```
+
+## cleanup
+
+Use the `cleanup` command to remove downloaded files and cache.
+
+```bash
+notion-downloader cleanup
+```
+
+### Options
+
+```txt
+Usage: notion-downloader cleanup [options]
+
+Remove all downloaded files and cache
 
 Options:
   -y, --yes          skip confirmation prompt. (default: false)
-  -o, --overwrite    overwrite existing files. (default: false)
   -c, --cwd <cwd>    the working directory. defaults to the current directory.
-  -p, --path <path>  the path to add the component to.
+  -o, --output-only  only clean output files and remove the filesmap files. (default: false)
   -h, --help         display help for command
-```
-
-## Monorepo
-
-In a monorepo, you can specify the path to your workspace with the `-c` or `--cwd` option.
-
-```bash
-npx shadcn@latest init -c ./apps/www
-```
-
-or
-
-```bash
-npx shadcn@latest add alert-dialog -c ./apps/www
 ```

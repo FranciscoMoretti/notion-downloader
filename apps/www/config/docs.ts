@@ -27,7 +27,7 @@ export const docsConfig: DocsConfig = {
           items: [],
         },
         {
-          title: "Config",
+          title: "Configuration",
           href: "/docs/config",
           items: [],
         },
@@ -68,17 +68,17 @@ export const docsConfig: DocsConfig = {
       title: "Packages",
       items: [
         {
-          title: "Tree",
+          title: "Notion Tree",
           href: "/docs/packages/notion-tree",
           items: [],
         },
         {
-          title: "Downloader",
+          title: "Notion Downloader",
           href: "/docs/packages/notion-downloader",
           items: [],
         },
         {
-          title: "Cache Client",
+          title: "Notion Cache Client",
           href: "/docs/packages/notion-cache-client",
           items: [],
         },

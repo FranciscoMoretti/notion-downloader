@@ -1,213 +1,282 @@
 ---
-title: components.json
-description: Configuration for your project.
+title: Configuration
+description: Configuration options for notion-downloader.
 ---
 
-The `components.json` file holds configuration for your project.
+The `notion-downloader` CLI can be configured using a `notion-downloader.config.json` file in your project directory.
 
-We use it to understand how your project is set up and how to generate components customized for your project.
-
-<Callout className="mt-6">
-  Note: The `components.json` file is optional and **only required if you're
-  using the CLI** to add components to your project. If you're using the copy
-  and paste method, you don't need this file.
-</Callout>
-
-You can create a `components.json` file in your project by running the following command:
+You can create a `notion-downloader.config.json` file by running the following command:
 
 ```bash
-npx shadcn@latest init
+notion-downloader init
 ```
 
-See the <Link href="/docs/cli">CLI section</Link> for more information.
+This will prompt you for the required configuration options and create a `notion-downloader.config.json` file in your current directory.
 
-## $schema
+## Options
 
-You can see the JSON Schema for `components.json` [here](https://ui.shadcn.com/schema.json).
+### `rootId`
 
-```json title="components.json"
+**Type:** `string`
+
+The ID of the Notion page or database to use as the root of your documentation. You can find the ID in the URL of the page or database.
+
+```json
 {
-  "$schema": "https://ui.shadcn.com/schema.json"
+  "rootId": "9120ec9960244ead80fa2ef4bc1bba25"
 }
 ```
 
-## style
+### `rootObjectType`
 
-The style for your components. **This cannot be changed after initialization.**
+**Type:** `"page"` | `"database"`
 
-```json title="components.json"
+The type of the root object. Must be either `"page"` or `"database"`.
+
+```json
 {
-  "style": "default" | "new-york"
+  "rootObjectType": "page"
 }
 ```
 
-{/* <ComponentPreview name="card-with-form" /> */}
+### `cache`
 
-## tailwind
+**Type:** `object`
 
-Configuration to help the CLI understand how Tailwind CSS is set up in your project.
+Configuration options for caching.
 
-See the <Link href="/docs/installation">installation section</Link> for how to set up Tailwind CSS.
+#### `cache.cacheDirectory`
 
-### tailwind.config
+**Type:** `string`
+**Default:** `"./.downloader"`
 
-Path to where your `tailwind.config.js` file is located.
+The directory to use for caching downloaded files.
 
-```json title="components.json"
+#### `cache.cleanCache`
+
+**Type:** `boolean`
+**Default:** `false`
+
+Whether to clean the cache before downloading files.
+
+#### `cache.cacheStrategy`
+
+**Type:** `"cache"` | `"no-cache"` | `"force-cache"`
+**Default:** `"cache"`
+
+The caching strategy to use:
+
+- `"cache"`: Use cached files if available, otherwise download them.
+- `"no-cache"`: Always download files, ignoring the cache.
+- `"force-cache"`: Only use cached files, never download them.
+
+```json
 {
-  "tailwind": {
-    "config": "tailwind.config.js" | "tailwind.config.ts"
+  "cache": {
+    "cacheDirectory": "./.downloader",
+    "cleanCache": false,
+    "cacheStrategy": "cache"
   }
 }
 ```
 
-### tailwind.css
+### `conversion`
 
-Path to the CSS file that imports Tailwind CSS into your project.
+**Type:** `object`
 
-```json title="components.json"
+Configuration options for converting Notion pages to Markdown.
+
+#### `conversion.skip`
+
+**Type:** `boolean`
+**Default:** `false`
+
+Whether to skip converting Notion pages to Markdown.
+
+```json
 {
-  "tailwind": {
-    "css": "styles/global.css"
+  "conversion": {
+    "skip": false
   }
 }
 ```
 
-### tailwind.baseColor
+### `output`
 
-This is used to generate the default color palette for your components. **This cannot be changed after initialization.**
+**Type:** `object`
 
-```json title="components.json"
+Configuration options for output files.
+
+#### `output.directory`
+
+**Type:** `string`
+**Default:** `"./docs"`
+
+The directory to output downloaded files to.
+
+```json
 {
-  "tailwind": {
-    "baseColor": "gray" | "neutral" | "slate" | "stone" | "zinc"
+  "output": {
+    "directory": "./docs"
   }
 }
 ```
 
-### tailwind.cssVariables
+### `naming`
 
-You can choose between using CSS variables or Tailwind CSS utility classes for theming.
+**Type:** `object`
 
-To use utility classes for theming set `tailwind.cssVariables` to `false`. For CSS variables, set `tailwind.cssVariables` to `true`.
+Configuration options for naming downloaded files.
 
-```json title="components.json"
+#### `naming.strategy`
+
+**Type:** `object`
+
+The naming strategy to use for different file types. You can specify a strategy for all files, assets, Markdown files, or individual asset types.
+
+**Possible values:**
+
+- `"default"`: Use the default naming strategy for the file type.
+- `"guid"`: Use a generated GUID for the file name.
+- `"githubSlug"`: Use the GitHub slug of the page title for Markdown files.
+- `"notionSlug"`: Use the Notion slug of the page title for Markdown files.
+- `"title"`: Use the page title for Markdown files.
+- `"legacy"`: Use the legacy naming strategy for assets.
+- `"ancestorPrefix"`: Prefix asset names with the names of their ancestor pages.
+
+```json
 {
-  "tailwind": {
-    "cssVariables": `true` | `false`
+  "naming": {
+    "strategy": {
+      "all": "default",
+      "assets": "legacy",
+      "markdown": "githubSlug",
+      "image": "ancestorPrefix",
+      "file": "guid",
+      "video": "default",
+      "pdf": "default",
+      "audio": "default"
+    }
   }
 }
 ```
 
-For more information, see the <Link href="/docs/theming">theming docs</Link>.
+#### `naming.prefix`
 
-**This cannot be changed after initialization.** To switch between CSS variables and utility classes, you'll have to delete and re-install your components.
+**Type:** `string`
+**Default:** `""`
 
-### tailwind.prefix
+A prefix to add to all downloaded file names.
 
-The prefix to use for your Tailwind CSS utility classes. Components will be added with this prefix.
-
-```json title="components.json"
+```json
 {
-  "tailwind": {
-    "prefix": "tw-"
+  "naming": {
+    "prefix": "docs-"
   }
 }
 ```
 
-## rsc
+### `layout`
 
-Whether or not to enable support for React Server Components.
+**Type:** `object`
 
-The CLI automatically adds a `use client` directive to client components when set to `true`.
+Configuration options for the layout of downloaded files.
 
-```json title="components.json"
+#### `layout.strategy`
+
+**Type:** `"hierarchical"` | `"flat"`
+**Default:** `"hierarchical"`
+
+The layout strategy to use:
+
+- `"hierarchical"`: Organize files in a hierarchy based on the Notion page structure.
+- `"flat"`: Put all files in a single flat directory.
+
+You can specify a layout strategy for all files or individual file types.
+
+```json
 {
-  "rsc": `true` | `false`
-}
-```
-
-## tsx
-
-Choose between TypeScript or JavaScript components.
-
-Setting this option to `false` allows components to be added as JavaScript with the `.jsx` file extension.
-
-```json title="components.json"
-{
-  "tsx": `true` | `false`
-}
-```
-
-## aliases
-
-The CLI uses these values and the `paths` config from your `tsconfig.json` or `jsconfig.json` file to place generated components in the correct location.
-
-Path aliases have to be set up in your `tsconfig.json` or `jsconfig.json` file.
-
-<Callout className="mt-6">
-  **Important:** If you're using the `src` directory, make sure it is included
-  under `paths` in your `tsconfig.json` or `jsconfig.json` file.
-</Callout>
-
-### aliases.utils
-
-Import alias for your utility functions.
-
-```json title="components.json"
-{
-  "aliases": {
-    "utils": "@/lib/utils"
+  "layout": {
+    "strategy": {
+      "all": "hierarchical",
+      "markdown": "flat",
+      "image": "hierarchical",
+      "file": "flat",
+      "video": "hierarchical",
+      "pdf": "hierarchical",
+      "audio": "hierarchical"
+    }
   }
 }
 ```
 
-### aliases.components
+### `logging`
 
-Import alias for your components.
+**Type:** `object`
 
-```json title="components.json"
+Configuration options for logging.
+
+#### `logging.level`
+
+**Type:** `"info"` | `"verbose"` | `"debug"`
+**Default:** `"info"`
+
+The minimum log level to output. Logs below this level will be suppressed.
+
+```json
 {
-  "aliases": {
-    "components": "@/components"
+  "logging": {
+    "level": "verbose"
   }
 }
 ```
 
-### aliases.ui
+## Full Configuration Example
 
-Import alias for `ui` components.
+Here's an example `notion-downloader.config.json` file with all options set:
 
-The CLI will use the `aliases.ui` value to determine where to place your `ui` components. Use this config if you want to customize the installation directory for your `ui` components.
-
-```json title="components.json"
+```json
 {
-  "aliases": {
-    "ui": "@/app/ui"
-  }
-}
-```
-
-### aliases.lib
-
-Import alias for `lib` functions such as `format-date` or `generate-id`.
-
-```json title="components.json"
-{
-  "aliases": {
-    "lib": "@/lib"
-  }
-}
-```
-
-### aliases.hooks
-
-Import alias for `hooks` such as `use-media-query` or `use-toast`.
-
-```json title="components.json"
-{
-  "aliases": {
-    "hooks": "@/hooks"
+  "notionToken": "secret_abc123def456ghi789jkl012mno345pqr678stu901",
+  "rootId": "9120ec9960244ead80fa2ef4bc1bba25",
+  "rootObjectType": "page",
+  "cache": {
+    "cacheDirectory": "./.downloader",
+    "cleanCache": false,
+    "cacheStrategy": "cache"
+  },
+  "conversion": {
+    "skip": false
+  },
+  "output": {
+    "directory": "./docs"
+  },
+  "naming": {
+    "strategy": {
+      "all": "default",
+      "assets": "legacy",
+      "markdown": "githubSlug",
+      "image": "ancestorPrefix",
+      "file": "guid",
+      "video": "default",
+      "pdf": "default",
+      "audio": "default"
+    },
+    "prefix": "docs-"
+  },
+  "layout": {
+    "strategy": {
+      "all": "hierarchical",
+      "markdown": "flat",
+      "image": "hierarchical",
+      "file": "flat",
+      "video": "hierarchical",
+      "pdf": "hierarchical",
+      "audio": "hierarchical"
+    }
+  },
+  "logging": {
+    "level": "verbose"
   }
 }
 ```

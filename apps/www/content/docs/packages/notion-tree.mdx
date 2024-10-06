@@ -1,4 +1,90 @@
 ---
-title: Tree
-description: The tree package documentation.
+title: Notion Tree
+description: The Notion Tree package documentation.
 ---
+
+A powerful package for downloading and caching Notion content.
+
+## Features
+
+- Download Notion object trees
+- Cache Notion queries for improved performance
+- Utilities for working with Notion objects and IDs
+
+## Installation
+
+```bash
+npm install notion-tree
+```
+
+## Usage
+
+### Downloading a Notion Object Tree
+
+```typescript
+import { downloadNotionObjectTree } from "notion-tree"
+
+const objectTree = await downloadNotionObjectTree(
+  cachedNotionClient,
+  startingNode,
+  cachingOptions
+)
+```
+
+The `downloadNotionObjectTree` function is the main entry point for fetching and caching Notion content. It takes the following parameters:
+
+- `cachedNotionClient`: An instance of `NotionCacheClient`
+- `startingNode`: An object containing `rootUUID` and `rootObjectType`
+- `cachingOptions`: Options for caching behavior
+
+### Cache Options
+
+The `cacheOptionsSchema` defines the following options for caching behavior:
+
+- `cacheDirectory`: String, default: "./.downloader"
+
+  - Specifies the directory where cache files will be stored.
+
+- `cleanCache`: Boolean, default: false
+
+  - When set to true, clears the existing cache before downloading.
+
+- `cacheStrategy`: Enum ["cache", "no-cache", "force-cache"], default: "cache"
+
+  - "cache": Uses cached data if available, fetches and updates cache for missing or outdated data.
+  - "no-cache": Always fetches fresh data from Notion, ignoring the cache.
+  - "force-cache": Only uses cached data, doesn't fetch from Notion even if data is missing.
+
+### NotionObjectTree Methods
+
+The `NotionObjectTree` class provides several methods for working with the downloaded Notion content:
+
+- `getRoot()`: Returns the root node of the tree.
+- `getPages()`: Returns an array of all PageObjectResponses.
+- `getDatabases()`: Returns an array of all DatabaseObjectResponses.
+- `getBlocks(type?)`: Returns an array of BlockObjectResponses. If a type is specified, it returns only blocks of that type.
+- `traverse<T>(nodeAction, parentContext, startNode?)`: Traverses the tree, applying a custom action to each node.
+- `getParent(objectType, id)`: Returns the parent of a specified object.
+- `getObject(objectType, id)`: Returns a specific object by type and ID.
+- `removeObject(objectType, id)`: Removes an object and its children from the tree.
+
+Example usage:
+
+```typescript
+const notionTree = new NotionObjectTree(rootNode, initialData)
+
+// Get all pages
+const pages = notionTree.getPages()
+
+// Get all paragraph blocks
+const paragraphs = notionTree.getBlocks("paragraph")
+
+// Traverse the tree
+notionTree.traverse((objectResponse, parentContext, tree) => {
+  // Custom action for each node
+  console.log(objectResponse.id)
+  return parentContext // or a new context
+}, initialContext)
+```
+
+These methods allow you to easily navigate and manipulate the Notion content structure after it has been downloaded.
