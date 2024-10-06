@@ -68,18 +68,18 @@ export const docsConfig: DocsConfig = {
       title: "Packages",
       items: [
         {
-          title: "CLI",
-          href: "/docs/packages/cli",
+          title: "Tree",
+          href: "/docs/packages/notion-tree",
           items: [],
         },
         {
           title: "Downloader",
-          href: "/docs/packages/downloader",
+          href: "/docs/packages/notion-downloader",
           items: [],
         },
         {
           title: "Cache Client",
-          href: "/docs/packages/cache-client",
+          href: "/docs/packages/notion-cache-client",
           items: [],
         },
       ],
