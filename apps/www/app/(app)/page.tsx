@@ -38,23 +38,7 @@ export default function IndexPage() {
         </PageActions>
       </PageHeader>
       <ExamplesNav className="[&>a:first-child]:text-primary" />
-      <section className="overflow-hidden rounded-lg border bg-background shadow-md md:hidden md:shadow-xl">
-        <Image
-          src="/examples/mail-dark.png"
-          width={1280}
-          height={727}
-          alt="Mail"
-          className="hidden dark:block"
-        />
-        <Image
-          src="/examples/mail-light.png"
-          width={1280}
-          height={727}
-          alt="Mail"
-          className="block dark:hidden"
-        />
-      </section>
-      <section className="hidden md:block">
+      <section className="block">
         <div className="overflow-hidden rounded-lg border bg-background shadow">
           {/* Placholder for a component that shows the lib with wow factor */}
           <div className="flex items-center justify-center">

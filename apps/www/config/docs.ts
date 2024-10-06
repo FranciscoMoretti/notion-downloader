@@ -27,13 +27,8 @@ export const docsConfig: DocsConfig = {
           items: [],
         },
         {
-          title: "components.json",
-          href: "/docs/components-json",
-          items: [],
-        },
-        {
-          title: "Dark mode",
-          href: "/docs/dark-mode",
+          title: "Config",
+          href: "/docs/config",
           items: [],
         },
         {
@@ -45,41 +40,46 @@ export const docsConfig: DocsConfig = {
       ],
     },
     {
-      title: "Installation",
+      title: "Guides",
       items: [
         {
-          title: "Next.js",
-          href: "/docs/installation/next",
+          title: "Docusaurus",
+          href: "/docs/guide/docusaurus",
           items: [],
         },
         {
-          title: "Vite",
-          href: "/docs/installation/vite",
+          title: "Obsidian",
+          href: "/docs/guide/obsidian",
           items: [],
         },
         {
-          title: "Remix",
-          href: "/docs/installation/remix",
-          items: [],
-        },
-        {
-          title: "Astro",
-          href: "/docs/installation/astro",
-          items: [],
-        },
-        {
-          title: "Laravel",
-          href: "/docs/installation/laravel",
-          items: [],
-        },
-        {
-          title: "Gatsby",
-          href: "/docs/installation/gatsby",
+          title: "GitHub",
+          href: "/docs/guide/github",
           items: [],
         },
         {
           title: "Manual",
-          href: "/docs/installation/manual",
+          href: "/docs/guide/manual",
+          items: [],
+        },
+      ],
+    },
+    {
+      title: "Packages",
+      items: [
+        {
+          title: "CLI",
+          href: "/docs/packages/cli",
+          items: [],
+        },
+        {
+          title: "Downloader",
+          href: "/docs/packages/downloader",
+          items: [],
+        },
+        {
+          title: "Cache Client",
+          href: "/docs/packages/cache-client",
           items: [],
         },
       ],
