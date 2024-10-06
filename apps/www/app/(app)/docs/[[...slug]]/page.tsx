@@ -13,7 +13,6 @@ import { absoluteUrl, cn } from "@/lib/utils"
 import { badgeVariants } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Mdx } from "@/components/mdx-components"
-import { OpenInV0Cta } from "@/components/open-in-v0-cta"
 import { DocsPager } from "@/components/pager"
 import { DashboardTableOfContents } from "@/components/toc"
 
@@ -65,7 +64,7 @@ export async function generateMetadata({
       title: doc.title,
       description: doc.description,
       images: [siteConfig.ogImage],
-      creator: "@shadcn",
+      creator: siteConfig.links.twitter,
     },
   }
 }
@@ -135,14 +134,6 @@ export default async function DocPage({ params }: DocPageProps) {
           <Mdx code={doc.body.code} />
         </div>
         <DocsPager doc={doc} />
-      </div>
-      <div className="hidden text-sm xl:block">
-        <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] pt-4">
-          <ScrollArea className="h-full pb-10">
-            {doc.toc && <DashboardTableOfContents toc={toc} />}
-            <OpenInV0Cta className="mt-6 max-w-[80%]" />
-          </ScrollArea>
-        </div>
       </div>
     </main>
   )
