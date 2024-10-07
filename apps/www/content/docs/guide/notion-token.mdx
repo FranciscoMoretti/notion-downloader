@@ -1,0 +1,49 @@
+---
+title: Notion Token
+description: How to get your Notion API token and add an integration to your Notion workspace.
+---
+
+## Getting Your Notion API Token
+
+To use the Notion API, you need to create an integration and get an API token. Here's how:
+
+1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations)
+2. Click "New integration"
+3. Name your integration and select the workspace it'll be associated with.
+4. Select "Internal integration" as the integration "type".
+5. Click "Submit" to create the integration
+6. You'll see your "Internal Integration Token" - this is your API token
+7. Click "Save" to complete your integration
+
+Keep this token secret and secure!
+
+## Adding the Integration to Your Notion Page or Database
+
+After creating the integration, you need to give it access to the specific pages or databases you want to work with:
+
+1. Open the Notion page or database you want to access via the API
+2. Click the "..." menu in the top right corner
+3. Select "Connect to" from the dropdown
+4. Find your integration in the list and click to add it
+
+Now your integration can access this page/database and its children.
+
+Remember: You need to add the integration to the root page/database of the tree you want to download.
+
+## Using Your Token
+
+Once you have your Notion API token, you can use it in two ways:
+
+1. Add it to a `.env` file:
+
+   ```bash
+   NOTION_TOKEN=your_token_here
+   ```
+
+2. Use it directly with the CLI:
+
+   ```bash
+   npx notion-downloader --notion-token your_token_here
+   ```
+
+Choose the method that best fits your workflow. Using a `.env` file is recommended for security and convenience in development environments, while the CLI option is useful for quick tests or one-off operations.
