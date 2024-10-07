@@ -15,7 +15,7 @@ import {
 
 export default function IndexPage() {
   return (
-    <div className="container relative  ">
+    <div className="relative container mx-auto">
       <PageHeader>
         <Announcement />
         <PageHeaderHeading>
