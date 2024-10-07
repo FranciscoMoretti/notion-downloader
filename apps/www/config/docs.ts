@@ -27,6 +27,11 @@ export const docsConfig: DocsConfig = {
           items: [],
         },
         {
+          title: "Notion Token",
+          href: "/docs/guide/notion-token",
+          items: [],
+        },
+        {
           title: "Configuration",
           href: "/docs/config",
           items: [],
@@ -42,11 +47,6 @@ export const docsConfig: DocsConfig = {
     {
       title: "Guides",
       items: [
-        {
-          title: "Notion Token",
-          href: "/docs/guide/notion-token",
-          items: [],
-        },
         {
           title: "Docusaurus",
           href: "/docs/guide/docusaurus",
