@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 export function Announcement() {
   return (
     <Link
-      href="/docs/cli"
+      href="/docs/usage"
       className="group inline-flex items-center px-0.5 text-sm font-medium"
     >
       <PieChart className="h-4 w-4" />{" "}
