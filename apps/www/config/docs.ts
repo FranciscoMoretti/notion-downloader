@@ -22,13 +22,13 @@ export const docsConfig: DocsConfig = {
           items: [],
         },
         {
-          title: "Installation",
-          href: "/docs/installation",
+          title: "Usage",
+          href: "/docs/usage",
           items: [],
         },
         {
           title: "Notion Token",
-          href: "/docs/guide/notion-token",
+          href: "/docs/notion-token",
           items: [],
         },
         {

@@ -1,0 +1,48 @@
+---
+title: Usage
+description: How to use the Notion Downloader.
+---
+
+## Usage
+
+Follow these steps to use the Notion Downloader:
+
+1. **Initialize your project**
+   Run the following command to create a `downloader.json` configuration file:
+
+   ```bash
+   npx notion-downloader init
+   ```
+
+   This will prompt you for the required configuration options and create a `notion-downloader.config.json` file in your current directory.
+
+2. **Configure downloader.json (Optional)**
+   If needed, customize your `downloader.json` file by following the [Configuration Guide](/docs/config).
+
+3. **Set up your Notion token**
+   Refer to the [Notion Token Setup](/docs/notion-token) guide for instructions on obtaining your Notion token. Once you have your token, you can use it in one of two ways:
+
+   a. Add it to a `.env` file in your project root:
+
+   ```bash
+   NOTION_TOKEN=your_token_here
+   ```
+
+   b. Use it directly with the CLI (see step 4).
+
+4. **Download your Notion content**
+   Run one of the following commands to pull your Notion content:
+
+   a. If you've set up your token in a `.env` file:
+
+   ```bash
+   npx notion-downloader pull
+   ```
+
+   b. If you want to use the token directly with the CLI:
+
+   ```bash
+   npx notion-downloader pull --notion-token your_token_here
+   ```
+
+Choose the method that best fits your workflow. Using a `.env` file is recommended for security and convenience in development environments, while the CLI option is useful for quick tests or one-off operations.

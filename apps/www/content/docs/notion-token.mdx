@@ -29,21 +29,3 @@ After creating the integration, you need to give it access to the specific pages
 Now your integration can access this page/database and its children.
 
 Remember: You need to add the integration to the root page/database of the tree you want to download.
-
-## Using Your Token
-
-Once you have your Notion API token, you can use it in two ways:
-
-1. Add it to a `.env` file:
-
-   ```bash
-   NOTION_TOKEN=your_token_here
-   ```
-
-2. Use it directly with the CLI:
-
-   ```bash
-   npx notion-downloader --notion-token your_token_here
-   ```
-
-Choose the method that best fits your workflow. Using a `.env` file is recommended for security and convenience in development environments, while the CLI option is useful for quick tests or one-off operations.
