@@ -53,6 +53,11 @@ export class FilesCleaner {
     // TODO: To remove all folders created, the folders created should be tracked. Not all folders created are databases
     //       Files can create nesting and create their own folders (e.g. assets in pages, pages in pages, etc.)
     for (const folder of sortedFolders) {
+      if (!fs.existsSync(folder.path)) {
+        verbose(`Skipping folder: [${folder.path}] because it no longer exists`)
+        continue
+      }
+
       if (fs.readdirSync(folder.path).length === 0) {
         await this.removeRecords([folder])
       } else {
