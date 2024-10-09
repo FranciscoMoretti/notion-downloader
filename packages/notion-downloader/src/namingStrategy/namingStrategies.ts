@@ -41,7 +41,7 @@ export abstract class SlugNamingStrategy extends NamingStrategy {
 
 export class GithubSlugNamingStrategy extends SlugNamingStrategy {
   _slugify(name: string): string {
-    return slug(name)
+    return sanitize(slug(name))
   }
 }
 
