@@ -693,6 +693,47 @@ test("multiple internal links in a paragraph", async () => {
   )
 })
 
+test("internal link to a file with spaces in its path", async () => {
+  const targetPageId = "789"
+  const targetPage = makeSamplePageObject({
+    slug: "documents/My Files/Important Doc",
+    name: "Important Document",
+    id: targetPageId,
+  })
+
+  const results = await getMarkdown(
+    {
+      type: "paragraph",
+      paragraph: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: "Check this document",
+              link: { url: `/${targetPageId}` },
+            },
+            annotations: {
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+              color: "default",
+            },
+            plain_text: "Check this document",
+            href: `/${targetPageId}`,
+          },
+        ],
+        color: "default",
+      },
+    },
+    targetPage
+  )
+  expect(results.trim()).toBe(
+    "[Check this document](/documents/My%20Files/Important%20Doc)"
+  )
+})
+
 async function getMarkdown(
   block: Record<string, unknown>,
   targetPage?: NotionPage,

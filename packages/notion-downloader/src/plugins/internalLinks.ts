@@ -99,6 +99,9 @@ function convertLinkHref(
     convertedLink = removePathExtension(convertedLink)
   }
 
+  // Encode spaces in the path
+  convertedLink = convertedLink.split("/").map(encodeURIComponent).join("/")
+
   /*****************************
   NOTE: as of this writing, the official Notion API completely drops links
   to headings, unless they are part of a inline link.
