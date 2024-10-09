@@ -1,9 +1,16 @@
-import { Config } from "./packages/download-notion/src/index"
+import { Config } from "./packages/notion-downloader/src/index"
 
 const config: Config = {
   conversion: {
     pageLinkHasExtension: false,
-    slugProperty: "slug",
+    namingStrategy: {
+      markdown: "notionSlug",
+      assets: "default",
+    },
+    outputPaths: {
+      markdown: "pages",
+      assets: "public",
+    },
   },
   rootDbAsFolder: true,
   rootObjectType: "page",
