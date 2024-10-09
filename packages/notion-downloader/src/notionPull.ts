@@ -125,6 +125,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   const optionsChanged = prevOptions && haveOptionsChanged(prevOptions, options)
   if (optionsChanged) {
     info("Options changed: Output will be regenerated")
+    // TODO: Fix, changing naming strategy doesn't change output files. Do a cleanup here and start from scratch
+    // TODO: Alternatively, create an abstraction over the files managers that handle these situations more smartly
   }
 
   const rootUUID = convertToUUID(options.rootId)
