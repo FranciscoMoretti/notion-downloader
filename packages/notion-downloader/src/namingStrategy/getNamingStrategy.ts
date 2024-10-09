@@ -14,6 +14,7 @@ import {
   GuidNamingStrategy,
   NotionSlugNamingStrategy,
   TitleNamingStrategy,
+  UrlEncodingNamingStrategy,
 } from "./namingStrategies"
 
 export function getAssetNamingStrategy(
@@ -42,6 +43,8 @@ export function getMarkdownNamingStrategy(
       return new TitleNamingStrategy()
     case AllNamingSchemaName.enum.guid:
       return new GuidNamingStrategy()
+    case MarkdownNamingStrategyNames.enum.urlEncoding:
+      return new UrlEncodingNamingStrategy()
     case MarkdownNamingStrategyNames.enum.githubSlug:
       return new GithubSlugNamingStrategy(slugProperty)
     case MarkdownNamingStrategyNames.enum.notionSlug:

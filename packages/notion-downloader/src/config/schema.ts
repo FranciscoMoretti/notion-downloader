@@ -26,6 +26,7 @@ export const MarkdownNamingStrategyNames = z.enum([
   "githubSlug",
   "notionSlug",
   "title",
+  "urlEncoding",
 ])
 export type MarkdownNamingStrategyNames = z.infer<
   typeof MarkdownNamingStrategyNames

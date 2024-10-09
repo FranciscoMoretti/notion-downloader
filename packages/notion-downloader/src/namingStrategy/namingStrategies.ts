@@ -97,3 +97,12 @@ export class TitleNamingStrategy extends NamingStrategy {
       .replaceAll("--", "-")
   }
 }
+
+export class UrlEncodingNamingStrategy extends NamingStrategy {
+  constructor() {
+    super([ObjectType.enum.page, ObjectType.enum.database])
+  }
+  protected _nameForObject(notionObject: NotionDatabase | NotionPage): string {
+    return encodeURIComponent(notionObject.title)
+  }
+}
