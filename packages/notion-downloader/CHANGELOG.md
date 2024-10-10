@@ -4,7 +4,8 @@
 
 ### Patch Changes
 
-- [`ff5272e50e888aad32b3eb314431bb6307e29897`](https://github.com/FranciscoMoretti/notion-downloader/commit/ff5272e50e888aad32b3eb314431bb6307e29897) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Created a urlEncoding naming strategy
+- [`64ca7402c23eec4178bcdbaddb0bf732b7d02e7e`](https://github.com/FranciscoMoretti/notion-downloader/commit/64ca7402c23eec4178bcdbaddb0bf732b7d02e7e) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - bugfix images treated as links
+
 
 ## 0.1.1
 
