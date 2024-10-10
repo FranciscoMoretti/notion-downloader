@@ -174,7 +174,8 @@ function doLinkFixes(
   markdown: string,
   config: IPluginsConfig
 ): string {
-  const linkRegExp = /\[.*?\]\([^\)]*?\)/g
+  // This regex matches markdown links that are not preceded by a ! character (not images)
+  const linkRegExp = getLinkMatchingRegex()
 
   logDebug("markdown before link fixes", markdown)
   let match: RegExpExecArray | null
@@ -219,6 +220,10 @@ function doLinkFixes(
     })
   }
   return markdown
+}
+
+export function getLinkMatchingRegex() {
+  return /(?<!!)\[.*?\]\([^\)]*?\)/g
 }
 
 // overrides for the conversions that notion-to-md does
