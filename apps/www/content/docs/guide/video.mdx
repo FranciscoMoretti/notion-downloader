@@ -1,0 +1,39 @@
+---
+title: Video Support
+description: How to use Notion Downloader with video blocks.
+---
+
+# Video Support
+
+Notion Downloader supports video playback through the `react-player` package. This allows you to easily embed and play videos from various sources, including YouTube, Vimeo, and more.
+
+## Usage
+
+To use video playback in your Notion-exported content, simply include the `ReactPlayer` component from `react-player`:
+
+```jsx
+import ReactPlayer from "react-player"
+
+// In your component
+<ReactPlayer url="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+```
+
+## Known Issues and Solutions
+
+When using `react-player` with React 18 and Next.js, you may encounter hydration errors. This is due to differences between server-side rendering and client-side rendering of the video component.
+
+To resolve these issues, we recommend using version 3.0.0-canary.4 or greater of `react-player`. This version includes improvements that help mitigate hydration problems in many cases.
+
+### Installation
+
+To install the recommended version:
+
+```bash
+npm install react-player@3.0.0-canary.4
+```
+
+## Additional Resources
+
+For more information on `react-player` and its usage, refer to the [official react-player documentation](https://github.com/cookpete/react-player).
+
+If you encounter any issues specific to Notion Downloader's implementation of video support, please open an issue on our GitHub repository.

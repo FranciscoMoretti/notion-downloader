@@ -67,6 +67,11 @@ export const docsConfig: DocsConfig = {
           href: "/docs/guide/manual-installation",
           items: [],
         },
+        {
+          title: "Video",
+          href: "/docs/guide/video",
+          items: [],
+        },
       ],
     },
     {
