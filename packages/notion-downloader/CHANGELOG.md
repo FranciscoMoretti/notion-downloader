@@ -1,5 +1,11 @@
 # notion-downloader
 
+## 0.1.4
+
+### Patch Changes
+
+- [`3cdb03f0b372190c2c09a7f182d908c8abe70f42`](https://github.com/FranciscoMoretti/notion-downloader/commit/3cdb03f0b372190c2c09a7f182d908c8abe70f42) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Option to download as mdx
+
 ## 0.1.3
 
 ### Patch Changes
