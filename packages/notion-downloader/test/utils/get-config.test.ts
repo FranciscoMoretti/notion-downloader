@@ -49,6 +49,7 @@ test("get config", async () => {
       skip: false,
       overwrite: false,
       filters: [],
+      markdownExtension: "md",
       pageLinkHasExtension: true,
       outputPaths: "./content",
       markdownPrefixes: "",

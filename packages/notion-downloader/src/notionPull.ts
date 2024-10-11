@@ -220,7 +220,8 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
     layoutStrategies,
     existingFilesManager,
     newFilesManager,
-    filesInMemory
+    filesInMemory,
+    options.conversion.markdownExtension
   )
 
   await updateAssetFilePathsForMarkdown(objectsTree, newFilesManager)

@@ -1,8 +1,7 @@
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { ObjectType } from "notion-cache-client"
 
-import { AssetType, FileType, TextType } from "../config/schema"
-import { error } from "../log"
+import { FileType, MarkdownExtension, TextType } from "../config/schema"
 import { stringifyProperty } from "../properties/toPlainText"
 import { PageProperty } from "../properties/types"
 import { NotionObject } from "./NotionObject"
@@ -11,10 +10,16 @@ export class NotionPage implements NotionObject {
   // TODO: Can this, Database and Image Extend the PageObjectResponse instead of using as metadata?
   public metadata: PageObjectResponse
   public fileType: FileType = TextType.enum.markdown
-  public extension: string = "md"
+  // TODO: This object has too many responsibilities. NotionPage should only be for handy access to PageObjectResponse.
+  // TODO: File based stuff only matters in some parts of the application, therefore it should be in another class.
+  public extension: MarkdownExtension
 
-  public constructor(metadata: PageObjectResponse) {
+  public constructor(
+    metadata: PageObjectResponse,
+    markdownExtension: MarkdownExtension = MarkdownExtension.enum.md
+  ) {
     this.metadata = metadata
+    this.extension = markdownExtension
   }
 
   public get id(): string {

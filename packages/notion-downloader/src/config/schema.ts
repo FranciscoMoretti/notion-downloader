@@ -150,6 +150,9 @@ export type FilterType = z.infer<typeof filterTypeSchema>
 
 export const pathOptionsSchema = z.union([z.string(), filepathSchema])
 
+export const MarkdownExtension = z.enum(["md", "mdx"])
+export type MarkdownExtension = z.infer<typeof MarkdownExtension>
+
 const filterSchema = z.object({
   propertyName: z.string(),
   propertyValue: z.string(),
@@ -161,6 +164,7 @@ export type Filter = z.infer<typeof filterSchema>
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
   overwrite: z.boolean().default(false),
+  markdownExtension: MarkdownExtension.default("md"),
   slugProperty: z.string().optional(),
   filters: z.array(filterSchema).default([]),
 

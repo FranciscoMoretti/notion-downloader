@@ -1,6 +1,7 @@
 import { ObjectType } from "notion-cache-client"
 import { NotionObjectResponse, NotionObjectTree } from "notion-tree"
 
+import { MarkdownExtension } from "./config/schema"
 import { LayoutStrategyGroup } from "./createStrategies"
 import { FilesManager, copyRecord } from "./files/FilesManager"
 import { LayoutStrategy } from "./layoutStrategy/LayoutStrategy"
@@ -21,7 +22,8 @@ export function getFileTreeMap(
   existingFilesManager: FilesManager,
 
   newFilesManager: FilesManager,
-  filesInMemory: FileBuffersMemory
+  filesInMemory: FileBuffersMemory,
+  markdownExtension: MarkdownExtension
 ) {
   const nodeAction = (
     objectResponse: NotionObjectResponse,
@@ -30,7 +32,7 @@ export function getFileTreeMap(
       databaseIsRoot: boolean
     }
   ) => {
-    const notionObject = getNotionObject(objectResponse)
+    const notionObject = getNotionObject(objectResponse, markdownExtension)
 
     // New level path is created by objects that can contain files as children
     const newLevelPath =
