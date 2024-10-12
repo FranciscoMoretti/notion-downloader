@@ -27,8 +27,8 @@ export const docsConfig: DocsConfig = {
           items: [],
         },
         {
-          title: "Notion Token",
-          href: "/docs/notion-token",
+          title: "Notion Setup",
+          href: "/docs/notion-setup",
           items: [],
         },
         {

@@ -7,7 +7,9 @@ description: How to use the Notion Downloader.
 
 Follow these steps to use the Notion Downloader:
 
-1. **Initialize your project**
+1. Get your `NOTION_TOKEN` and `ROOT_ID` by following the guide in [Notion Setup](/docs/notion-setup/).
+
+2. **Initialize your project**
    Run the following command to create a `downloader.json` configuration file:
 
    ```bash
@@ -16,11 +18,11 @@ Follow these steps to use the Notion Downloader:
 
    This will prompt you for the required configuration options and create a `downloader.json` file in your current directory.
 
-2. **Configure downloader.json (Optional)**
+3. **Configure downloader.json (Optional)**
    If needed, customize your `downloader.json` file by following the [Configuration Guide](/docs/config).
 
-3. **Set up your Notion token**
-   Refer to the [Notion Token Setup](/docs/notion-token) guide for instructions on obtaining your Notion token. Once you have your token, you can use it in one of two ways:
+4. **Add your Notion token**
+   Refer to the [Notion Token Setup](/docs/notion-setup) guide for instructions on obtaining your Notion token. Once you have your token, you can use it in one of two ways:
 
    a. Add it to a `.env` file in your project root:
 
@@ -28,9 +30,10 @@ Follow these steps to use the Notion Downloader:
    NOTION_TOKEN=your_token_here
    ```
 
-   b. Use it directly with the CLI (see step 4).
+   b. Use it directly with the CLI (see step 5).
 
-4. **Download your Notion content**
+
+5. **Download your Notion content**
    Run one of the following commands to pull your Notion content:
 
    a. If you've set up your token in a `.env` file:
