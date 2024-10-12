@@ -72,9 +72,15 @@ npm install notion-downloader
     }
     ```
 
-8. **Videos:** For compatibility with server rendering, follow the [Video Support guide](https://nextra.site/docs/guide/video).
+8. Run the downloader:
 
-9. **Images:** If any images come from external domains, update your `next.config.mjs` file:
+```bash
+npm run download
+```
+
+9. **Videos:** For compatibility with server rendering, follow the [Video Support guide](https://nextra.site/docs/guide/video).
+
+10. **Images:** If any images come from external domains, update your `next.config.mjs` file:
 
 ```javascript
 import nextra from 'nextra'
@@ -100,8 +106,14 @@ const nextConfig = {
 export default nextConfig
 ```
 
+11. Run the documentation site:
 
-10. (Optional) Update your `.gitignore` file with:
+```bash
+npm run dev
+```
+
+
+12. (Optional) Update your `.gitignore` file with:
 
 ```bash
 # notion-downloader
