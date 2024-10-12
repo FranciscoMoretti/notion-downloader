@@ -44,12 +44,13 @@ npm install notion-downloader
 7. Create the downloader configuration:
 
    1. Run `notion-downloader init`
-   2. Use the following options in your configuration file:
+   2. Use the following options in your `downloader.json` file:
 
     ```json
     {
     "rootObjectType": "database",
     "rootDbAsFolder": true,
+    "revalidatePeriod": -1,
     ...
     "conversion": {
         ...
