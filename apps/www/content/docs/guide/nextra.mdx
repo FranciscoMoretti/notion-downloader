@@ -1,0 +1,111 @@
+---
+title: Nextra
+description: How to setup a Nextra project that uses Notion Downloader to pull content from Notion.
+---
+
+
+Here's a guide on how to integrate `Nextra` with `notion-downloader`:
+
+# Integrating Nextra with notion-downloader
+
+This guide explains how to set up a Nextra project that uses `notion-downloader` to pull content from Notion.
+- Reference template repository: [https://github.com/FranciscoMoretti/notion-nextra](https://github.com/FranciscoMoretti/notion-nextra).
+- Demo: [https://notion-nextra.vercel.app/](https://notion-nextra.vercel.app/)
+
+## Installation
+
+1. Follow the [Nextra installation guide](https://nextra.site/docs).
+
+2. Install `notion-downloader`:
+
+```bash
+npm install notion-downloader
+```
+
+3. Add the following scripts to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "download": "notion-downloader pull",
+    "cleanup:output": "notion-downloader cleanup -o",
+    "cleanup:all": "notion-downloader cleanup"
+  }
+}
+```
+
+4. Get your NOTION_TOKEN by following the guide in the [Notion Token documentation](https://nextra.site/docs/notion-token).
+
+5. Your root Notion object should be a database with a page titled "index". You can start from [this template](https://franciscomoretti.notion.site/11a047149aef80578303e705001bb90e?v=8446592daa4c4e7ab8c2c73cae646e27).
+
+6. Get the `rootId` from your page following the guide in `/notion-root-id.mdx`.
+
+
+7. Create the downloader configuration:
+
+   1. Run `notion-downloader init`
+   2. Use the following options in your configuration file:
+
+    ```json
+    {
+    "rootObjectType": "database",
+    "rootDbAsFolder": true,
+    ...
+    "conversion": {
+        ...
+        "markdownExtension": "mdx",
+        "namingStrategy": {
+            "markdown": "urlEncoding",
+            "assets": "guid"
+        },
+        "outputPaths": {
+            "markdown": "pages",
+            "assets": "public"
+        },
+        "layoutStrategy": {
+            "markdown": "hierarchical",
+            "assets": "flat"
+            }
+        ...
+        }
+    ...
+    }
+    ```
+
+8. **Videos:** For compatibility with server rendering, follow the [Video Support guide](https://nextra.site/docs/guide/video).
+
+9. **Images:** If any images come from external domains, update your `next.config.mjs` file:
+
+```javascript
+import nextra from 'nextra'
+
+/** @type {import('next').NextConfig} */
+const withNextra = nextra({
+  theme: 'nextra-theme-docs',
+  themeConfig: './theme.config.tsx',
+})
+
+const nextConfig = {
+  ...withNextra(),
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+}
+
+export default nextConfig
+```
+
+
+10. (Optional) Update your `.gitignore` file with:
+
+```bash
+# notion-downloader
+/.downloader
+```
+
+By following these steps, you'll have a Nextra project set up to pull content from Notion using `notion-downloader`. This integration allows you to maintain your content in Notion while leveraging Nextra's powerful documentation features.

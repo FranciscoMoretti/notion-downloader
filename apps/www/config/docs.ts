@@ -48,6 +48,11 @@ export const docsConfig: DocsConfig = {
       title: "Guides",
       items: [
         {
+          title: "Nextra",
+          href: "/docs/guide/nextra",
+          items: [],
+        },
+        {
           title: "Docusaurus",
           href: "/docs/guide/docusaurus",
           items: [],
