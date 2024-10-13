@@ -1,5 +1,11 @@
 # notion-downloader
 
+## 0.1.6
+
+### Patch Changes
+
+- [`93916f440bd1bb42b1b95f2b130995a6875b8f6c`](https://github.com/FranciscoMoretti/notion-downloader/commit/93916f440bd1bb42b1b95f2b130995a6875b8f6c) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Fix markdown internal links slashes
+
 ## 0.1.5
 
 ### Patch Changes
