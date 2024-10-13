@@ -4,6 +4,7 @@
   "compilerOptions": {
     "isolatedModules": false,
     "baseUrl": ".",
+    "module": "ESNext",
     "paths": {
       "@/*": ["./*"]
     }
