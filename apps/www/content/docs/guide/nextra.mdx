@@ -22,25 +22,13 @@ This guide explains how to set up a Nextra project that uses `notion-downloader`
 npm install notion-downloader
 ```
 
-3. Add the following scripts to your `package.json`:
+3. Your root Notion object should be a database with a page titled "index". You can start from [this template](https://franciscomoretti.notion.site/11a047149aef80578303e705001bb90e?v=8446592daa4c4e7ab8c2c73cae646e27).
 
-```json
-{
-  "scripts": {
-    "download": "notion-downloader pull",
-    "cleanup:output": "notion-downloader cleanup -o",
-    "cleanup:all": "notion-downloader cleanup"
-  }
-}
-```
-4. Your root Notion object should be a database with a page titled "index". You can start from [this template](https://franciscomoretti.notion.site/11a047149aef80578303e705001bb90e?v=8446592daa4c4e7ab8c2c73cae646e27).
+4. Get your `NOTION_TOKEN` and `ROOT_ID` from the [Notion Setup](/docs/notion-setup/) guide.
 
-5. Get your `NOTION_TOKEN` and `ROOT_ID` by following the guide in [Notion Setup](/docs/notion-setup/).
+5. Create the downloader configuration:
 
-6. Create the downloader configuration:
-
-   1. Run `notion-downloader init`
-   2. Use the following options in your `downloader.json` file:
+   Run `npx notion-downloader init` and use these options in `downloader.json` created:
 
     ```json
     {
@@ -70,7 +58,7 @@ npm install notion-downloader
     ```
 
 
-7. **Add your Notion token**
+6. **Add your Notion token**
    Refer to the [Notion Token Setup](/docs/notion-setup) guide for instructions on obtaining your Notion token. Once you have your token, you can use it in one of two ways:
 
    a. Add it to a `.env` file in your project root:
@@ -82,15 +70,15 @@ npm install notion-downloader
    b. Use it directly with the CLI.
 
 
-8. Run the downloader:
+7. Run the downloader:
 
 ```bash
-npm run download
+npx notion-downloader pull
 ```
 
-9. **Videos:** For compatibility with server rendering, follow the [Video Support guide](/docs/guide/video).
+8. **Videos:** For compatibility with server rendering, follow the [Video Support guide](/docs/guide/video).
 
-10. **Images:** If any images come from external domains, update your `next.config.mjs` file:
+9. **Images:** If any images come from external domains, update your `next.config.mjs` file:
 
 ```javascript
 import nextra from 'nextra'
@@ -116,14 +104,14 @@ const nextConfig = {
 export default nextConfig
 ```
 
-11. Run the documentation site:
+10. Run the documentation site:
 
 ```bash
 npm run dev
 ```
 
 
-12. (Optional) Update your `.gitignore` file with:
+11. (Optional) Update your `.gitignore` file with:
 
 ```bash
 # notion-downloader

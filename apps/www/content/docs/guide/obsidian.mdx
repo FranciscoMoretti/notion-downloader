@@ -3,4 +3,58 @@ title: Obsidian
 description: How to use Notion Downloader with Obsidian.
 ---
 
-TBD
+1. Install `notion-downloader`:
+
+```bash
+npm install notion-downloader
+```
+
+2. Get your `NOTION_TOKEN` and `ROOT_ID` from the [Notion Setup](/docs/notion-setup/) guide.
+
+3. Create the downloader configuration:
+
+   Run `npx notion-downloader init` and use these options in `downloader.json` created:
+
+```json
+{
+  ... 
+  "conversion": {
+    ... 
+    "outputPaths": {
+      "markdown": "./content/",
+      "assets": "./content/assets/"
+    },
+    "markdownPrefixes": {
+      "markdown": "",
+      "assets": "assets/"
+    },
+    "layoutStrategy": {
+      "markdown": "hierarchical",
+      "assets": "flat"
+    },
+    "namingStrategy": "default",
+    ... 
+  }
+  ... 
+}
+```
+
+> Your Obsidian vault should point to the `content` folder. You can change `content` to any other folder name.
+
+
+> This config puts all assets in the `assets` folder. See the [configuration reference](/docs/configuration) for more options.
+
+4. Add your Notion token:
+
+   a. In a `.env` file:
+   ```bash
+   NOTION_TOKEN=your_token_here
+   ```
+
+   b. Or use it directly with the CLI.
+
+5. Run the downloader:
+
+```bash
+npx notion-downloader pull
+```

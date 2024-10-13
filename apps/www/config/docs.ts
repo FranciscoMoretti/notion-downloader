@@ -48,6 +48,11 @@ export const docsConfig: DocsConfig = {
       title: "Guides",
       items: [
         {
+          title: "Obsidian",
+          href: "/docs/guide/obsidian",
+          items: [],
+        },
+        {
           title: "Nextra",
           href: "/docs/guide/nextra",
           items: [],
@@ -55,11 +60,6 @@ export const docsConfig: DocsConfig = {
         {
           title: "Docusaurus",
           href: "/docs/guide/docusaurus",
-          items: [],
-        },
-        {
-          title: "Obsidian",
-          href: "/docs/guide/obsidian",
           items: [],
         },
         {
