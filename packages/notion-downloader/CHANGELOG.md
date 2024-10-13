@@ -1,5 +1,11 @@
 # notion-downloader
 
+## 0.1.5
+
+### Patch Changes
+
+- [`5a466d677b25503d11e9c90bc78ac9564c8b9de6`](https://github.com/FranciscoMoretti/notion-downloader/commit/5a466d677b25503d11e9c90bc78ac9564c8b9de6) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - version reporting
+
 ## 0.1.4
 
 ### Patch Changes
