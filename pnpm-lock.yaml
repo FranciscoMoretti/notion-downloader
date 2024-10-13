@@ -523,8 +523,8 @@ importers:
   packages/notion-fixtures:
     dependencies:
       notion-cache-client:
-        specifier: 0.0.8
-        version: 0.0.8
+        specifier: 0.1.0
+        version: 0.1.0
     devDependencies:
       '@types/eslint':
         specifier: ^8.37.0
@@ -5281,8 +5281,8 @@ packages:
     resolution: {integrity: sha512-DlL+XwOy3NxAQ8xuC0okPgK46iuVNAK01YN7RueYBqqFeGsBjV9XmCAzAdgt+667bCl5kPh9EqKKDwnaPG1I7A==}
     engines: {node: '>=10'}
 
-  notion-cache-client@0.0.8:
-    resolution: {integrity: sha512-ftJ2mkJy3S6CbSrdHBDmDfW2zLLZQo2kTAasUZksJ+D2QtmjGpu/QHmBm9Mk/iUf6b3XaqTaADsv+TtdU+ADRA==}
+  notion-cache-client@0.1.0:
+    resolution: {integrity: sha512-fcZdVTzrpHrmKhtvKqRiRD2OVSydAkk2wj7F8Q74YQmGpc21cqBTQ+HbPEM41T97LEQuv+iml8364ZEmFCEjiA==}
     hasBin: true
 
   notion-client@4.19.8:
@@ -12411,7 +12411,7 @@ snapshots:
 
   normalize-url@6.1.0: {}
 
-  notion-cache-client@0.0.8:
+  notion-cache-client@0.1.0:
     dependencies:
       '@notionhq/client': 2.2.15
       chalk: 5.2.0
