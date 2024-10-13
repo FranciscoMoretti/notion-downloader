@@ -32,10 +32,9 @@ export function recordMapWithoutPrefix(
 
 export function recordWithPrefix(
   record: FileRecord,
-  prefix: string,
-  forcePosix: boolean = false
+  prefix: string
 ): FileRecord {
-  const newPath = addPathPrefix(record.path, prefix, forcePosix)
+  const newPath = addPathPrefix(record.path, prefix)
 
   return {
     ...record,

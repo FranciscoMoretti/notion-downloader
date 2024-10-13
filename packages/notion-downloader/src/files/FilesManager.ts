@@ -9,6 +9,7 @@ import {
   recordWithPrefix,
   toMapDataWithPrefix,
 } from "./recordPrefixUtils"
+import { convertMarkdownPath } from "./markdownPathUtils"
 
 type PathType = "base" | "output" | "markdown"
 
@@ -71,7 +72,11 @@ export class FilesManager {
     if (pathType === "output") {
       return recordWithPrefix(recordFromDirectory, this.outputDirectories[type])
     } else if (pathType === "markdown") {
-      return recordWithPrefix(recordFromDirectory, this.markdownPrefixes[type], true)
+      const record =  recordWithPrefix(recordFromDirectory, this.markdownPrefixes[type])
+      return {
+        ...record,
+        path: convertMarkdownPath(record.path),
+      }
     } else if (pathType === "base") {
       return recordFromDirectory
     } else {
@@ -87,6 +92,7 @@ export class FilesManager {
     record: FileRecord
   ): void {
     let recordToSet: FileRecord
+    // TODO: Only base can be set. Everything else can be computed from it, but not the other way around. Reflect it in this interface
     if (pathType === "output") {
       recordToSet = recordWithPrefix(record, this.outputDirectories[type])
     } else if (pathType === "markdown") {

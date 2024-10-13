@@ -111,16 +111,3 @@ describe("recordPrefixUtils", () => {
     expect(result.audio["audio-id"].path).toBe("/path/to/file.txt")
   })
 })
-
-describe("recordPrefixUtils with forcePosix", () => {
-  const sampleFileRecord: FileRecord = {
-    path: "path\\to\\file.txt",
-    lastEditedTime: "2023-04-01T12:00:00Z",
-  }
-
-  test("recordWithPrefix with forcePosix true", () => {
-    const result = recordWithPrefix(sampleFileRecord, "prefix", true)
-    expect(result.path).toBe("prefix/path/to/file.txt")
-    expect(result.lastEditedTime).toBe(sampleFileRecord.lastEditedTime)
-  })
-})
