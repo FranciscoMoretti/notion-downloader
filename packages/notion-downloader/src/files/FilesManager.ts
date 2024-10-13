@@ -71,7 +71,7 @@ export class FilesManager {
     if (pathType === "output") {
       return recordWithPrefix(recordFromDirectory, this.outputDirectories[type])
     } else if (pathType === "markdown") {
-      return recordWithPrefix(recordFromDirectory, this.markdownPrefixes[type])
+      return recordWithPrefix(recordFromDirectory, this.markdownPrefixes[type], true)
     } else if (pathType === "base") {
       return recordFromDirectory
     } else {

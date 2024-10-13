@@ -1,8 +1,12 @@
 import path from "path"
 
-export function addPathPrefix(basePath: string, prefix: string): string {
+export function addPathPrefix(
+  basePath: string,
+  prefix: string,
+  forcePosix: boolean = false
+): string {
   if (prefix === "") {
-    return basePath
+    return forcePosix ? basePath.replace(/\\/g, "/") : basePath
   }
   const normalizedPrefix = path.normalize(prefix)
   const normalizedPath = path.normalize(basePath)
@@ -11,7 +15,7 @@ export function addPathPrefix(basePath: string, prefix: string): string {
   // e.g. /foo/bar and prefix /prefix will result in /prefix/foo/bar
   const newPath = path.join(normalizedPrefix, normalizedPath)
 
-  return newPath
+  return forcePosix ? newPath.replace(/\\/g, "/") : newPath
 }
 
 export function removePathPrefix(fullPath: string, prefix: string): string {

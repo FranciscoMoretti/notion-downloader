@@ -124,6 +124,53 @@ describe("Path utils with different separators", () => {
 
     expect(addPathPrefix("foo\\bar", "C:\\prefix")).toBe("C:\\prefix\\foo\\bar")
   })
+})
 
-  // Add more tests for removePathPrefix and removePathExtension
+describe("addPathPrefix with forcePosix", () => {
+  test("forcePosix true with Windows-style path", () => {
+    expect(addPathPrefix("foo\\bar", "prefix", true)).toBe("prefix/foo/bar")
+  })
+
+  test("forcePosix true with POSIX-style path", () => {
+    expect(addPathPrefix("foo/bar", "prefix", true)).toBe("prefix/foo/bar")
+  })
+
+  test("forcePosix false with POSIX-style path", () => {
+    expect(addPathPrefix("foo/bar", "prefix", false)).toBe(
+      path.normalize("prefix/foo/bar")
+    )
+  })
+
+  test("forcePosix true with empty prefix", () => {
+    expect(addPathPrefix("foo\\bar", "", true)).toBe("foo/bar")
+  })
+
+  test("forcePosix false with empty prefix", () => {
+    expect(addPathPrefix("foo\\bar", "", false)).toBe(
+      path.normalize("foo\\bar")
+    )
+  })
+})
+
+describe("addPathPrefix with different platforms", () => {
+  const originalPlatform = process.platform
+
+  afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform })
+  })
+
+  test("Windows platform with forcePosix true", () => {
+    Object.defineProperty(process, "platform", { value: "win32" })
+    expect(addPathPrefix("foo\\bar", "prefix", true)).toBe("prefix/foo/bar")
+  })
+
+  test("POSIX platform with forcePosix true", () => {
+    Object.defineProperty(process, "platform", { value: "linux" })
+    expect(addPathPrefix("foo/bar", "prefix", true)).toBe("prefix/foo/bar")
+  })
+
+  test("POSIX platform with forcePosix false", () => {
+    Object.defineProperty(process, "platform", { value: "linux" })
+    expect(addPathPrefix("foo/bar", "prefix", false)).toBe("prefix/foo/bar")
+  })
 })
