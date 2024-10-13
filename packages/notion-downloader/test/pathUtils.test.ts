@@ -1,5 +1,5 @@
 import path from "path"
-import { describe, expect, test } from "vitest"
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 
 import {
   addPathPrefix,
@@ -81,4 +81,49 @@ describe("removePathExtension", () => {
   test("handles paths with only filename", () => {
     expect(removePathExtension("file.txt")).toBe("file")
   })
+})
+
+describe("Path utils with different separators", () => {
+  const originalPlatform = process.platform
+  const originalSep = path.sep
+  const originalJoin = path.join
+  const originalNormalize = path.normalize
+
+  beforeEach(() => {
+    vi.mock("path", async () => {
+      const actual = await vi.importActual("path")
+      return {
+        ...actual,
+        sep: "/",
+        join: (...paths: string[]) => paths.join("/"),
+        normalize: (p: string) => p.replace(/\\/g, "/"),
+      }
+    })
+  })
+
+  afterEach(() => {
+    vi.unmock("path")
+    Object.defineProperty(process, "platform", { value: originalPlatform })
+    Object.defineProperty(path, "sep", { value: originalSep })
+    Object.defineProperty(path, "join", { value: originalJoin })
+    Object.defineProperty(path, "normalize", { value: originalNormalize })
+  })
+
+  test("addPathPrefix with POSIX separators", () => {
+    expect(addPathPrefix("foo/bar", "/prefix")).toBe("/prefix/foo/bar")
+  })
+
+  test("addPathPrefix with Windows separators", () => {
+    Object.defineProperty(path, "sep", { value: "\\" })
+    Object.defineProperty(path, "join", {
+      value: (...paths: string[]) => paths.join("\\"),
+    })
+    Object.defineProperty(path, "normalize", {
+      value: (p: string) => p.replace(/\//g, "\\"),
+    })
+
+    expect(addPathPrefix("foo\\bar", "C:\\prefix")).toBe("C:\\prefix\\foo\\bar")
+  })
+
+  // Add more tests for removePathPrefix and removePathExtension
 })
