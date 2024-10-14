@@ -9,6 +9,19 @@ Notion Downloader supports video playback through the `react-player` package. Th
 
 ## Usage
 
+Add the `video` plugin to your downloader config:
+
+```json
+{
+   "conversion": {
+        "plugins": [
+            "video"
+        ]
+   }
+}
+```
+
+
 To use video playback in your Notion-exported content, simply include the `ReactPlayer` component from `react-player`:
 
 ```jsx
