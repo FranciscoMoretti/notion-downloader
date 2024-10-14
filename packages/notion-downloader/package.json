@@ -1,6 +1,6 @@
 {
   "name": "notion-downloader",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A CLI to download notion pages.",
   "publishConfig": {
     "access": "public"
