@@ -13,7 +13,7 @@ import {
 import { NotionToMarkdown } from "notion-to-md"
 import { NotionObjectTree, downloadNotionObjectTree } from "notion-tree"
 
-import { IPluginsConfig, loadConfigAsync } from "./config/configuration"
+import { loadPlugins } from "./config/plugins"
 import {
   FilepathGroup,
   NotionPullOptions,
@@ -37,7 +37,7 @@ import { endGroup, error, group, info } from "./log"
 import { NotionPage } from "./notionObjects/NotionPage"
 import { filterTree } from "./objectTree/filterTree"
 import { convertInternalUrl } from "./plugins/internalLinks"
-import { IPluginContext } from "./plugins/pluginTypes"
+import { IPlugin, IPluginContext } from "./plugins/pluginTypes"
 import {
   readOrDownloadNewAssets,
   saveNewAssets,
@@ -253,13 +253,11 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
   info(`Found ${objectsTree.getPages().length} pages`)
   info(`Found ${pagesToOutput.length} to output`)
 
-  const pluginsConfig = await loadConfigAsync()
   const notionToMarkdown = new NotionToMarkdown({
     notionClient: cachedNotionClient,
   })
   await outputPages(
     options,
-    pluginsConfig,
     pagesToOutput,
     cachedNotionClient,
     notionToMarkdown,
@@ -399,7 +397,6 @@ function getPagesToOutput(
 
 async function outputPages(
   options: NotionPullOptions,
-  config: IPluginsConfig,
   pages: Array<NotionPage>,
   client: Client,
   notionToMarkdown: NotionToMarkdown,
@@ -412,6 +409,7 @@ async function outputPages(
     notionToMarkdown,
     filesManager
   )
+  const plugins = await loadPlugins(options.conversion.plugins)
 
   for (const page of pages) {
     const mdPathWithRoot = filesManager.get(
@@ -419,7 +417,7 @@ async function outputPages(
       ObjectType.enum.page,
       page.id
     )?.path
-    const markdown = await getMarkdownForPage(config, context, page)
+    const markdown = await getMarkdownForPage(plugins, context, page)
     writePage(markdown, mdPathWithRoot)
   }
 

@@ -2,6 +2,8 @@ import { ObjectType, PageOrDatabase } from "notion-cache-client"
 import { cacheOptionsSchema } from "notion-tree"
 import { coerce, z } from "zod"
 
+import { NotionToMdPlugin } from "./pluginSchema"
+
 export const AssetType = z.enum(["image", "file", "video", "pdf", "audio"])
 export type AssetType = z.infer<typeof AssetType>
 
@@ -161,6 +163,9 @@ const filterSchema = z.object({
 
 export type Filter = z.infer<typeof filterSchema>
 
+export const PluginsConfig = z.array(z.union([z.string(), NotionToMdPlugin]))
+export type PluginsConfig = z.infer<typeof PluginsConfig>
+
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
   overwrite: z.boolean().default(false),
@@ -177,6 +182,7 @@ export const conversionSchema = z.object({
   namingStrategy: namingStrategyOptionsSchema.default(
     AllNamingSchemaName.enum.default
   ),
+  plugins: PluginsConfig.default([]),
 })
 
 export const rootObjectTypeSchema = z.enum([

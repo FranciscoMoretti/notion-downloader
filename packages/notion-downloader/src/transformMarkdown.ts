@@ -1,17 +1,18 @@
 import chalk from "chalk"
 
-import { IPluginsConfig } from "./config/configuration"
+import { IPluginsConfig } from "./config/plugins"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import { getFileUrl } from "./notionObjects/NotionFile"
 import { NotionPage } from "./notionObjects/NotionPage"
 import {
+  IPlugin,
   IPluginContext,
   IRegexMarkdownModification,
 } from "./plugins/pluginTypes"
 import { NotionBlock } from "./types"
 
 export async function getMarkdownForPage(
-  config: IPluginsConfig,
+  plugins: IPlugin[],
   context: IPluginContext,
   page: NotionPage
 ): Promise<string> {
@@ -21,7 +22,7 @@ export async function getMarkdownForPage(
 
   logDebugFn("markdown from page", () => JSON.stringify(blocks, null, 2))
 
-  const body = await getMarkdownFromNotionBlocks(context, config, blocks)
+  const body = await getMarkdownFromNotionBlocks(context, plugins, blocks)
   const frontmatter = getFrontMatter(page) // todo should be a plugin
   return `${frontmatter}\n${body}`
 }
@@ -29,26 +30,26 @@ export async function getMarkdownForPage(
 // this is split off from getMarkdownForPage so that unit tests can provide the block contents
 export async function getMarkdownFromNotionBlocks(
   context: IPluginContext,
-  config: IPluginsConfig,
+  plugins: IPlugin[],
   blocks: Array<NotionBlock>
 ): Promise<string> {
   // changes to the blocks we get from notion API
-  doNotionBlockTransforms(blocks, config)
+  doNotionBlockTransforms(blocks, plugins)
 
   // overrides for the default notion-to-markdown conversions
-  registerNotionToMarkdownCustomTransforms(config, context)
+  registerNotionToMarkdownCustomTransforms(plugins, context)
 
   // the main conversion to markdown, using the notion-to-md library
   let markdown = await doNotionToMarkdown(context, blocks) // ?
 
   // corrections to links after they are converted to markdown,
   // with access to all the pages we've seen
-  markdown = doLinkFixes(context, markdown, config)
+  markdown = doLinkFixes(context, markdown, plugins)
 
   //console.log("markdown after link fixes", markdown);
 
   // simple regex-based tweaks. These are usually related to docusaurus
-  const body = await doTransformsOnMarkdown(context, config, markdown)
+  const body = await doTransformsOnMarkdown(context, plugins, markdown)
 
   // console.log("markdown after regex fixes", markdown);
   // console.log("body after regex", body);
@@ -62,10 +63,10 @@ export async function getMarkdownFromNotionBlocks(
 // operations on notion blocks before they are converted to markdown
 function doNotionBlockTransforms(
   blocks: Array<NotionBlock>,
-  config: IPluginsConfig
+  plugins: IPlugin[]
 ) {
   for (const block of blocks) {
-    config.plugins.forEach((plugin) => {
+    plugins.forEach((plugin) => {
       if (plugin.notionBlockModifications) {
         plugin.notionBlockModifications.forEach((transform) => {
           logDebug("transforming block with plugin", plugin.name)
@@ -78,10 +79,10 @@ function doNotionBlockTransforms(
 
 async function doTransformsOnMarkdown(
   context: IPluginContext,
-  config: IPluginsConfig,
+  plugins: IPlugin[],
   input: string
 ) {
-  const regexMods: IRegexMarkdownModification[] = config.plugins
+  const regexMods: IRegexMarkdownModification[] = plugins
     .filter((plugin) => !!plugin.regexMarkdownModifications)
     .map((plugin) => {
       const mods = plugin.regexMarkdownModifications!
@@ -172,7 +173,7 @@ async function doNotionToMarkdown(
 function doLinkFixes(
   context: IPluginContext,
   markdown: string,
-  config: IPluginsConfig
+  plugins: IPlugin[]
 ): string {
   // This regex matches markdown links that are not preceded by a ! character (not images)
   const linkRegExp = getLinkMatchingRegex()
@@ -196,7 +197,7 @@ function doLinkFixes(
     // We only use the first plugin that matches and makes a change to the link.
     // Enhance: we could take the time to see if multiple plugins match, and
     // and point this out in verbose logging mode.
-    config.plugins.some((plugin) => {
+    plugins.some((plugin) => {
       if (!plugin.linkModifier) return false
       if (plugin.linkModifier.match.exec(originalLinkMarkdown) === null) {
         verbose(`plugin "${plugin.name}" did not match this url`)
@@ -228,10 +229,10 @@ export function getLinkMatchingRegex() {
 
 // overrides for the conversions that notion-to-md does
 function registerNotionToMarkdownCustomTransforms(
-  config: IPluginsConfig,
+  plugins: IPlugin[],
   pluginContext: IPluginContext
 ) {
-  config.plugins.forEach((plugin) => {
+  plugins.forEach((plugin) => {
     if (plugin.notionToMarkdownTransforms) {
       plugin.notionToMarkdownTransforms.forEach((transform) => {
         logDebug(

@@ -1,15 +1,15 @@
-import { ObjectType, ObjectType } from "notion-cache-client"
+import { ObjectType } from "notion-cache-client"
 
 import { FilepathGroup, mapToAssetType } from "../config/schema"
 import { NotionObject } from "../notionObjects/NotionObject"
 import { iNotionAssetObject } from "../notionObjects/objectTypes"
 import { FileRecord, FileRecordType, FilesMap, FilesMapData } from "./FilesMap"
+import { convertMarkdownPath } from "./markdownPathUtils"
 import {
   recordMapWithPrefix,
   recordWithPrefix,
   toMapDataWithPrefix,
 } from "./recordPrefixUtils"
-import { convertMarkdownPath } from "./markdownPathUtils"
 
 type PathType = "base" | "output" | "markdown"
 
@@ -72,7 +72,10 @@ export class FilesManager {
     if (pathType === "output") {
       return recordWithPrefix(recordFromDirectory, this.outputDirectories[type])
     } else if (pathType === "markdown") {
-      const record =  recordWithPrefix(recordFromDirectory, this.markdownPrefixes[type])
+      const record = recordWithPrefix(
+        recordFromDirectory,
+        this.markdownPrefixes[type]
+      )
       return {
         ...record,
         path: convertMarkdownPath(record.path),

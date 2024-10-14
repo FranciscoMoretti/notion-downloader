@@ -12,6 +12,10 @@ process.on("SIGTERM", () => process.exit(0))
 
 export { NotionPullOptionsInput as Config }
 
+// TODO: Cleanup unnecesasry exports
+export { IPlugin } from "./plugins/pluginTypes"
+export { NotionBlock } from "./types"
+
 async function main() {
   const packageInfo = await getPackageInfo()
 

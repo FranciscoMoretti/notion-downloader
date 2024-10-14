@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client"
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { IPluginsConfig } from "../config/configuration"
+import { IPluginsConfig } from "../config/plugins"
 import { defaultPullOptions, parsePathFileOptions } from "../config/schema"
 import { FilesManager } from "../files/FilesManager"
 import { FilesMap } from "../files/FilesMap"
