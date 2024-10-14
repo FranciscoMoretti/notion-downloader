@@ -10,6 +10,7 @@ export function getPackageInfo() {
     packageJsonPath = path.resolve(__dirname, "..", "package.json")
   } else {
     // ESM
+    // TODO: Fix, this gives a warning for CJS. Maybe its a sign to drop support for CJS?
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
     packageJsonPath = path.resolve(__dirname, "..", "..", "package.json")
