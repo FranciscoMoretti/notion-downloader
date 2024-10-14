@@ -2,7 +2,6 @@ import { Client } from "@notionhq/client"
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 
-import { IPluginsConfig } from "../config/plugins"
 import { defaultPullOptions, parsePathFileOptions } from "../config/schema"
 import { FilesManager } from "../files/FilesManager"
 import { FilesMap } from "../files/FilesMap"
@@ -13,10 +12,10 @@ import { NotionPage } from "../notionObjects/NotionPage"
 import { getMarkdownFromNotionBlocks } from "../transformMarkdown"
 import { NotionBlock } from "../types"
 import { convertInternalUrl } from "./internalLinks"
-import { IPluginContext } from "./pluginTypes"
+import { IPlugin, IPluginContext } from "./pluginTypes"
 
 export async function blocksToMarkdown(
-  config: IPluginsConfig,
+  plugins: IPlugin[],
   blocks: NotionBlock[],
   pages?: NotionPage[],
   // Notes on children:
@@ -108,7 +107,7 @@ export async function blocksToMarkdown(
     // console.log(pages[0].matchesLinkId);
     // console.log(pluginContext.pages[0].matchesLinkId);
   }
-  const r = await getMarkdownFromNotionBlocks(pluginContext, config, blocks)
+  const r = await getMarkdownFromNotionBlocks(pluginContext, plugins, blocks)
   //console.log("blocksToMarkdown", r);
   return r
 }
@@ -243,7 +242,7 @@ export function makeSamplePageObject(options: {
 }
 
 export async function oneBlockToMarkdown(
-  config: IPluginsConfig,
+  plugins: IPlugin[],
   block: Record<string, unknown>,
   targetPage?: NotionPage,
   targetPage2?: NotionPage
@@ -283,7 +282,7 @@ export async function oneBlockToMarkdown(
     name: "Dummy2",
   })
   return await blocksToMarkdown(
-    config,
+    plugins,
     [fullBlock as NotionBlock],
     targetPage ? [dummyPage1, targetPage, targetPage2 ?? dummyPage2] : undefined
   )

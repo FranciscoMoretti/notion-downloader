@@ -739,12 +739,14 @@ async function getMarkdown(
   targetPage?: NotionPage,
   targetPage2?: NotionPage
 ) {
-  const config = {
-    plugins: [
+  return await oneBlockToMarkdown(
+    [
       standardCalloutTransformer,
       standardInternalLinkConversion,
       standardExternalLinkConversion,
     ],
-  }
-  return await oneBlockToMarkdown(config, block, targetPage, targetPage2)
+    block,
+    targetPage,
+    targetPage2
+  )
 }

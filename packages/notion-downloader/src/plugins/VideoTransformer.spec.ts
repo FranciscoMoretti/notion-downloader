@@ -6,8 +6,8 @@ import { standardVideoTransformer } from "./VideoTransformer"
 import { blocksToMarkdown } from "./pluginTestRun"
 
 test("youtube embedded", async () => {
-  const config = { plugins: [standardVideoTransformer] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [standardVideoTransformer]
+  const result = await blocksToMarkdown(plugins, [
     {
       object: "block",
       type: "video",
@@ -36,8 +36,8 @@ test("youtube embedded", async () => {
 
 test("vimeo embedded", async () => {
   setLogLevel("verbose")
-  const config = { plugins: [standardVideoTransformer] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [standardVideoTransformer]
+  const result = await blocksToMarkdown(plugins, [
     {
       object: "block",
       type: "video",
@@ -56,8 +56,8 @@ test("vimeo embedded", async () => {
 
 test("video link, not embedded", async () => {
   setLogLevel("verbose")
-  const config = { plugins: [standardVideoTransformer] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [standardVideoTransformer]
+  const result = await blocksToMarkdown(plugins, [
     {
       object: "block",
       type: "paragraph",
@@ -90,8 +90,8 @@ test("video link, not embedded", async () => {
 
 test("direct upload to to Notion (embedded)", async () => {
   setLogLevel("verbose")
-  const config = { plugins: [standardVideoTransformer] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [standardVideoTransformer]
+  const result = await blocksToMarkdown(plugins, [
     {
       object: "block",
       id: "12f7db3b-4412-4be9-a3f7-6ac423fee94a",

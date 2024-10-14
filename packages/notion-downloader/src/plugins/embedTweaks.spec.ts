@@ -8,8 +8,8 @@ import { IPlugin } from "./pluginTypes"
 
 test("imgur", async () => {
   setLogLevel("verbose")
-  const config = { plugins: [imgurGifEmbed] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [imgurGifEmbed]
+  const result = await blocksToMarkdown(plugins, [
     {
       object: "block",
       id: "e36710d8-98ad-40dc-b41b-b376ebdd6894",
@@ -22,8 +22,8 @@ test("imgur", async () => {
 
 test("gif", async () => {
   setLogLevel("verbose")
-  const config = { plugins: [gifEmbed] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [gifEmbed]
+  const result = await blocksToMarkdown(plugins, [
     {
       object: "block",
       id: "e36710d8-98ad-40dc-b41b-b376ebdd6894",
@@ -50,8 +50,8 @@ test("tweaks are not applied inside code blocks", async () => {
       },
     ],
   }
-  const config = { plugins: [p] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [p]
+  const result = await blocksToMarkdown(plugins, [
     {
       type: "code",
       code: {
@@ -117,8 +117,8 @@ test("simplest possible", async () => {
       },
     ],
   }
-  const config = { plugins: [p] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [p]
+  const result = await blocksToMarkdown(plugins, [
     {
       type: "paragraph",
       paragraph: {
@@ -156,8 +156,8 @@ test("use match in output", async () => {
       },
     ],
   }
-  const config = { plugins: [p] }
-  const result = await blocksToMarkdown(config, [
+  const plugins = [p]
+  const result = await blocksToMarkdown(plugins, [
     {
       type: "paragraph",
       paragraph: {

@@ -65,13 +65,14 @@ test("raw url inside a mermaid codeblock gets converted to path using slug of th
     ],
   }
 
-  const config = {
-    plugins: [
+  const results = await oneBlockToMarkdown(
+    [
       standardInternalLinkConversion,
       standardExternalLinkConversion,
       mermaidLinks,
     ],
-  }
-  const results = await oneBlockToMarkdown(config, input, targetPage)
+    input,
+    targetPage
+  )
   expect(results.trim()).toContain(`click A "/slug-of-target"`)
 })

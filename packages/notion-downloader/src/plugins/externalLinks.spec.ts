@@ -136,8 +136,5 @@ test("inline links to external site", async () => {
 })
 
 async function getMarkdown(block: Record<string, unknown>) {
-  const config = {
-    plugins: [standardExternalLinkConversion],
-  }
-  return await oneBlockToMarkdown(config, block)
+  return await oneBlockToMarkdown([standardExternalLinkConversion], block)
 }

@@ -28,7 +28,7 @@ const columnBlock = {
 } as unknown as NotionBlock
 async function getResults(children: NotionBlock[]) {
   return await blocksToMarkdown(
-    { plugins: [standardColumnTransformer] },
+    [standardColumnTransformer],
     [columnBlock],
     undefined,
     children,

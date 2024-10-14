@@ -1,6 +1,5 @@
 import chalk from "chalk"
 
-import { IPluginsConfig } from "./config/plugins"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import { getFileUrl } from "./notionObjects/NotionFile"
 import { NotionPage } from "./notionObjects/NotionPage"

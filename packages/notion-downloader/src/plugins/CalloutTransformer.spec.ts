@@ -38,79 +38,83 @@ beforeEach(() => {
 test("smoketest callout", async () => {
   const config = { plugins: [standardCalloutTransformer] }
   block.callout.icon.emoji = "ℹ️"
-  let results = await blocksToMarkdown(config, [
-    block as unknown as NotionBlock,
-  ])
+  let results = await blocksToMarkdown(
+    [standardCalloutTransformer],
+    [block as unknown as NotionBlock]
+  )
   expect(results).toContain("\n:::note\n\nThis is the callout\n\n:::\n")
   block.callout.icon.emoji = "❗"
-  results = await blocksToMarkdown(config, [block as unknown as NotionBlock])
+  results = await blocksToMarkdown(
+    [standardCalloutTransformer],
+    [block as unknown as NotionBlock]
+  )
   expect(results).toContain(":::info")
 })
 
 test("external link inside callout, bold preserved", async () => {
-  const config = {
-    plugins: [
+  const results = await blocksToMarkdown(
+    [
       standardCalloutTransformer,
       standardInternalLinkConversion,
       standardExternalLinkConversion,
     ],
-  }
-  const results = await blocksToMarkdown(config, [
-    {
-      type: "callout",
-      callout: {
-        rich_text: [
-          {
-            type: "text",
-            text: { content: "Callouts inline ", link: null },
-            annotations: {
-              bold: false,
-              italic: false,
-              strikethrough: false,
-              underline: false,
-              code: false,
-              color: "default",
+    [
+      {
+        type: "callout",
+        callout: {
+          rich_text: [
+            {
+              type: "text",
+              text: { content: "Callouts inline ", link: null },
+              annotations: {
+                bold: false,
+                italic: false,
+                strikethrough: false,
+                underline: false,
+                code: false,
+                color: "default",
+              },
+              plain_text: "Callouts inline ",
+              href: null,
             },
-            plain_text: "Callouts inline ",
-            href: null,
-          },
-          {
-            type: "text",
-            text: {
-              content: "great page",
-              link: { url: `https://github.com` },
+            {
+              type: "text",
+              text: {
+                content: "great page",
+                link: { url: `https://github.com` },
+              },
+              annotations: {
+                bold: true,
+                italic: false,
+                strikethrough: false,
+                underline: false,
+                code: false,
+                color: "default",
+              },
+              plain_text: "great page",
+              href: `https://github.com`,
             },
-            annotations: {
-              bold: true,
-              italic: false,
-              strikethrough: false,
-              underline: false,
-              code: false,
-              color: "default",
+            {
+              type: "text",
+              text: { content: ".", link: null },
+              annotations: {
+                bold: false,
+                italic: false,
+                strikethrough: false,
+                underline: false,
+                code: false,
+                color: "default",
+              },
+              plain_text: ".",
+              href: null,
             },
-            plain_text: "great page",
-            href: `https://github.com`,
-          },
-          {
-            type: "text",
-            text: { content: ".", link: null },
-            annotations: {
-              bold: false,
-              italic: false,
-              strikethrough: false,
-              underline: false,
-              code: false,
-              color: "default",
-            },
-            plain_text: ".",
-            href: null,
-          },
-        ],
-        icon: { type: "emoji", emoji: "⚠️" },
-        color: "gray_background",
-      },
-    } as unknown as NotionBlock,
-  ])
+          ],
+          icon: { type: "emoji", emoji: "⚠️" },
+          color: "gray_background",
+        },
+      } as unknown as NotionBlock,
+    ]
+  )
   expect(results.trim()).toBe(
     `:::caution
 
@@ -121,20 +125,17 @@ Callouts inline [**great page**](https://github.com).
 })
 
 test("internal link inside callout, bold preserved", async () => {
-  const config = {
-    plugins: [
-      standardCalloutTransformer,
-      standardInternalLinkConversion,
-      standardExternalLinkConversion,
-    ],
-  }
   const slugTargetPage = makeSamplePageObject({
     slug: "hello-world",
     name: "Hello World",
     id: "123",
   })
   const results = await blocksToMarkdown(
-    config,
+    [
+      standardCalloutTransformer,
+      standardInternalLinkConversion,
+      standardExternalLinkConversion,
+    ],
     [
       {
         type: "callout",

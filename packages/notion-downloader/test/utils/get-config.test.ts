@@ -55,6 +55,7 @@ test("get config", async () => {
       markdownPrefixes: "",
       layoutStrategy: "hierarchical",
       namingStrategy: "default",
+      plugins: [],
     },
   })
 })

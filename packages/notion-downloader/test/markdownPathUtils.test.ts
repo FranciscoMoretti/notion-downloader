@@ -67,5 +67,14 @@ describe("markdownPathUtils", () => {
         "[Link Text](path/to/file%20with%20spaces.md#section-id)"
       )
     })
+    test("Links with sapces in different parts of the path", () => {
+      const convertedPath = convertMarkdownPath(
+        "folder with spaces/to/file with spaces.md"
+      )
+      const markdownLink = `[Link Text](${convertedPath}#section-id)`
+      expect(markdownLink).toBe(
+        "[Link Text](folder%20with%20spaces/to/file%20with%20spaces.md#section-id)"
+      )
+    })
   })
 })

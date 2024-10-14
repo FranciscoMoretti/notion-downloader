@@ -10,11 +10,6 @@ import { defaultPlugins } from "./defaultPlugins"
 import { NotionToMdPlugin } from "./pluginSchema"
 import { PluginsConfig } from "./schema"
 
-// TODO: Remove IPluginsConfig
-export type IPluginsConfig = {
-  plugins: IPlugin[]
-}
-
 function loadOfficialPlugin(pluginName: string): NotionToMdPlugin {
   if (!(pluginName in standardPluginsDict)) {
     throw new Error(`Official plugin "${pluginName}" not found`)

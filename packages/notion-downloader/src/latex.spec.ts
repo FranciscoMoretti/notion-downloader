@@ -3,13 +3,12 @@ import { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 import { NotionToMarkdown } from "notion-to-md"
 import { expect, test } from "vitest"
 
-import { IPluginsConfig } from "./config/configuration"
-import defaultConfig from "./config/default.plugin.config"
+import { defaultPlugins } from "./config/defaultPlugins"
 import { defaultPullOptions, parsePathFileOptions } from "./config/schema"
 import { FilesManager } from "./files/FilesManager"
 import { NotionPage } from "./notionObjects/NotionPage"
 import { convertInternalUrl } from "./plugins/internalLinks"
-import { IPluginContext } from "./plugins/pluginTypes"
+import { IPlugin, IPluginContext } from "./plugins/pluginTypes"
 import { getMarkdownFromNotionBlocks } from "./transformMarkdown"
 
 test("Latex Rendering", async () => {
@@ -25,7 +24,7 @@ test("Latex Rendering", async () => {
     auth: "",
   })
 
-  const config: IPluginsConfig = defaultConfig
+  const plugins: IPlugin[] = defaultPlugins
 
   const context: IPluginContext = {
     getBlockChildren: (id: string) => {
@@ -95,7 +94,7 @@ test("Latex Rendering", async () => {
     },
   ]
 
-  expect(await getMarkdownFromNotionBlocks(context, config, blocks)).toContain(
+  expect(await getMarkdownFromNotionBlocks(context, plugins, blocks)).toContain(
     "$x$"
   )
 })
