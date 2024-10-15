@@ -1,5 +1,11 @@
 # notion-downloader
 
+## 0.1.8
+
+### Patch Changes
+
+- [`1b11362e7246cad355185f9e6956d41e6f7594eb`](https://github.com/FranciscoMoretti/notion-downloader/commit/1b11362e7246cad355185f9e6956d41e6f7594eb) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Fix double url encoding
+
 ## 0.1.7
 
 ### Patch Changes
