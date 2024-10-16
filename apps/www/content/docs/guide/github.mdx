@@ -1,6 +1,84 @@
 ---
 title: GitHub
-description: How to use Notion Downloader with GitHub.
+description: Notion to GitHub with notion-downloader.
 ---
 
-TBD
+
+How to set up a GitHub repository that uses `notion-downloader` to pull content from Notion.
+
+## Notion to GitHub with notion-downloader
+
+This guide explains how to set up a GitHub repository that uses `notion-downloader` to pull content from Notion.
+- Reference template repository: [https://github.com/FranciscoMoretti/notion-to-github](https://github.com/FranciscoMoretti/notion-to-github).
+
+## Steps
+
+1. Install `notion-downloader`:
+
+```bash 
+npm install notion-downloader
+```
+
+2. Get your `NOTION_TOKEN` and `ROOT_ID` from the [Notion Setup](/docs/notion-setup/) guide.
+
+3. Create the downloader configuration:
+
+   Run `npx notion-downloader init` and use these options in `downloader.json` created:
+
+```json
+{
+  ... 
+  "rootObjectType": "page",
+  "conversion": {
+    ... 
+    "pageLinkHasExtension": true,
+    "markdownPrefixes": {
+      "markdown": "",
+      "assets": ""
+    },
+    "layoutStrategy": {
+      "markdown": "hierarchical",
+      "assets": "hierarchical"
+    },
+    "namingStrategy": {
+      "markdown": "githubSlug",
+      "assets": "default"
+    }
+
+    ...
+  }
+  ...
+}
+```
+
+> Name your root page `README` for it to be featured on the repository home page.
+
+4. Add your Notion token:
+
+   a. In a `.env` file:
+   ```bash
+   NOTION_TOKEN=your_token_here
+   ```
+
+   b. Or use it directly with the CLI.  
+
+5. Run the downloader:
+
+```bash
+npx notion-downloader pull
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
