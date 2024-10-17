@@ -63,6 +63,7 @@ export class NotionSlugNamingStrategy extends SlugNamingStrategy {
         .replaceAll("%", "-")
         // remove consecutive dashes
         .replaceAll("--", "-")
+      // TODO: Do we want to sanitize the `.` character?
     )
   }
 }
