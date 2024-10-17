@@ -166,6 +166,15 @@ export type Filter = z.infer<typeof filterSchema>
 export const PluginsConfig = z.array(z.union([z.string(), NotionToMdPlugin]))
 export type PluginsConfig = z.infer<typeof PluginsConfig>
 
+export const FrontmatterEmptyFieldStrategy = z.enum([
+  "skip",
+  "empty",
+  "undefined",
+])
+export type FrontmatterEmptyFieldStrategy = z.infer<
+  typeof FrontmatterEmptyFieldStrategy
+>
+
 export const conversionSchema = z.object({
   skip: z.boolean().default(false),
   overwrite: z.boolean().default(false),
@@ -182,6 +191,12 @@ export const conversionSchema = z.object({
   namingStrategy: namingStrategyOptionsSchema.default(
     AllNamingSchemaName.enum.default
   ),
+  frontmatter: z
+    .object({
+      skip: z.boolean().default(false),
+      emptyFieldStrategy: FrontmatterEmptyFieldStrategy.default("empty"),
+    })
+    .default({}),
   plugins: PluginsConfig.default([]),
 })
 

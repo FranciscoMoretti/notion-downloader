@@ -1,5 +1,6 @@
 import chalk from "chalk"
 
+import { FrontmatterEmptyFieldStrategy } from "./config/schema"
 import { error, info, logDebug, logDebugFn, verbose, warning } from "./log"
 import { getFileUrl } from "./notionObjects/NotionFile"
 import { NotionPage } from "./notionObjects/NotionPage"
@@ -22,7 +23,15 @@ export async function getMarkdownForPage(
   logDebugFn("markdown from page", () => JSON.stringify(blocks, null, 2))
 
   const body = await getMarkdownFromNotionBlocks(context, plugins, blocks)
-  const frontmatter = getFrontMatter(page) // todo should be a plugin
+
+  if (context.options.conversion.frontmatter.skip) {
+    return body
+  }
+
+  const frontmatter = getFrontMatter(
+    page,
+    context.options.conversion.frontmatter.emptyFieldStrategy
+  )
   return `${frontmatter}\n${body}`
 }
 
@@ -262,14 +271,31 @@ function sanitizeProp(value: string): string {
   return sanitized
 }
 
-// enhance:make this built-in plugin so that it can be overridden
-function getFrontMatter(page: NotionPage): string {
-  const customProperties = Object.fromEntries(
-    Object.entries(page.metadata.properties).map(([key, _]) => {
-      const value = page.getPropertyAsPlainText(key)
-      return [key, value ? sanitizeProp(value) : undefined]
+function getFrontMatter(
+  page: NotionPage,
+  emptyFieldsStrategy: FrontmatterEmptyFieldStrategy
+): string {
+  const customProperties = Object.entries(page.metadata.properties)
+    .map(([key, _]) => {
+      const rawValue = page.getPropertyAsPlainText(key)
+      return [key, rawValue ? sanitizeProp(rawValue) : null]
     })
-  )
+    .filter(([_, value]) => {
+      if (emptyFieldsStrategy === "skip") {
+        return value !== null
+      }
+      return true
+    })
+    .map(([key, value]) => {
+      if (value === null) {
+        if (emptyFieldsStrategy === "empty") {
+          return [key, ""]
+        } else if (emptyFieldsStrategy === "undefined") {
+          return [key, "undefined"]
+        }
+      }
+      return [key, value]
+    })
 
   const standardProperties = {
     title: `${sanitizeProp(page.title)}`,
@@ -280,7 +306,7 @@ function getFrontMatter(page: NotionPage): string {
   }
 
   const frontMatterProperties = {
-    ...customProperties,
+    ...Object.fromEntries(customProperties),
     ...standardProperties,
   }
 

@@ -3,4 +3,76 @@ title: Docusaurus
 description: How to use Notion Downloader with Docusaurus.
 ---
 
-TBD
+1. Follow the instructions in the [Docusaurus](https://docusaurus.io/docs/installation) guide to install Docusaurus.
+
+2. Install `notion-downloader`:
+
+```bash
+npm install notion-downloader
+```
+
+3. Get your `NOTION_TOKEN` and `ROOT_ID` from the [Notion Setup](/docs/notion-setup/) guide.
+
+4. Create the downloader configuration:
+
+   Run `npx notion-downloader init` and use these options in `downloader.json` created:
+
+
+  "rootObjectType": "database",
+    "outputPaths": "./docs",
+    "markdownExtension": "mdx",
+    "outputPaths": {
+      "markdown": "./docs",
+      "assets": "./static"
+    },
+
+    "namingStrategy": {
+      "markdown": "githubSlug",
+      "assets": "default"
+    },
+
+    "frontmatter": {
+      "emptyFieldStrategy": "skip"
+    },
+
+```json
+{
+  ... 
+  "conversion": {
+    ... 
+    "outputPaths": {
+      "markdown": "./content/",
+      "assets": "./content/assets/"
+    },
+    "markdownPrefixes": {
+      "markdown": "",
+      "assets": "assets/"
+    },
+    "layoutStrategy": {
+      "markdown": "hierarchical",
+      "assets": "flat"
+    },
+    "namingStrategy": "default",
+    ... 
+  }
+  ... 
+}
+```
+
+5. Add your Notion token:
+
+   a. In a `.env` file:
+   ```bash
+   NOTION_TOKEN=your_token_here
+   ```
+
+   b. Or use it directly with the CLI.
+
+
+6. Remove the existing content from the `docs` folder.
+
+7. Run the downloader:
+
+```bash
+npx notion-downloader pull
+```
