@@ -18,41 +18,25 @@ npm install notion-downloader
    Run `npx notion-downloader init` and use these options in `downloader.json` created:
 
 
+```json
+{
+  ... 
   "rootObjectType": "database",
-    "outputPaths": "./docs",
+  "conversion": {
+    ... 
     "markdownExtension": "mdx",
     "outputPaths": {
       "markdown": "./docs",
       "assets": "./static"
     },
-
     "namingStrategy": {
       "markdown": "githubSlug",
       "assets": "default"
     },
-
+    "layoutStrategy": "hierarchical",
     "frontmatter": {
       "emptyFieldStrategy": "skip"
-    },
-
-```json
-{
-  ... 
-  "conversion": {
-    ... 
-    "outputPaths": {
-      "markdown": "./content/",
-      "assets": "./content/assets/"
-    },
-    "markdownPrefixes": {
-      "markdown": "",
-      "assets": "assets/"
-    },
-    "layoutStrategy": {
-      "markdown": "hierarchical",
-      "assets": "flat"
-    },
-    "namingStrategy": "default",
+    }
     ... 
   }
   ... 
