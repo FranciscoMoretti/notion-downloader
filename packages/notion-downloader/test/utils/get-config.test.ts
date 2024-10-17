@@ -56,6 +56,10 @@ test("get config", async () => {
       layoutStrategy: "hierarchical",
       namingStrategy: "default",
       plugins: [],
+      frontmatter: {
+        skip: false,
+        emptyFieldStrategy: "empty",
+      },
     },
   })
 })
