@@ -5,7 +5,7 @@ import { NotionBlock } from "../types"
 import { IPlugin, IPluginContext } from "./pluginTypes"
 
 export const standardVideoTransformer: IPlugin = {
-  name: "video",
+  name: "standardVideoTransformer",
   notionToMarkdownTransforms: [
     {
       type: "video",
