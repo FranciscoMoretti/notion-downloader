@@ -1,5 +1,13 @@
 # notion-downloader
 
+## 0.1.9
+
+### Patch Changes
+
+- [`60cdc749baebf877ecb04771e3f4dafa876df136`](https://github.com/FranciscoMoretti/notion-downloader/commit/60cdc749baebf877ecb04771e3f4dafa876df136) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Frontmatter optioons
+
+- [`e9697bdaba6a2440e9188a7db5f5e5ed6d9fa6be`](https://github.com/FranciscoMoretti/notion-downloader/commit/e9697bdaba6a2440e9188a7db5f5e5ed6d9fa6be) Thanks [@FranciscoMoretti](https://github.com/FranciscoMoretti)! - Update plugin name
+
 ## 0.1.8
 
 ### Patch Changes
