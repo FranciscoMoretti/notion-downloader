@@ -1,7 +1,4 @@
-/* This file is only used when testing docu-notion itself, not when it is used as a library.
-  E.g., if you run `npm run pull-test-tagged`, docu-notion will read this file and use it to configure itself,
-  using these example plugins.
- */ import {
+import { 
   Config,
   IPlugin,
   NotionBlock,
@@ -49,7 +46,7 @@ const config: Config = {
     },
     plugins: [
       // here we're adding a plugin that needs a parameter for customization
-      "video",
+      "standardVideoTransformer",
       // here's we're adding a plugin that doesn't take any customization
       dummyMarkdownModifier,
     ],
