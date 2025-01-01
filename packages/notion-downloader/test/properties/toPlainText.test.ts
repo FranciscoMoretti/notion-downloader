@@ -96,7 +96,7 @@ describe("stringifyProperty", () => {
         { name: "Option2", id: "id_2", color: "red" },
       ],
     }
-    expect(stringifyProperty(property)).toBe(`["Option1", "Option2"]`)
+    expect(stringifyProperty(property)).toBe(JSON.stringify(["Option1", "Option2"], null, 2))
   })
 
   it("should stringify status property", () => {
@@ -169,7 +169,7 @@ describe("stringifyProperty", () => {
         { external: { url: "file2.jpg" }, name: "file2.jpg" },
       ],
     }
-    expect(stringifyProperty(property)).toBe(`[	"file1.pn"g," file2.jpg]`")
+    expect(stringifyProperty(property)).toBe(JSON.stringify(["file1.png", "file2.jpg"], null, 2))
   })
 
   it("should stringify created_by property", () => {
@@ -302,7 +302,7 @@ describe("stringifyProperty", () => {
       id: "id_1",
       people: [sampleUser, sampleUser],
     }
-    expect(stringifyProperty(property)).toBe(`["User1", "User1"]`)
+    expect(stringifyProperty(property)).toBe(JSON.stringify(["User1", "User1"], null, 2))
   })
 
   it("should stringify relation property", () => {
@@ -311,7 +311,7 @@ describe("stringifyProperty", () => {
       id: "id_1",
       relation: [{ id: "rel_1" }, { id: "rel_2" }],
     }
-    expect(stringifyProperty(property)).toBe(`["rel_1", "rel_2"]`)
+    expect(stringifyProperty(property)).toBe(JSON.stringify(["rel_1", "rel_2"], null, 2))
   })
 
   it("should stringify rollup property with number", () => {
