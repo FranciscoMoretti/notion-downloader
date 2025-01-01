@@ -112,7 +112,7 @@ export function stringifySelect(
 export function stringifyMultiSelect(
   property: PropertyWithoutId<MultiSelectProperty>
 ): string {
-  return property.multi_select.map((item) => item.name).join(", ")
+  return stringifyList(property.multi_select.map((item) => item.name))
 }
 export function stringifyStatus(
   property: PropertyWithoutId<StatusProperty>
@@ -149,7 +149,7 @@ export function stringifyFiles(
   property: PropertyWithoutId<FilesProperty>
 ): string {
   // TODO: Should these contain URLS or names?
-  return property.files.map((file) => file.name).join(", ")
+  return stringifyList(property.files.map((file) => file.name))
 }
 
 export function stringifyCreatedBy(
@@ -239,15 +239,14 @@ export function stringifyRichText(
 export function stringifyPeople(
   property: PropertyWithoutId<PeopleProperty>
 ): string {
-  return property.people
-    .map((person) => stringifyUserResponse(person))
-    .join(", ")
+  return stringifyList(property.people
+    .map((person) => stringifyUserResponse(person)))
 }
 
 export function stringifyRelation(
   property: PropertyWithoutId<RelationProperty>
 ): string {
-  return property.relation.map((relation) => relation.id).join(", ")
+  return stringifyList(property.relation.map((relation) => relation.id))
 }
 
 export function stringifyRollup(
@@ -318,4 +317,8 @@ export function stringifyDateResponse(
     return date.end
   }
   return ""
+}
+
+function stringifyList(list: string[]) {
+  return JSON.stringify(list, null, 2)
 }
