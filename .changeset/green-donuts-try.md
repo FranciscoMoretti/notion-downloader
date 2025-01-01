@@ -1,5 +1,0 @@
----
-"notion-downloader": patch
----
-
-stringifyList
