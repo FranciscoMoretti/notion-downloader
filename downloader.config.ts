@@ -1,65 +1,37 @@
-import { 
-  Config,
-  IPlugin,
-  NotionBlock,
-} from "./packages/notion-downloader/src/index"
-
-// This is an example of a plugin that needs customization by the end user.
-// It uses a closure to supply the plugin with the customization parameter.
-function dummyBlockModifier(customParameter: string): IPlugin {
-  return {
-    name: "dummyBlockModifier",
-
-    notionBlockModifications: [
-      {
-        modify: (block: NotionBlock) => {
-          console.log(
-            `dummyBlockModifier has customParameter:${customParameter}.`
-          )
-        },
-      },
-    ],
-  }
-}
-
-const dummyMarkdownModifier: IPlugin = {
-  name: "dummyMarkdownModifier",
-
-  regexMarkdownModifications: [
-    {
-      regex: /aaa(.*)aaa/,
-      replacementPattern: "bbb$1bbb",
-    },
-  ],
-}
+import { Config } from "./packages/notion-downloader/src/index"
 
 const config: Config = {
   conversion: {
     pageLinkHasExtension: false,
+    slugProperty: 'slug',
     namingStrategy: {
-      markdown: "notionSlug",
-      assets: "default",
+      markdown: 'githubSlug',
+      assets: 'default',
     },
     outputPaths: {
-      markdown: "pages",
-      assets: "public",
+      markdown: 'data/blog',
+      assets: 'public/notion',
     },
-    plugins: [
-      // here we're adding a plugin that needs a parameter for customization
-      "standardVideoTransformer",
-      // here's we're adding a plugin that doesn't take any customization
-      dummyMarkdownModifier,
+    markdownPrefixes: {
+      markdown: '',
+      assets: '/notion/',
+    },
+    filters: [
+      {
+        propertyName: 'draft',
+        propertyValue: 'false',
+        fitlerType: 'property',
+      },
     ],
   },
   rootDbAsFolder: true,
-  rootObjectType: "page",
-  rootId: "11a047149aef80ffb78ef8afd3325647",
+  rootObjectType: 'database',
+  rootId: 'bbad12b67bcf4390bb503b177f17a9f1',
   cache: {
     cleanCache: false,
-    cacheStrategy: "cache",
+    cacheStrategy: 'cache',
   },
-  logLevel: "info",
+  logLevel: 'info',
   revalidatePeriod: -1,
 }
-
 export default config
