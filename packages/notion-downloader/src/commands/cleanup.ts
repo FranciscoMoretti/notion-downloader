@@ -21,7 +21,7 @@ const cleanupOptionsSchema = z.object({
 export const cleanup = new Command()
   .name("cleanup")
   .description("Remove all downloaded files and cache")
-  .option("-y, --yes", "skip confirmation prompt.", false)
+  .option("-y, --yes", "skip confirmation prompts", false)
   .option(
     "-c, --cwd <cwd>",
     "the working directory. defaults to the current directory.",
@@ -41,6 +41,7 @@ export const cleanup = new Command()
       handleError(`The path ${cwd} does not exist. Please try again.`)
     }
 
+    // TODO: Optionally delete conversion but not the cache
     const config = await getConfig(cwd)
     if (!config) {
       handleError("Configuration not found.")
@@ -49,41 +50,65 @@ export const cleanup = new Command()
 
     const cacheDir = pullOptions.cache.cacheDirectory
     const outputFilesMapPath = path.join(cacheDir, "output_filesmap.json")
-    if (!existsSync(outputFilesMapPath)) {
-      console.log(
-        "Output filesmap not found. Skipping cleanup of output files."
-      )
-    } else {
+
+    // Handle output files cleanup
+    if (existsSync(outputFilesMapPath)) {
       const filesManager = loadFilesManagerFile(outputFilesMapPath)
-      const confirm =
-        options.yes ||
-        (await prompts(
-          [
-            {
-              type: "confirm",
-              name: "confirm",
-              message: "Are you sure you want to delete all files?",
-            },
-          ],
-          {
-            onCancel: () => {
-              console.log("Cleanup cancelled.")
-              process.exit(0)
-            },
-          }
-        ))
-      if (!confirm) return
-      if (filesManager) {
-        const filesCleaner = new FilesCleaner()
-        await filesCleaner.cleanupAllFiles(filesManager)
+      const confirmOutput = options.yes || await prompts(
+        [{
+          type: "confirm",
+          name: "value",
+          message: "Do you want to clean up all output files?",
+          initial: true
+        }],
+        {
+          onCancel: () => {
+            logger.info("Skipping output files cleanup.")
+            return { value: false }
+          },
+        }
+      )
+
+      if ((typeof confirmOutput === 'boolean' ? confirmOutput : confirmOutput.value)) {
+        if (filesManager) {
+          const filesCleaner = new FilesCleaner()
+          await filesCleaner.cleanupAllFiles(filesManager)
+        }
+        await fs.rm(outputFilesMapPath)
+        logger.info("Output files cleaned up.")
+      } else {
+        logger.info("Skipping cleanup of output files.")
       }
-      await fs.rm(outputFilesMapPath)
-    }
-    if (options.outputOnly) {
-      console.log("Skipping cache directory cleanup.")
     } else {
-      console.log("Cleaning up cache directory...")
-      await fs.rm(cacheDir, { recursive: true })
+      logger.info("Output filesmap not found. Skipping cleanup of output files.")
     }
+    
+    // Handle cache cleanup if not output-only
+    if (!options.outputOnly) {
+        const confirmCache = options.yes || await prompts(
+        [{
+          type: "confirm",
+          name: "value",
+          message: "Do you want to clean up the cache directory?",
+          initial: true
+
+        }],
+        {
+          onCancel: () => {
+            console.log("Cleanup cancelled.")
+            process.exit(0)
+          },
+        }
+      )
+
+      if ((typeof confirmCache === 'boolean' ? confirmCache : confirmCache.value)) {
+        logger.info("Cleaning up cache directory...")
+        await fs.rm(cacheDir, { recursive: true })
+        logger.info("Cache directory cleaned up.")
+      }
+    } else {
+      logger.info("Skipping cache directory cleanup.")
+    }
+
     logger.info("Cleanup complete.")
   })
