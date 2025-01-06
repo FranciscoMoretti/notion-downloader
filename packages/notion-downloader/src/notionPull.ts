@@ -277,7 +277,7 @@ export async function notionPull(options: NotionPullOptions): Promise<void> {
 
   group("Download report")
   for (const [key, value] of Object.entries(cachedNotionClient.stats)) {
-    info(`${key}: ${value}`)
+    info(`${key}: ${JSON.stringify(value, null, 2)}`)
   }
 
   info("Stage execution times:")
