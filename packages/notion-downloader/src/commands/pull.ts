@@ -16,7 +16,12 @@ import { pullOptionsSchema } from "../config/schema"
 import { setLogLevel } from "../log"
 import { notionContinuosPull } from "../notionPull"
 
-dotenv.config()
+// Read from .env, .env.local, .env.development, .env.development.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env') })
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
+dotenv.config({ path: path.resolve(process.cwd(), '.env.development') })
+dotenv.config({ path: path.resolve(process.cwd(), '.env.development.local') })
+
 export const pull = new Command()
   .name("pull")
   .description("pull pages from notion")
