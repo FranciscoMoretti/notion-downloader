@@ -11,12 +11,6 @@ importers:
       '@babel/core':
         specifier: ^7.22.1
         version: 7.24.6
-      '@changesets/changelog-github':
-        specifier: ^0.4.8
-        version: 0.4.8
-      '@changesets/cli':
-        specifier: ^2.26.1
-        version: 2.27.3
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^3.7.2
         version: 3.7.2(prettier@2.8.8)
@@ -72,6 +66,12 @@ importers:
         specifier: ^1.4.0
         version: 1.6.0(@types/node@20.12.12)
     devDependencies:
+      '@changesets/changelog-github':
+        specifier: ^0.4.8
+        version: 0.4.8
+      '@changesets/cli':
+        specifier: ^2.26.1
+        version: 2.27.3
       '@types/node':
         specifier: ^20.11.27
         version: 20.12.12
